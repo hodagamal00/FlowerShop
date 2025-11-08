@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CartController">
+   <children>
+      <!-- Header -->
+      <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="80.0" prefWidth="800.0" style="-fx-background-color: #2c3e50;">
+         <children>
+            <!-- Use 'fill' for Text colour instead of 'textFill' (not supported on JavaFX 14) -->
+            <Text text="Shopping Cart" fill="WHITE" layoutX="300.0" layoutY="50.0">
+               <font>
+                  <Font name="System Bold" size="32.0" />
+               </font>
+            </Text>
+         </children>
+      </AnchorPane>
+      
+      <!-- Cart Content -->
+      <VBox layoutX="50.0" layoutY="100.0" spacing="20.0" prefWidth="700.0">
+         <Text text="Items in Your Cart" fill="#2c3e50">
+            <font>
+               <Font name="System Bold" size="20.0" />
+            </font>
+         </Text>
+         
+         <ListView fx:id="CartItemsList" prefHeight="400.0" prefWidth="700.0" style="-fx-font-size: 14px;" />
+         
+         <Text text="Review your items and proceed to checkout when ready." wrappingWidth="700.0" fill="#555">
+            <font>
+               <Font size="14.0" />
+            </font>
+         </Text>
+      </VBox>
+   </children>
+</AnchorPane>

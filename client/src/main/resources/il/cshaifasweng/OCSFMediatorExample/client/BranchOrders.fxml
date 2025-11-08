@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="800.0" maxWidth="1520.0" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.BranchOrdersController">
+    <children>
+        <!-- Top Navigation Bar -->
+        <AnchorPane styleClass="navbar" layoutY="0.0" maxHeight="70.0" minHeight="70.0" prefHeight="70.0" prefWidth="1520.0">
+            <children>
+                <Label text="FlowerShop - Branch Orders" textFill="WHITE" layoutX="30.0" layoutY="20.0" styleClass="header-title">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Label>
+                <HBox spacing="12.0" layoutX="950.0" layoutY="20.0">
+                    <Button fx:id="dashboardBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToDashboard" text="Dashboard" prefWidth="120.0" />
+                    <Button fx:id="homeBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToHome" text="Home" prefWidth="100.0" />
+                </HBox>
+            </children>
+        </AnchorPane>
+        
+        <!-- Main Content -->
+        <ScrollPane layoutY="70.0" prefWidth="1520.0" prefHeight="730.0" fitToWidth="true" styleClass="scroll-pane">
+            <content>
+                <AnchorPane prefWidth="1480.0" prefHeight="800.0" style="-fx-background-color: #faf8fc;">
+                    <children>
+                        <VBox spacing="25.0" layoutX="50.0" layoutY="30.0" prefWidth="1420.0">
+                            <!-- Filters -->
+                            <HBox spacing="20.0" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 20; -fx-background-color: white;">
+                                <Label text="Filter by:" />
+                                <ComboBox fx:id="statusFilterCombo" promptText="Status" prefWidth="150.0" />
+                                <TextField fx:id="searchField" promptText="Search by Order # or Customer" prefWidth="300.0" />
+                                <Button fx:id="searchBtn" styleClass="btn-primary" text="Search" onAction="#searchOrders" prefWidth="100.0" />
+                                <Button fx:id="refreshBtn" styleClass="btn-secondary" text="Refresh" onAction="#refreshOrders" prefWidth="100.0" />
+                            </HBox>
+                            
+                            <!-- Orders Table -->
+                            <VBox spacing="15.0" styleClass="card" style="-fx-padding: 30; -fx-background-color: white;">
+                                <HBox alignment="CENTER_LEFT">
+                                    <Text text="Branch Orders" fill="#4a148c">
+                                        <font>
+                                            <Font name="System Bold" size="24.0" />
+                                        </font>
+                                    </Text>
+                                    <Label fx:id="orderCountLabel" text="(125 total)" layoutX="1250.0" style="-fx-text-fill: #7b1fa2;">
+                                        <font>
+                                            <Font size="14.0" />
+                                        </font>
+                                    </Label>
+                                </HBox>
+                                
+                                <TableView fx:id="ordersTable" prefHeight="500.0">
+                                    <columns>
+                                        <TableColumn fx:id="orderIdCol" text="Order #" prefWidth="100.0" />
+                                        <TableColumn fx:id="customerCol" text="Customer" prefWidth="200.0" />
+                                        <TableColumn fx:id="orderDateCol" text="Order Date" prefWidth="180.0" />
+                                        <TableColumn fx:id="deliveryTimeCol" text="Delivery/Pickup Time" prefWidth="180.0" />
+                                        <TableColumn fx:id="typeCol" text="Type" prefWidth="120.0" />
+                                        <TableColumn fx:id="totalCol" text="Total" prefWidth="120.0" />
+                                        <TableColumn fx:id="statusCol" text="Status" prefWidth="150.0" />
+                                        <TableColumn fx:id="actionsCol" text="Actions" prefWidth="250.0" />
+                                    </columns>
+                                </TableView>
+                            </VBox>
+                            
+                            <!-- Quick Actions -->
+                            <HBox spacing="20.0" alignment="CENTER">
+                                <Button fx:id="viewDetailsBtn" styleClass="btn-primary" text="View Selected Order" onAction="#viewOrderDetails" prefWidth="180.0" prefHeight="45.0" />
+                                <Button fx:id="updateStatusBtn" styleClass="btn-secondary" text="Update Status" onAction="#updateOrderStatus" prefWidth="150.0" prefHeight="45.0" />
+                                <Button fx:id="printBtn" styleClass="btn-secondary" text="Print Order" onAction="#printOrder" prefWidth="130.0" prefHeight="45.0" />
+                            </HBox>
+                            
+                            <!-- Messages -->
+                            <Label fx:id="successMessage" text="✓ Order updated successfully!" textFill="#81c784" visible="false">
+                                <font>
+                                    <Font name="System Bold" size="14.0" />
+                                </font>
+                            </Label>
+                            <Label fx:id="errorMessage" text="Error" textFill="#e57373" visible="false" />
+                        </VBox>
+                    </children>
+                </AnchorPane>
+            </content>
+        </ScrollPane>
+    </children>
+</AnchorPane>

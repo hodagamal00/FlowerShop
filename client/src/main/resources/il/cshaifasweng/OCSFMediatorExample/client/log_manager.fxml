@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.LogManagerController">
+   <children>
+      <!-- Header -->
+      <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="80.0" prefWidth="1520.0" style="-fx-background-color: #2c3e50;">
+         <children>
+            <Label text="Manager Dashboard - Reports &amp; Analytics" textFill="WHITE" layoutX="20.0" layoutY="25.0">
+               <font>
+                  <Font name="System Bold" size="28.0" />
+               </font>
+            </Label>
+            <Button fx:id="goBack" layoutX="1350.0" layoutY="25.0" mnemonicParsing="false" onAction="#backToCatalog" prefHeight="35.0" prefWidth="150.0" text="← Back to Catalog" style="-fx-font-size: 14px;" />
+         </children>
+      </AnchorPane>
+      
+      <!-- Filter Section -->
+      <AnchorPane layoutX="20.0" layoutY="100.0" prefWidth="1480.0" prefHeight="120.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
+         <children>
+            <VBox layoutX="20.0" layoutY="15.0" spacing="15.0" prefWidth="1440.0">
+               <HBox spacing="20.0" alignment="CENTER_LEFT">
+                  <VBox spacing="8.0" prefWidth="200.0">
+                     <Label text="Shop Selection:" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                     <ComboBox fx:id="chooseShop" prefHeight="35.0" prefWidth="200.0" promptText="Choose Shop" />
+                     <Label fx:id="shopError" text="" textFill="RED" />
+                  </VBox>
+                  
+                  <VBox spacing="8.0" prefWidth="180.0">
+                     <Label text="Report Type:" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                     <ComboBox fx:id="LogType" prefHeight="35.0" prefWidth="180.0" promptText="Select Report Type" />
+                     <Label fx:id="logError" text="" textFill="RED" />
+                  </VBox>
+                  
+                  <VBox spacing="8.0">
+                     <Label text="Date Range:" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                     <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Label text="From:" style="-fx-font-size: 13px;" />
+                        <ComboBox fx:id="FromDay" prefHeight="35.0" prefWidth="80.0" promptText="Day" />
+                        <ComboBox fx:id="FromMonth" prefHeight="35.0" prefWidth="100.0" promptText="Month" />
+                        <ComboBox fx:id="FromYear" prefHeight="35.0" prefWidth="90.0" promptText="Year" />
+                        
+                        <Label text="Until:" style="-fx-font-size: 13px; -fx-padding: 0 0 0 20;" />
+                        <ComboBox fx:id="UntilDay" prefHeight="35.0" prefWidth="80.0" promptText="Day" />
+                        <ComboBox fx:id="UntilMonth" prefHeight="35.0" prefWidth="100.0" promptText="Month" />
+                        <ComboBox fx:id="UntilYear" prefHeight="35.0" prefWidth="90.0" promptText="Year" />
+                     </HBox>
+                     <Label fx:id="fieldsError" text="" textFill="RED" />
+                  </VBox>
+                  
+                  <VBox spacing="8.0" style="-fx-padding: 20 0 0 20;">
+                     <Button fx:id="LoadLogButton" mnemonicParsing="false" onAction="#loadLog" prefHeight="40.0" prefWidth="150.0" text="Generate Report" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
+                  </VBox>
+               </HBox>
+               
+               <HBox spacing="15.0" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
+                  <CheckBox fx:id="compareButton" mnemonicParsing="false" onAction="#clickedCompareButton" text="Compare With Another Shop" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                  <ComboBox fx:id="CompareShops" prefHeight="35.0" prefWidth="220.0" promptText="Select Comparison Shop" />
+                  <Label fx:id="shopError2" text="" textFill="RED" />
+               </HBox>
+            </VBox>
+         </children>
+      </AnchorPane>
+      
+      <!-- Chart Section -->
+      <AnchorPane layoutX="20.0" layoutY="240.0" prefWidth="1480.0" prefHeight="540.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
+         <children>
+            <BarChart fx:id="LogChart" layoutX="20.0" layoutY="20.0" prefHeight="500.0" prefWidth="1440.0">
+              <xAxis>
+                <CategoryAxis fx:id="Day" label="Time Period" side="BOTTOM">
+                   <tickLabelFont>
+                      <Font size="12.0" />
+                   </tickLabelFont>
+                </CategoryAxis>
+              </xAxis>
+              <yAxis>
+                <NumberAxis fx:id="Number" label="Count" side="LEFT">
+                   <tickLabelFont>
+                      <Font size="12.0" />
+                   </tickLabelFont>
+                </NumberAxis>
+              </yAxis>
+            </BarChart>
+            
+            <!-- Loading Indicator -->
+            <Label fx:id="wait" layoutX="520.0" layoutY="200.0" text="Please Wait" visible="false" textFill="#3498db">
+               <font>
+                  <Font size="72.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      
+      <!-- Hidden Elements -->
+      <Text fx:id="FromDateText" visible="false" />
+      <Text fx:id="UntilDateText" visible="false" />
+   </children>
+</AnchorPane>

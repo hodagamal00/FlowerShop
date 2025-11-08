@@ -1,0 +1,51 @@
+/* Consolidated design tokens for FlowerShop UI
+ * This file defines color variables, fonts, radii and spacing
+ * in one central location.  Other CSS files can import or
+ * reference these variables to ensure consistency across the
+ * application.
+ */
+
+/* === COLOR PALETTE === */
+:root {
+    /* Primary light purple shades */
+    -fx-primary-dark: #ab47bc;
+    -fx-primary:      #ba68c8;
+    -fx-primary-light:#ce93d8;
+    -fx-primary-lighter: #e1bee7;
+
+    /* Secondary lavender shades */
+    -fx-secondary:        #9c27b0;
+    -fx-secondary-light:  #ba68c8;
+    -fx-accent:           #e1bee7;
+    -fx-accent-light:     #f3e5f5;
+
+    /* Neutral colours */
+    -fx-background:    #faf8fc;
+    -fx-surface:       #ffffff;
+    -fx-border:        #e1bee7;
+    -fx-text-primary:  #4a148c;
+    -fx-text-secondary:#7b1fa2;
+
+    /* Status colours */
+    -fx-success: #81c784;
+    -fx-warning: #ffb74d;
+    -fx-error:   #e57373;
+    -fx-info:    #64b5f6;
+}
+
+/* === GLOBAL TYPOGRAPHY === */
+.root {
+    -fx-font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* === BORDER RADII AND SPACING === */
+/* Define common radii for buttons, cards, and form fields */
+.rounded-small    { -fx-background-radius: 4px; }
+.rounded-medium   { -fx-background-radius: 6px; }
+.rounded-large    { -fx-background-radius: 8px; }
+
+/* Common spacing utilities */
+.spacing-small  { -fx-padding: 5px; }
+.spacing-medium { -fx-padding: 10px; }
+.spacing-large  { -fx-padding: 20px; }

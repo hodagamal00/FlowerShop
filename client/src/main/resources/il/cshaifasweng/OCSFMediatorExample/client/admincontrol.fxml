@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AdminControlController">
+   <children>
+      <!-- Header with Purple Theme -->
+      <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="80.0" prefWidth="1520.0" styleClass="admin-panel">
+         <children>
+            <Label text="Admin Control Panel" textFill="WHITE" layoutX="30.0" layoutY="25.0" styleClass="admin-title">
+               <font>
+                  <Font name="System Bold" size="28.0" />
+               </font>
+            </Label>
+            <Button fx:id="backButton" styleClass="btn-outline" layoutX="1340.0" layoutY="25.0" mnemonicParsing="false" onAction="#openCatalog" prefHeight="35.0" prefWidth="150.0" text="← Back to Catalog" style="-fx-text-fill: white; -fx-border-color: white;" />
+         </children>
+      </AnchorPane>
+      
+      <!-- Main Content: wrap existing panels in a ScrollPane for scrolling -->
+      <ScrollPane fitToWidth="true" fitToHeight="true" AnchorPane.topAnchor="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <content>
+          <AnchorPane prefWidth="1520.0" prefHeight="680.0">
+            <!-- Left Panel - Accounts List with Purple Theme -->
+            <AnchorPane layoutX="20.0" layoutY="20.0" prefWidth="350.0" prefHeight="680.0" styleClass="admin-section">
+               <children>
+                  <VBox spacing="15.0" layoutX="15.0" layoutY="15.0" prefWidth="320.0">
+                     <Text fx:id="accountsText" text="User Accounts" strokeType="OUTSIDE" styleClass="card-header">
+                        <font>
+                           <Font name="System Bold" size="20.0" />
+                        </font>
+                     </Text>
+                     <ComboBox fx:id="profileType" styleClass="combo-box" onAction="#selectType" prefHeight="35.0" prefWidth="320.0" promptText="Select Account Type" />
+                     <ListView fx:id="accountsList" styleClass="list-view" prefHeight="520.0" prefWidth="320.0" />
+                     <Button fx:id="loadProfile" styleClass="btn-primary" mnemonicParsing="false" onAction="#loadSelectProfile" prefHeight="40.0" prefWidth="320.0" text="Load Selected Account" />
+                  </VBox>
+               </children>
+            </AnchorPane>
+            
+            <!-- Right Panel - Account Details with Purple Theme -->
+            <AnchorPane layoutX="390.0" layoutY="20.0" prefWidth="1110.0" prefHeight="680.0" styleClass="admin-section">
+               <children>
+                  <Text layoutX="30.0" layoutY="40.0" text="Account Information" strokeType="OUTSIDE" styleClass="card-header">
+                     <font>
+                        <Font name="System Bold" size="24.0" />
+                     </font>
+                  </Text>
+            
+            <!-- Column 1 - Basic Info -->
+            <VBox layoutX="30.0" layoutY="70.0" spacing="20.0" prefWidth="330.0">
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Account ID:" strokeType="OUTSIDE" prefWidth="120.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="accID" editable="false" prefWidth="200.0" style="-fx-background-color: #f0f0f0;" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Customer ID:" strokeType="OUTSIDE" prefWidth="120.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="customerID" prefWidth="200.0" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Full Name:" strokeType="OUTSIDE" prefWidth="120.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="name" prefWidth="200.0" />
+               </HBox>
+               <VBox spacing="5.0">
+                  <Text text="Address:" strokeType="OUTSIDE">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="address" prefHeight="70.0" prefWidth="320.0" />
+               </VBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Email:" strokeType="OUTSIDE" prefWidth="120.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="email" prefWidth="200.0" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Password:" strokeType="OUTSIDE" prefWidth="120.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="password" prefWidth="200.0" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Phone:" strokeType="OUTSIDE" prefWidth="120.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="phone" prefWidth="200.0" />
+               </HBox>
+            </VBox>
+            
+            <!-- Column 2 - Payment Info -->
+            <VBox layoutX="390.0" layoutY="70.0" spacing="20.0" prefWidth="330.0">
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Credit Card #:" strokeType="OUTSIDE" prefWidth="140.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="creditnum" prefWidth="180.0" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Expiry Month:" strokeType="OUTSIDE" prefWidth="140.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="creditexpmonth" prefWidth="180.0" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Expiry Year:" strokeType="OUTSIDE" prefWidth="140.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="creditexpyear" prefWidth="180.0" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="CVV:" strokeType="OUTSIDE" prefWidth="140.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="cvv" prefWidth="180.0" />
+               </HBox>
+            </VBox>
+            
+            <!-- Column 3 - Status Info -->
+            <VBox layoutX="750.0" layoutY="70.0" spacing="20.0" prefWidth="330.0">
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Logged In:" strokeType="OUTSIDE" prefWidth="140.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="logged" prefWidth="180.0" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Shop ID:" strokeType="OUTSIDE" prefWidth="140.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="shop" prefWidth="180.0" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Subscription:" strokeType="OUTSIDE" prefWidth="140.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="sub" editable="false" prefWidth="180.0" style="-fx-background-color: #f0f0f0;" />
+               </HBox>
+               <HBox spacing="10.0" alignment="CENTER_LEFT">
+                  <Text text="Privilege Level:" strokeType="OUTSIDE" prefWidth="140.0">
+                     <font><Font size="14.0" /></font>
+                  </Text>
+                  <TextField fx:id="privilageField" prefWidth="180.0" />
+               </HBox>
+            </VBox>
+            
+            <!-- Action Buttons -->
+            <HBox layoutX="30.0" layoutY="560.0" spacing="20.0" alignment="CENTER">
+               <Button fx:id="Save" styleClass="btn-success" mnemonicParsing="false" onAction="#SaveChanges" prefHeight="45.0" prefWidth="200.0" text="Save Changes" />
+               <Button fx:id="freeze" styleClass="btn-danger" mnemonicParsing="false" prefHeight="45.0" prefWidth="200.0" text="Freeze Account" />
+            </HBox>
+            
+            <!-- Loading Indicator -->
+            <Label fx:id="wait" layoutX="300.0" layoutY="250.0" text="Please Wait" visible="false" textFill="#3498db">
+               <font>
+                  <Font size="72.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

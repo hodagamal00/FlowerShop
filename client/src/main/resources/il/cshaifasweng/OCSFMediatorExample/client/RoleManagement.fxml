@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+            prefHeight="800.0" prefWidth="1200.0" styleClass="root" 
+            stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RoleManagementController">
+   
+   <!-- Navigation Bar -->
+   <HBox alignment="CENTER_LEFT" layoutY="0.0" prefHeight="70.0" prefWidth="1200.0" 
+         spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0" 
+         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <padding>
+         <Insets left="20.0" right="20.0" />
+      </padding>
+      
+      <Label text="FlowerShop Network" styleClass="navbar-brand">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+      </Label>
+      
+      <Label text="Role Management" styleClass="navbar-title">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      
+      <HBox HBox.hgrow="ALWAYS" />
+      
+      <Button fx:id="backButton" onAction="#handleBackToDashboard" 
+              styleClass="btn-secondary" text="← Back to Dashboard">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+   </HBox>
+   
+   <!-- Main Content Area -->
+   <ScrollPane fitToWidth="true" layoutY="70.0" prefHeight="730.0" prefWidth="1200.0" 
+               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" 
+               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+      <content>
+         <VBox spacing="25.0" styleClass="content-container">
+            <padding>
+               <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+            
+            <!-- Page Header -->
+            <VBox spacing="10.0">
+               <Label text="User Roles & Privileges" styleClass="page-title">
+                  <font>
+                     <Font name="System Bold" size="32.0" />
+                  </font>
+               </Label>
+               <Label text="Manage user access levels and permissions across the network" 
+                      styleClass="subtitle" textFill="#666666">
+                  <font>
+                     <Font size="16.0" />
+                  </font>
+               </Label>
+            </VBox>
+            
+            <!-- Role Hierarchy Info Card -->
+            <VBox spacing="15.0" styleClass="card">
+               <padding>
+                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+               </padding>
+               
+               <Label text="Privilege Levels" styleClass="section-title">
+                  <font>
+                     <Font name="System Bold" size="20.0" />
+                  </font>
+               </Label>
+               
+               <Separator />
+               
+               <VBox spacing="12.0">
+                  <HBox spacing="15.0" styleClass="role-info-box">
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                     <Label text="Level 0:" styleClass="role-level" prefWidth="80.0">
+                        <font>
+                           <Font name="System Bold" size="14.0" />
+                        </font>
+                     </Label>
+                     <Label text="Guest - Browse catalog only, no purchases" 
+                            textFill="#666666">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                  </HBox>
+                  
+                  <HBox spacing="15.0" styleClass="role-info-box">
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                     <Label text="Level 1:" styleClass="role-level" prefWidth="80.0">
+                        <font>
+                           <Font name="System Bold" size="14.0" />
+                        </font>
+                     </Label>
+                     <Label text="Customer - Full shopping, orders, complaints, account management" 
+                            textFill="#666666">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                  </HBox>
+                  
+                  <HBox spacing="15.0" styleClass="role-info-box">
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                     <Label text="Level 2:" styleClass="role-level" prefWidth="80.0">
+                        <font>
+                           <Font name="System Bold" size="14.0" />
+                        </font>
+                     </Label>
+                     <Label text="Worker - Customer + manage branch orders, catalog, deliveries" 
+                            textFill="#666666">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                  </HBox>
+                  
+                  <HBox spacing="15.0" styleClass="role-info-box">
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                     <Label text="Level 3:" styleClass="role-level" prefWidth="80.0">
+                        <font>
+                           <Font name="System Bold" size="14.0" />
+                        </font>
+                     </Label>
+                     <Label text="Manager - Worker + branch reports, promotions, settings" 
+                            textFill="#666666">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                  </HBox>
+                  
+                  <HBox spacing="15.0" styleClass="role-info-box">
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                     <Label text="Level 4:" styleClass="role-level" prefWidth="80.0">
+                        <font>
+                           <Font name="System Bold" size="14.0" />
+                        </font>
+                     </Label>
+                     <Label text="Chain Manager - Full network access, all branches, global settings, role management" 
+                            textFill="#666666">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                  </HBox>
+               </VBox>
+            </VBox>
+            
+            <!-- Search/Filter Users -->
+            <VBox spacing="15.0" styleClass="card">
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+               
+               <HBox spacing="15.0" alignment="CENTER_LEFT">
+                  <VBox spacing="8.0">
+                     <Label text="Search User:" styleClass="field-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <TextField fx:id="searchField" promptText="Email or name..." 
+                                styleClass="text-field" prefWidth="250.0">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </TextField>
+                  </VBox>
+                  
+                  <VBox spacing="8.0">
+                     <Label text="Filter by Role:" styleClass="field-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <ComboBox fx:id="roleFilterCombo" prefWidth="180.0" 
+                               promptText="All Roles" styleClass="combo-box" />
+                  </VBox>
+                  
+                  <VBox spacing="8.0">
+                     <Label text="Filter by Branch:" styleClass="field-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <ComboBox fx:id="branchFilterCombo" prefWidth="180.0" 
+                               promptText="All Branches" styleClass="combo-box" />
+                  </VBox>
+                  
+                  <VBox spacing="8.0" alignment="BOTTOM_LEFT">
+                     <Label text=" " />
+                     <Button fx:id="searchButton" onAction="#handleSearch" 
+                             styleClass="btn-primary" text="Search">
+                        <font>
+                           <Font name="System Bold" size="14.0" />
+                        </font>
+                     </Button>
+                  </VBox>
+               </HBox>
+            </VBox>
+            
+            <!-- Users Table -->
+            <VBox spacing="15.0" styleClass="card">
+               <padding>
+                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+               </padding>
+               
+               <HBox alignment="CENTER_LEFT" spacing="15.0">
+                  <Label text="User Accounts" styleClass="section-title">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                  </Label>
+                  <HBox HBox.hgrow="ALWAYS" />
+                  <Button fx:id="refreshButton" onAction="#handleRefresh" 
+                          styleClass="btn-secondary" text="🔄 Refresh">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+               </HBox>
+               
+               <Separator />
+               
+               <TableView fx:id="usersTable" prefHeight="350.0">
+                  <columns>
+                     <TableColumn fx:id="userIdCol" prefWidth="60.0" text="ID" />
+                     <TableColumn fx:id="userNameCol" prefWidth="150.0" text="Name" />
+                     <TableColumn fx:id="userEmailCol" prefWidth="200.0" text="Email" />
+                     <TableColumn fx:id="userBranchCol" prefWidth="150.0" text="Branch" />
+                     <TableColumn fx:id="userRoleCol" prefWidth="120.0" text="Role" />
+                     <TableColumn fx:id="userPrivilegeCol" prefWidth="100.0" text="Level" />
+                     <TableColumn fx:id="userSubscriptionCol" prefWidth="120.0" text="Subscription" />
+                     <TableColumn fx:id="userStatusCol" prefWidth="100.0" text="Status" />
+                     <TableColumn fx:id="userActionsCol" prefWidth="200.0" text="Actions" />
+                  </columns>
+               </TableView>
+            </VBox>
+            
+            <!-- User Statistics -->
+            <VBox spacing="15.0" styleClass="card">
+               <padding>
+                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+               </padding>
+               
+               <Label text="Network Statistics" styleClass="section-title">
+                  <font>
+                     <Font name="System Bold" size="20.0" />
+                  </font>
+               </Label>
+               
+               <Separator />
+               
+               <HBox spacing="25.0" alignment="CENTER">
+                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                     <padding>
+                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                     </padding>
+                     <Label text="Total Users" styleClass="stat-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="totalUsersLabel" text="0" styleClass="stat-value" 
+                            textFill="#ba68c8">
+                        <font>
+                           <Font name="System Bold" size="28.0" />
+                        </font>
+                     </Label>
+                  </VBox>
+                  
+                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                     <padding>
+                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                     </padding>
+                     <Label text="Customers" styleClass="stat-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="customersLabel" text="0" styleClass="stat-value" 
+                            textFill="#4caf50">
+                        <font>
+                           <Font name="System Bold" size="28.0" />
+                        </font>
+                     </Label>
+                  </VBox>
+                  
+                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                     <padding>
+                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                     </padding>
+                     <Label text="Workers" styleClass="stat-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="workersLabel" text="0" styleClass="stat-value" 
+                            textFill="#2196f3">
+                        <font>
+                           <Font name="System Bold" size="28.0" />
+                        </font>
+                     </Label>
+                  </VBox>
+                  
+                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                     <padding>
+                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                     </padding>
+                     <Label text="Managers" styleClass="stat-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="managersLabel" text="0" styleClass="stat-value" 
+                            textFill="#ff9800">
+                        <font>
+                           <Font name="System Bold" size="28.0" />
+                        </font>
+                     </Label>
+                  </VBox>
+               </HBox>
+            </VBox>
+            
+         </VBox>
+      </content>
+   </ScrollPane>
+   
+</AnchorPane>

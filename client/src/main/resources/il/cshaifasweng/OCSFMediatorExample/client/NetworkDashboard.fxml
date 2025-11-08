@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+            prefHeight="800.0" prefWidth="1200.0" styleClass="root" 
+            stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.NetworkDashboardController">
+   
+   <!-- Navigation Bar -->
+   <HBox alignment="CENTER_LEFT" layoutY="0.0" prefHeight="70.0" prefWidth="1200.0" 
+         spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0" 
+         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <padding>
+         <Insets left="20.0" right="20.0" />
+      </padding>
+      
+      <Label text="FlowerShop Network" styleClass="navbar-brand">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+      </Label>
+      
+      <Label text="Network Dashboard" styleClass="navbar-title">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      
+      <HBox HBox.hgrow="ALWAYS" />
+      
+      <Button fx:id="backButton" onAction="#handleBackToCatalog" 
+              styleClass="btn-secondary" text="← Back to Catalog">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Button>
+   </HBox>
+   
+   <!-- Main Content Area -->
+   <ScrollPane fitToWidth="true" layoutY="70.0" prefHeight="730.0" prefWidth="1200.0" 
+               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" 
+               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+      <content>
+         <VBox spacing="25.0" styleClass="content-container">
+            <padding>
+               <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+            
+            <!-- Page Header -->
+            <VBox spacing="10.0">
+               <Label text="Chain Manager Dashboard" styleClass="page-title">
+                  <font>
+                     <Font name="System Bold" size="32.0" />
+                  </font>
+               </Label>
+               <Label text="Monitor and manage all branches across the network" 
+                      styleClass="subtitle" textFill="#666666">
+                  <font>
+                     <Font size="16.0" />
+                  </font>
+               </Label>
+            </VBox>
+            
+            <!-- Network Overview Statistics -->
+            <VBox spacing="15.0" styleClass="card">
+               <padding>
+                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+               </padding>
+               
+               <Label text="Network Overview" styleClass="section-title">
+                  <font>
+                     <Font name="System Bold" size="20.0" />
+                  </font>
+               </Label>
+               
+               <Separator />
+               
+               <HBox spacing="25.0" alignment="CENTER">
+                  <VBox spacing="10.0" alignment="CENTER" styleClass="stat-box">
+                     <padding>
+                        <Insets bottom="20.0" left="25.0" right="25.0" top="20.0" />
+                     </padding>
+                     <Label text="Total Branches" styleClass="stat-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="totalBranchesLabel" text="0" styleClass="stat-value" 
+                            textFill="#ba68c8">
+                        <font>
+                           <Font name="System Bold" size="36.0" />
+                        </font>
+                     </Label>
+                  </VBox>
+                  
+                  <VBox spacing="10.0" alignment="CENTER" styleClass="stat-box">
+                     <padding>
+                        <Insets bottom="20.0" left="25.0" right="25.0" top="20.0" />
+                     </padding>
+                     <Label text="Total Revenue" styleClass="stat-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="totalRevenueLabel" text="₪0.00" styleClass="stat-value" 
+                            textFill="#4caf50">
+                        <font>
+                           <Font name="System Bold" size="36.0" />
+                        </font>
+                     </Label>
+                  </VBox>
+                  
+                  <VBox spacing="10.0" alignment="CENTER" styleClass="stat-box">
+                     <padding>
+                        <Insets bottom="20.0" left="25.0" right="25.0" top="20.0" />
+                     </padding>
+                     <Label text="Total Orders" styleClass="stat-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="totalOrdersLabel" text="0" styleClass="stat-value" 
+                            textFill="#2196f3">
+                        <font>
+                           <Font name="System Bold" size="36.0" />
+                        </font>
+                     </Label>
+                  </VBox>
+                  
+                  <VBox spacing="10.0" alignment="CENTER" styleClass="stat-box">
+                     <padding>
+                        <Insets bottom="20.0" left="25.0" right="25.0" top="20.0" />
+                     </padding>
+                     <Label text="Active Users" styleClass="stat-label">
+                        <font>
+                           <Font size="14.0" />
+                        </font>
+                     </Label>
+                     <Label fx:id="activeUsersLabel" text="0" styleClass="stat-value" 
+                            textFill="#ff9800">
+                        <font>
+                           <Font name="System Bold" size="36.0" />
+                        </font>
+                     </Label>
+                  </VBox>
+               </HBox>
+            </VBox>
+            
+            <!-- Revenue Comparison Chart -->
+            <VBox spacing="15.0" styleClass="card">
+               <padding>
+                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+               </padding>
+               
+               <HBox alignment="CENTER_LEFT" spacing="15.0">
+                  <Label text="Branch Performance Comparison" styleClass="section-title">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                  </Label>
+                  <HBox HBox.hgrow="ALWAYS" />
+                  <ComboBox fx:id="chartPeriodCombo" prefWidth="150.0" 
+                            promptText="Select Period" styleClass="combo-box" 
+                            onAction="#handlePeriodChange" />
+               </HBox>
+               
+               <Separator />
+               
+               <!-- Bar Chart for Branch Comparison -->
+               <BarChart fx:id="branchComparisonChart" prefHeight="400.0" 
+                        legendVisible="true" title="Branch Revenue Comparison">
+                  <xAxis>
+                     <CategoryAxis fx:id="branchXAxis" label="Branch" />
+                  </xAxis>
+                  <yAxis>
+                     <NumberAxis fx:id="revenueYAxis" label="Revenue (₪)" />
+                  </yAxis>
+               </BarChart>
+            </VBox>
+            
+            <!-- Branch Status Table -->
+            <VBox spacing="15.0" styleClass="card">
+               <padding>
+                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+               </padding>
+               
+               <HBox alignment="CENTER_LEFT" spacing="15.0">
+                  <Label text="Branch Status" styleClass="section-title">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                  </Label>
+                  <HBox HBox.hgrow="ALWAYS" />
+                  <Button fx:id="refreshButton" onAction="#handleRefresh" 
+                          styleClass="btn-secondary" text="🔄 Refresh">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="viewReportsButton" onAction="#handleViewReports" 
+                          styleClass="btn-primary" text="📊 Cross-Branch Reports">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Button>
+               </HBox>
+               
+               <Separator />
+               
+               <TableView fx:id="branchesTable" prefHeight="300.0">
+                  <columns>
+                     <TableColumn fx:id="branchIdCol" prefWidth="80.0" text="ID" />
+                     <TableColumn fx:id="branchNameCol" prefWidth="200.0" text="Branch Name" />
+                     <TableColumn fx:id="branchLocationCol" prefWidth="180.0" text="Location" />
+                     <TableColumn fx:id="branchManagerCol" prefWidth="150.0" text="Manager" />
+                     <TableColumn fx:id="branchOrdersCol" prefWidth="120.0" text="Orders (30d)" />
+                     <TableColumn fx:id="branchRevenueCol" prefWidth="150.0" text="Revenue (30d)" />
+                     <TableColumn fx:id="branchStatusCol" prefWidth="100.0" text="Status" />
+                     <TableColumn fx:id="branchActionsCol" prefWidth="120.0" text="Actions" />
+                  </columns>
+               </TableView>
+            </VBox>
+            
+            <!-- Quick Actions -->
+            <VBox spacing="15.0" styleClass="card">
+               <padding>
+                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+               </padding>
+               
+               <Label text="Quick Actions" styleClass="section-title">
+                  <font>
+                     <Font name="System Bold" size="20.0" />
+                  </font>
+               </Label>
+               
+               <Separator />
+               
+               <HBox spacing="20.0" alignment="CENTER">
+                  <Button fx:id="globalSettingsButton" onAction="#handleGlobalSettings" 
+                          styleClass="btn-primary" prefWidth="200.0" prefHeight="60.0">
+                     <graphic>
+                        <VBox alignment="CENTER" spacing="5.0">
+                           <Label text="⚙️ Global Settings">
+                              <font>
+                                 <Font name="System Bold" size="14.0" />
+                              </font>
+                           </Label>
+                           <Label text="Network Configuration" textFill="#f3e5f5">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+                     </graphic>
+                  </Button>
+                  
+                  <Button fx:id="networkPromotionsButton" onAction="#handleNetworkPromotions" 
+                          styleClass="btn-primary" prefWidth="200.0" prefHeight="60.0">
+                     <graphic>
+                        <VBox alignment="CENTER" spacing="5.0">
+                           <Label text="🎯 Network Promotions">
+                              <font>
+                                 <Font name="System Bold" size="14.0" />
+                              </font>
+                           </Label>
+                           <Label text="Chain-Wide Campaigns" textFill="#f3e5f5">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+                     </graphic>
+                  </Button>
+                  
+                  <Button fx:id="roleManagementButton" onAction="#handleRoleManagement" 
+                          styleClass="btn-primary" prefWidth="200.0" prefHeight="60.0">
+                     <graphic>
+                        <VBox alignment="CENTER" spacing="5.0">
+                           <Label text="👥 Role Management">
+                              <font>
+                                 <Font name="System Bold" size="14.0" />
+                              </font>
+                           </Label>
+                           <Label text="User Privileges" textFill="#f3e5f5">
+                              <font>
+                                 <Font size="11.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+                     </graphic>
+                  </Button>
+               </HBox>
+            </VBox>
+            
+         </VBox>
+      </content>
+   </ScrollPane>
+   
+</AnchorPane>

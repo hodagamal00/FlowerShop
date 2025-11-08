@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1100.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CheckoutController">
+   <children>
+      <!-- Header -->
+      <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="80.0" prefWidth="1100.0" style="-fx-background-color: #2c3e50;">
+         <children>
+            <Label text="Checkout" textFill="WHITE" layoutX="20.0" layoutY="25.0">
+               <font>
+                  <Font name="System Bold" size="28.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+      
+      <!-- Main Content: wrapped in ScrollPane for vertical scrolling -->
+      <ScrollPane fitToWidth="true" fitToHeight="true" AnchorPane.topAnchor="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <content>
+          <!-- Original content moved inside this AnchorPane -->
+          <AnchorPane layoutX="30.0" layoutY="20.0" prefWidth="1040.0" prefHeight="580.0">
+            <children>
+               <!-- Left Column -->
+               <VBox layoutX="0.0" layoutY="0.0" spacing="25.0" prefWidth="500.0">
+                  <!-- Preparation Date Section -->
+                  <VBox spacing="12.0">
+                     <Text text="1. Select Preparation Date &amp; Time" fill="#2c3e50">
+                        <font>
+                           <Font name="System Bold" size="18.0" />
+                        </font>
+                     </Text>
+                     <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <ComboBox fx:id="dayCheckout" prefHeight="35.0" prefWidth="90.0" promptText="Day" />
+                        <ComboBox fx:id="monthCheckout" prefHeight="35.0" prefWidth="110.0" promptText="Month" />
+                        <ComboBox fx:id="yearCheckout" prefHeight="35.0" prefWidth="90.0" promptText="Year" />
+                        <ComboBox fx:id="hourCheckout" prefHeight="35.0" prefWidth="90.0" promptText="Hour" />
+                     </HBox>
+                     <Text fx:id="noDate" fill="RED" text="" wrappingWidth="480.0" />
+                  </VBox>
+                  
+                  <!-- Shop Selection -->
+                  <VBox spacing="12.0">
+                     <Text text="2. Choose Shop" fill="#2c3e50">
+                        <font>
+                           <Font name="System Bold" size="18.0" />
+                        </font>
+                     </Text>
+                     <ComboBox fx:id="chooseShopID" prefHeight="35.0" prefWidth="400.0" promptText="Select Shop Location" />
+                     <Text fx:id="noShop" fill="RED" text="" wrappingWidth="480.0" />
+                  </VBox>
+                  
+                  <!-- Delivery Options -->
+                  <VBox spacing="12.0">
+                     <Text text="3. Delivery Options" fill="#2c3e50">
+                        <font>
+                           <Font name="System Bold" size="18.0" />
+                        </font>
+                     </Text>
+                     <CheckBox fx:id="deliverToHome" mnemonicParsing="false" onAction="#DeliverToMyHome" text="Store Pickup (Free)" style="-fx-font-size: 14px;" />
+                     <CheckBox fx:id="deliveryBox" mnemonicParsing="false" onAction="#deliverySomeone" text="Delivery Service (20₪)" style="-fx-font-size: 14px;" />
+                     
+                     <VBox spacing="10.0" style="-fx-padding: 0 0 0 25;">
+                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                           <Text text="Recipient Name:" strokeType="OUTSIDE" prefWidth="130.0">
+                              <font><Font size="14.0" /></font>
+                           </Text>
+                           <TextField fx:id="recepNameField" prefWidth="300.0" />
+                        </HBox>
+                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                           <Text text="Phone Number:" strokeType="OUTSIDE" prefWidth="130.0">
+                              <font><Font size="14.0" /></font>
+                           </Text>
+                           <TextField fx:id="recepPhoneField" prefWidth="300.0" />
+                        </HBox>
+                        <Label fx:id="phone_regex" text="" textFill="RED" />
+                        <VBox spacing="5.0">
+                           <Text text="Delivery Address:" strokeType="OUTSIDE">
+                              <font><Font size="14.0" /></font>
+                           </Text>
+                           <TextField fx:id="recepAddressField" prefHeight="60.0" prefWidth="450.0" />
+                        </VBox>
+                     </VBox>
+                  </VBox>
+                  
+                  <!-- Greeting Card Option -->
+                  <VBox spacing="12.0">
+                     <CheckBox fx:id="greetingBoxCheckout" mnemonicParsing="false" onAction="#addGreeting" text="Add Greeting Card" style="-fx-font-size: 14px;" />
+                     <TextField fx:id="greetingTextCheckout" prefHeight="100.0" prefWidth="480.0" promptText="Enter your greeting message here..." />
+                  </VBox>
+               </VBox>
+               
+               <!-- Right Column - Payment -->
+               <VBox layoutX="540.0" layoutY="0.0" spacing="25.0" prefWidth="500.0">
+                  <Text text="4. Payment Information" fill="#2c3e50">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Text>
+                  
+                  <CheckBox fx:id="anotherMethodBox" mnemonicParsing="false" onAction="#useAnotherMethod" text="Use Different Payment Method" style="-fx-font-size: 14px;" />
+                  
+                  <VBox spacing="15.0" style="-fx-padding: 10; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-color: #f9f9f9;">
+                     <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Text text="Card Number:" strokeType="OUTSIDE" prefWidth="130.0">
+                           <font><Font size="14.0" /></font>
+                        </Text>
+                        <TextField fx:id="creditNumberField" prefWidth="280.0" promptText="16 digits" />
+                     </HBox>
+                     <Label fx:id="credit_regex" text="" textFill="RED" />
+                     
+                     <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Text text="Expiry Date:" strokeType="OUTSIDE" prefWidth="130.0">
+                           <font><Font size="14.0" /></font>
+                        </Text>
+                        <ComboBox fx:id="expiryMonth" prefHeight="35.0" prefWidth="120.0" promptText="Month" />
+                        <ComboBox fx:id="expiryYear" prefHeight="35.0" prefWidth="90.0" promptText="Year" />
+                     </HBox>
+                     <Text fx:id="noDateTwo" fill="RED" text="" wrappingWidth="450.0" />
+                     
+                     <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Text text="CVV:" strokeType="OUTSIDE" prefWidth="130.0">
+                           <font><Font size="14.0" /></font>
+                        </Text>
+                        <TextField fx:id="cvvField" prefWidth="80.0" promptText="3 digits" />
+                     </HBox>
+                     <Label fx:id="cvv_regex" text="" textFill="RED" />
+                  </VBox>
+                  
+                  <!-- Order Summary -->
+                  <VBox spacing="10.0" style="-fx-padding: 15; -fx-border-color: #27ae60; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #e8f8f5;">
+                     <Text text="Order Summary" fill="#27ae60">
+                        <font>
+                           <Font name="System Bold" size="16.0" />
+                        </font>
+                     </Text>
+                     <HBox spacing="10.0">
+                        <Text text="Subtotal:" prefWidth="150.0"><font><Font size="14.0" /></font></Text>
+                        <Text text="---" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
+                     </HBox>
+                     <HBox spacing="10.0">
+                        <Text text="Delivery:" prefWidth="150.0"><font><Font size="14.0" /></font></Text>
+                        <Text text="20₪" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
+                     </HBox>
+                     <HBox spacing="10.0">
+                        <Text text="Total:" prefWidth="150.0" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
+                        <Text text="---" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
+                     </HBox>
+                  </VBox>
+               </VBox>
+               
+               <!-- Bottom Buttons -->
+               <HBox layoutX="250.0" layoutY="510.0" spacing="30.0" alignment="CENTER">
+                  <Button fx:id="placeOrderButton" mnemonicParsing="false" onAction="#PlaceOrder" prefHeight="50.0" prefWidth="250.0" text="Place Order" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
+                  <Button fx:id="back" mnemonicParsing="false" onAction="#openCatalog" prefHeight="50.0" prefWidth="200.0" text="← Back to Catalog" style="-fx-font-size: 16px;" />
+               </HBox>
+            </children>
+          </AnchorPane>
+        </content>
+      </ScrollPane>
+      
+      <!-- Hidden Elements -->
+      <Text fx:id="deliveryDateCheckout" visible="false" />
+      <Text fx:id="recepAddressText" visible="false" />
+      <Text fx:id="recepNameText" visible="false" />
+      <Text fx:id="recepPhoneText" visible="false" />
+      <Text fx:id="creditNumberText" visible="false" />
+      <Text fx:id="expiryText" visible="false" />
+      <Text fx:id="cvvText" visible="false" />
+   </children>
+</AnchorPane>

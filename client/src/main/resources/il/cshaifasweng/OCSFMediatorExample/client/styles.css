@@ -1,0 +1,9 @@
+/*
+ * Global stylesheet that imports the existing light purple theme.
+ * This file serves as the single entry point for styling the
+ * FlowerShop application.  All FXML files should reference
+ * `@styles.css` so that the same look and feel is applied
+ * consistently across the entire app.
+ */
+
+@import url("mycsss.css");

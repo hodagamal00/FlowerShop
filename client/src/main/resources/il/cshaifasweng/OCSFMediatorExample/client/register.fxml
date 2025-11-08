@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="700.0" prefWidth="900.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegisterController">
+    <children>
+        <!-- Header -->
+        <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="80.0" prefWidth="900.0" style="-fx-background-color: #27ae60;">
+            <children>
+                <Label layoutX="30.0" layoutY="25.0" text="Lilach - Customer Registration" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Label>
+            </children>
+        </AnchorPane>
+        
+        <!-- Main Content -->
+        <HBox layoutX="40.0" layoutY="100.0" spacing="40.0" prefWidth="820.0">
+            <!-- Left Column - Personal Info -->
+            <VBox spacing="20.0" prefWidth="390.0">
+                <Label text="Personal Information" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                
+                <VBox spacing="8.0">
+                    <Label text="Email Address:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="Email" prefHeight="35.0" promptText="your@email.com" style="-fx-font-size: 13px;" />
+                    <Label fx:id="email_regex_error" text="" textFill="#ff6b6b" />
+                    <Label fx:id="ErrorMsg" text="" textFill="#ff6b6b" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="Password:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="Password" prefHeight="35.0" promptText="Enter password" style="-fx-font-size: 13px;" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="Full Name:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="Name" prefHeight="35.0" promptText="First and Last Name" style="-fx-font-size: 13px;" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="ID Number:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="userID" prefHeight="35.0" promptText="9-digit ID number" style="-fx-font-size: 13px;" />
+                    <Label fx:id="ID_Bad" text="" textFill="#ff6b6b" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="Phone Number:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="PhoneNumber" prefHeight="35.0" promptText="10-digit phone number" style="-fx-font-size: 13px;" />
+                    <Label fx:id="phone_regex_error" text="" textFill="#ff6b6b" />
+                </VBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="Address:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="Street_Address" prefHeight="35.0" promptText="Street Address" style="-fx-font-size: 13px;" />
+                    <TextField fx:id="City_Address" prefHeight="35.0" promptText="City" style="-fx-font-size: 13px;" />
+                </VBox>
+            </VBox>
+            
+            <!-- Right Column - Payment & Options -->
+            <VBox spacing="20.0" prefWidth="390.0">
+                <Label text="Payment &amp; Subscription" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" />
+                
+                <VBox spacing="8.0">
+                    <Label text="Credit Card Number:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="CardNumber" prefHeight="35.0" promptText="16-digit card number" style="-fx-font-size: 13px;" />
+                    <Label fx:id="card_regex_error" text="" textFill="#ff6b6b" />
+                </VBox>
+                
+                <HBox spacing="15.0">
+                    <VBox spacing="8.0" prefWidth="180.0">
+                        <Label text="Expiry Month:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                        <ComboBox fx:id="chooseMonth" prefHeight="35.0" prefWidth="180.0" promptText="Month" />
+                    </VBox>
+                    <VBox spacing="8.0" prefWidth="180.0">
+                        <Label text="Expiry Year:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                        <ComboBox fx:id="chooseYear" prefHeight="35.0" prefWidth="180.0" promptText="Year" />
+                    </VBox>
+                </HBox>
+                
+                <VBox spacing="8.0">
+                    <Label text="CVV:" textFill="WHITE" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="CVV" prefHeight="35.0" prefWidth="100.0" promptText="3 digits" style="-fx-font-size: 13px;" />
+                    <Label fx:id="CVV_regex_error" text="" textFill="#ff6b6b" />
+                </VBox>
+                
+                <VBox spacing="15.0" style="-fx-padding: 15; -fx-border-color: white; -fx-border-width: 1; -fx-border-radius: 5;">
+                    <Label text="Subscription Options" textFill="WHITE" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                    <CheckBox fx:id="subscription" mnemonicParsing="false" onAction="#checkSubscription" text="Add Annual Subscription (100₪) - Get 10% off on orders over 50₪" textFill="WHITE" wrapText="true" style="-fx-font-size: 13px;" />
+                </VBox>
+                
+                <VBox spacing="15.0" style="-fx-padding: 15; -fx-border-color: white; -fx-border-width: 1; -fx-border-radius: 5;">
+                    <Label text="Account Type" textFill="WHITE" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+                    <CheckBox fx:id="registerShop" mnemonicParsing="false" onAction="#checkedShop" text="Register as Shop Account" textFill="WHITE" style="-fx-font-size: 13px;" />
+                    <CheckBox fx:id="registerChain" mnemonicParsing="false" onAction="#checkedChain" text="Register as Chain Account" textFill="WHITE" style="-fx-font-size: 13px;" />
+                    <ComboBox fx:id="selectChain" prefHeight="35.0" prefWidth="360.0" promptText="Select Shop to Register" />
+                    <Label fx:id="shopError" text="" textFill="#ff6b6b" />
+                </VBox>
+            </VBox>
+        </HBox>
+        
+        <!-- Footer Buttons -->
+        <HBox layoutX="280.0" layoutY="630.0" spacing="30.0" alignment="CENTER">
+            <Button fx:id="RegisterButton" mnemonicParsing="false" onAction="#AddCustomerToDB" prefHeight="45.0" prefWidth="180.0" text="Register" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
+            <Button fx:id="backk" mnemonicParsing="false" onAction="#backkk" prefHeight="45.0" prefWidth="150.0" text="← Back" style="-fx-font-size: 16px;" />
+        </HBox>
+        
+        <Label fx:id="fieldsError" layoutX="340.0" layoutY="600.0" text="" textFill="#ff6b6b" style="-fx-font-size: 14px;" />
+        
+        <!-- Hidden Labels -->
+        <Label fx:id="email_regex_error1" visible="false" />
+    </children>
+</AnchorPane>

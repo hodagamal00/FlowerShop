@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="900.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.SecondaryController">
+    <children>
+        <!-- Header -->
+        <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="80.0" prefWidth="900.0" style="-fx-background-color: #2c3e50;">
+            <children>
+                <Text text="Product Details" textFill="WHITE" layoutX="340.0" layoutY="50.0">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Text>
+                <Button fx:id="back_button" layoutX="20.0" layoutY="25.0" mnemonicParsing="false" onAction="#returnWindow" prefHeight="35.0" prefWidth="100.0" text="← Back" style="-fx-font-size: 14px;" />
+                <Button fx:id="edit_product" layoutX="770.0" layoutY="25.0" mnemonicParsing="false" onAction="#edit_product" prefHeight="35.0" prefWidth="100.0" text="Edit Product" style="-fx-font-size: 14px;" />
+            </children>
+        </AnchorPane>
+        
+        <!-- Main Content -->
+        <AnchorPane layoutX="50.0" layoutY="100.0" prefWidth="800.0" prefHeight="580.0">
+            <children>
+                <!-- Left Side - Product Image -->
+                <VBox layoutX="0.0" layoutY="0.0" spacing="15.0" prefWidth="350.0" alignment="CENTER">
+                    <ImageView fx:id="flower_image" fitHeight="400.0" fitWidth="340.0" pickOnBounds="true" preserveRatio="true" style="-fx-border-color: #ddd; -fx-border-width: 2; -fx-border-radius: 5;" />
+                    <DialogPane fx:id="flower_name" contentText="Product Name" prefHeight="60.0" prefWidth="340.0" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;" />
+                </VBox>
+                
+                <!-- Right Side - Edit Form -->
+                <VBox layoutX="380.0" layoutY="0.0" spacing="20.0" prefWidth="420.0" style="-fx-padding: 20; -fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
+                    <Text text="Edit Product Information" fill="#2c3e50">
+                        <font>
+                            <Font name="System Bold" size="20.0" />
+                        </font>
+                    </Text>
+                    
+                    <VBox spacing="8.0">
+                        <Text text="Product Name:" strokeType="OUTSIDE">
+                            <font><Font size="14.0" /></font>
+                        </Text>
+                        <TextField fx:id="setName" prefHeight="40.0" promptText="Enter product name" style="-fx-font-size: 14px;" />
+                    </VBox>
+                    
+                    <VBox spacing="8.0">
+                        <Text text="Price (₪):" strokeType="OUTSIDE">
+                            <font><Font size="14.0" /></font>
+                        </Text>
+                        <TextField fx:id="setPrice" prefHeight="40.0" promptText="Enter price" style="-fx-font-size: 14px;" />
+                    </VBox>
+                    
+                    <VBox spacing="8.0">
+                        <Text text="Product Details:" strokeType="OUTSIDE">
+                            <font><Font size="14.0" /></font>
+                        </Text>
+                        <TextArea fx:id="setDetails" prefHeight="250.0" prefWidth="380.0" promptText="Enter product description and details..." style="-fx-font-size: 13px;" />
+                    </VBox>
+                    
+                    <Button fx:id="apply_changes" mnemonicParsing="false" onAction="#updateProduct" prefHeight="45.0" prefWidth="380.0" text="Apply Changes" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
+                </VBox>
+            </children>
+        </AnchorPane>
+    </children>
+</AnchorPane>
