@@ -1089,7 +1089,7 @@ public class SimpleServer extends AbstractServer {
 	public void addMessage(Message newMessage) {
 
 		System.out.println("inside Add Account To Catalog");
-		long numOfRows = countAccountRows();
+		long numOfRows = countMessageRows();
 		int castedId = (int) numOfRows;
 		int newId = castedId + 1;
 		newMessage.setMessageID(newId);
@@ -1120,18 +1120,26 @@ public class SimpleServer extends AbstractServer {
 		System.out.println("khaled");
 		session.close();
 	}
+
 	public Long countMessageRows() {
 		System.out.println("Arrived to coutnrwos 1");
-		final CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-		System.out.println("Arrived to coutnrwos 2");
-		CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-		System.out.println("Arrived to coutnrwos 3");
-		Root<Message> root = criteria.from(Message.class);
-		System.out.println("Arrived to coutnrwos 4");
-		criteria.select(criteriaBuilder.count(root));
-		System.out.println("Arrived to coutnrwos 5");
-		System.out.println(session.createQuery(criteria).getSingleResult());
-		return session.createQuery(criteria).getSingleResult();
+		SessionFactory sessionFactory = getSessionFactory();
+		Session localSession = sessionFactory.openSession();
+		try {
+			final CriteriaBuilder criteriaBuilder = localSession.getCriteriaBuilder();
+			System.out.println("Arrived to coutnrwos 2");
+			CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+			System.out.println("Arrived to coutnrwos 3");
+			Root<Message> root = criteria.from(Message.class);
+			System.out.println("Arrived to coutnrwos 4");
+			criteria.select(criteriaBuilder.count(root));
+			System.out.println("Arrived to coutnrwos 5");
+			Long count = localSession.createQuery(criteria).getSingleResult();
+			System.out.println(count);
+			return count;
+		} finally {
+			localSession.close();
+		}
 	}
 
 
