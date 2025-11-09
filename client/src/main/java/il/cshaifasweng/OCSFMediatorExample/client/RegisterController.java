@@ -128,109 +128,126 @@ public class RegisterController {
         fieldsError.setVisible(false);
         shopError.setVisible(false);
         ID_Bad.setVisible(false);
+        boolean hasError = false;
 
         if(registerShop.isSelected())
         {
             if(selectChain.getSelectionModel().getSelectedIndex() == -1)
             {
                 shopError.setVisible(true);
+                hasError = true;
+
             }
         }
-        if(Email.getText() == "" || Password.getText() == "" || Name.getText() == "" || userID.getText() == "" || PhoneNumber.getText() == "" || Street_Address.getText() == "" || City_Address.getText() == "" || CardNumber.getText() == "" || CVV.getText() == "" || chooseMonth.getSelectionModel().getSelectedIndex() == -1 || chooseYear.getSelectionModel().getSelectedIndex() == -1)
+        if(Email.getText().isEmpty() || Password.getText().isEmpty() || Name.getText().isEmpty() || userID.getText().isEmpty() || PhoneNumber.getText().isEmpty() || Street_Address.getText().isEmpty() || City_Address.getText().isEmpty() || CardNumber.getText().isEmpty() || CVV.getText().isEmpty() || chooseMonth.getSelectionModel().getSelectedIndex() == -1 || chooseYear.getSelectionModel().getSelectedIndex() == -1)
         {
             fieldsError.setVisible(true);
+            hasError = true;
+
         }
         Pattern pattern = Pattern.compile(email_regex);
         Matcher matcher = pattern.matcher(Email.getText());
         if(!matcher.matches()){
             email_regex_error.setVisible(true);
+            hasError = true;
+
         }
         pattern = Pattern.compile(creditCard_regex);
         matcher = pattern.matcher(CardNumber.getText());
         if(!matcher.matches()){
             card_regex_error.setVisible(true);
+            hasError = true;
+
         }
         pattern = Pattern.compile(CVV_regex);
         matcher = pattern.matcher(CVV.getText());
         if(!matcher.matches()){
             CVV_regex_error.setVisible(true);
+            hasError = true;
+
         }
         pattern = Pattern.compile(phoneNum_regex);
         matcher = pattern.matcher(PhoneNumber.getText());
         if(!matcher.matches()){
             phone_regex_error.setVisible(true);
+            hasError = true;
+
         }
         pattern = Pattern.compile(ID_regex);
         matcher = pattern.matcher(userID.getText());
         if(!matcher.matches()){
             ID_Bad.setVisible(true);
+            hasError = true;
+
         }
-        else if(!RegisteredAccounts.contains(Email.getText()))
-        {
-            String Address = Street_Address.getText() + ", " + City_Address.getText();
-            int shopID = 0;
-            if(registerChain.isSelected())
-                shopID = 0;
-            else
+        if(!hasError) {
+            if(!RegisteredAccounts.contains(Email.getText()))
             {
-                switch (selectChain.getValue().toString())
+                String Address = Street_Address.getText() + ", " + City_Address.getText();
+                int shopID = 0;
+                if(registerChain.isSelected())
+                    shopID = 0;
+                else
                 {
-                    case "ID 0: - Chain":
-                        shopID = 0;
-                        break;
-                    case "ID 1: Tiberias, Big Danilof":
-                        shopID  = 1;
-                        break;
-                    case "ID 2: Haifa, Merkaz Zeiv":
-                        shopID  = 2;
-                        break;
-                    case "ID 3: Tel Aviv, Ramat Aviv":
-                        shopID  = 3;
-                        break;
-                    case "ID 4: Eilat, Ice mall":
-                        shopID  = 4;
-                        break;
-                    case "ID 5: Be'er Sheva, Big Beer Sheva":
-                        shopID = 5;
-                        break;
+                    switch (selectChain.getValue())
+                    {
+                        case "ID 0: - Chain":
+                            shopID = 0;
+                            break;
+                        case "ID 1: Tiberias, Big Danilof":
+                            shopID  = 1;
+                            break;
+                        case "ID 2: Haifa, Merkaz Zeiv":
+                            shopID  = 2;
+                            break;
+                        case "ID 3: Tel Aviv, Ramat Aviv":
+                            shopID  = 3;
+                            break;
+                        case "ID 4: Eilat, Ice mall":
+                            shopID  = 4;
+                            break;
+                        case "ID 5: Be'er Sheva, Big Beer Sheva":
+                            shopID = 5;
+                            break;
+                    }
+
                 }
+                long id = Integer.parseInt(userID.getText());
+                System.out.println("ID = " + id);
+                //Account new_acc = new Account(Name.getText(),Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()) ,Integer.parseInt(CVV.getText()), shopID);
+                Account new_acc = new Account(0,Name.getText(),id,Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(CVV.getText()),false,shopID,subscription.isSelected());
+                new_acc.setPrivialge(1);
+                System.out.println("Registering To Shop " + shopID);
+                RegisteredAccounts.add(Email.getText());
+
+
+                UpdateMessage new_msg2=new UpdateMessage("account","add");
+                //account_num++;
+                //new_acc.setAccountID(account_num);
+                //new_msg2.setId(account_num);
+                new_msg2.setAccount(new_acc);
+                try {
+                    System.out.println("before sending updateMessage to server ");
+                    SimpleClient.getClient().sendToServer(new_msg2); // sends the updated product to the server class
+                    System.out.println("afater sending updateMessage to server ");
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
+                Parent roott = loader.load();
+                LoginController cc = loader.getController();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(roott));
+                stage.setTitle("Delivery Panel");
+                stage.show();
+                Stage stagee = (Stage)RegisterButton.getScene().getWindow();
+                stagee.close();
 
             }
-            long id = Integer.parseInt(userID.getText());
-            System.out.println("ID = " + id);
-            //Account new_acc = new Account(Name.getText(),Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()) ,Integer.parseInt(CVV.getText()), shopID);
-            Account new_acc = new Account(0,Name.getText(),id,Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(CVV.getText()),false,shopID,subscription.isSelected());
-            new_acc.setPrivialge(1);
-            System.out.println("Registering To Shop " + shopID);
-            RegisteredAccounts.add(Email.getText());
-
-
-            UpdateMessage new_msg2=new UpdateMessage("account","add");
-            //account_num++;
-            //new_acc.setAccountID(account_num);
-            //new_msg2.setId(account_num);
-            new_msg2.setAccount(new_acc);
-            try {
-                System.out.println("before sending updateMessage to server ");
-                SimpleClient.getClient().sendToServer(new_msg2); // sends the updated product to the server class
-                System.out.println("afater sending updateMessage to server ");
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            else{
+                ErrorMsg.setVisible(true);
             }
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
-            Parent roott = loader.load();
-            LoginController cc = loader.getController();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(roott));
-            stage.setTitle("Delivery Panel");
-            stage.show();
-            Stage stagee = (Stage)RegisterButton.getScene().getWindow();
-            stagee.close();
-
-        }
-        else{
-            ErrorMsg.setVisible(true);
         }
 
     }
