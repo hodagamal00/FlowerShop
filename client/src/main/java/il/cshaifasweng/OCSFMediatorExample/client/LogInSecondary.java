@@ -173,7 +173,7 @@ public class LogInSecondary {
     @FXML
     void backkk(ActionEvent event) throws IOException {
         // Navigate back to the primary login screen inside the AppShell.
-        NavigationService.getInstance().navigate("LogInPrim");
+        NavigationService.getInstance().navigate("Login");
     }
 
     @FXML

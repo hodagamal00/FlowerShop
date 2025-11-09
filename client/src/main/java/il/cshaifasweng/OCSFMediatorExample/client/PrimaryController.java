@@ -381,9 +381,9 @@ public class PrimaryController {
 			e.printStackTrace();
 		}
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("LogInPrim.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
 		Parent roott = loader.load();
-		LogInPrimary cc = loader.getController();
+		LoginController cc = loader.getController();
 		Stage stage = new Stage();
 		stage.setScene(new Scene(roott));
 		stage.setTitle("Welcome");
@@ -395,7 +395,7 @@ public class PrimaryController {
 
 	@FXML
 	void goToLogin(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("LogInPrim.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
         Parent roott = loader.load();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));

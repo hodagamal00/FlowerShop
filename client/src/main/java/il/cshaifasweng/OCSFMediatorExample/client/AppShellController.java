@@ -34,7 +34,7 @@ public class AppShellController {
         // NavigationService.  These may be overridden or extended
         // by individual controllers as needed.
         if (loginButton != null) {
-            loginButton.setOnAction(e -> NavigationService.getInstance().navigate("LogInPrim"));
+            loginButton.setOnAction(e -> NavigationService.getInstance().navigate("Login"));
         }
         if (profileButton != null) {
             profileButton.setOnAction(e -> NavigationService.getInstance().navigate("Profile"));

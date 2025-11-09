@@ -218,9 +218,9 @@ public class RegisterController {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("LogInPrim.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
             Parent roott = loader.load();
-            LogInPrimary cc = loader.getController();
+            LoginController cc = loader.getController();
             Stage stage = new Stage();
             stage.setScene(new Scene(roott));
             stage.setTitle("Delivery Panel");
@@ -312,9 +312,9 @@ public class RegisterController {
 
     @FXML
     void backkk(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("LogInPrim.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
         Parent roott = loader.load();
-        LogInPrimary cc = loader.getController();
+        LoginController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Login");

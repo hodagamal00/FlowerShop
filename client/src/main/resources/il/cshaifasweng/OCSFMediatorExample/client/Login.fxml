@@ -20,7 +20,7 @@
 <VBox prefHeight="600.0" prefWidth="800.0" spacing="20.0" alignment="TOP_CENTER"
       stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="il.cshaifasweng.OCSFMediatorExample.client.LogInPrimary">
+    fx:controller="il.cshaifasweng.OCSFMediatorExample.client.LoginController">
     <children>
         <!-- Header section -->
         <VBox alignment="CENTER" spacing="4.0">
@@ -33,12 +33,12 @@
             <!-- Email input -->
             <Label text="Email Address:" styleClass="form-label" />
             <TextField fx:id="Email" promptText="Enter your email" maxWidth="Infinity" />
-            <Label fx:id="ErrorMsg" textFill="#e57373" />
+            <Label fx:id="ErrorMsg" textFill="#c97be5"/>
 
             <!-- Password input -->
             <Label text="Password:" styleClass="form-label" />
             <PasswordField fx:id="Password" promptText="Enter your password" maxWidth="Infinity" />
-            <Label fx:id="ErrorMsgPass" textFill="#e57373" />
+            <Label fx:id="ErrorMsgPass" textFill="#a074e5"/>
 
             <!-- Primary login button -->
             <Button fx:id="LogIn" text="Log In" onAction="#LogIn" maxWidth="Infinity" styleClass="btn-primary" />
@@ -54,6 +54,8 @@
             </HBox>
 
             <!-- Guest and back buttons -->
+            <Button fx:id="LogInTab" text="Existing Customer Login" visible="false" managed="false"
+                    onAction="#gotoLogInSecondary" />
             <Button fx:id="Guest" text="Continue as Guest" onAction="#gotoCatalog" styleClass="btn-outline" />
             <Button fx:id="backLog" text="← Back" onAction="#ReturnFromLogin" visible="false" styleClass="btn-outline" />
 

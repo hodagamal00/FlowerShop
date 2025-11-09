@@ -29,7 +29,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-public class LogInPrimary {
+public class LoginController {
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -51,9 +51,6 @@ public class LogInPrimary {
 
     @FXML // fx:id="LogIn"
     private Button LogIn; // Value injected by FXMLLoader
-
-    @FXML // fx:id="LogInTab"
-    private Button LogInTab; // Value injected by FXMLLoader
 
     @FXML // fx:id="Password"
     private TextField Password; // Value injected by FXMLLoader
@@ -80,13 +77,12 @@ public class LogInPrimary {
     void ReturnFromLogin(ActionEvent event) {
         logSucc.setVisible(false);
         OpenCatalogplz.setVisible(false);
-        Email.setVisible(false);
-        Password.setVisible(false);
-        LogIn.setVisible(false);
+        Email.setVisible(true);
+        Password.setVisible(true);
+        LogIn.setVisible(true);
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
         backLog.setVisible(false);
-        LogInTab.setVisible(true);
         RegisterTab.setVisible(true);
         Guest.setVisible(true);
         requestFix = 0;
@@ -109,7 +105,6 @@ public class LogInPrimary {
     void gotoLogInSecondary(ActionEvent event) throws IOException {
         RegisterTab.setVisible(false);
         Guest.setVisible(false);
-        LogInTab.setVisible(false);
         LogIn.setVisible(true);
         Email.setVisible(true);
         Password.setVisible(true);
@@ -129,18 +124,17 @@ public class LogInPrimary {
 
     @FXML
     void initialize() {
-        assert Email != null : "fx:id=\"Email\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert ErrorMsg != null : "fx:id=\"ErrorMsg\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert ErrorMsgPass != null : "fx:id=\"ErrorMsgPass\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert Guest != null : "fx:id=\"Guest\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert LogIn != null : "fx:id=\"LogIn\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert LogInTab != null : "fx:id=\"LogInTab\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert OpenCatalogplz != null : "fx:id=\"OpenCatalogplz\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert Password != null : "fx:id=\"Password\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert RegisterTab != null : "fx:id=\"RegisterTab\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert alLog != null : "fx:id=\"alLog\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert backLog != null : "fx:id=\"backLog\" was not injected: check your FXML file 'LogInPrim.fxml'.";
-        assert logSucc != null : "fx:id=\"logSucc\" was not injected: check your FXML file 'LogInPrim.fxml'.";
+        assert Email != null : "fx:id=\"Email\" was not injected: check your FXML file 'Login.fxml'.";
+        assert ErrorMsg != null : "fx:id=\"ErrorMsg\" was not injected: check your FXML file 'Login.fxml'.";
+        assert ErrorMsgPass != null : "fx:id=\"ErrorMsgPass\" was not injected: check your FXML file 'Login.fxml'.";
+        assert Guest != null : "fx:id=\"Guest\" was not injected: check your FXML file 'Login.fxml'.";
+        assert LogIn != null : "fx:id=\"LogIn\" was not injected: check your FXML file 'Login.fxml'.";
+        assert OpenCatalogplz != null : "fx:id=\"OpenCatalogplz\" was not injected: check your FXML file 'Login.fxml'.";
+        assert Password != null : "fx:id=\"Password\" was not injected: check your FXML file 'Login.fxml'.";
+        assert RegisterTab != null : "fx:id=\"RegisterTab\" was not injected: check your FXML file 'Login.fxml'.";
+        assert alLog != null : "fx:id=\"alLog\" was not injected: check your FXML file 'Login.fxml'.";
+        assert backLog != null : "fx:id=\"backLog\" was not injected: check your FXML file 'Login.fxml'.";
+        assert logSucc != null : "fx:id=\"logSucc\" was not injected: check your FXML file 'Login.fxml'.";
 
         // By default, show the email/password fields and primary login button.  In the
         // original implementation these controls were hidden until a secondary
@@ -241,7 +235,7 @@ public class LogInPrimary {
     /*
     @FXML
     void backkk(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("LogInPrim.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
         Parent roott = loader.load();
         LogInPrimary cc = loader.getController();
         Stage stage = new Stage();
