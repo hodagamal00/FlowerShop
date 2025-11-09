@@ -41,7 +41,7 @@
             <Label fx:id="ErrorMsgPass" textFill="#a074e5"/>
 
             <!-- Primary login button -->
-            <Button fx:id="LogIn" text="Log In" onAction="#LogIn" maxWidth="Infinity" styleClass="btn-primary" />
+            <Button fx:id="LogIn" text="Log In" onAction="#handleLogin" maxWidth="Infinity" styleClass="btn-primary" />
 
             <!-- Login success message and continue button -->
             <Text fx:id="logSucc" />

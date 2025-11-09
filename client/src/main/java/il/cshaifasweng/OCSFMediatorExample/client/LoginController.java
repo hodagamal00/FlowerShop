@@ -10,6 +10,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
+import javafx.application.Platform;
+import javafx.scene.Node;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.beans.property.SimpleObjectProperty;
@@ -251,8 +253,11 @@ public class LoginController {
 
     int requestFix = 0;
     boolean alreadyLogged = false;
+    private ActionEvent lastLoginEvent;
+
     @FXML
-    public void LogIn(javafx.event.ActionEvent actionEvent) throws IOException {
+    public void handleLogin(ActionEvent actionEvent) throws IOException {
+        lastLoginEvent = actionEvent;
         backLog.setVisible(false);
         CheckMail checkMailRequest  = new CheckMail(Email.getText(),login_flag,Password.getText()); // check if employee's/customer's email exists
         try
@@ -288,6 +293,26 @@ public class LoginController {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+    private void navigateToHomePage() {
+        ActionEvent event = lastLoginEvent;
+        if (event == null) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("HomePage.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.show();
+                lastLoginEvent = null;
+            } catch (IOException e) {
+                ErrorMsg.setText("Unable to load home page.");
+                ErrorMsg.setVisible(true);
+            }
+        });
     }
 
     @Subscribe
@@ -331,8 +356,7 @@ public class LoginController {
         System.out.println("Checking Mail IN DB");
         if(checkEmailPass.getexists()==true)
         {
-            // Login succeeded: navigate to the catalog view inside the AppShell
-            NavigationService.getInstance().navigate("primary");
+            navigateToHomePage();
         }
         else{
             ErrorMsgPass.setVisible(true);
