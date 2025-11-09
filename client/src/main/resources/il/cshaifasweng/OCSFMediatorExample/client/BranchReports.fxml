@@ -18,292 +18,303 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
-            prefHeight="800.0" prefWidth="1200.0" styleClass="root" 
-            stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" 
-            xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.BranchReportsController">
-   
-   <!-- Navigation Bar -->
-   <HBox alignment="CENTER_LEFT" layoutY="0.0" prefHeight="70.0" prefWidth="1200.0" 
-         spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0" 
-         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-      <padding>
-         <Insets left="20.0" right="20.0" />
-      </padding>
-      
-      <Label text="FlowerShop Manager" styleClass="navbar-brand">
-         <font>
-            <Font name="System Bold" size="24.0" />
-         </font>
-      </Label>
-      
-      <Label text="Branch Reports" styleClass="navbar-title">
-         <font>
-            <Font name="System Bold" size="18.0" />
-         </font>
-      </Label>
-      
-      <HBox HBox.hgrow="ALWAYS" />
-      
-      <Button fx:id="backButton" onAction="#handleBackToCatalog" 
-              styleClass="btn-secondary" text="← Back to Catalog">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Button>
-   </HBox>
-   
-   <!-- Main Content Area with ScrollPane -->
-   <ScrollPane fitToWidth="true" layoutY="70.0" prefHeight="730.0" prefWidth="1200.0" 
-               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" 
-               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
-      <content>
-         <VBox spacing="25.0" styleClass="content-container">
+<ScrollPane
+        xmlns="http://javafx.com/javafx/17"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.BranchReportsController"
+        stylesheets="@mycsss.css"
+        fitToWidth="true"
+        pannable="true"
+        styleClass="app-scroll-container">
+   <content>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                  prefHeight="800.0" prefWidth="1200.0" styleClass="root"
+                  xmlns="http://javafx.com/javafx/17"
+                  xmlns:fx="http://javafx.com/fxml/1"
+      >
+
+         <!-- Navigation Bar -->
+         <HBox alignment="CENTER_LEFT" layoutY="0.0" prefHeight="70.0" prefWidth="1200.0"
+               spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0"
+               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <padding>
-               <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+               <Insets left="20.0" right="20.0" />
             </padding>
-            
-            <!-- Page Header -->
-            <VBox spacing="10.0">
-               <Label text="Branch Performance Reports" styleClass="page-title">
-                  <font>
-                     <Font name="System Bold" size="32.0" />
-                  </font>
-               </Label>
-               <Label fx:id="branchLabel" text="Branch: Loading..." 
-                      styleClass="subtitle" textFill="#666666">
-                  <font>
-                     <Font size="16.0" />
-                  </font>
-               </Label>
-            </VBox>
-            
-            <!-- Report Filters Card -->
-            <VBox spacing="15.0" styleClass="card">
-               <padding>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-               </padding>
-               
-               <Label text="Report Filters" styleClass="section-title">
-                  <font>
-                     <Font name="System Bold" size="18.0" />
-                  </font>
-               </Label>
-               
-               <HBox spacing="20.0" alignment="CENTER_LEFT">
-                  <VBox spacing="8.0">
-                     <Label text="Report Type:" styleClass="field-label">
+
+            <Label text="FlowerShop Manager" styleClass="navbar-brand">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+
+            <Label text="Branch Reports" styleClass="navbar-title">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+
+            <HBox HBox.hgrow="ALWAYS" />
+
+            <Button fx:id="backButton" onAction="#handleBackToCatalog"
+                    styleClass="btn-secondary" text="← Back to Catalog">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+         </HBox>
+
+         <!-- Main Content Area with ScrollPane -->
+         <ScrollPane fitToWidth="true" layoutY="70.0" prefHeight="730.0" prefWidth="1200.0"
+                     AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+            <content>
+               <VBox spacing="25.0" styleClass="content-container">
+                  <padding>
+                     <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                  </padding>
+
+                  <!-- Page Header -->
+                  <VBox spacing="10.0">
+                     <Label text="Branch Performance Reports" styleClass="page-title">
                         <font>
-                           <Font size="14.0" />
+                           <Font name="System Bold" size="32.0" />
                         </font>
                      </Label>
-                     <ComboBox fx:id="reportTypeCombo" prefWidth="200.0" 
-                               promptText="Select Report Type" styleClass="combo-box">
-                     </ComboBox>
-                  </VBox>
-                  
-                  <VBox spacing="8.0">
-                     <Label text="Start Date:" styleClass="field-label">
+                     <Label fx:id="branchLabel" text="Branch: Loading..."
+                            styleClass="subtitle" textFill="#666666">
                         <font>
-                           <Font size="14.0" />
+                           <Font size="16.0" />
                         </font>
                      </Label>
-                     <DatePicker fx:id="startDatePicker" prefWidth="180.0" 
-                                 promptText="From Date" styleClass="date-picker" />
                   </VBox>
-                  
-                  <VBox spacing="8.0">
-                     <Label text="End Date:" styleClass="field-label">
+
+                  <!-- Report Filters Card -->
+                  <VBox spacing="15.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </padding>
+
+                     <Label text="Report Filters" styleClass="section-title">
                         <font>
-                           <Font size="14.0" />
+                           <Font name="System Bold" size="18.0" />
                         </font>
                      </Label>
-                     <DatePicker fx:id="endDatePicker" prefWidth="180.0" 
-                                 promptText="To Date" styleClass="date-picker" />
-                  </VBox>
-                  
-                  <VBox spacing="8.0" alignment="BOTTOM_LEFT">
-                     <Label text=" " />
-                     <HBox spacing="10.0">
-                        <Button fx:id="generateButton" onAction="#handleGenerateReport" 
-                                styleClass="btn-primary" text="Generate Report">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="exportButton" onAction="#handleExportReport" 
-                                styleClass="btn-secondary" text="Export PDF">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Button>
+
+                     <HBox spacing="20.0" alignment="CENTER_LEFT">
+                        <VBox spacing="8.0">
+                           <Label text="Report Type:" styleClass="field-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <ComboBox fx:id="reportTypeCombo" prefWidth="200.0"
+                                     promptText="Select Report Type" styleClass="combo-box">
+                           </ComboBox>
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                           <Label text="Start Date:" styleClass="field-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <DatePicker fx:id="startDatePicker" prefWidth="180.0"
+                                       promptText="From Date" styleClass="date-picker" />
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                           <Label text="End Date:" styleClass="field-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <DatePicker fx:id="endDatePicker" prefWidth="180.0"
+                                       promptText="To Date" styleClass="date-picker" />
+                        </VBox>
+
+                        <VBox spacing="8.0" alignment="BOTTOM_LEFT">
+                           <Label text=" " />
+                           <HBox spacing="10.0">
+                              <Button fx:id="generateButton" onAction="#handleGenerateReport"
+                                      styleClass="btn-primary" text="Generate Report">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="exportButton" onAction="#handleExportReport"
+                                      styleClass="btn-secondary" text="Export PDF">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Button>
+                           </HBox>
+                        </VBox>
                      </HBox>
                   </VBox>
-               </HBox>
-            </VBox>
-            
-            <!-- Income Report Section -->
-            <VBox spacing="15.0" styleClass="card" fx:id="incomeReportCard">
-               <padding>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </padding>
-               
-               <HBox alignment="CENTER_LEFT" spacing="15.0">
-                  <Label text="Income Report" styleClass="section-title">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="totalIncomeLabel" text="Total: ₪0.00" 
-                         styleClass="highlight-text" textFill="#ba68c8">
-                     <font>
-                        <Font name="System Bold" size="18.0" />
-                     </font>
-                  </Label>
-               </HBox>
-               
-               <Separator />
-               
-               <!-- Bar Chart for Income -->
-               <BarChart fx:id="incomeBarChart" prefHeight="350.0" 
-                        legendVisible="true" title="Income Over Time">
-                  <xAxis>
-                     <CategoryAxis fx:id="incomeXAxis" label="Time Period" />
-                  </xAxis>
-                  <yAxis>
-                     <NumberAxis fx:id="incomeYAxis" label="Income (₪)" />
-                  </yAxis>
-               </BarChart>
-               
-               <!-- Income Data Table -->
-               <TableView fx:id="incomeTable" prefHeight="200.0">
-                  <columns>
-                     <TableColumn fx:id="incomePeriodCol" prefWidth="200.0" text="Period" />
-                     <TableColumn fx:id="incomeOrdersCol" prefWidth="150.0" text="Orders Count" />
-                     <TableColumn fx:id="incomeAmountCol" prefWidth="150.0" text="Total Income" />
-                     <TableColumn fx:id="incomeAvgCol" prefWidth="150.0" text="Avg Order Value" />
-                  </columns>
-               </TableView>
-            </VBox>
-            
-            <!-- Orders Report Section -->
-            <VBox spacing="15.0" styleClass="card" fx:id="ordersReportCard">
-               <padding>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </padding>
-               
-               <HBox alignment="CENTER_LEFT" spacing="15.0">
-                  <Label text="Orders Report" styleClass="section-title">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="totalOrdersLabel" text="Total Orders: 0" 
-                         styleClass="highlight-text" textFill="#ba68c8">
-                     <font>
-                        <Font name="System Bold" size="18.0" />
-                     </font>
-                  </Label>
-               </HBox>
-               
-               <Separator />
-               
-               <!-- Orders Statistics -->
-               <HBox spacing="30.0" alignment="CENTER">
-                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+
+                  <!-- Income Report Section -->
+                  <VBox spacing="15.0" styleClass="card" fx:id="incomeReportCard">
                      <padding>
-                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
-                     <Label text="Completed" styleClass="stat-label">
-                        <font>
-                           <Font size="14.0" />
-                        </font>
-                     </Label>
-                     <Label fx:id="completedOrdersLabel" text="0" styleClass="stat-value" 
-                            textFill="#4caf50">
-                        <font>
-                           <Font name="System Bold" size="28.0" />
-                        </font>
-                     </Label>
+
+                     <HBox alignment="CENTER_LEFT" spacing="15.0">
+                        <Label text="Income Report" styleClass="section-title">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="totalIncomeLabel" text="Total: ₪0.00"
+                               styleClass="highlight-text" textFill="#ba68c8">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                     </HBox>
+
+                     <Separator />
+
+                     <!-- Bar Chart for Income -->
+                     <BarChart fx:id="incomeBarChart" prefHeight="350.0"
+                               legendVisible="true" title="Income Over Time">
+                        <xAxis>
+                           <CategoryAxis fx:id="incomeXAxis" label="Time Period" />
+                        </xAxis>
+                        <yAxis>
+                           <NumberAxis fx:id="incomeYAxis" label="Income (₪)" />
+                        </yAxis>
+                     </BarChart>
+
+                     <!-- Income Data Table -->
+                     <TableView fx:id="incomeTable" prefHeight="200.0">
+                        <columns>
+                           <TableColumn fx:id="incomePeriodCol" prefWidth="200.0" text="Period" />
+                           <TableColumn fx:id="incomeOrdersCol" prefWidth="150.0" text="Orders Count" />
+                           <TableColumn fx:id="incomeAmountCol" prefWidth="150.0" text="Total Income" />
+                           <TableColumn fx:id="incomeAvgCol" prefWidth="150.0" text="Avg Order Value" />
+                        </columns>
+                     </TableView>
                   </VBox>
-                  
-                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+
+                  <!-- Orders Report Section -->
+                  <VBox spacing="15.0" styleClass="card" fx:id="ordersReportCard">
                      <padding>
-                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
-                     <Label text="Pending" styleClass="stat-label">
-                        <font>
-                           <Font size="14.0" />
-                        </font>
-                     </Label>
-                     <Label fx:id="pendingOrdersLabel" text="0" styleClass="stat-value" 
-                            textFill="#ff9800">
-                        <font>
-                           <Font name="System Bold" size="28.0" />
-                        </font>
-                     </Label>
+
+                     <HBox alignment="CENTER_LEFT" spacing="15.0">
+                        <Label text="Orders Report" styleClass="section-title">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="totalOrdersLabel" text="Total Orders: 0"
+                               styleClass="highlight-text" textFill="#ba68c8">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                     </HBox>
+
+                     <Separator />
+
+                     <!-- Orders Statistics -->
+                     <HBox spacing="30.0" alignment="CENTER">
+                        <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                           <padding>
+                              <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                           </padding>
+                           <Label text="Completed" styleClass="stat-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="completedOrdersLabel" text="0" styleClass="stat-value"
+                                  textFill="#4caf50">
+                              <font>
+                                 <Font name="System Bold" size="28.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+
+                        <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                           <padding>
+                              <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                           </padding>
+                           <Label text="Pending" styleClass="stat-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="pendingOrdersLabel" text="0" styleClass="stat-value"
+                                  textFill="#ff9800">
+                              <font>
+                                 <Font name="System Bold" size="28.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+
+                        <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                           <padding>
+                              <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                           </padding>
+                           <Label text="Cancelled" styleClass="stat-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="cancelledOrdersLabel" text="0" styleClass="stat-value"
+                                  textFill="#f44336">
+                              <font>
+                                 <Font name="System Bold" size="28.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+                     </HBox>
                   </VBox>
-                  
-                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+
+                  <!-- Complaints Report Section -->
+                  <VBox spacing="15.0" styleClass="card" fx:id="complaintsReportCard">
                      <padding>
-                        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
-                     <Label text="Cancelled" styleClass="stat-label">
-                        <font>
-                           <Font size="14.0" />
-                        </font>
-                     </Label>
-                     <Label fx:id="cancelledOrdersLabel" text="0" styleClass="stat-value" 
-                            textFill="#f44336">
-                        <font>
-                           <Font name="System Bold" size="28.0" />
-                        </font>
-                     </Label>
+
+                     <HBox alignment="CENTER_LEFT" spacing="15.0">
+                        <Label text="Complaints Breakdown" styleClass="section-title">
+                           <font>
+                              <Font name="System Bold" size="20.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="totalComplaintsLabel" text="Total: 0"
+                               styleClass="highlight-text" textFill="#ba68c8">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                     </HBox>
+
+                     <Separator />
+
+                     <!-- Pie Chart for Complaints -->
+                     <PieChart fx:id="complaintsPieChart" prefHeight="400.0"
+                               legendVisible="true" title="Complaints by Status">
+                     </PieChart>
+
+                     <!-- Complaints Data Table -->
+                     <TableView fx:id="complaintsTable" prefHeight="200.0">
+                        <columns>
+                           <TableColumn fx:id="complaintStatusCol" prefWidth="200.0" text="Status" />
+                           <TableColumn fx:id="complaintCountCol" prefWidth="150.0" text="Count" />
+                           <TableColumn fx:id="complaintPercentCol" prefWidth="150.0" text="Percentage" />
+                           <TableColumn fx:id="complaintAvgTimeCol" prefWidth="200.0" text="Avg Response Time" />
+                        </columns>
+                     </TableView>
                   </VBox>
-               </HBox>
-            </VBox>
-            
-            <!-- Complaints Report Section -->
-            <VBox spacing="15.0" styleClass="card" fx:id="complaintsReportCard">
-               <padding>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </padding>
-               
-               <HBox alignment="CENTER_LEFT" spacing="15.0">
-                  <Label text="Complaints Breakdown" styleClass="section-title">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="totalComplaintsLabel" text="Total: 0" 
-                         styleClass="highlight-text" textFill="#ba68c8">
-                     <font>
-                        <Font name="System Bold" size="18.0" />
-                     </font>
-                  </Label>
-               </HBox>
-               
-               <Separator />
-               
-               <!-- Pie Chart for Complaints -->
-               <PieChart fx:id="complaintsPieChart" prefHeight="400.0" 
-                        legendVisible="true" title="Complaints by Status">
-               </PieChart>
-               
-               <!-- Complaints Data Table -->
-               <TableView fx:id="complaintsTable" prefHeight="200.0">
-                  <columns>
-                     <TableColumn fx:id="complaintStatusCol" prefWidth="200.0" text="Status" />
-                     <TableColumn fx:id="complaintCountCol" prefWidth="150.0" text="Count" />
-                     <TableColumn fx:id="complaintPercentCol" prefWidth="150.0" text="Percentage" />
-                     <TableColumn fx:id="complaintAvgTimeCol" prefWidth="200.0" text="Avg Response Time" />
-                  </columns>
-               </TableView>
-            </VBox>
-            
-         </VBox>
-      </content>
-   </ScrollPane>
-   
-</AnchorPane>
+
+               </VBox>
+            </content>
+         </ScrollPane>
+
+      </AnchorPane>
+   </content>
+</ScrollPane>

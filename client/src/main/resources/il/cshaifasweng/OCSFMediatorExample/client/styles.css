@@ -7,3 +7,12 @@
  */
 
 @import url("mycsss.css");
+
+.app-scroll-container {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.app-scroll-container > .viewport {
+    -fx-background-color: transparent;
+}

@@ -3,6 +3,9 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import java.io.IOException;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.Region;
 
 /**
  * NavigationService is a singleton responsible for loading FXML views
@@ -56,10 +59,49 @@ public class NavigationService {
         try {
             FXMLLoader loader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
             Parent view = loader.load();
-            // Replace the content in the shell's centre pane
-            appShellController.setContent(view);
+            Node content = ensureScrollable(view);
+            appShellController.setContent(content);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    /**
+     * Ensures that the supplied view is scrollable by wrapping it in a
+     * {@link ScrollPane} when necessary.  Views that already use a scroll
+     * pane are left intact, while new wrappers receive sensible defaults to
+     * provide vertical scrolling without affecting existing layouts.
+     *
+     * @param view the view loaded from FXML
+     * @return a node that supports scrolling when the content exceeds the viewport
+     */
+    private Node ensureScrollable(Parent view) {
+        if (view instanceof ScrollPane existing) {
+            configureScrollPane(existing, false);
+            return existing;
+        }
+
+        ScrollPane wrapper = new ScrollPane(view);
+        configureScrollPane(wrapper, true);
+        return wrapper;
+    }
+
+    private void configureScrollPane(ScrollPane scrollPane, boolean enforceFitToWidth) {
+        if (enforceFitToWidth) {
+            scrollPane.setFitToWidth(true);
+        }
+
+        if (scrollPane.isFitToWidth()) {
+            Node content = scrollPane.getContent();
+            if (content instanceof Region region && !region.minWidthProperty().isBound()) {
+                region.minWidthProperty().bind(scrollPane.widthProperty());
+            }
+        }
+
+        scrollPane.setPannable(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        if (!scrollPane.getStyleClass().contains("app-scroll-container")) {
+            scrollPane.getStyleClass().add("app-scroll-container");
         }
     }
 }

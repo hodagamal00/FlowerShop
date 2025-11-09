@@ -16,311 +16,322 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
-            prefHeight="800.0" prefWidth="1200.0" styleClass="root" 
-            stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" 
-            xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.NetworkPromotionsController">
-   
-   <!-- Navigation Bar -->
-   <HBox alignment="CENTER_LEFT" layoutY="0.0" prefHeight="70.0" prefWidth="1200.0" 
-         spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0" 
-         AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-      <padding>
-         <Insets left="20.0" right="20.0" />
-      </padding>
-      
-      <Label text="FlowerShop Network" styleClass="navbar-brand">
-         <font>
-            <Font name="System Bold" size="24.0" />
-         </font>
-      </Label>
-      
-      <Label text="Network Promotions" styleClass="navbar-title">
-         <font>
-            <Font name="System Bold" size="18.0" />
-         </font>
-      </Label>
-      
-      <HBox HBox.hgrow="ALWAYS" />
-      
-      <Button fx:id="backButton" onAction="#handleBackToDashboard" 
-              styleClass="btn-secondary" text="← Back to Dashboard">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Button>
-   </HBox>
-   
-   <!-- Main Content Area -->
-   <ScrollPane fitToWidth="true" layoutY="70.0" prefHeight="730.0" prefWidth="1200.0" 
-               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" 
-               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
-      <content>
-         <VBox spacing="25.0" styleClass="content-container">
+<ScrollPane
+        xmlns="http://javafx.com/javafx/17"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.NetworkPromotionsController"
+        stylesheets="@mycsss.css"
+        fitToWidth="true"
+        pannable="true"
+        styleClass="app-scroll-container">
+   <content>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                  prefHeight="800.0" prefWidth="1200.0" styleClass="root"
+                  xmlns="http://javafx.com/javafx/17"
+                  xmlns:fx="http://javafx.com/fxml/1"
+      >
+
+         <!-- Navigation Bar -->
+         <HBox alignment="CENTER_LEFT" layoutY="0.0" prefHeight="70.0" prefWidth="1200.0"
+               spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0"
+               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <padding>
-               <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+               <Insets left="20.0" right="20.0" />
             </padding>
-            
-            <!-- Page Header -->
-            <VBox spacing="10.0">
-               <Label text="Chain-Wide Promotions" styleClass="page-title">
-                  <font>
-                     <Font name="System Bold" size="32.0" />
-                  </font>
-               </Label>
-               <Label text="Create and manage promotional campaigns across all branches" 
-                      styleClass="subtitle" textFill="#666666">
-                  <font>
-                     <Font size="16.0" />
-                  </font>
-               </Label>
-            </VBox>
-            
-            <!-- Create Network Promotion Card -->
-            <VBox spacing="20.0" styleClass="card">
-               <padding>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </padding>
-               
-               <Label fx:id="formTitleLabel" text="Create Network-Wide Promotion" styleClass="section-title">
-                  <font>
-                     <Font name="System Bold" size="20.0" />
-                  </font>
-               </Label>
-               
-               <Separator />
-               
-               <HBox spacing="20.0">
-                  <VBox spacing="20.0" HBox.hgrow="ALWAYS">
-                     <VBox spacing="8.0">
-                        <Label text="Campaign Name:" styleClass="field-label">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Label>
-                        <TextField fx:id="promotionNameField" 
-                                   promptText="e.g., Summer Sale 2025" 
-                                   styleClass="text-field">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </TextField>
-                     </VBox>
-                     
-                     <VBox spacing="8.0">
-                        <Label text="Discount Percentage:" styleClass="field-label">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Label>
-                        <HBox spacing="10.0" alignment="CENTER_LEFT">
-                           <TextField fx:id="discountField" 
-                                      promptText="Enter discount %" 
-                                      styleClass="text-field" prefWidth="150.0">
-                              <font>
-                                 <Font size="14.0" />
-                              </font>
-                           </TextField>
-                           <Label text="%" textFill="#666666">
-                              <font>
-                                 <Font size="16.0" />
-                              </font>
-                           </Label>
-                        </HBox>
-                     </VBox>
-                     
-                     <VBox spacing="8.0">
-                        <Label text="Campaign Period:" styleClass="field-label">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Label>
-                        <HBox spacing="15.0" alignment="CENTER_LEFT">
-                           <VBox spacing="5.0">
-                              <Label text="Start:" textFill="#666666">
-                                 <font>
-                                    <Font size="12.0" />
-                                 </font>
-                              </Label>
-                              <DatePicker fx:id="startDatePicker" prefWidth="160.0" 
-                                          styleClass="date-picker" />
-                           </VBox>
-                           <VBox spacing="5.0">
-                              <Label text="End:" textFill="#666666">
-                                 <font>
-                                    <Font size="12.0" />
-                                 </font>
-                              </Label>
-                              <DatePicker fx:id="endDatePicker" prefWidth="160.0" 
-                                          styleClass="date-picker" />
-                           </VBox>
-                        </HBox>
-                     </VBox>
+
+            <Label text="FlowerShop Network" styleClass="navbar-brand">
+               <font>
+                  <Font name="System Bold" size="24.0" />
+               </font>
+            </Label>
+
+            <Label text="Network Promotions" styleClass="navbar-title">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+
+            <HBox HBox.hgrow="ALWAYS" />
+
+            <Button fx:id="backButton" onAction="#handleBackToDashboard"
+                    styleClass="btn-secondary" text="← Back to Dashboard">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+         </HBox>
+
+         <!-- Main Content Area -->
+         <ScrollPane fitToWidth="true" layoutY="70.0" prefHeight="730.0" prefWidth="1200.0"
+                     AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+            <content>
+               <VBox spacing="25.0" styleClass="content-container">
+                  <padding>
+                     <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                  </padding>
+
+                  <!-- Page Header -->
+                  <VBox spacing="10.0">
+                     <Label text="Chain-Wide Promotions" styleClass="page-title">
+                        <font>
+                           <Font name="System Bold" size="32.0" />
+                        </font>
+                     </Label>
+                     <Label text="Create and manage promotional campaigns across all branches"
+                            styleClass="subtitle" textFill="#666666">
+                        <font>
+                           <Font size="16.0" />
+                        </font>
+                     </Label>
                   </VBox>
-                  
-                  <VBox spacing="20.0" HBox.hgrow="ALWAYS">
-                     <VBox spacing="8.0">
-                        <Label text="Apply To:" styleClass="field-label">
+
+                  <!-- Create Network Promotion Card -->
+                  <VBox spacing="20.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                     </padding>
+
+                     <Label fx:id="formTitleLabel" text="Create Network-Wide Promotion" styleClass="section-title">
+                        <font>
+                           <Font name="System Bold" size="20.0" />
+                        </font>
+                     </Label>
+
+                     <Separator />
+
+                     <HBox spacing="20.0">
+                        <VBox spacing="20.0" HBox.hgrow="ALWAYS">
+                           <VBox spacing="8.0">
+                              <Label text="Campaign Name:" styleClass="field-label">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="promotionNameField"
+                                         promptText="e.g., Summer Sale 2025"
+                                         styleClass="text-field">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </TextField>
+                           </VBox>
+
+                           <VBox spacing="8.0">
+                              <Label text="Discount Percentage:" styleClass="field-label">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                 <TextField fx:id="discountField"
+                                            promptText="Enter discount %"
+                                            styleClass="text-field" prefWidth="150.0">
+                                    <font>
+                                       <Font size="14.0" />
+                                    </font>
+                                 </TextField>
+                                 <Label text="%" textFill="#666666">
+                                    <font>
+                                       <Font size="16.0" />
+                                    </font>
+                                 </Label>
+                              </HBox>
+                           </VBox>
+
+                           <VBox spacing="8.0">
+                              <Label text="Campaign Period:" styleClass="field-label">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                 <VBox spacing="5.0">
+                                    <Label text="Start:" textFill="#666666">
+                                       <font>
+                                          <Font size="12.0" />
+                                       </font>
+                                    </Label>
+                                    <DatePicker fx:id="startDatePicker" prefWidth="160.0"
+                                                styleClass="date-picker" />
+                                 </VBox>
+                                 <VBox spacing="5.0">
+                                    <Label text="End:" textFill="#666666">
+                                       <font>
+                                          <Font size="12.0" />
+                                       </font>
+                                    </Label>
+                                    <DatePicker fx:id="endDatePicker" prefWidth="160.0"
+                                                styleClass="date-picker" />
+                                 </VBox>
+                              </HBox>
+                           </VBox>
+                        </VBox>
+
+                        <VBox spacing="20.0" HBox.hgrow="ALWAYS">
+                           <VBox spacing="8.0">
+                              <Label text="Apply To:" styleClass="field-label">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <ComboBox fx:id="applyToCombo" prefWidth="280.0"
+                                        promptText="Select category or products"
+                                        styleClass="combo-box">
+                              </ComboBox>
+                           </VBox>
+
+                           <VBox spacing="12.0">
+                              <Label text="Target Branches:" styleClass="field-label">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <CheckBox fx:id="allBranchesCheckbox" text="All Branches"
+                                        selected="true">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </CheckBox>
+                              <CheckBox fx:id="activeCheckbox" text="Active"
+                                        selected="true">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </CheckBox>
+                           </VBox>
+
+                           <HBox spacing="15.0" alignment="CENTER_LEFT">
+                              <VBox.margin>
+                                 <Insets top="10.0" />
+                              </VBox.margin>
+                              <Button fx:id="saveButton" onAction="#handleSavePromotion"
+                                      styleClass="btn-primary" text="Save Promotion">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="clearButton" onAction="#handleClear"
+                                      styleClass="btn-secondary" text="Clear">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Button>
+                           </HBox>
+                        </VBox>
+                     </HBox>
+                  </VBox>
+
+                  <!-- Active Network Promotions -->
+                  <VBox spacing="15.0" styleClass="card">
+                     <padding>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                     </padding>
+
+                     <HBox alignment="CENTER_LEFT" spacing="15.0">
+                        <Label text="Active Network Promotions" styleClass="section-title">
                            <font>
-                              <Font name="System Bold" size="14.0" />
+                              <Font name="System Bold" size="20.0" />
                            </font>
                         </Label>
-                        <ComboBox fx:id="applyToCombo" prefWidth="280.0" 
-                                  promptText="Select category or products" 
-                                  styleClass="combo-box">
-                        </ComboBox>
-                     </VBox>
-                     
-                     <VBox spacing="12.0">
-                        <Label text="Target Branches:" styleClass="field-label">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Label>
-                        <CheckBox fx:id="allBranchesCheckbox" text="All Branches" 
-                                  selected="true">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </CheckBox>
-                        <CheckBox fx:id="activeCheckbox" text="Active" 
-                                  selected="true">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </CheckBox>
-                     </VBox>
-                     
-                     <HBox spacing="15.0" alignment="CENTER_LEFT">
-                        <VBox.margin>
-                           <Insets top="10.0" />
-                        </VBox.margin>
-                        <Button fx:id="saveButton" onAction="#handleSavePromotion" 
-                                styleClass="btn-primary" text="Save Promotion">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="clearButton" onAction="#handleClear" 
-                                styleClass="btn-secondary" text="Clear">
+                        <HBox HBox.hgrow="ALWAYS" />
+                        <Button fx:id="refreshButton" onAction="#handleRefresh"
+                                styleClass="btn-secondary" text="🔄 Refresh">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </Button>
                      </HBox>
+
+                     <Separator />
+
+                     <TableView fx:id="promotionsTable" prefHeight="250.0">
+                        <columns>
+                           <TableColumn fx:id="idCol" prefWidth="60.0" text="ID" />
+                           <TableColumn fx:id="nameCol" prefWidth="220.0" text="Campaign Name" />
+                           <TableColumn fx:id="discountCol" prefWidth="100.0" text="Discount %" />
+                           <TableColumn fx:id="startDateCol" prefWidth="130.0" text="Start Date" />
+                           <TableColumn fx:id="endDateCol" prefWidth="130.0" text="End Date" />
+                           <TableColumn fx:id="applyToCol" prefWidth="160.0" text="Applies To" />
+                           <TableColumn fx:id="branchesCol" prefWidth="150.0" text="Branches" />
+                           <TableColumn fx:id="statusCol" prefWidth="90.0" text="Status" />
+                           <TableColumn fx:id="actionsCol" prefWidth="160.0" text="Actions" />
+                        </columns>
+                     </TableView>
                   </VBox>
-               </HBox>
-            </VBox>
-            
-            <!-- Active Network Promotions -->
-            <VBox spacing="15.0" styleClass="card">
-               <padding>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </padding>
-               
-               <HBox alignment="CENTER_LEFT" spacing="15.0">
-                  <Label text="Active Network Promotions" styleClass="section-title">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
-                  </Label>
-                  <HBox HBox.hgrow="ALWAYS" />
-                  <Button fx:id="refreshButton" onAction="#handleRefresh" 
-                          styleClass="btn-secondary" text="🔄 Refresh">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-               </HBox>
-               
-               <Separator />
-               
-               <TableView fx:id="promotionsTable" prefHeight="250.0">
-                  <columns>
-                     <TableColumn fx:id="idCol" prefWidth="60.0" text="ID" />
-                     <TableColumn fx:id="nameCol" prefWidth="220.0" text="Campaign Name" />
-                     <TableColumn fx:id="discountCol" prefWidth="100.0" text="Discount %" />
-                     <TableColumn fx:id="startDateCol" prefWidth="130.0" text="Start Date" />
-                     <TableColumn fx:id="endDateCol" prefWidth="130.0" text="End Date" />
-                     <TableColumn fx:id="applyToCol" prefWidth="160.0" text="Applies To" />
-                     <TableColumn fx:id="branchesCol" prefWidth="150.0" text="Branches" />
-                     <TableColumn fx:id="statusCol" prefWidth="90.0" text="Status" />
-                     <TableColumn fx:id="actionsCol" prefWidth="160.0" text="Actions" />
-                  </columns>
-               </TableView>
-            </VBox>
-            
-            <!-- Promotion Impact Analytics -->
-            <VBox spacing="15.0" styleClass="card">
-               <padding>
-                  <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
-               </padding>
-               
-               <Label text="Promotion Impact" styleClass="section-title">
-                  <font>
-                     <Font name="System Bold" size="20.0" />
-                  </font>
-               </Label>
-               
-               <Separator />
-               
-               <HBox spacing="40.0" alignment="CENTER">
-                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+
+                  <!-- Promotion Impact Analytics -->
+                  <VBox spacing="15.0" styleClass="card">
                      <padding>
-                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
-                     <Label text="Active Campaigns" styleClass="stat-label">
+
+                     <Label text="Promotion Impact" styleClass="section-title">
                         <font>
-                           <Font size="14.0" />
+                           <Font name="System Bold" size="20.0" />
                         </font>
                      </Label>
-                     <Label fx:id="activeCampaignsLabel" text="0" styleClass="stat-value" 
-                            textFill="#4caf50">
-                        <font>
-                           <Font name="System Bold" size="32.0" />
-                        </font>
-                     </Label>
+
+                     <Separator />
+
+                     <HBox spacing="40.0" alignment="CENTER">
+                        <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                           <padding>
+                              <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                           </padding>
+                           <Label text="Active Campaigns" styleClass="stat-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="activeCampaignsLabel" text="0" styleClass="stat-value"
+                                  textFill="#4caf50">
+                              <font>
+                                 <Font name="System Bold" size="32.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+
+                        <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                           <padding>
+                              <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                           </padding>
+                           <Label text="Total Products on Sale" styleClass="stat-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="productsOnSaleLabel" text="0" styleClass="stat-value"
+                                  textFill="#ba68c8">
+                              <font>
+                                 <Font name="System Bold" size="32.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+
+                        <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
+                           <padding>
+                              <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                           </padding>
+                           <Label text="Sales Increase" styleClass="stat-label">
+                              <font>
+                                 <Font size="14.0" />
+                              </font>
+                           </Label>
+                           <Label fx:id="salesIncreaseLabel" text="0%" styleClass="stat-value"
+                                  textFill="#2196f3">
+                              <font>
+                                 <Font name="System Bold" size="32.0" />
+                              </font>
+                           </Label>
+                        </VBox>
+                     </HBox>
                   </VBox>
-                  
-                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
-                     <padding>
-                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
-                     </padding>
-                     <Label text="Total Products on Sale" styleClass="stat-label">
-                        <font>
-                           <Font size="14.0" />
-                        </font>
-                     </Label>
-                     <Label fx:id="productsOnSaleLabel" text="0" styleClass="stat-value" 
-                            textFill="#ba68c8">
-                        <font>
-                           <Font name="System Bold" size="32.0" />
-                        </font>
-                     </Label>
-                  </VBox>
-                  
-                  <VBox spacing="8.0" alignment="CENTER" styleClass="stat-box">
-                     <padding>
-                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
-                     </padding>
-                     <Label text="Sales Increase" styleClass="stat-label">
-                        <font>
-                           <Font size="14.0" />
-                        </font>
-                     </Label>
-                     <Label fx:id="salesIncreaseLabel" text="0%" styleClass="stat-value" 
-                            textFill="#2196f3">
-                        <font>
-                           <Font name="System Bold" size="32.0" />
-                        </font>
-                     </Label>
-                  </VBox>
-               </HBox>
-            </VBox>
-            
-         </VBox>
-      </content>
-   </ScrollPane>
-   
-</AnchorPane>
+
+               </VBox>
+            </content>
+         </ScrollPane>
+
+      </AnchorPane>
+   </content>
+</ScrollPane>

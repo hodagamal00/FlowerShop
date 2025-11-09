@@ -3,11 +3,22 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      alignment="CENTER" spacing="20.0" prefWidth="800.0" prefHeight="600.0"
-      stylesheets="@styles.css">
-    <children>
-        <Label text="Welcome to the Home Page" styleClass="header-title" />
-        <Label text="You have successfully logged in." styleClass="form-label" />
-    </children>
-</VBox>
+<?import javafx.scene.control.ScrollPane?>
+<ScrollPane
+        xmlns="http://javafx.com/javafx/17"
+        xmlns:fx="http://javafx.com/fxml/1"
+        stylesheets="@styles.css"
+        fitToWidth="true"
+        pannable="true"
+        styleClass="app-scroll-container">
+    <content>
+        <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+              alignment="CENTER" spacing="20.0" prefWidth="800.0" prefHeight="600.0"
+        >
+            <children>
+                <Label text="Welcome to the Home Page" styleClass="header-title" />
+                <Label text="You have successfully logged in." styleClass="form-label" />
+            </children>
+        </VBox>
+    </content>
+</ScrollPane>

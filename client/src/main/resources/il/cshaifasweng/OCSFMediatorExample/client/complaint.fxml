@@ -8,76 +8,88 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="650.0" maxWidth="700.0" minHeight="650.0" minWidth="700.0" prefHeight="650.0" prefWidth="700.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ComplaintController">
-   <children>
-      <!-- Header -->
-      <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: #e74c3c;">
+<?import javafx.scene.control.ScrollPane?>
+<ScrollPane
+        xmlns="http://javafx.com/javafx/17"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ComplaintController"
+        stylesheets="@mycsss.css"
+        fitToWidth="true"
+        pannable="true"
+        styleClass="app-scroll-container">
+   <content>
+      <AnchorPane maxHeight="650.0" maxWidth="700.0" minHeight="650.0" minWidth="700.0" prefHeight="650.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
          <children>
-            <Label layoutX="50.0" layoutY="30.0" prefHeight="40.0" prefWidth="600.0" text="We're Sorry Something Went Wrong" textFill="WHITE">
+            <!-- Header -->
+            <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: #e74c3c;">
+               <children>
+                  <Label layoutX="50.0" layoutY="30.0" prefHeight="40.0" prefWidth="600.0" text="We're Sorry Something Went Wrong" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="28.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+
+            <!-- Main Content -->
+            <VBox layoutX="50.0" layoutY="130.0" spacing="25.0" prefWidth="600.0">
+               <Text text="Please fill out the form below and we'll work to resolve your issue as quickly as possible." wrappingWidth="600.0" fill="#555">
+                  <font>
+                     <Font size="16.0" />
+                  </font>
+               </Text>
+
+               <VBox spacing="10.0">
+                  <Label text="Your Name:" textFill="#333">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="nametxt" prefHeight="40.0" prefWidth="600.0" promptText="Enter your full name" style="-fx-font-size: 14px;" />
+               </VBox>
+
+               <VBox spacing="10.0">
+                  <Label text="Email Address:" textFill="#333">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="emailtxt" prefHeight="40.0" prefWidth="600.0" promptText="Enter your email address" style="-fx-font-size: 14px;" />
+               </VBox>
+
+               <VBox spacing="10.0">
+                  <Label text="Complaint Topic:" textFill="#333">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="topictxt" prefHeight="40.0" prefWidth="600.0" promptText="Brief description of the issue" style="-fx-font-size: 14px;" />
+               </VBox>
+
+               <VBox spacing="10.0">
+                  <Label text="Detailed Description:" textFill="#333">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="comptxt" prefHeight="150.0" prefWidth="600.0" promptText="Please provide detailed information about your complaint..." style="-fx-font-size: 14px;" />
+               </VBox>
+
+               <VBox spacing="0.0" style="-fx-padding: 10 0 0 0;">
+                  <HBox spacing="20.0" alignment="CENTER">
+                     <Button fx:id="submitcomp" mnemonicParsing="false" onAction="#subcomp" prefHeight="45.0" prefWidth="200.0" text="Submit Complaint" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
+                     <Button fx:id="cancelcomp" mnemonicParsing="false" onAction="#cancelcmp" prefHeight="45.0" prefWidth="150.0" text="Cancel" style="-fx-font-size: 16px; -fx-background-color: #95a5a6; -fx-text-fill: white;" />
+                  </HBox>
+               </VBox>
+            </VBox>
+
+            <!-- Footer Note -->
+            <Label layoutX="50.0" layoutY="605.0" prefWidth="600.0" text="We aim to respond to all complaints within 24 hours." textFill="#777">
                <font>
-                  <Font name="System Bold" size="28.0" />
+                  <Font size="12.0" style="-fx-font-style: italic;" />
                </font>
             </Label>
          </children>
       </AnchorPane>
-      
-      <!-- Main Content -->
-      <VBox layoutX="50.0" layoutY="130.0" spacing="25.0" prefWidth="600.0">
-         <Text text="Please fill out the form below and we'll work to resolve your issue as quickly as possible." wrappingWidth="600.0" fill="#555">
-            <font>
-               <Font size="16.0" />
-            </font>
-         </Text>
-         
-         <VBox spacing="10.0">
-            <Label text="Your Name:" textFill="#333">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="nametxt" prefHeight="40.0" prefWidth="600.0" promptText="Enter your full name" style="-fx-font-size: 14px;" />
-         </VBox>
-         
-         <VBox spacing="10.0">
-            <Label text="Email Address:" textFill="#333">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="emailtxt" prefHeight="40.0" prefWidth="600.0" promptText="Enter your email address" style="-fx-font-size: 14px;" />
-         </VBox>
-         
-         <VBox spacing="10.0">
-            <Label text="Complaint Topic:" textFill="#333">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="topictxt" prefHeight="40.0" prefWidth="600.0" promptText="Brief description of the issue" style="-fx-font-size: 14px;" />
-         </VBox>
-         
-         <VBox spacing="10.0">
-            <Label text="Detailed Description:" textFill="#333">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="comptxt" prefHeight="150.0" prefWidth="600.0" promptText="Please provide detailed information about your complaint..." style="-fx-font-size: 14px;" />
-         </VBox>
-         
-         <VBox spacing="0.0" style="-fx-padding: 10 0 0 0;">
-            <HBox spacing="20.0" alignment="CENTER">
-               <Button fx:id="submitcomp" mnemonicParsing="false" onAction="#subcomp" prefHeight="45.0" prefWidth="200.0" text="Submit Complaint" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
-               <Button fx:id="cancelcomp" mnemonicParsing="false" onAction="#cancelcmp" prefHeight="45.0" prefWidth="150.0" text="Cancel" style="-fx-font-size: 16px; -fx-background-color: #95a5a6; -fx-text-fill: white;" />
-            </HBox>
-         </VBox>
-      </VBox>
-      
-      <!-- Footer Note -->
-      <Label layoutX="50.0" layoutY="605.0" prefWidth="600.0" text="We aim to respond to all complaints within 24 hours." textFill="#777">
-         <font>
-            <Font size="12.0" style="-fx-font-style: italic;" />
-         </font>
-      </Label>
-   </children>
-</AnchorPane>
+   </content>
+</ScrollPane>

@@ -11,144 +11,156 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" styleClass="main-container" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ErrorController">
-   <children>
-      <!-- Navigation Bar -->
-      <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1024.0" spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<?import javafx.scene.control.ScrollPane?>
+<ScrollPane
+        xmlns="http://javafx.com/javafx/8.0.171"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ErrorController"
+        stylesheets="@mycsss.css"
+        fitToWidth="true"
+        pannable="true"
+        styleClass="app-scroll-container">
+   <content>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" styleClass="main-container" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
          <children>
-            <Label text="FlowerShop" styleClass="navbar-title">
-               <font>
-                  <Font name="System Bold" size="20.0" />
-               </font>
-            </Label>
-            <HBox alignment="CENTER_LEFT" spacing="15.0" HBox.hgrow="ALWAYS">
+            <!-- Navigation Bar -->
+            <HBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="1024.0" spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <Hyperlink fx:id="catalogLink" onAction="#handleCatalog" text="Catalog" styleClass="nav-link" />
-                  <Hyperlink fx:id="ordersLink" onAction="#handleOrders" text="My Orders" styleClass="nav-link" />
-                  <Hyperlink fx:id="complaintsLink" onAction="#handleComplaints" text="Complaints" styleClass="nav-link" />
-                  <Hyperlink fx:id="accountLink" onAction="#handleAccount" text="Account" styleClass="nav-link" />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER_RIGHT" spacing="10.0">
-               <children>
-                  <Label fx:id="usernameLabel" text="Guest" styleClass="user-label" />
-                  <Button fx:id="logoutBtn" onAction="#handleLogout" text="Logout" styleClass="btn-secondary" />
-               </children>
-            </HBox>
-         </children>
-         <padding>
-            <Insets left="20.0" right="20.0" />
-         </padding>
-      </HBox>
-
-      <!-- Main Error Content -->
-      <VBox alignment="CENTER" layoutX="212.0" layoutY="184.0" prefHeight="500.0" prefWidth="600.0" spacing="30.0" styleClass="card" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="212.0" AnchorPane.rightAnchor="212.0" AnchorPane.topAnchor="150.0">
-         <children>
-            <!-- Error Icon -->
-            <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@images/error-icon.png" />
-               </image>
-            </ImageView>
-
-            <!-- Error Title -->
-            <Label fx:id="errorTitleLabel" text="Oops! Something Went Wrong" styleClass="error-title">
-               <font>
-                  <Font name="System Bold" size="28.0" />
-               </font>
-            </Label>
-
-            <!-- Error Message -->
-            <Label fx:id="errorMessageLabel" alignment="CENTER" text="We encountered an unexpected error while processing your request." textAlignment="CENTER" wrapText="true" prefWidth="500.0" styleClass="error-message">
-               <font>
-                  <Font size="16.0" />
-               </font>
-            </Label>
-
-            <!-- Error Code/Details -->
-            <VBox alignment="CENTER" spacing="5.0" styleClass="error-details-box">
-               <children>
-                  <Label text="Error Details:" styleClass="error-details-title">
+                  <Label text="FlowerShop" styleClass="navbar-title">
                      <font>
-                        <Font name="System Bold" size="14.0" />
+                        <Font name="System Bold" size="20.0" />
                      </font>
                   </Label>
-                  <Label fx:id="errorCodeLabel" text="Error Code: ERR_UNKNOWN" styleClass="error-code">
-                     <font>
-                        <Font name="Courier New" size="13.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="errorDetailsLabel" text="No additional details available" styleClass="error-details" wrapText="true" textAlignment="CENTER" prefWidth="450.0">
-                     <font>
-                        <Font size="12.0" />
-                     </font>
-                  </Label>
+                  <HBox alignment="CENTER_LEFT" spacing="15.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <Hyperlink fx:id="catalogLink" onAction="#handleCatalog" text="Catalog" styleClass="nav-link" />
+                        <Hyperlink fx:id="ordersLink" onAction="#handleOrders" text="My Orders" styleClass="nav-link" />
+                        <Hyperlink fx:id="complaintsLink" onAction="#handleComplaints" text="Complaints" styleClass="nav-link" />
+                        <Hyperlink fx:id="accountLink" onAction="#handleAccount" text="Account" styleClass="nav-link" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                     <children>
+                        <Label fx:id="usernameLabel" text="Guest" styleClass="user-label" />
+                        <Button fx:id="logoutBtn" onAction="#handleLogout" text="Logout" styleClass="btn-secondary" />
+                     </children>
+                  </HBox>
                </children>
                <padding>
-                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                  <Insets left="20.0" right="20.0" />
                </padding>
-            </VBox>
-
-            <!-- Action Buttons -->
-            <HBox alignment="CENTER" spacing="20.0">
-               <children>
-                  <Button fx:id="backBtn" onAction="#handleGoBack" text="Go Back" styleClass="btn-secondary" prefWidth="140.0">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="homeBtn" onAction="#handleGoHome" text="Go to Home" styleClass="btn-primary" prefWidth="140.0">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="retryBtn" onAction="#handleRetry" text="Try Again" styleClass="btn-success" prefWidth="140.0">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-               </children>
             </HBox>
 
-            <!-- Support Information -->
-            <VBox alignment="CENTER" spacing="5.0">
+            <!-- Main Error Content -->
+            <VBox alignment="CENTER" layoutX="212.0" layoutY="184.0" prefHeight="500.0" prefWidth="600.0" spacing="30.0" styleClass="card" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="212.0" AnchorPane.rightAnchor="212.0" AnchorPane.topAnchor="150.0">
                <children>
-                  <Label text="Need help? Contact our support team:" styleClass="support-label">
+                  <!-- Error Icon -->
+                  <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@images/error-icon.png" />
+                     </image>
+                  </ImageView>
+
+                  <!-- Error Title -->
+                  <Label fx:id="errorTitleLabel" text="Oops! Something Went Wrong" styleClass="error-title">
                      <font>
-                        <Font size="13.0" />
+                        <Font name="System Bold" size="28.0" />
                      </font>
                   </Label>
-                  <HBox alignment="CENTER" spacing="15.0">
+
+                  <!-- Error Message -->
+                  <Label fx:id="errorMessageLabel" alignment="CENTER" text="We encountered an unexpected error while processing your request." textAlignment="CENTER" wrapText="true" prefWidth="500.0" styleClass="error-message">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
+
+                  <!-- Error Code/Details -->
+                  <VBox alignment="CENTER" spacing="5.0" styleClass="error-details-box">
                      <children>
-                        <Label text="📧 support@flowershop.com" styleClass="support-contact">
+                        <Label text="Error Details:" styleClass="error-details-title">
                            <font>
-                              <Font size="12.0" />
+                              <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <Label text="📞 1-800-FLOWERS" styleClass="support-contact">
+                        <Label fx:id="errorCodeLabel" text="Error Code: ERR_UNKNOWN" styleClass="error-code">
+                           <font>
+                              <Font name="Courier New" size="13.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="errorDetailsLabel" text="No additional details available" styleClass="error-details" wrapText="true" textAlignment="CENTER" prefWidth="450.0">
                            <font>
                               <Font size="12.0" />
                            </font>
                         </Label>
                      </children>
-                  </HBox>
-               </children>
-            </VBox>
-         </children>
-         <padding>
-            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-         </padding>
-      </VBox>
+                     <padding>
+                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                     </padding>
+                  </VBox>
 
-      <!-- Footer -->
-      <HBox alignment="CENTER" prefHeight="40.0" prefWidth="1024.0" spacing="20.0" styleClass="footer" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-         <children>
-            <Label text="© 2025 FlowerShop. All rights reserved." styleClass="footer-text">
-               <font>
-                  <Font size="12.0" />
-               </font>
-            </Label>
+                  <!-- Action Buttons -->
+                  <HBox alignment="CENTER" spacing="20.0">
+                     <children>
+                        <Button fx:id="backBtn" onAction="#handleGoBack" text="Go Back" styleClass="btn-secondary" prefWidth="140.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="homeBtn" onAction="#handleGoHome" text="Go to Home" styleClass="btn-primary" prefWidth="140.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="retryBtn" onAction="#handleRetry" text="Try Again" styleClass="btn-success" prefWidth="140.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
+
+                  <!-- Support Information -->
+                  <VBox alignment="CENTER" spacing="5.0">
+                     <children>
+                        <Label text="Need help? Contact our support team:" styleClass="support-label">
+                           <font>
+                              <Font size="13.0" />
+                           </font>
+                        </Label>
+                        <HBox alignment="CENTER" spacing="15.0">
+                           <children>
+                              <Label text="📧 support@flowershop.com" styleClass="support-contact">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Label>
+                              <Label text="📞 1-800-FLOWERS" styleClass="support-contact">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+               </padding>
+            </VBox>
+
+            <!-- Footer -->
+            <HBox alignment="CENTER" prefHeight="40.0" prefWidth="1024.0" spacing="20.0" styleClass="footer" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+               <children>
+                  <Label text="© 2025 FlowerShop. All rights reserved." styleClass="footer-text">
+                     <font>
+                        <Font size="12.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
          </children>
-      </HBox>
-   </children>
-</AnchorPane>
+      </AnchorPane>
+   </content>
+</ScrollPane>

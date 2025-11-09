@@ -9,51 +9,63 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" stylesheets="@mycsss.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.LogInSecondary">
-    <children>
-        <!-- Header -->
-        <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="120.0" prefWidth="800.0" style="-fx-background-color: #3498db;">
+<?import javafx.scene.control.ScrollPane?>
+<ScrollPane
+        xmlns="http://javafx.com/javafx/17"
+        xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.LogInSecondary"
+        stylesheets="@mycsss.css"
+        fitToWidth="true"
+        pannable="true"
+        styleClass="app-scroll-container">
+    <content>
+        <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
             <children>
-                <Label layoutX="240.0" layoutY="35.0" text="Employee Login Portal" textAlignment="CENTER" textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="32.0" />
-                    </font>
-                </Label>
+                <!-- Header -->
+                <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="120.0" prefWidth="800.0" style="-fx-background-color: #3498db;">
+                    <children>
+                        <Label layoutX="240.0" layoutY="35.0" text="Employee Login Portal" textAlignment="CENTER" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="32.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </AnchorPane>
+
+                <!-- Main Login Form -->
+                <VBox layoutX="250.0" layoutY="160.0" spacing="20.0" prefWidth="300.0" alignment="CENTER">
+                    <VBox spacing="10.0">
+                        <Label text="Email Address:" textFill="WHITE" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                        <TextField fx:id="Email" prefHeight="40.0" promptText="Enter your email" style="-fx-font-size: 14px;" />
+                        <Label fx:id="ErrorMsg" text="" textFill="#ff6b6b" />
+                    </VBox>
+
+                    <VBox spacing="10.0">
+                        <Label text="Password:" textFill="WHITE" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+                        <!-- Use PasswordField for masked password entry -->
+                        <PasswordField fx:id="Password" prefHeight="40.0" promptText="Enter your password" style="-fx-font-size: 14px;" />
+                        <Label fx:id="ErrorMsgPass" text="" textFill="#ff6b6b" />
+                    </VBox>
+
+                    <VBox spacing="15.0" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
+                        <Label text="Select Login Type:" textFill="WHITE" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+                        <Button fx:id="Customer_login" mnemonicParsing="false" onAction="#CustomerLogIn" prefHeight="45.0" prefWidth="300.0" text="Customer Login" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
+
+                        <Button fx:id="Employee_login" mnemonicParsing="false" onAction="#EmployeeLogIn" prefHeight="45.0" prefWidth="300.0" text="Worker Login" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #3498db; -fx-text-fill: white;" />
+
+                        <Button fx:id="Manager_login" mnemonicParsing="false" onAction="#ManagerLogIn" prefHeight="45.0" prefWidth="300.0" text="Manager Login" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #e67e22; -fx-text-fill: white;" />
+
+                        <Button fx:id="LogIn" mnemonicParsing="false" onAction="#LogIn" prefHeight="40.0" prefWidth="200.0" text="Log In" style="-fx-font-size: 14px;" visible="false" />
+                    </VBox>
+
+                    <Text fx:id="logSucc" text="" fill="#27ae60" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="300.0" textAlignment="CENTER" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+
+                    <Button fx:id="OpenCatalogplz" mnemonicParsing="false" onAction="#openCatalogFunc" prefHeight="40.0" prefWidth="300.0" text="Continue to Catalog" visible="false" style="-fx-font-size: 14px; -fx-background-color: #27ae60; -fx-text-fill: white;" />
+
+                    <Button fx:id="bak" mnemonicParsing="false" onAction="#backkk" prefHeight="35.0" prefWidth="150.0" text="← Back" style="-fx-font-size: 13px;" />
+                </VBox>
             </children>
         </AnchorPane>
-        
-        <!-- Main Login Form -->
-        <VBox layoutX="250.0" layoutY="160.0" spacing="20.0" prefWidth="300.0" alignment="CENTER">
-            <VBox spacing="10.0">
-                <Label text="Email Address:" textFill="WHITE" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
-                <TextField fx:id="Email" prefHeight="40.0" promptText="Enter your email" style="-fx-font-size: 14px;" />
-                <Label fx:id="ErrorMsg" text="" textFill="#ff6b6b" />
-            </VBox>
-            
-            <VBox spacing="10.0">
-                <Label text="Password:" textFill="WHITE" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
-                <!-- Use PasswordField for masked password entry -->
-                <PasswordField fx:id="Password" prefHeight="40.0" promptText="Enter your password" style="-fx-font-size: 14px;" />
-                <Label fx:id="ErrorMsgPass" text="" textFill="#ff6b6b" />
-            </VBox>
-            
-            <VBox spacing="15.0" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
-                <Label text="Select Login Type:" textFill="WHITE" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
-                
-                <Button fx:id="Customer_login" mnemonicParsing="false" onAction="#CustomerLogIn" prefHeight="45.0" prefWidth="300.0" text="Customer Login" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
-                
-                <Button fx:id="Employee_login" mnemonicParsing="false" onAction="#EmployeeLogIn" prefHeight="45.0" prefWidth="300.0" text="Worker Login" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #3498db; -fx-text-fill: white;" />
-                
-                <Button fx:id="Manager_login" mnemonicParsing="false" onAction="#ManagerLogIn" prefHeight="45.0" prefWidth="300.0" text="Manager Login" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #e67e22; -fx-text-fill: white;" />
-                
-                <Button fx:id="LogIn" mnemonicParsing="false" onAction="#LogIn" prefHeight="40.0" prefWidth="200.0" text="Log In" style="-fx-font-size: 14px;" visible="false" />
-            </VBox>
-            
-            <Text fx:id="logSucc" text="" fill="#27ae60" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="300.0" textAlignment="CENTER" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
-            
-            <Button fx:id="OpenCatalogplz" mnemonicParsing="false" onAction="#openCatalogFunc" prefHeight="40.0" prefWidth="300.0" text="Continue to Catalog" visible="false" style="-fx-font-size: 14px; -fx-background-color: #27ae60; -fx-text-fill: white;" />
-            
-            <Button fx:id="bak" mnemonicParsing="false" onAction="#backkk" prefHeight="35.0" prefWidth="150.0" text="← Back" style="-fx-font-size: 13px;" />
-        </VBox>
-    </children>
-</AnchorPane>
+    </content>
+</ScrollPane>
