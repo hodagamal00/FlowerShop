@@ -110,8 +110,13 @@ public class SimpleServer extends AbstractServer {
 			String recievedStr = (String) msg;
 			if (recievedStr.equals("first entry")) { // if arrived here it means we opened the app
 				System.out.println("entered first entry");
-				List<String> list = session.createSQLQuery("SHOW TABLES from flowers;").list();
-
+				// Query the tables in the current schema.  Previously the code
+				// hard-coded the schema name ("flowers"), which no longer matches
+				// the schema configured in `hibernate.properties`.  Using a simple
+				// `SHOW TABLES` statement lets MySQL return the tables for the
+				// active connection regardless of the schema name and prevents
+				// startup failures when the schema changes.
+				List<String> list = session.createSQLQuery("SHOW TABLES;").list();
 
 				System.out.println(list.get(0));
 				System.out.println(list.get(1));
@@ -218,12 +223,13 @@ public class SimpleServer extends AbstractServer {
 					session.close();
 					break;
 
-
-				case "account":
+					case "account":
 					if (updateClassFunction.equals("add")) {
 						System.out.println("arrived to here inside add");
 						Account NewAcc = recievedMessage.getAccount();
+						NewAcc.setLoggedIn(true);
 						addAccount(NewAcc);
+						client.sendToClient(NewAcc);
 
 					} else if (updateClassFunction.equals("remove")) {
 						String idToRemove = recievedMessage.getDelteId();
@@ -903,29 +909,31 @@ public class SimpleServer extends AbstractServer {
 	public void addAccount(Account newAcc) {
 
 		System.out.println("inside Add Account To Catalog");
-		long numOfRows = countAccountRows();
-		int castedId = (int) numOfRows;
-		int newId = castedId + 1;
-		newAcc.setAccountID(newId);
-		/*String recievedName = newAcc.getFullName();   // CHANGED WITH YARA
-		String Adress=newAcc.getAddress();
-		String Email=newAcc.getEmail();
-		String Password=newAcc.getPassword();
-		long Phonnum=newAcc.getPhoneNumber();
-		long creditcardnum=newAcc.getCreditCardNumber();
-
-		Date newdate=newAcc.getCreditCardExpire();
-
-		int Cvv=newAcc.getCcv();
-		boolean is_login=newAcc.getLogged();
-		int belongedshop=newAcc.getBelongShop();
-		*/
-
-		System.out.println("Session Testing 000###");
 
 		SessionFactory sessionFactory = getSessionFactory();
 		session = sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
+
+		long numOfRows = countAccountRows();
+		int castedId = (int) numOfRows;
+		int newId = castedId + 1;
+		newAcc.setAccountID(newId);
+                /*String recievedName = newAcc.getFullName();   // CHANGED WITH YARA
+                String Adress=newAcc.getAddress();
+                String Email=newAcc.getEmail();
+                String Password=newAcc.getPassword();
+                long Phonnum=newAcc.getPhoneNumber();
+                long creditcardnum=newAcc.getCreditCardNumber();
+
+                Date newdate=newAcc.getCreditCardExpire();
+
+                int Cvv=newAcc.getCcv();
+                boolean is_login=newAcc.getLogged();
+                int belongedshop=newAcc.getBelongShop();
+                */
+
+		System.out.println("Session Testing 000###");
+
 		System.out.println("Done Session Testing 000###");
 
 		session.save(newAcc);

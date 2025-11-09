@@ -7,9 +7,9 @@ import java.util.LinkedList;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.application.Platform;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
-import il.cshaifasweng.OCSFMediatorExample.entities.Cart;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,6 +18,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class RegisterController {
 
@@ -111,6 +113,8 @@ public class RegisterController {
     private Label ID_Bad; // Value injected by FXMLLoader
 
     private LinkedList<String> RegisteredAccounts = new LinkedList<>(); // list of all registered emails
+    private boolean registrationPending = false;
+    private String pendingEmail;
 
     String email_regex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)*(\\\\.[A-Za-z]{2,})$";
     String creditCard_regex = "^\\d{16}$";
@@ -215,10 +219,8 @@ public class RegisterController {
                 long id = Integer.parseInt(userID.getText());
                 System.out.println("ID = " + id);
                 //Account new_acc = new Account(Name.getText(),Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()) ,Integer.parseInt(CVV.getText()), shopID);
-                Account new_acc = new Account(0,Name.getText(),id,Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(CVV.getText()),false,shopID,subscription.isSelected());
-                new_acc.setPrivialge(1);
+                Account new_acc = new Account(0,Name.getText(),id,Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(CVV.getText()),true,shopID,subscription.isSelected());                new_acc.setPrivialge(1);
                 System.out.println("Registering To Shop " + shopID);
-                RegisteredAccounts.add(Email.getText());
 
 
                 UpdateMessage new_msg2=new UpdateMessage("account","add");
@@ -228,21 +230,20 @@ public class RegisterController {
                 new_msg2.setAccount(new_acc);
                 try {
                     System.out.println("before sending updateMessage to server ");
+                    registrationPending = true;
+                    pendingEmail = new_acc.getEmail();
+                    RegisterButton.setDisable(true);
                     SimpleClient.getClient().sendToServer(new_msg2); // sends the updated product to the server class
                     System.out.println("afater sending updateMessage to server ");
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                    registrationPending = false;
+                    pendingEmail = null;
+                    RegisterButton.setDisable(false);
+                    ErrorMsg.setText("Unable to contact the server. Please try again.");
+                    ErrorMsg.setVisible(true);
                 }
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
-                Parent roott = loader.load();
-                LoginController cc = loader.getController();
-                Stage stage = new Stage();
-                stage.setScene(new Scene(roott));
-                stage.setTitle("Delivery Panel");
-                stage.show();
-                Stage stagee = (Stage)RegisterButton.getScene().getWindow();
-                stagee.close();
 
             }
             else{
@@ -300,6 +301,9 @@ public class RegisterController {
         assert RegisterButton != null : "fx:id=\"RegisterButton\" was not injected: check your FXML file 'register.fxml'.";
         assert Street_Address != null : "fx:id=\"Street_Address\" was not injected: check your FXML file 'register.fxml'.";
         assert userID != null : "fx:id=\"ZipCode\" was not injected: check your FXML file 'register.fxml'.";
+        if(!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         selectChain.getItems().add("ID 1: Tiberias, Big Danilof");
         selectChain.getItems().add("ID 2: Haifa, Merkaz Zeiv");
         selectChain.getItems().add("ID 3: Tel Aviv, Ramat Aviv");
@@ -325,6 +329,33 @@ public class RegisterController {
         { chooseMonth.getItems().add(String.valueOf(i)); }
         for( i = 2000 ; i < 2030 ; i++)
         { chooseYear.getItems().add(String.valueOf(i));  }
+    }
+    @Subscribe
+    public void handleAccountCreated(PassAccountEvent event) {
+        if(!registrationPending) {
+            return;
+        }
+        Account createdAccount = event.getRecievedAccount();
+        if(createdAccount == null || pendingEmail == null) {
+            return;
+        }
+        if(!createdAccount.getEmail().equalsIgnoreCase(pendingEmail)) {
+            return;
+        }
+
+        registrationPending = false;
+        pendingEmail = null;
+        RegisteredAccounts.add(createdAccount.getEmail());
+
+        Platform.runLater(() -> {
+            RegisterButton.setDisable(false);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Registration Successful");
+            alert.setHeaderText("Welcome to FlowerShop!");
+            alert.setContentText("Your account has been created and you're now signed in.");
+            alert.showAndWait();
+            NavigationService.getInstance().navigate("primary");
+        });
     }
 
     @FXML
