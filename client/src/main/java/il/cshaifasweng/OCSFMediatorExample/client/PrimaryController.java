@@ -15,9 +15,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
 import javafx.scene.control.DialogPane;
@@ -26,9 +24,7 @@ import javafx.scene.image.ImageView;
 // Added for detailed product navigation
 import il.cshaifasweng.OCSFMediatorExample.client.ProductDetailsController;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 // Event to pass current account to complaint controller
@@ -361,13 +357,14 @@ public class PrimaryController {
 
 	}
 
+
+	private void navigateInShell(String fxml) {
+		NavigationService.getInstance().navigate(fxml);
+	}
+
 	@FXML
 	void goLogOut(ActionEvent event) throws IOException {
-
-
-
 		LogOut logOutObject = new LogOut();
-		// If no account is currently logged in, skip sending a logout event
 		if (currentLoggedAccount != null) {
 			logOutObject.setMail(currentLoggedAccount.getEmail());
 		}
@@ -375,48 +372,24 @@ public class PrimaryController {
 		try {
 			System.out.println("before sending the logout object" );
 			SimpleClient.getClient().sendToServer(logOutObject);
-
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
-		Parent roott = loader.load();
-		LoginController cc = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("Welcome");
-		stage.show();
-		Stage stagee = (Stage)logout.getScene().getWindow();
-		stagee.close();
-
+		currentLoggedAccount = null;
+		SimpleClient.setAccount(null);
+		applyPrivilegeBasedUI();
+		navigateInShell("Login");
 	}
 
 	@FXML
 	void goToLogin(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
-        Parent roott = loader.load();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Login");
-        stage.show();
-        // Close the current primary/catalog window to avoid multiple open windows
-        Stage currentStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-        currentStage.close();
+		navigateInShell("Login");
 	}
 
 	@FXML
 	void goToRegister(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("register.fxml"));
-        Parent roott = loader.load();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Register");
-        stage.show();
-        // Close the current window when opening the registration page
-        Stage currentStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-        currentStage.close();
+		navigateInShell("register");
 	}
 
 	@FXML
@@ -434,15 +407,7 @@ public class PrimaryController {
 				},4000
 		);
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("replycomplaint.fxml"));
-		Parent roott = loader.load();
-		ReplyComplaintController cc = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("Reply Complaint");
-		stage.show();
-		Stage stagee = (Stage)openComplaints.getScene().getWindow();
-		stagee.close();
+		navigateInShell("replycomplaint");
 
 	}
 
@@ -462,15 +427,7 @@ public class PrimaryController {
 				},4000
 		);
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("admincontrol.fxml"));
-		Parent roott = loader.load();
-		AdminControlController cc = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("Delivery Panel");
-		stage.show();
-		Stage stagee = (Stage)adminControlButtton.getScene().getWindow();
-		stagee.close();
+		navigateInShell("admincontrol");
 	}
 
 	@FXML
@@ -574,15 +531,8 @@ public class PrimaryController {
 				},4000
 		);
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("delivery.fxml"));
-		Parent roott = loader.load();
-		DeliveryController cc = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("Delivery Panel");
-		stage.show();
-		Stage stagee = (Stage)infoo.getScene().getWindow();
-		stagee.close();
+		navigateInShell("delivery");
+
 	}
 
 
@@ -654,31 +604,15 @@ public class PrimaryController {
 		);
 
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("log_manager.fxml"));
-		Parent roott = loader.load();
-		LogManagerController cc = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("Complaint Manager");
-		stage.show();
-		Stage stagee = (Stage)infoo.getScene().getWindow();
-		stagee.close();
+		navigateInShell("log_manager");
+
 	}
 	@FXML
 	void openCheckout(ActionEvent event) throws IOException
 	{
 		System.out.println("arrived to checkout 1");
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("checkout.fxml"));
-		Parent roott = loader.load();
-		CheckoutController cc = loader.getController();
+		navigateInShell("checkout");
 		System.out.println("arrived to checkout 2");
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("Checkout");
-		stage.show();
-		Stage stagee = (Stage)checkout.getScene().getWindow();
-		System.out.println("arrived to checkout 3");
-		stagee.close();
 		PassAccountEventCheckout recievedAcc = new PassAccountEventCheckout(currentLoggedAccount);
 		recievedAcc.productsToCheckout = userCart;
 
@@ -729,15 +663,7 @@ public class PrimaryController {
 
 	@FXML
 	void openMyComplaints(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("mycomplaints.fxml"));
-		Parent roott = loader.load();
-		MyComplaintsController cc = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("My Complaints");
-		stage.show();
-		Stage stagee = (Stage)viewMyComplaints.getScene().getWindow();
-		stagee.close();
+		navigateInShell("mycomplaints");
 
 		PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentLoggedAccount);
 
@@ -768,15 +694,8 @@ public class PrimaryController {
 	@FXML
 	void openMyOrders(ActionEvent event) throws IOException
 	{
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("myorders.fxml"));
-		Parent roott = loader.load();
-		MyOrdersController cc = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("My Orders");
-		stage.show();
-		Stage stagee = (Stage)viewMyOrders.getScene().getWindow();
-		stagee.close();
+		navigateInShell("myorders");
+
 		PassAccountEventOrders recievedAcc = new PassAccountEventOrders(currentLoggedAccount);
 
 		new java.util.Timer().schedule(
@@ -1917,13 +1836,8 @@ public class PrimaryController {
 
 	@FXML
 	void complinstart(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("complaint.fxml"));
-		Parent roott = loader.load();
-		ComplaintController cc = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(roott));
-		stage.setTitle("complaint application");
-		stage.show();
+		navigateInShell("complaint");
+
 		// Pass the current logged account to the complaint controller via EventBus.  The controller
 		// listens for PassAccountEventComplaints events and stores the account for submission.
 		if (currentLoggedAccount != null) {
@@ -2212,13 +2126,7 @@ public class PrimaryController {
 	 */
 	@FXML
 	void openProductDetails(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("ProductDetails.fxml"));
-		Parent root = loader.load();
-		ProductDetailsController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Product Details");
-		stage.show();
+		navigateInShell("ProductDetails");
 	}
 	
 	/**
@@ -2227,43 +2135,23 @@ public class PrimaryController {
 	 */
 	@FXML
 	void openOrderConfirmation(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("OrderConfirmation.fxml"));
-		Parent root = loader.load();
-		OrderConfirmationController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Order Confirmation");
-		stage.show();
+		navigateInShell("OrderConfirmation");
 	}
-	
 	/**
 	 * Navigate to Profile page
 	 * Shows user profile and account settings
 	 */
 	@FXML
 	void openProfile(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("Profile.fxml"));
-		Parent root = loader.load();
-		ProfileController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("My Profile");
-		stage.show();
-	}
-	
+			navigateInShell("Profile");
+		}
 	/**
 	 * Navigate to Order Details page
 	 * Shows detailed information about a specific order
 	 */
 	@FXML
 	void openOrderDetails(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("OrderDetails.fxml"));
-		Parent root = loader.load();
-		OrderDetailsController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Order Details");
-		stage.show();
+		navigateInShell("OrderDetails");
 	}
 	
 	/**
@@ -2277,14 +2165,8 @@ public class PrimaryController {
 			openAccessDenied(event, 2, "Worker Dashboard");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("WorkerDashboard.fxml"));
-		Parent root = loader.load();
-		WorkerDashboardController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Worker Dashboard");
-		stage.show();
+
+		navigateInShell("WorkerDashboard");
 	}
 	
 	/**
@@ -2298,16 +2180,9 @@ public class PrimaryController {
 			openAccessDenied(event, 2, "Branch Orders");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("BranchOrders.fxml"));
-		Parent root = loader.load();
-		BranchOrdersController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Branch Orders");
-		stage.show();
+
+		navigateInShell("BranchOrders");
 	}
-	
 	/**
 	 * Navigate to Catalog Management page
 	 * Allows workers to manage catalog items (Privilege >= 2 required)
@@ -2319,16 +2194,9 @@ public class PrimaryController {
 			openAccessDenied(event, 2, "Catalog Management");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("CatalogManagement.fxml"));
-		Parent root = loader.load();
-		CatalogManagementController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Catalog Management");
-		stage.show();
+
+		navigateInShell("CatalogManagement");
 	}
-	
 	/**
 	 * Navigate to Branch Reports page
 	 * Shows branch analytics with charts (Privilege >= 3 required)
@@ -2340,14 +2208,9 @@ public class PrimaryController {
 			openAccessDenied(event, 3, "Branch Reports");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("BranchReports.fxml"));
-		Parent root = loader.load();
-		BranchReportsController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Branch Reports");
-		stage.show();
+
+		navigateInShell("BranchReports");
+
 	}
 	
 	/**
@@ -2361,14 +2224,9 @@ public class PrimaryController {
 			openAccessDenied(event, 3, "Promotions Management");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("PromotionsManagement.fxml"));
-		Parent root = loader.load();
-		PromotionsManagementController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Promotions Management");
-		stage.show();
+
+		navigateInShell("PromotionsManagement");
+
 	}
 	
 	/**
@@ -2382,14 +2240,9 @@ public class PrimaryController {
 			openAccessDenied(event, 3, "Branch Settings");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("BranchSettings.fxml"));
-		Parent root = loader.load();
-		BranchSettingsController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Branch Settings");
-		stage.show();
+
+		navigateInShell("BranchSettings");
+
 	}
 	
 	/**
@@ -2403,14 +2256,9 @@ public class PrimaryController {
 			openAccessDenied(event, 4, "Network Dashboard");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("NetworkDashboard.fxml"));
-		Parent root = loader.load();
-		NetworkDashboardController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Network Dashboard");
-		stage.show();
+
+		navigateInShell("NetworkDashboard");
+
 	}
 	
 	/**
@@ -2424,14 +2272,9 @@ public class PrimaryController {
 			openAccessDenied(event, 4, "Cross-Branch Reports");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("CrossBranchReports.fxml"));
-		Parent root = loader.load();
-		CrossBranchReportsController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Cross-Branch Reports");
-		stage.show();
+
+		navigateInShell("CrossBranchReports");
+
 	}
 	
 	/**
@@ -2445,14 +2288,9 @@ public class PrimaryController {
 			openAccessDenied(event, 4, "Global Settings");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("GlobalSettings.fxml"));
-		Parent root = loader.load();
-		GlobalSettingsController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Global Settings");
-		stage.show();
+
+		navigateInShell("GlobalSettings");
+
 	}
 	
 	/**
@@ -2466,14 +2304,9 @@ public class PrimaryController {
 			openAccessDenied(event, 4, "Network Promotions");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("NetworkPromotions.fxml"));
-		Parent root = loader.load();
-		NetworkPromotionsController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Network Promotions");
-		stage.show();
+
+		navigateInShell("NetworkPromotions");
+
 	}
 	
 	/**
@@ -2487,14 +2320,9 @@ public class PrimaryController {
 			openAccessDenied(event, 4, "Role Management");
 			return;
 		}
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("RoleManagement.fxml"));
-		Parent root = loader.load();
-		RoleManagementController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Role Management");
-		stage.show();
+
+		navigateInShell("RoleManagement");
+
 	}
 	
 	/**
@@ -2503,13 +2331,8 @@ public class PrimaryController {
 	 */
 	@FXML
 	void openError(ActionEvent event) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("Error.fxml"));
-		Parent root = loader.load();
-		ErrorController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Error");
-		stage.show();
+		navigateInShell("Error");
+
 	}
 	
 	/**
@@ -2520,13 +2343,8 @@ public class PrimaryController {
 			SimpleClient.getClient().getUser().getPrivilegeLevel() : 0;
 		
 		AccessDeniedController.setAccessInfo(currentPrivilege, requiredPrivilege, pageName);
-		
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("AccessDenied.fxml"));
-		Parent root = loader.load();
-		AccessDeniedController controller = loader.getController();
-		Stage stage = new Stage();
-		stage.setScene(new Scene(root));
-		stage.setTitle("Access Denied");
-		stage.show();
+
+		navigateInShell("AccessDenied");
+
 	}
 }
