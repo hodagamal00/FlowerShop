@@ -115,7 +115,7 @@ public class RegisterController {
     private boolean registrationPending = false;
     private String pendingEmail;
 
-    String email_regex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)*(\\\\.[A-Za-z]{2,})$";
+    String email_regex = "^(?=.{1,64}@)[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$";
     String creditCard_regex = "^\\d{16}$";
     String CVV_regex = "^\\d{3}$";
     String phoneNum_regex = "^\\d{10}$";
@@ -357,6 +357,7 @@ public class RegisterController {
 
         Platform.runLater(() -> {
             RegisterButton.setDisable(false);
+            RegisterButton.setText("Register");
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Registration Successful");
             alert.setHeaderText("Welcome to FlowerShop!");
@@ -375,6 +376,7 @@ public class RegisterController {
         pendingEmail = null;
         Platform.runLater(() -> {
             RegisterButton.setDisable(false);
+            RegisterButton.setText("Register");
             ErrorMsg.setText(event.getMessage());
             ErrorMsg.setVisible(true);
         });

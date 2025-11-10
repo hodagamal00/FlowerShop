@@ -10,6 +10,8 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.WorkerUpdateManager;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ManagerUpdateManager;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.OrderUpdateManager;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ComplaintUpdateManager;
+import java.io.InputStream;
+import java.util.Properties;
 
 //import il.cshaifasweng.OCSFMediatorExample.server.Product;
 import java.io.IOException;
@@ -35,6 +37,8 @@ public class SimpleServer extends AbstractServer {
 
 	public static Session session;
 	private static Session session1;
+	private static SessionFactory cachedSessionFactory;
+	private static final Object sessionFactoryLock = new Object();
 	private List<Product> productGeneralList = new ArrayList<Product>();
 	private List<Account> accountGeneralList = new ArrayList<Account>();
 	private int flowersnum = 0;
@@ -57,28 +61,58 @@ public class SimpleServer extends AbstractServer {
 	}
 
 	public static SessionFactory getSessionFactory() throws HibernateException {
-		Configuration configuration = new Configuration();
+		if (cachedSessionFactory != null) {
+			return cachedSessionFactory;
+		}
 
-		// Add ALL of your entities here. You can also try adding a whole package.
-		configuration.addAnnotatedClass(Product.class);
-		configuration.addAnnotatedClass(Account.class);
-		configuration.addAnnotatedClass(Worker.class);
-		configuration.addAnnotatedClass(Manager.class);
-		configuration.addAnnotatedClass(Order.class);
-		configuration.addAnnotatedClass(Complaint.class);
-		configuration.addAnnotatedClass(Message.class);
-		configuration.addAnnotatedClass(Report.class);  // Added Report entity
-		configuration.addAnnotatedClass(Promotion.class);  // Added Promotion entity
-		configuration.addAnnotatedClass(BranchSettings.class);  // Added BranchSettings entity
-		configuration.addAnnotatedClass(GlobalSettings.class);  // Added GlobalSettings entity
+		synchronized (sessionFactoryLock) {
+			if (cachedSessionFactory != null) {
+				return cachedSessionFactory;
+			}
 
+			Configuration configuration = new Configuration();
 
-		ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-				.applySettings(configuration.getProperties())
-				.build();
+			// Explicitly load the Hibernate properties so the server can
+			// reliably connect to the configured schema.  Relying on the
+			// default configuration loader proved unreliable and resulted
+			// in incomplete schema generation (for example, the
+			// accounts_table was never created).
+			Properties properties = new Properties();
+			try (InputStream input = SimpleServer.class.getClassLoader()
+					.getResourceAsStream("hibernate.properties")) {
+				if (input == null) {
+					throw new HibernateException(
+							"Unable to locate hibernate.properties on the classpath");
+				}
+				properties.load(input);
+			} catch (IOException ex) {
+				throw new HibernateException("Failed to load Hibernate configuration", ex);
+			}
 
-		return configuration.buildSessionFactory(serviceRegistry);
+			configuration.setProperties(properties);
+
+			// Add ALL of your entities here. You can also try adding a whole package.
+			configuration.addAnnotatedClass(Product.class);
+			configuration.addAnnotatedClass(Account.class);
+			configuration.addAnnotatedClass(Worker.class);
+			configuration.addAnnotatedClass(Manager.class);
+			configuration.addAnnotatedClass(Order.class);
+			configuration.addAnnotatedClass(Complaint.class);
+			configuration.addAnnotatedClass(Message.class);
+			configuration.addAnnotatedClass(Report.class);  // Added Report entity
+			configuration.addAnnotatedClass(Promotion.class);  // Added Promotion entity
+			configuration.addAnnotatedClass(BranchSettings.class);  // Added BranchSettings entity
+			configuration.addAnnotatedClass(GlobalSettings.class);  // Added GlobalSettings entity
+
+			ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+					.applySettings(configuration.getProperties())
+					.build();
+
+			cachedSessionFactory = configuration.buildSessionFactory(serviceRegistry);
+			return cachedSessionFactory;
+		}
 	}
+
 
 	public static void generateProducts() {
 		System.out.println("arrived to generate products function");
@@ -990,16 +1024,20 @@ public class SimpleServer extends AbstractServer {
 	}
 	public Long countAccountRows() {
 		System.out.println("Arrived to coutnrwos 1");
-		final CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-		System.out.println("Arrived to coutnrwos 2");
-		CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-		System.out.println("Arrived to coutnrwos 3");
-		Root<Account> root = criteria.from(Account.class);
-		System.out.println("Arrived to coutnrwos 4");
-		criteria.select(criteriaBuilder.count(root));
-		System.out.println("Arrived to coutnrwos 5");
-		System.out.println(session.createQuery(criteria).getSingleResult());
-		return session.createQuery(criteria).getSingleResult();
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session countSession = sessionFactory.openSession()) {
+			final CriteriaBuilder criteriaBuilder = countSession.getCriteriaBuilder();
+			System.out.println("Arrived to coutnrwos 2");
+			CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+			System.out.println("Arrived to coutnrwos 3");
+			Root<Account> root = criteria.from(Account.class);
+			System.out.println("Arrived to coutnrwos 4");
+			criteria.select(criteriaBuilder.count(root));
+			Long count = countSession.createQuery(criteria).getSingleResult();
+			System.out.println("Arrived to coutnrwos 5");
+			System.out.println(count);
+			return count;
+		}
 	}
 	public void editAccount(Account accountEdit){
 		System.out.println("Arrived to edit catalog product 1");
