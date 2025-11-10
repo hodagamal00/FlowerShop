@@ -242,6 +242,7 @@ public class LoginController {
     private Account authenticatedAccount;
     private boolean navigationPendingAccount;
 
+    @FXML
     void handleLogin(ActionEvent event) {
         lastLoginEvent = event;
         // Clear previous error messages
