@@ -240,11 +240,14 @@ public class LoginController {
     boolean alreadyLogged = false;
     private ActionEvent lastLoginEvent;
 
-    void handleLogin(ActionEvent event) {
+    @FXML
+    private void handleLogin(ActionEvent event) {
         // Clear previous error messages
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
         alLog.setVisible(false);
+        lastLoginEvent = event;
+
 
         String email = Email.getText().trim();
         String password = Password.getText();
