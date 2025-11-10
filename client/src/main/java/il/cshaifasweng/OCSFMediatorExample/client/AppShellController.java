@@ -1,4 +1,5 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
+
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -24,10 +25,8 @@ public class AppShellController {
     @FXML private Button profileButton;
     @FXML private Button cartButton;
     @FXML private Label statusLabel;
-    @FXML private Label userNameLabel;
+    @FXML private Label accountNameLabel;
     @FXML private StackPane contentPane;
-    private boolean eventBusRegistered;
-
 
     /**
      * Called by the FXML loader after the fields have been injected.
@@ -36,17 +35,15 @@ public class AppShellController {
      */
     public void initialize() {
         NavigationService.getInstance().setAppShellController(this);
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+        if (accountNameLabel != null) {
+            accountNameLabel.setVisible(false);
+        }
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
         // by individual controllers as needed.
-        if (!eventBusRegistered) {
-            EventBus.getDefault().register(this);
-            eventBusRegistered = true;
-        }
-        if (userNameLabel != null) {
-            userNameLabel.setVisible(false);
-            userNameLabel.setManaged(false);
-        }
         if (loginButton != null) {
             loginButton.setOnAction(e -> NavigationService.getInstance().navigate("Login"));
         }
@@ -56,7 +53,6 @@ public class AppShellController {
         if (cartButton != null) {
             cartButton.setOnAction(e -> NavigationService.getInstance().navigate("cart"));
         }
-
     }
 
     /**
@@ -91,6 +87,10 @@ public class AppShellController {
             loginButton.setVisible(!loggedIn);
             profileButton.setVisible(loggedIn);
         }
+        if (!loggedIn && accountNameLabel != null) {
+            accountNameLabel.setVisible(false);
+            accountNameLabel.setText("");
+        }
     }
 
     /**
@@ -102,5 +102,28 @@ public class AppShellController {
         if (statusLabel != null) {
             statusLabel.setText(message);
         }
+    }
+
+    /**
+     * Displays the logged-in account name in the header and toggles the
+     * appropriate login/profile buttons.
+     *
+     * @param fullName The display name of the logged-in account
+     */
+    public void showAccountName(String fullName) {
+        setLoggedIn(true);
+        if (accountNameLabel != null) {
+            accountNameLabel.setText(fullName != null ? fullName : "");
+            accountNameLabel.setVisible(fullName != null && !fullName.isBlank());
+        }
+    }
+
+    @Subscribe
+    public void handlePassAccountEvent(PassAccountEvent event) {
+        Account account = event.getRecievedAccount();
+        if (account == null) {
+            return;
+        }
+        Platform.runLater(() -> showAccountName(account.getFullName()));
     }
 }
