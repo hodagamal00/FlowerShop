@@ -240,6 +240,7 @@ public class LoginController {
     boolean alreadyLogged = false;
     private ActionEvent lastLoginEvent;
 
+    @FXML
     void handleLogin(ActionEvent event) {
         // Clear previous error messages
         ErrorMsg.setVisible(false);
