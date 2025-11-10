@@ -12,7 +12,6 @@ import java.util.*;
 import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
 import javafx.application.Platform;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

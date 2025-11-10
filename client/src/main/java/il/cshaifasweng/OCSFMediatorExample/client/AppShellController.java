@@ -1,11 +1,14 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
-
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * Controller for the {@code AppShell.fxml}.  This class manages the
@@ -21,7 +24,10 @@ public class AppShellController {
     @FXML private Button profileButton;
     @FXML private Button cartButton;
     @FXML private Label statusLabel;
+    @FXML private Label userNameLabel;
     @FXML private StackPane contentPane;
+    private boolean eventBusRegistered;
+
 
     /**
      * Called by the FXML loader after the fields have been injected.
@@ -33,6 +39,14 @@ public class AppShellController {
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
         // by individual controllers as needed.
+        if (!eventBusRegistered) {
+            EventBus.getDefault().register(this);
+            eventBusRegistered = true;
+        }
+        if (userNameLabel != null) {
+            userNameLabel.setVisible(false);
+            userNameLabel.setManaged(false);
+        }
         if (loginButton != null) {
             loginButton.setOnAction(e -> NavigationService.getInstance().navigate("Login"));
         }
@@ -42,6 +56,7 @@ public class AppShellController {
         if (cartButton != null) {
             cartButton.setOnAction(e -> NavigationService.getInstance().navigate("cart"));
         }
+
     }
 
     /**
