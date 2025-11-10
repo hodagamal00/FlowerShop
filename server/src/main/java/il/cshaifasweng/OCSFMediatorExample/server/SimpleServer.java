@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
+import il.cshaifasweng.OCSFMediatorExample.client.RegistrationResultEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.*;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
@@ -223,13 +224,40 @@ public class SimpleServer extends AbstractServer {
 					session.close();
 					break;
 
-					case "account":
+				case "account":
 					if (updateClassFunction.equals("add")) {
 						System.out.println("arrived to here inside add");
 						Account NewAcc = recievedMessage.getAccount();
-						NewAcc.setLoggedIn(true);
-						addAccount(NewAcc);
-						client.sendToClient(NewAcc);
+
+						try {
+							// FIX 1: Check if email already exists in database
+							if (isEmailAlreadyRegistered(NewAcc.getEmail())) {
+								System.out.println("Email already exists in database: " + NewAcc.getEmail());
+								RegistrationResultEvent errorEvent = new RegistrationResultEvent(false, "This email address is already registered. Please use a different email or try logging in.");
+								client.sendToClient(errorEvent);
+								return; // Exit early
+							}
+
+							NewAcc.setLoggedIn(true);
+							Account savedAccount = addAccount(NewAcc);
+
+							if (savedAccount != null) {
+								// FIX 2: Send success event with the account
+								System.out.println("Account added successfully: " + savedAccount.getEmail());
+								client.sendToClient(savedAccount);
+							} else {
+								// FIX 3: Send failure event
+								System.out.println("Failed to add account: " + NewAcc.getEmail());
+								RegistrationResultEvent errorEvent = new RegistrationResultEvent(false, "Registration failed. Please try again.");
+								client.sendToClient(errorEvent);
+							}
+
+						} catch (Exception e) {
+							System.err.println("Error during account addition:");
+							e.printStackTrace();
+							RegistrationResultEvent errorEvent = new RegistrationResultEvent(false, "Registration failed due to a server error. Please try again later.");
+							client.sendToClient(errorEvent);
+						}
 
 					} else if (updateClassFunction.equals("remove")) {
 						String idToRemove = recievedMessage.getDelteId();
@@ -242,6 +270,7 @@ public class SimpleServer extends AbstractServer {
 					}
 
 					break;
+
 
 				case "worker":
 					if (updateClassFunction.equals("add")) {
@@ -460,56 +489,6 @@ public class SimpleServer extends AbstractServer {
 			}
 
 
-			/*
-			if(foundAlready == false){
-				List<Manager> managersList = getAllAccountsManager();
-				Manager tempManager = new Manager() ; // in case the user is manager
-				for (int i=0;i<managersList.size();i++) // search the email in all manager accounts and save the result object in the tempManager object
-				{
-
-					if(managersList.get(i).getEmail().equals(recievedMailStr))
-					{
-						foundAlready = true ;
-						tempManager.setEmail(managersList.get(i).getEmail());
-						tempManager.setFullName(managersList.get(i).getFullName());
-						tempManager.setPassword(managersList.get(i).getPassword());
-						tempManager.setLoggedIn(managersList.get(i).getLoggedIn());
-						tempManager.setPersonID(managersList.get(i).getPersonID());
-						tempManager.setShopID(managersList.get(i).getShopID());
-
-
-					}
-
-					client.sendToClient(tempManager);
-
-				}
-			}
-
-
-			if(foundAlready == false){
-				List<Worker> workersList = getAllAccountsWorker();
-				Worker tempWorker = new Worker(); // in case the user is worker
-				for (int i=0;i<workersList.size();i++) // search the email in all worker accounts and save the result object in the tempWorker object
-				{
-
-					if(workersList.get(i).getEmail().equals(recievedMailStr))
-					{
-						tempWorker.setEmail(workersList.get(i).getEmail());
-						tempWorker.setFullName(workersList.get(i).getFullName());
-						tempWorker.setLoggedIn(workersList.get(i).getLoggedIn());
-						tempWorker.setPersonID(workersList.get(i).getPersonID());
-
-					}
-
-					client.sendToClient(tempWorker);
-
-				}
-			}
-
-
-
-
-			 */
 		}
 
 		if(msg instanceof LogOut){
@@ -906,41 +885,75 @@ public class SimpleServer extends AbstractServer {
 		return resultlest;
 	}
 
-	public void addAccount(Account newAcc) {
+	private boolean isEmailAlreadyRegistered(String email) {
+		System.out.println("Checking for existing email " + email);
+		SessionFactory sessionFactory = getSessionFactory();
+		Session localSession = sessionFactory.openSession();
+		try {
+			CriteriaBuilder builder = localSession.getCriteriaBuilder();
+			CriteriaQuery<Long> query = builder.createQuery(Long.class);
+			Root<Account> root = query.from(Account.class);
+			query.select(builder.count(root));
+			query.where(builder.equal(builder.lower(root.get("email")), email.toLowerCase()));
+			Long count = localSession.createQuery(query).getSingleResult();
+			return count != null && count > 0;
+		} finally {
+			localSession.close();
+		}
+	}
 
+	public Account addAccount(Account newAcc) {
 		System.out.println("inside Add Account To Catalog");
 
-		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
+		try {
+			SessionFactory sessionFactory = getSessionFactory();
+			session = sessionFactory.openSession();
+			Transaction tx = session.beginTransaction();
 
-		long numOfRows = countAccountRows();
-		int castedId = (int) numOfRows;
-		int newId = castedId + 1;
-		newAcc.setAccountID(newId);
-                /*String recievedName = newAcc.getFullName();   // CHANGED WITH YARA
-                String Adress=newAcc.getAddress();
-                String Email=newAcc.getEmail();
-                String Password=newAcc.getPassword();
-                long Phonnum=newAcc.getPhoneNumber();
-                long creditcardnum=newAcc.getCreditCardNumber();
+			// FIX 1: Check if email already exists before registration
+			if (isEmailAlreadyRegistered(newAcc.getEmail())) {
+				System.out.println("Email already exists: " + newAcc.getEmail());
+				tx.rollback();
+				session.close();
+				// Return null to indicate failure due to email conflict
+				RegistrationResultEvent event = new RegistrationResultEvent(false, "Email address already exists. Please use a different email or try logging in.");
+				return null;
+			}
 
-                Date newdate=newAcc.getCreditCardExpire();
+			long numOfRows = countAccountRows();
+			int castedId = (int) numOfRows;
+			int newId = castedId + 1;
+			newAcc.setAccountID(newId);
+			newAcc.setLoggedIn(true); // Auto-login after successful registration
 
-                int Cvv=newAcc.getCcv();
-                boolean is_login=newAcc.getLogged();
-                int belongedshop=newAcc.getBelongShop();
-                */
+			System.out.println("Saving account with email: " + newAcc.getEmail());
+			session.save(newAcc);
+			session.flush();
+			tx.commit();
 
-		System.out.println("Session Testing 000###");
+			System.out.println("Account saved successfully with ID: " + newId);
+			session.close();
 
-		System.out.println("Done Session Testing 000###");
+			return newAcc;
 
-		session.save(newAcc);
-		session.flush();
-		tx.commit();
-		System.out.println("khaled");
-		session.close();
+		} catch (Exception exception) {
+			System.err.println("Error during account registration:");
+			exception.printStackTrace();
+
+			if (session != null) {
+				try {
+					session.getTransaction().rollback();
+				} catch (Exception rollbackEx) {
+					System.err.println("Error during transaction rollback:");
+					rollbackEx.printStackTrace();
+				}
+				session.close();
+			}
+
+			// Return failure event for proper error handling
+			RegistrationResultEvent event = new RegistrationResultEvent(false, "Registration failed. Please try again or contact support.");
+			return null;
+		}
 	}
 	public void removeAccount(String AccIdToRemove, ConnectionToClient _client) {
 

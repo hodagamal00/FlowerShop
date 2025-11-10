@@ -5,7 +5,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleClient extends AbstractClient {
@@ -37,37 +36,46 @@ public class SimpleClient extends AbstractClient {
 		if(msg instanceof String){
 			String recievedStr = (String)msg ;
 
-				if(recievedStr.equals("not found")){
+			if(recievedStr.equals("not found")){
 				System.out.println("didnt find a table"); // we didnt find the table , so we need to create 6 items at the beggings
 				// now tell the primary controller that the table isnt found
 				InitDatabaseEvent event = new InitDatabaseEvent(true);
 				EventBus.getDefault().post(event);
-			   }
-				if(recievedStr.equals("mail not found")){
-					// post an event that the mail is not found
-					MailChecker mailCheckEvent = new MailChecker(false);
-					EventBus.getDefault().post(mailCheckEvent);
+			}
+			if(recievedStr.equals("mail not found")){
+				// post an event that the mail is not found
+				MailChecker mailCheckEvent = new MailChecker(false);
+				EventBus.getDefault().post(mailCheckEvent);
+			}
+			if(recievedStr.equals("wrong password")){
+				// post an event that the password is incorrect
+				MailChecker mailCheckEvent = new MailChecker(true);
+				mailCheckEvent.setPasswordExists(false);
+				EventBus.getDefault().post(mailCheckEvent);
+			}
+			if(recievedStr.equals("found mail and password"))
+			{
+				MailChecker mailCheckEvent = new MailChecker(true);
+				mailCheckEvent.setPasswordExists(true);
+				mailCheckEvent.setLoggedIn(false);
+				EventBus.getDefault().post(mailCheckEvent);
+			}
+			if(recievedStr.equals("already logged"))
+			{
+				MailChecker mailCheckEvent = new MailChecker(true);
+				mailCheckEvent.setPasswordExists(true);
+				mailCheckEvent.setLoggedIn(true);
+				EventBus.getDefault().post(mailCheckEvent);
+			}
+			if(recievedStr.startsWith("registration_failed:"))
+			{
+				String reason = recievedStr.substring("registration_failed:".length());
+				String message = "Unable to complete registration.";
+				if(reason.equals("email_exists")){
+					message = "An account with this email already exists.";
 				}
-				if(recievedStr.equals("wrong password")){
-					// post an event that the password is incorrect
-					MailChecker mailCheckEvent = new MailChecker(true);
-					mailCheckEvent.setPasswordExists(false);
-					EventBus.getDefault().post(mailCheckEvent);
-				}
-				if(recievedStr.equals("found mail and password"))
-				{
-					MailChecker mailCheckEvent = new MailChecker(true);
-					mailCheckEvent.setPasswordExists(true);
-					mailCheckEvent.setLoggedIn(false);
-					EventBus.getDefault().post(mailCheckEvent);
-				}
-				if(recievedStr.equals("already logged"))
-				{
-					MailChecker mailCheckEvent = new MailChecker(true);
-					mailCheckEvent.setPasswordExists(true);
-					mailCheckEvent.setLoggedIn(true);
-					EventBus.getDefault().post(mailCheckEvent);
-				}
+				EventBus.getDefault().post(new RegistrationResultEvent(false, message));
+			}
 		}
 		else if(msg instanceof FoundTable){
 			FoundTable ft = (FoundTable) msg ;

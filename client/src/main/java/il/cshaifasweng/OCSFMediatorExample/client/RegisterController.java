@@ -2,7 +2,6 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Date;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
@@ -124,7 +123,8 @@ public class RegisterController {
 
 
     @FXML
-        void AddCustomerToDB(ActionEvent event) throws IOException {
+    void AddCustomerToDB(ActionEvent event) throws IOException {
+        // Clear previous error messages
         email_regex_error.setVisible(false);
         phone_regex_error.setVisible(false);
         card_regex_error.setVisible(false);
@@ -132,126 +132,134 @@ public class RegisterController {
         fieldsError.setVisible(false);
         shopError.setVisible(false);
         ID_Bad.setVisible(false);
+        ErrorMsg.setVisible(false);
         boolean hasError = false;
 
-        if(registerShop.isSelected())
-        {
-            if(selectChain.getSelectionModel().getSelectedIndex() == -1)
-            {
+        // Validate required fields
+        if(registerShop.isSelected()) {
+            if(selectChain.getSelectionModel().getSelectedIndex() == -1) {
+                shopError.setText("Please select a shop to register with");
                 shopError.setVisible(true);
                 hasError = true;
-
             }
         }
-        if(Email.getText().isEmpty() || Password.getText().isEmpty() || Name.getText().isEmpty() || userID.getText().isEmpty() || PhoneNumber.getText().isEmpty() || Street_Address.getText().isEmpty() || City_Address.getText().isEmpty() || CardNumber.getText().isEmpty() || CVV.getText().isEmpty() || chooseMonth.getSelectionModel().getSelectedIndex() == -1 || chooseYear.getSelectionModel().getSelectedIndex() == -1)
-        {
+
+        if(Email.getText().isEmpty() || Password.getText().isEmpty() || Name.getText().isEmpty() ||
+                userID.getText().isEmpty() || PhoneNumber.getText().isEmpty() || Street_Address.getText().isEmpty() ||
+                City_Address.getText().isEmpty() || CardNumber.getText().isEmpty() || CVV.getText().isEmpty() ||
+                chooseMonth.getSelectionModel().getSelectedIndex() == -1 || chooseYear.getSelectionModel().getSelectedIndex() == -1) {
+            fieldsError.setText("Please fill in all required fields");
             fieldsError.setVisible(true);
             hasError = true;
-
         }
+
+        // Validate email format
         Pattern pattern = Pattern.compile(email_regex);
         Matcher matcher = pattern.matcher(Email.getText());
         if(!matcher.matches()){
+            email_regex_error.setText("Please enter a valid email address");
             email_regex_error.setVisible(true);
             hasError = true;
-
         }
+
+        // Validate credit card
         pattern = Pattern.compile(creditCard_regex);
         matcher = pattern.matcher(CardNumber.getText());
         if(!matcher.matches()){
+            card_regex_error.setText("Credit card must be 16 digits");
             card_regex_error.setVisible(true);
             hasError = true;
-
         }
+
+        // Validate CVV
         pattern = Pattern.compile(CVV_regex);
         matcher = pattern.matcher(CVV.getText());
         if(!matcher.matches()){
+            CVV_regex_error.setText("CVV must be 3 digits");
             CVV_regex_error.setVisible(true);
             hasError = true;
-
         }
+
+        // Validate phone
         pattern = Pattern.compile(phoneNum_regex);
         matcher = pattern.matcher(PhoneNumber.getText());
         if(!matcher.matches()){
+            phone_regex_error.setText("Phone number must be 10 digits");
             phone_regex_error.setVisible(true);
             hasError = true;
-
         }
+
+        // Validate ID
         pattern = Pattern.compile(ID_regex);
         matcher = pattern.matcher(userID.getText());
         if(!matcher.matches()){
+            ID_Bad.setText("ID must be 9 digits");
             ID_Bad.setVisible(true);
             hasError = true;
-
         }
+
+        // FIX 1: Check local duplicate email before sending to server
+        if(RegisteredAccounts.contains(Email.getText())) {
+            ErrorMsg.setText("This email is already registered. Please use a different email or try logging in.");
+            ErrorMsg.setVisible(true);
+            hasError = true;
+        }
+
         if(!hasError) {
-            if(!RegisteredAccounts.contains(Email.getText()))
-            {
+            try {
                 String Address = Street_Address.getText() + ", " + City_Address.getText();
                 int shopID = 0;
-                if(registerChain.isSelected())
-                    shopID = 0;
-                else
-                {
-                    switch (selectChain.getValue())
-                    {
-                        case "ID 0: - Chain":
-                            shopID = 0;
-                            break;
-                        case "ID 1: Tiberias, Big Danilof":
-                            shopID  = 1;
-                            break;
-                        case "ID 2: Haifa, Merkaz Zeiv":
-                            shopID  = 2;
-                            break;
-                        case "ID 3: Tel Aviv, Ramat Aviv":
-                            shopID  = 3;
-                            break;
-                        case "ID 4: Eilat, Ice mall":
-                            shopID  = 4;
-                            break;
-                        case "ID 5: Be'er Sheva, Big Beer Sheva":
-                            shopID = 5;
-                            break;
-                    }
 
+                if(registerChain.isSelected()) {
+                    shopID = 0;
+                } else {
+                    switch (selectChain.getValue()) {
+                        case "ID 1: Tiberias, Big Danilof": shopID = 1; break;
+                        case "ID 2: Haifa, Merkaz Zeiv": shopID = 2; break;
+                        case "ID 3: Tel Aviv, Ramat Aviv": shopID = 3; break;
+                        case "ID 4: Eilat, Ice mall": shopID = 4; break;
+                        case "ID 5: Be'er Sheva, Big Beer Sheva": shopID = 5; break;
+                        default: shopID = 0; break;
+                    }
                 }
-                long id = Integer.parseInt(userID.getText());
-                System.out.println("ID = " + id);
-                //Account new_acc = new Account(Name.getText(),Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()) ,Integer.parseInt(CVV.getText()), shopID);
-                Account new_acc = new Account(0,Name.getText(),id,Address,Email.getText(),Password.getText(),Long.parseLong(PhoneNumber.getText()),Long.parseLong(CardNumber.getText()),Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()),Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),Integer.parseInt(CVV.getText()),true,shopID,subscription.isSelected());                new_acc.setPrivialge(1);
+
+                long id = Long.parseLong(userID.getText());
+                Account new_acc = new Account(0, Name.getText(), id, Address, Email.getText(),
+                        Password.getText(), Long.parseLong(PhoneNumber.getText()),
+                        Long.parseLong(CardNumber.getText()),
+                        Integer.parseInt(chooseMonth.getSelectionModel().getSelectedItem()),
+                        Integer.parseInt(chooseYear.getSelectionModel().getSelectedItem()),
+                        Integer.parseInt(CVV.getText()), true, shopID, subscription.isSelected());
+                new_acc.setPrivialge(1);
+
                 System.out.println("Registering To Shop " + shopID);
 
-
-                UpdateMessage new_msg2=new UpdateMessage("account","add");
-                //account_num++;
-                //new_acc.setAccountID(account_num);
-                //new_msg2.setId(account_num);
+                UpdateMessage new_msg2 = new UpdateMessage("account", "add");
                 new_msg2.setAccount(new_acc);
-                try {
-                    System.out.println("before sending updateMessage to server ");
-                    registrationPending = true;
-                    pendingEmail = new_acc.getEmail();
-                    RegisterButton.setDisable(true);
-                    SimpleClient.getClient().sendToServer(new_msg2); // sends the updated product to the server class
-                    System.out.println("afater sending updateMessage to server ");
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                    registrationPending = false;
-                    pendingEmail = null;
-                    RegisterButton.setDisable(false);
-                    ErrorMsg.setText("Unable to contact the server. Please try again.");
-                    ErrorMsg.setVisible(true);
-                }
 
-            }
-            else{
+                System.out.println("before sending updateMessage to server ");
+                registrationPending = true;
+                pendingEmail = new_acc.getEmail();
+                RegisterButton.setDisable(true);
+                RegisterButton.setText("Registering...");
+                SimpleClient.getClient().sendToServer(new_msg2);
+                System.out.println("after sending updateMessage to server ");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                registrationPending = false;
+                pendingEmail = null;
+                RegisterButton.setDisable(false);
+                RegisterButton.setText("Register");
+                ErrorMsg.setText("Unable to contact the server. Please check your internet connection and try again.");
+                ErrorMsg.setVisible(true);
+            } catch (NumberFormatException e) {
+                ErrorMsg.setText("Invalid number format in one of the fields. Please check your input.");
                 ErrorMsg.setVisible(true);
             }
         }
-
     }
+
     @FXML
     void checkedChain(ActionEvent event)
     {
@@ -358,6 +366,19 @@ public class RegisterController {
         });
     }
 
+    @Subscribe
+    public void handleRegistrationFailure(RegistrationResultEvent event) {
+        if(event.isSuccess()) {
+            return;
+        }
+        registrationPending = false;
+        pendingEmail = null;
+        Platform.runLater(() -> {
+            RegisterButton.setDisable(false);
+            ErrorMsg.setText(event.getMessage());
+            ErrorMsg.setVisible(true);
+        });
+    }
     @FXML
     void backkk(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));

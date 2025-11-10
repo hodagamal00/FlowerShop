@@ -234,66 +234,65 @@ public class LoginController {
         ErrorMsgPass.setVisible(false);
     }
 
-    /*
-    @FXML
-    void backkk(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
-        Parent roott = loader.load();
-        LogInPrimary cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Login");
-        stage.show();
-        Stage stagee = (Stage) bak.getScene().getWindow();
-        // do what you have to do
-        stagee.close();
-    }
 
-     */
 
     int requestFix = 0;
     boolean alreadyLogged = false;
     private ActionEvent lastLoginEvent;
 
-    @FXML
-    public void handleLogin(ActionEvent actionEvent) throws IOException {
-        lastLoginEvent = actionEvent;
-        backLog.setVisible(false);
-        CheckMail checkMailRequest  = new CheckMail(Email.getText(),login_flag,Password.getText()); // check if employee's/customer's email exists
-        try
-        {
-            SimpleClient.getClient().sendToServer(checkMailRequest); // send the mail to the server to check if exists
-            new java.util.Timer().schedule(
-                    new java.util.TimerTask() {
-                        @Override
-                        public void run() {
-                            if(alreadyLogged == true && requestFix == 0)
-                            {
-                                backLog.setVisible(true);
-                                alLog.setVisible(true);
-                            }
-                            else if(itWorked == true)
-                            {
+    void handleLogin(ActionEvent event) {
+        // Clear previous error messages
+        ErrorMsg.setVisible(false);
+        ErrorMsgPass.setVisible(false);
+        alLog.setVisible(false);
 
-                                LogIn.setVisible(false);
-                                backLog.setVisible(false);
-                                logSucc.setVisible(true);
-                                OpenCatalogplz.setVisible(true);
-                            }
-                            else
-                            {
-                                backLog.setVisible(true);
-                            }
-                        }
-                    },2000
-            );
+        String email = Email.getText().trim();
+        String password = Password.getText();
 
+        // Basic validation
+        if (email.isEmpty() || password.isEmpty()) {
+            if (email.isEmpty()) {
+                ErrorMsg.setText("Please enter your email address");
+                ErrorMsg.setVisible(true);
+            }
+            if (password.isEmpty()) {
+                ErrorMsgPass.setText("Please enter your password");
+                ErrorMsgPass.setVisible(true);
+            }
+            return;
         }
-        catch (IOException e) {
-            // TODO Auto-generated catch block
+
+        // Basic email format validation
+        String emailRegex = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$";
+        if (!email.matches(emailRegex)) {
+            ErrorMsg.setText("Please enter a valid email address");
+            ErrorMsg.setVisible(true);
+            return;
+        }
+
+        // Disable login button during processing
+        LogIn.setDisable(true);
+        LogIn.setText("Logging in...");
+
+        try {
+            // Create CheckMail object and send to server
+            CheckMail loginRequest = new CheckMail(email, password);
+            SimpleClient.getClient().sendToServer(loginRequest);
+
+        } catch (IOException e) {
+            LogIn.setDisable(false);
+            LogIn.setText("Log In");
+            ErrorMsg.setText("Unable to connect to server. Please check your internet connection.");
+            ErrorMsg.setVisible(true);
+        } catch (Exception e) {
+            LogIn.setDisable(false);
+            LogIn.setText("Log In");
+            ErrorMsg.setText("An error occurred. Please try again.");
+            ErrorMsg.setVisible(true);
             e.printStackTrace();
         }
     }
+
     private void navigateToHomePage() {
         ActionEvent event = lastLoginEvent;
         if (event == null) {
