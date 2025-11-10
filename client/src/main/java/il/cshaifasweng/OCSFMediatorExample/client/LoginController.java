@@ -11,10 +11,15 @@ import java.net.URL;
 import java.util.*;
 import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
 import javafx.application.Platform;
+import javafx.scene.Node;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
@@ -23,6 +28,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 public class LoginController {
@@ -242,6 +248,8 @@ public class LoginController {
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
         alLog.setVisible(false);
+        logSucc.setVisible(false);
+        OpenCatalogplz.setVisible(false);
 
         String email = Email.getText().trim();
         String password = Password.getText();
@@ -266,6 +274,8 @@ public class LoginController {
             ErrorMsg.setVisible(true);
             return;
         }
+        // Remember the triggering event so we can navigate after a successful login
+        lastLoginEvent = event;
 
         // Disable login button during processing
         LogIn.setDisable(true);

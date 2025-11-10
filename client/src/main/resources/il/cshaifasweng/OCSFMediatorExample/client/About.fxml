@@ -49,7 +49,7 @@
                         BorderPane.alignment="CENTER">
                      <children>
                         <ImageView fitHeight="80.0" fitWidth="80.0" preserveRatio="true">
-                           <image><Image url="@/images/logo.png"/></image>
+                           <image><Image url="@/images/flower5.jpg"/></image>
                         </ImageView>
                         <Label text="About FlowerShop" styleClass="page-title"/>
                         <Label text="Your Trusted Flower Delivery Service" styleClass="text-secondary"/>
