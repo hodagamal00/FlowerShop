@@ -376,77 +376,35 @@ public class SimpleServer extends AbstractServer {
 			String recievedMailStr = recievedMessage.getEmail();
 			String recievedPasswordStr = recievedMessage.getPassword();
 
-			boolean foundTheMail = false ;
-			boolean foundThePassword = false ;
-			// 1. apply query to check if the mail exists in the accounts table
 			List<Account> accountsList = getAllAccounts();
-			for (int i=0;i<accountsList.size();i++)
-			{
-				System.out.println(accountsList.get(i).getEmail());
-				if(accountsList.get(i).getEmail().equals(recievedMailStr))
-				{
-					foundTheMail = true ;
-					System.out.println("found the mail ! the iteration is: " + i);
-				}
+			Account matchedAccount = null;
 
-			}
-			// 2. if the account exists then check if the password matches
-			if(foundTheMail)
-			{
-				for (int i=0;i<accountsList.size();i++)
-				{
-					System.out.println(accountsList.get(i).getPassword());
-					if(accountsList.get(i).getPassword().equals(recievedPasswordStr))
-					{
-						if(accountsList.get(i).getLoggedIn() == false) {
-
-
-							System.out.println("arrived to the new code 8/6");
-							foundThePassword = true;
-							Account updateAcc  = SimpleServer.session.load(Account.class, accountsList.get(i).getAccountID());
-							System.out.println(updateAcc.getID());
-							//System.out.println("the found mailid is :" + foundMailId);
-							updateAcc.setLoggedIn(true);
-
-
-							System.out.println("found the password ! the iteration is: " + i);
-							client.sendToClient("found mail and password");
-							new java.util.Timer().schedule(
-									new java.util.TimerTask() {
-										@Override
-										public void run() {
-
-											SimpleServer.session.update(updateAcc);
-										}
-									},1000
-							);
-
-							tx1.commit();
-							SimpleServer.session.close();
-
-						}
-						else
-						{
-							System.out.println("arrived to already logged in");
-							client.sendToClient("already logged");
-							foundThePassword = true ;
-
-						}
-					}
-
-
+			for (Account account : accountsList) {
+				System.out.println(account.getEmail());
+				if (account.getEmail().equals(recievedMailStr)) {
+					matchedAccount = account;
+					break;
 				}
 			}
-			else if(!foundTheMail)
-			{ // 3. if the account not found then send a message to the client
-				// send a message to the client
+
+			if (matchedAccount == null) {
+				tx1.rollback();
+				session.close();
 				client.sendToClient("mail not found");
-			}
-
-			if(foundTheMail && !foundThePassword)
-			{ // 4. if the account found but password not found then send a message to the client
-				// send a message to the client
+			} else if (!matchedAccount.getPassword().equals(recievedPasswordStr)) {
+				tx1.rollback();
+				session.close();
 				client.sendToClient("wrong password");
+			} else if (matchedAccount.getLoggedIn()) {
+				tx1.rollback();
+				session.close();
+				client.sendToClient("already logged");
+			} else {
+				matchedAccount.setLoggedIn(true);
+				session.update(matchedAccount);
+				tx1.commit();
+				session.close();
+				client.sendToClient("found mail and password");
 			}
 		}
 		if(msg instanceof MailClass){ // added today

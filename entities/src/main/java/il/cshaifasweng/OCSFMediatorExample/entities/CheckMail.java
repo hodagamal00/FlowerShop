@@ -14,6 +14,8 @@ public class CheckMail implements Serializable {
     }
 
     public CheckMail(String email, String password) {
+        this.email = email;
+        this.password = password;
     }
 
     // SETTERS

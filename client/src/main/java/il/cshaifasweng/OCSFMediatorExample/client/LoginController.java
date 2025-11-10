@@ -245,6 +245,8 @@ public class LoginController {
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
         alLog.setVisible(false);
+        logSucc.setVisible(false);
+        OpenCatalogplz.setVisible(false);
 
         String email = Email.getText().trim();
         String password = Password.getText();
@@ -269,6 +271,8 @@ public class LoginController {
             ErrorMsg.setVisible(true);
             return;
         }
+        // Remember the triggering event so we can navigate after a successful login
+        lastLoginEvent = event;
 
         // Disable login button during processing
         LogIn.setDisable(true);
@@ -315,38 +319,32 @@ public class LoginController {
     }
 
     @Subscribe
-    public void checkMailInDB(MailChecker checkML) throws IOException
-    {
-        System.out.println("IM HERE :DDD");
-        if(checkML.getExistsMail() == false){ // case incorrect email
-            System.out.println("arrived to case incorrect email succesfully");
-            ErrorMsg.setVisible(true);
+    public void checkMailInDB(MailChecker checkML) throws IOException {
+        Platform.runLater(() -> {
+            LogIn.setDisable(false);
+            LogIn.setText("Log In");
 
-            /*MailPassMatch checkEmailPass = new MailPassMatch(Email.getText(),Password.getText(),login_flag);
-            try {
-                SimpleClient.getClient().sendToServer(checkEmailPass);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }*/
-        }
-        else if(checkML.getExistsPassword() == false)
-        { // case email found but the password is incorrect
-            System.out.println("arrived to case incorrect password  succesfully");
-            ErrorMsgPass.setVisible(true);
-        }
-        else if(checkML.isLoggedIn() == false)
-        {
-            System.out.println("WE GOT HERE, GOOD EMAIL");
-            itWorked = true;
-            requestFix++;
-        }
-        else if(checkML.isLoggedIn() == true)
-        {
-            System.out.println("Already Logged In");
-            alreadyLogged = true;
-        }
+            ErrorMsg.setVisible(false);
+            ErrorMsgPass.setVisible(false);
+            alLog.setVisible(false);
 
+            if (!checkML.getExistsMail()) {
+                ErrorMsg.setText("Account not found. Please check your email or create a new account.");
+                ErrorMsg.setVisible(true);
+                Password.clear();
+            } else if (!checkML.getExistsPassword()) {
+                ErrorMsgPass.setText("Incorrect password. Please try again.");
+                ErrorMsgPass.setVisible(true);
+                Password.clear();
+            } else if (checkML.isLoggedIn()) {
+                alLog.setText("This account is already logged in on another device.");
+                alLog.setVisible(true);
+            } else {
+                logSucc.setText("Login successful! Redirecting to the home page...");
+                logSucc.setVisible(true);
+                navigateToHomePage();
+            }
+        });
     }
     boolean itWorked = false;
 
