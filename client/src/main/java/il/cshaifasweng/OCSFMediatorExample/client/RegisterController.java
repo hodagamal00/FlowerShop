@@ -357,6 +357,7 @@ public class RegisterController {
 
         Platform.runLater(() -> {
             RegisterButton.setDisable(false);
+            RegisterButton.setText("Register");
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Registration Successful");
             alert.setHeaderText("Welcome to FlowerShop!");
@@ -375,6 +376,7 @@ public class RegisterController {
         pendingEmail = null;
         Platform.runLater(() -> {
             RegisterButton.setDisable(false);
+            RegisterButton.setText("Register");
             ErrorMsg.setText(event.getMessage());
             ErrorMsg.setVisible(true);
         });

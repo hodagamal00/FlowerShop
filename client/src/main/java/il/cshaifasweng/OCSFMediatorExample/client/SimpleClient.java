@@ -20,6 +20,12 @@ public class SimpleClient extends AbstractClient {
 	protected void handleMessageFromServer(Object msg) {
 		System.out.println("handle start");
 
+		if(msg instanceof RegistrationResultEvent) {
+			RegistrationResultEvent resultEvent = (RegistrationResultEvent) msg;
+			EventBus.getDefault().post(resultEvent);
+			return;
+		}
+
 		if(msg instanceof List){
 			System.out.println("arrived to msg instanceof LIST in simple client");
 			List<Product> listt = (List<Product>) msg;
@@ -34,6 +40,7 @@ public class SimpleClient extends AbstractClient {
 
 		}
 		if(msg instanceof String){
+
 			String recievedStr = (String)msg ;
 
 			if(recievedStr.equals("not found")){

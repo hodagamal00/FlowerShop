@@ -362,6 +362,24 @@ public class PrimaryController {
 		NavigationService.getInstance().navigate(fxml);
 	}
 
+	private void navigateAfterLogin(Account account) {
+		if (account == null) {
+			navigateInShell("primary");
+			return;
+		}
+
+		int privilege = account.getPrivialge();
+		if (privilege >= 4) {
+			navigateInShell("NetworkDashboard");
+		} else if (privilege >= 3) {
+			navigateInShell("log_manager");
+		} else if (privilege >= 2) {
+			navigateInShell("WorkerDashboard");
+		} else {
+			navigateInShell("primary");
+		}
+	}
+
 	@FXML
 	void goLogOut(ActionEvent event) throws IOException {
 		LogOut logOutObject = new LogOut();
@@ -1683,6 +1701,9 @@ public class PrimaryController {
 		System.out.println("Acc Priv: " + recvAccount.getPrivialge());
 		currentLoggedAccount = recvAccount;
 		System.out.println(" Current Priv : " + currentLoggedAccount.getPrivialge());
+		SimpleClient.setAccount(currentLoggedAccount);
+		applyPrivilegeBasedUI();
+		navigateAfterLogin(currentLoggedAccount);
 
 	}
 	@Subscribe
@@ -1696,64 +1717,11 @@ public class PrimaryController {
 		allProducts = rtEvent.getRecievedList();
 
 
-		/*
-		// TESTING THE ACCOUNTS ADD MANUALLY
-		UpdateMessage new_msg=new UpdateMessage("account","add");
-		Date date=new Date();
-		Account new_acc=new Account("khaled","sakhnin","@eee","332",457,889,1,2,445,2);
-		new_msg.setAccount(new_acc);
-		try {
-			System.out.println("before sending updateMessage to server ");
-			SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
-			System.out.println("afater sending updateMessage to server ");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-
-		/*new_acc=new Account("abu-nebal","haifa","@nebal.com","111",457,889,date,445,2);
-		new_msg.setAccount(new_acc);
-		try {
-			System.out.println("before sending updateMessage to server ");
-			SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
-			System.out.println("afater sending updateMessage to server ");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-
-		new_acc=new Account("molazem-ra2oof","haifa","@ra2of.com","111",457,889,date,445,2);
-		new_msg.setAccount(new_acc);
-		try {
-			System.out.println("before sending updateMessage to server ");
-			SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
-			System.out.println("afater sending updateMessage to server ");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
 	}
 
 	@Subscribe
 	public void initDatabase(InitDatabaseEvent event) {
-		/*
-		UpdateMessage new_msg=new UpdateMessage("account","add");
-		Date date=new Date();
-		Account new_acc=new Account("khaled","sakhnin","@eee","332",457,889,1,2,445,2);
-		new_msg.setAccount(new_acc);
-		try {
-			System.out.println("before sending updateMessage to server ");
-			SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
-			System.out.println("afater sending updateMessage to server ");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-		 */
 		System.out.println("arrived to databaseInit");
         // When constructing Product instances we must pass the price as a double.
         // DialogPane#getContentText() returns a String, so parse it to double

@@ -11,15 +11,10 @@ import java.net.URL;
 import java.util.*;
 import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
 import javafx.application.Platform;
-import javafx.scene.Node;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
@@ -28,7 +23,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 public class LoginController {
@@ -239,15 +233,15 @@ public class LoginController {
     int requestFix = 0;
     boolean alreadyLogged = false;
     private ActionEvent lastLoginEvent;
+    private Account authenticatedAccount;
+    private boolean navigationPendingAccount;
 
-    @FXML
-    private void handleLogin(ActionEvent event) {
+    void handleLogin(ActionEvent event) {
+        lastLoginEvent = event;
         // Clear previous error messages
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
         alLog.setVisible(false);
-        lastLoginEvent = event;
-
 
         String email = Email.getText().trim();
         String password = Password.getText();
@@ -283,37 +277,54 @@ public class LoginController {
             SimpleClient.getClient().sendToServer(loginRequest);
 
         } catch (IOException e) {
-            LogIn.setDisable(false);
-            LogIn.setText("Log In");
+            resetLoginButton();
+
             ErrorMsg.setText("Unable to connect to server. Please check your internet connection.");
             ErrorMsg.setVisible(true);
         } catch (Exception e) {
-            LogIn.setDisable(false);
-            LogIn.setText("Log In");
+            resetLoginButton();
+
             ErrorMsg.setText("An error occurred. Please try again.");
             ErrorMsg.setVisible(true);
             e.printStackTrace();
         }
     }
 
-    private void navigateToHomePage() {
-        ActionEvent event = lastLoginEvent;
-        if (event == null) {
+    private void resetLoginButton() {
+        Platform.runLater(() -> {
+            LogIn.setDisable(false);
+            LogIn.setText("Log In");
+        });
+    }
+
+    private void handleLoginSuccess(Account account) {
+        resetLoginButton();
+        if (account == null) {
+            navigationPendingAccount = true;
             return;
         }
 
+        authenticatedAccount = account;
+        navigationPendingAccount = false;
+        CatalogFlag.setFlagg(1);
+        navigateAfterLogin(account);
+        lastLoginEvent = null;
+    }
+
+    private void navigateAfterLogin(Account account) {
         Platform.runLater(() -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("HomePage.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.show();
-                lastLoginEvent = null;
-            } catch (IOException e) {
-                ErrorMsg.setText("Unable to load home page.");
-                ErrorMsg.setVisible(true);
+            int privilege = account.getPrivialge();
+            String targetView;
+            if (privilege >= 4) {
+                targetView = "NetworkDashboard";
+            } else if (privilege >= 3) {
+                targetView = "log_manager";
+            } else if (privilege >= 2) {
+                targetView = "WorkerDashboard";
+            } else {
+                targetView = "primary";
             }
+            NavigationService.getInstance().navigate(targetView);
         });
     }
 
@@ -324,6 +335,7 @@ public class LoginController {
         if(checkML.getExistsMail() == false){ // case incorrect email
             System.out.println("arrived to case incorrect email succesfully");
             ErrorMsg.setVisible(true);
+            resetLoginButton();
 
             /*MailPassMatch checkEmailPass = new MailPassMatch(Email.getText(),Password.getText(),login_flag);
             try {
@@ -337,17 +349,25 @@ public class LoginController {
         { // case email found but the password is incorrect
             System.out.println("arrived to case incorrect password  succesfully");
             ErrorMsgPass.setVisible(true);
+            resetLoginButton();
         }
         else if(checkML.isLoggedIn() == false)
         {
             System.out.println("WE GOT HERE, GOOD EMAIL");
             itWorked = true;
             requestFix++;
+            Account account = resolveAuthenticatedAccount();
+            handleLoginSuccess(account);
         }
         else if(checkML.isLoggedIn() == true)
         {
             System.out.println("Already Logged In");
             alreadyLogged = true;
+            resetLoginButton();
+            Platform.runLater(() -> {
+                alLog.setText("User already logged in from another session.");
+                alLog.setVisible(true);
+            });
         }
 
     }
@@ -358,12 +378,36 @@ public class LoginController {
         System.out.println("Checking Mail IN DB");
         if(checkEmailPass.getexists()==true)
         {
-            navigateToHomePage();
+            Account account = resolveAuthenticatedAccount();
+            handleLoginSuccess(account);
         }
         else{
             ErrorMsgPass.setVisible(true);
+            resetLoginButton();
         }
     }
 
-}
+    @Subscribe
+    public void onAccountReceived(PassAccountEvent event) {
+        Account account = SimpleClient.getUser();
+        if (account == null) {
+            account = event.getRecievedAccount();
+        }
+        if (account == null) {
+            return;
+        }
+        authenticatedAccount = account;
+        if (navigationPendingAccount) {
+            handleLoginSuccess(account);
+        }
+    }
 
+    private Account resolveAuthenticatedAccount() {
+        Account account = authenticatedAccount;
+        if (account == null) {
+            account = SimpleClient.getUser();
+        }
+        return account;
+    }
+
+}
