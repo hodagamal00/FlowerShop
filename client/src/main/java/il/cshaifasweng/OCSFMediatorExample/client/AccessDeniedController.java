@@ -5,6 +5,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+
+import java.util.List;
 
 /**
  * Controller for the Access Denied page
@@ -23,7 +28,9 @@ public class AccessDeniedController {
     @FXML private Label deniedMessageLabel;
     @FXML private Label currentRoleLabel;
     @FXML private Label requiredRoleLabel;
-    
+
+    @FXML private VBox privilegeDetailsBox;
+
     @FXML private Button backBtn;
     @FXML private Button catalogBtn;
 
@@ -41,6 +48,72 @@ public class AccessDeniedController {
         "Manager (Level 3)",
         "Chain Manager (Level 4)"
     };
+    private static final PrivilegeDescriptor[] PRIVILEGE_DESCRIPTORS = {
+            new PrivilegeDescriptor(0, "Level 0 – Guest",
+                    "Role: Unregistered user (no account / no login)",
+                    List.of(
+                            "Browse the public catalog (view all products by category, price, color, etc.)",
+                            "View product details (name, price, image, description)",
+                            "Add items to a temporary cart (not saved between sessions)",
+                            "Cannot place orders, submit complaints, or view personal data",
+                            "Access the Login and Registration pages only"
+                    )),
+            new PrivilegeDescriptor(1, "👩‍💼 Level 1 – Customer",
+                    "Role: Registered user with an account",
+                    List.of(
+                            "Create and confirm orders (from catalog or custom bouquets)",
+                            "Specify delivery information (address, receiver name, phone)",
+                            "Pay for orders (credit card, subscription)",
+                            "Cancel orders according to policy (refund rules)",
+                            "Submit and view complaints",
+                            "View order history",
+                            "Receive notifications about orders, deliveries, and complaints",
+                            "If subscribed: get discounts and network-wide purchase rights"
+                    )),
+            new PrivilegeDescriptor(2, "👩‍🔧 Level 2 – Worker",
+                    "Role: Flower shop employee (customer service or store clerk)",
+                    List.of(
+                            "View and manage branch orders (accept, prepare, mark as delivered)",
+                            "Handle complaints assigned to the branch",
+                            "Access branch inventory (add/update stock availability)",
+                            "Send status updates to customers (e.g., delivery dispatched)",
+                            "Cannot modify catalog or prices (manager-only task)"
+                    )),
+            new PrivilegeDescriptor(3, "👩‍🏫 Level 3 – Branch Manager",
+                    "Role: Manager of a specific store/branch",
+                    List.of(
+                            "Manage catalog items for their branch (add, update, remove)",
+                            "View and analyze branch reports (sales, orders, complaints)",
+                            "Manage branch workers and accounts",
+                            "Approve discounts and promotions for their branch only"
+                    )),
+            new PrivilegeDescriptor(4, "👩‍💼 Level 4 – Chain Manager",
+                    "Role: Central administrator of the entire flower network",
+                    List.of(
+                            "Manage all branches, managers, and workers",
+                            "Update and synchronize the global catalog",
+                            "View and compare reports across all branches",
+                            "Modify system configurations, user privileges, and accounts",
+                            "Suspend or reactivate user accounts",
+                            "Create global promotions",
+                            "Supervise complaint resolution and system performance",
+                            "Monitor activity and analytics for the entire network"
+                    ))
+    };
+
+    private static final class PrivilegeDescriptor {
+        final int level;
+        final String title;
+        final String roleDescription;
+        final List<String> capabilities;
+
+        PrivilegeDescriptor(int level, String title, String roleDescription, List<String> capabilities) {
+            this.level = level;
+            this.title = title;
+            this.roleDescription = roleDescription;
+            this.capabilities = capabilities;
+        }
+    }
 
     /**
      * Set access denial information before navigating to this page
@@ -68,24 +141,28 @@ public class AccessDeniedController {
         
         // Configure navigation visibility based on user role
         configureNavigationByRole();
+        // Build privilege breakdown
+        populatePrivilegeDetails();
     }
 
     /**
      * Load current user information
      */
     private void loadUserInfo() {
-        // Get current user from session/client
-        // For now, using placeholder
         try {
-            // Account currentUser = SimpleClient.getClient().getCurrentUser();
-            // if (currentUser != null) {
-            //     usernameLabel.setText(currentUser.getUserName());
-            //     currentPrivilegeLevel = currentUser.getPrivilegeLevel();
-            // } else {
-            //     usernameLabel.setText("Guest");
-            //     currentPrivilegeLevel = 0;
-            // }
-            usernameLabel.setText("Guest");
+            Account currentUser = SimpleClient.getUser();
+            if (currentUser != null) {
+                String displayName = currentUser.getFullName();
+                if (displayName == null || displayName.isBlank()) {
+                    displayName = currentUser.getEmail();
+                }
+                if (displayName == null || displayName.isBlank()) {
+                    displayName = "User";
+                }
+                usernameLabel.setText(displayName);
+            } else {
+                usernameLabel.setText("Guest");
+            }
         } catch (Exception e) {
             usernameLabel.setText("Guest");
         }
@@ -123,13 +200,56 @@ public class AccessDeniedController {
     private void configureNavigationByRole() {
         // Get current user privilege level
         int privilegeLevel = currentPrivilegeLevel;
-        
-        // Show/hide links based on privilege
-        if (privilegeLevel < 1) { // Guest
-            ordersLink.setVisible(false);
-            complaintsLink.setVisible(false);
-            accountLink.setVisible(false);
-            logoutBtn.setVisible(false);
+
+        boolean loggedIn = privilegeLevel >= 1;
+
+        setLinkVisibility(ordersLink, loggedIn);
+        setLinkVisibility(complaintsLink, loggedIn);
+        setLinkVisibility(accountLink, loggedIn);
+
+        if (logoutBtn != null) {
+            logoutBtn.setVisible(loggedIn);
+            logoutBtn.setManaged(loggedIn);
+        }
+    }
+
+    private void setLinkVisibility(Hyperlink link, boolean visible) {
+        if (link != null) {
+            link.setVisible(visible);
+            link.setManaged(visible);
+        }
+    }
+
+    private void populatePrivilegeDetails() {
+        if (privilegeDetailsBox == null) {
+            return;
+        }
+
+        privilegeDetailsBox.getChildren().clear();
+        for (PrivilegeDescriptor descriptor : PRIVILEGE_DESCRIPTORS) {
+            VBox box = new VBox(6);
+            box.setFillWidth(true);
+            box.getStyleClass().add("card");
+            box.setStyle(descriptor.level == currentPrivilegeLevel
+                    ? "-fx-border-color: #6a1b9a; -fx-border-width: 2; -fx-background-color: rgba(106,27,154,0.08); -fx-border-radius: 10; -fx-background-radius: 10;"
+                    : descriptor.level == requiredPrivilegeLevel
+                    ? "-fx-border-color: #c0392b; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-radius: 10;"
+                    : "-fx-border-color: rgba(0,0,0,0.05); -fx-border-radius: 10; -fx-background-radius: 10;");
+
+            Label titleLabel = new Label(descriptor.title);
+            titleLabel.getStyleClass().add("strong");
+            Label roleLabel = new Label(descriptor.roleDescription);
+            roleLabel.getStyleClass().add("text-secondary");
+            roleLabel.setWrapText(true);
+
+            box.getChildren().addAll(titleLabel, roleLabel);
+            for (String capability : descriptor.capabilities) {
+                Label capabilityLabel = new Label("• " + capability);
+                capabilityLabel.setWrapText(true);
+                box.getChildren().add(capabilityLabel);
+            }
+
+            privilegeDetailsBox.getChildren().add(box);
         }
     }
 

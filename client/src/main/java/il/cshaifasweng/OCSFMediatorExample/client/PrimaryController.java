@@ -413,8 +413,11 @@ public class PrimaryController {
 	@FXML
 	void ReplyToComplaints(ActionEvent event) throws IOException {
 
-		PassAccountEventReplyComplaint recievedAcc = new PassAccountEventReplyComplaint(currentLoggedAccount);
+		if (!ensurePrivilege(event, 2, "Complaint Handling")) {
+			return;
+		}
 
+		PassAccountEventReplyComplaint recievedAcc = new PassAccountEventReplyComplaint(currentLoggedAccount);
 		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
 					@Override
@@ -433,8 +436,11 @@ public class PrimaryController {
 	@FXML
 	void openControlPanel(ActionEvent event) throws IOException {
 
-		PassAccountEventAdmin recievedAcc = new PassAccountEventAdmin(currentLoggedAccount);
+		if (!ensurePrivilege(event, 3, "Admin Panel")) {
+			return;
+		}
 
+		PassAccountEventAdmin recievedAcc = new PassAccountEventAdmin(currentLoggedAccount);
 		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
 					@Override
@@ -451,86 +457,44 @@ public class PrimaryController {
 	@FXML
 	void addToCartFlower1(ActionEvent event)
 	{
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		if (CatalogSTARTIndex < allProducts.size()) {
+			addProductToCart(allProducts.get(CatalogSTARTIndex));
+		}
 	}
 
 	@FXML
 	void addToCartFlower2(ActionEvent event) {
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+1).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+1).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+1));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		if (CatalogSTARTIndex + 1 < allProducts.size()) {
+			addProductToCart(allProducts.get(CatalogSTARTIndex + 1));
+		}
 	}
 
 	@FXML
 	void addToCartFlower3(ActionEvent event) {
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+2).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+2).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+2));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		if (CatalogSTARTIndex + 2 < allProducts.size()) {
+			addProductToCart(allProducts.get(CatalogSTARTIndex + 2));
+		}
 	}
 
 	@FXML
 	void addToCartFlower4(ActionEvent event) {
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+3).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+3).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+3));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		if (CatalogSTARTIndex + 3 < allProducts.size()) {
+			addProductToCart(allProducts.get(CatalogSTARTIndex + 3));
+		}
 	}
 
 	@FXML
 	void addToCartFlower5(ActionEvent event) {
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+4).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+4).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+4));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		if (CatalogSTARTIndex + 4 < allProducts.size()) {
+			addProductToCart(allProducts.get(CatalogSTARTIndex + 4));
+		}
 	}
 
 	@FXML
 	void addToCartFlower6(ActionEvent event) 	{
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+5).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+5).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+5));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		if (CatalogSTARTIndex + 5 < allProducts.size()) {
+			addProductToCart(allProducts.get(CatalogSTARTIndex + 5));
+		}
 	}
 	@FXML
 	private TextField cartText;
@@ -538,6 +502,9 @@ public class PrimaryController {
 	@FXML
 	void openDelivery(ActionEvent event) throws IOException
 	{
+		if (!ensurePrivilege(event, 2, "Deliveries")) {
+			return;
+		}
 		PassAccountEventDelivery recievedAcc = new PassAccountEventDelivery(currentLoggedAccount);
 		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
@@ -596,6 +563,10 @@ public class PrimaryController {
 	@FXML
 	void openComplaintManager(ActionEvent event) throws IOException {
 
+		if (!ensurePrivilege(event, 3, "Manager Dashboard")) {
+			return;
+		}
+
 		GetAllComplaints allComplaints = new GetAllComplaints();
 		System.out.println("send request for complaints !!");
 		try {
@@ -628,6 +599,10 @@ public class PrimaryController {
 	@FXML
 	void openCheckout(ActionEvent event) throws IOException
 	{
+		if (!ensurePrivilege(event, 1, "Checkout")) {
+			return;
+		}
+
 		System.out.println("arrived to checkout 1");
 		navigateInShell("checkout");
 		System.out.println("arrived to checkout 2");
@@ -681,8 +656,10 @@ public class PrimaryController {
 
 	@FXML
 	void openMyComplaints(ActionEvent event) throws IOException {
+		if (!ensurePrivilege(event, 1, "Complaints")) {
+			return;
+		}
 		navigateInShell("mycomplaints");
-
 		PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentLoggedAccount);
 
 		new java.util.Timer().schedule(
@@ -712,6 +689,9 @@ public class PrimaryController {
 	@FXML
 	void openMyOrders(ActionEvent event) throws IOException
 	{
+		if (!ensurePrivilege(event, 1, "My Orders")) {
+			return;
+		}
 		navigateInShell("myorders");
 
 		PassAccountEventOrders recievedAcc = new PassAccountEventOrders(currentLoggedAccount);
@@ -939,16 +919,8 @@ public class PrimaryController {
             String selectedColor = chooseCustomColor.getSelectionModel().getSelectedItem();
             Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor, priceValue);
 
-            int basePrice = Integer.parseInt(cartTextPrice.getText());
-            int addedPrice = (int) Math.round(product.getPrice());
-            CartItemsList.getItems().add(product.getName());
-            basePrice = basePrice + addedPrice;
-            cartTextPrice.setText(String.valueOf(basePrice));
-            userCart.add(product);
-			if (currentLoggedAccount.isSubscription() == true && basePrice > 50)
-				cartTextDiscount.setText("" + basePrice * 0.9);
-			else
-				cartTextDiscount.setText("" + basePrice);
+			addProductToCart(product);
+
 
 
 			customid.setVisible(false);
@@ -1639,10 +1611,12 @@ public class PrimaryController {
         System.out.println(CatalogFlag.getFlagg());
         cartTextPrice.setText("0");
         cartTextDiscount.setText("0");
+		updateCartSummary(0);
         worker_edit.setVisible(false);
 
         inboxList.setVisible(false);
         openMessage.setVisible(false);
+		applyPrivilegeBasedUI();
 
     }
 
@@ -1931,58 +1905,39 @@ public class PrimaryController {
 	 * Privilege 4 (Chain Manager): + Network-wide access
 	 */
 	private void applyPrivilegeBasedUI() {
-        // If no account is logged in yet (e.g., user opens catalog as guest),
-        // default to privilege 0 to avoid NullPointerExceptions.  This ensures
-        // the catalog can still be browsed without requiring authentication.
-        if (currentLoggedAccount == null) {
-            hideAllPrivilegedFeatures();
-            System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
-            return;
-        }
-        int privilege = currentLoggedAccount.getPrivialge();
-        System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
-		
-		// GUEST (0): Can only browse catalog - all interactive features hidden
-		if (privilege == 0) {
-			hideAllPrivilegedFeatures();
+		hideAllPrivilegedFeatures();
+
+		int privilege = resolveCurrentPrivilegeLevel();
+		System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
+
+		// Guest baseline: browse catalog and manage a temporary cart
+		enableGuestFeatures();
+		if (privilege <= 0) {
 			System.out.println("Guest mode: Browse-only access");
+			return;
 		}
-		
+
 		// CUSTOMER (1): Can browse + checkout + manage own orders/complaints
-		else if (privilege == 1) {
-			hideAllPrivilegedFeatures();
-			enableCustomerFeatures();
-			System.out.println("Customer mode: Shopping and account management enabled");
-		}
-		
-		// WORKER (2): Customer features + worker panel
-		else if (privilege == 2) {
-			hideAllPrivilegedFeatures();
-			enableCustomerFeatures();
+		enableCustomerFeatures();
+		System.out.println("Customer mode: Shopping and account management enabled");
+
+		if (privilege >= 2) {
+			// WORKER (2): Customer features + worker panel
 			enableWorkerFeatures();
 			System.out.println("Worker mode: Customer + Worker panel enabled");
 		}
-		
-		// MANAGER (3): Worker features + admin dashboard + reports
-		else if (privilege == 3) {
-			hideAllPrivilegedFeatures();
-			enableCustomerFeatures();
-			enableWorkerFeatures();
+		if (privilege >= 3) {
+			// MANAGER (3): Worker features + admin dashboard + reports
 			enableManagerFeatures();
 			System.out.println("Manager mode: Full branch admin access enabled");
 		}
-		
-		// CHAIN MANAGER (4): All features + network-wide access
-		else if (privilege >= 4) {
-			hideAllPrivilegedFeatures();
-			enableCustomerFeatures();
-			enableWorkerFeatures();
-			enableManagerFeatures();
+		if (privilege >= 4) {
+			// CHAIN MANAGER (4): All features + network-wide access
 			enableChainManagerFeatures();
 			System.out.println("Chain Manager mode: Network-wide admin access enabled");
 		}
 	}
-	
+
 	/**
 	 * Hide all privileged features (reset to guest mode)
 	 */
@@ -1998,24 +1953,20 @@ public class PrimaryController {
 		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(false);
 		if (CartItemsList != null) CartItemsList.setVisible(false);
 		if (cartTopText != null) cartTopText.setVisible(false);
-		if (flower1_addCart != null) flower1_addCart.setVisible(false);
-		if (flower2_addCart != null) flower2_addCart.setVisible(false);
-		if (flower3_addCart != null) flower3_addCart.setVisible(false);
-		if (flower4_addCart != null) flower4_addCart.setVisible(false);
-		if (flower5_addCart != null) flower5_addCart.setVisible(false);
-		if (flower6_addCart != null) flower6_addCart.setVisible(false);
+		if (viewCart != null) viewCart.setVisible(false);
+		setAddToCartButtonsVisible(false);
 		if (CreateCustomItem != null) CreateCustomItem.setVisible(false);
-		
+
 		// Worker features
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
-		
+
 		// Manager features
 		if (infoo != null) infoo.setVisible(false);
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
 		if (adminEditCatalog != null) adminEditCatalog.setVisible(false);
 	}
-	
+
 	/**
 	 * Enable customer features (privilege >= 1)
 	 * Allows: Shopping cart, checkout, order management, complaints
@@ -2029,26 +1980,22 @@ public class PrimaryController {
 		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(true);
 		if (CartItemsList != null) CartItemsList.setVisible(true);
 		if (cartTopText != null) cartTopText.setVisible(true);
-		
+		if (viewCart != null) viewCart.setVisible(true);
+
 		// Add to cart buttons
-		if (flower1_addCart != null) flower1_addCart.setVisible(true);
-		if (flower2_addCart != null) flower2_addCart.setVisible(true);
-		if (flower3_addCart != null) flower3_addCart.setVisible(true);
-		if (flower4_addCart != null) flower4_addCart.setVisible(true);
-		if (flower5_addCart != null) flower5_addCart.setVisible(true);
-		if (flower6_addCart != null) flower6_addCart.setVisible(true);
-		
+		setAddToCartButtonsVisible(true);
+
 		// Custom products
 		if (CreateCustomItem != null) CreateCustomItem.setVisible(true);
-		
+
 		// Account management
 		if (viewMyOrders != null) viewMyOrders.setVisible(true);
 		if (viewMyComplaints != null) viewMyComplaints.setVisible(true);
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(true);
-		
+
 		System.out.println("  \u2713 Customer features enabled");
 	}
-	
+
 	/**
 	 * Enable worker features (privilege >= 2)
 	 * Allows: Worker panel, delivery management, complaint handling
@@ -2057,10 +2004,95 @@ public class PrimaryController {
 		// Worker panel access
 		if (deliveryButton != null) deliveryButton.setVisible(true);
 		if (openComplaints != null) openComplaints.setVisible(true);
-		
+
 		System.out.println("  \u2713 Worker features enabled");
 	}
-	
+
+	/**
+	 * Enable guest features (privilege = 0)
+	 * Allows: catalog browsing, temporary cart management
+	 */
+	private void enableGuestFeatures() {
+		if (viewCart != null) viewCart.setVisible(true);
+		setAddToCartButtonsVisible(true);
+	}
+
+	private void setAddToCartButtonsVisible(boolean visible) {
+		if (flower1_addCart != null) flower1_addCart.setVisible(visible);
+		if (flower2_addCart != null) flower2_addCart.setVisible(visible);
+		if (flower3_addCart != null) flower3_addCart.setVisible(visible);
+		if (flower4_addCart != null) flower4_addCart.setVisible(visible);
+		if (flower5_addCart != null) flower5_addCart.setVisible(visible);
+		if (flower6_addCart != null) flower6_addCart.setVisible(visible);
+	}
+
+	private int resolveCurrentPrivilegeLevel() {
+		if (currentLoggedAccount != null) {
+			return currentLoggedAccount.getPrivialge();
+		}
+		Account sessionAccount = SimpleClient.getUser();
+		if (sessionAccount != null) {
+			return sessionAccount.getPrivilegeLevel();
+		}
+		return 0;
+	}
+
+	private void addProductToCart(Product product) {
+		if (product == null) {
+			return;
+		}
+
+		if (CartItemsList != null) {
+			CartItemsList.getItems().add(product.getName());
+		}
+		userCart.add(product);
+
+		int basePrice = parseCartTotal();
+		basePrice += (int) Math.round(product.getPrice());
+		updateCartSummary(basePrice);
+	}
+
+	private int parseCartTotal() {
+		if (cartTextPrice == null) {
+			return 0;
+		}
+		String value = cartTextPrice.getText();
+		if (value == null || value.isBlank()) {
+			return 0;
+		}
+		try {
+			return Integer.parseInt(value.trim());
+		} catch (NumberFormatException ignored) {
+			return 0;
+		}
+	}
+
+	private void updateCartSummary(int basePrice) {
+		if (cartTextPrice != null) {
+			cartTextPrice.setText(String.valueOf(basePrice));
+		}
+
+		boolean discountApplied = hasSubscriptionDiscount() && basePrice > 50;
+		int discountedTotal = discountApplied ? (int) Math.round(basePrice * 0.9) : basePrice;
+
+		if (cartTextDiscount != null) {
+			cartTextDiscount.setText(String.valueOf(discountedTotal));
+		}
+		if (cartTextPriceDiscount != null) {
+			cartTextPriceDiscount.setText(discountApplied ? "Subscriber discount applied" : "No discounts applied");
+		}
+		if (cartTextPriceFinal != null) {
+			cartTextPriceFinal.setText("Final total: " + discountedTotal);
+		}
+	}
+
+	private boolean hasSubscriptionDiscount() {
+		if (currentLoggedAccount != null) {
+			return currentLoggedAccount.isSubscription();
+		}
+		Account account = SimpleClient.getUser();
+		return account != null && account.isSubscription();
+	}
 	/**
 	 * Enable manager features (privilege >= 3)
 	 * Allows: Admin dashboard, user management, reports
@@ -2302,14 +2334,19 @@ public class PrimaryController {
 		navigateInShell("Error");
 
 	}
-	
+	private boolean ensurePrivilege(ActionEvent event, int requiredPrivilege, String pageName) throws IOException {
+		if (resolveCurrentPrivilegeLevel() < requiredPrivilege) {
+			openAccessDenied(event, requiredPrivilege, pageName);
+			return false;
+		}
+		return true;
+	}
 	/**
 	 * Navigate to Access Denied page with custom privilege information
 	 */
 	private void openAccessDenied(ActionEvent event, int requiredPrivilege, String pageName) throws IOException {
-		int currentPrivilege = SimpleClient.getClient().getUser() != null ? 
-			SimpleClient.getClient().getUser().getPrivilegeLevel() : 0;
-		
+		int currentPrivilege = resolveCurrentPrivilegeLevel();
+
 		AccessDeniedController.setAccessInfo(currentPrivilege, requiredPrivilege, pageName);
 
 		navigateInShell("AccessDenied");
