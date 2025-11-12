@@ -113,6 +113,24 @@
     -fx-border-color: -fx-border;
     -fx-border-radius: 10;
 }
+.profile-icon-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 22px;
+    -fx-background-radius: 999;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+}
+
+.profile-icon-button:hover {
+    -fx-background-color: -fx-accent-light;
+}
+
+.profile-name-label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
 
 /* === INPUTS (TextField, PasswordField, ComboBox, DatePicker) ========== */
 .text-field, .password-field, .combo-box, .date-picker, .text-area {

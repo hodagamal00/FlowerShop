@@ -1,13 +1,14 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Account;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import javafx.application.Platform;
+import javafx.scene.layout.VBox;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -22,12 +23,12 @@ public class AppShellController {
 
     @FXML private TextField searchField;
     @FXML private Button loginButton;
+    @FXML private VBox profileContainer;
     @FXML private Button profileButton;
+    @FXML private Label profileNameLabel;
     @FXML private Button cartButton;
     @FXML private Label statusLabel;
-    @FXML private Label accountNameLabel;
     @FXML private StackPane contentPane;
-
     /**
      * Called by the FXML loader after the fields have been injected.
      * Registers this controller with the {@link NavigationService} and
@@ -37,9 +38,6 @@ public class AppShellController {
         NavigationService.getInstance().setAppShellController(this);
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
-        }
-        if (accountNameLabel != null) {
-            accountNameLabel.setVisible(false);
         }
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
@@ -53,6 +51,8 @@ public class AppShellController {
         if (cartButton != null) {
             cartButton.setOnAction(e -> NavigationService.getInstance().navigate("cart"));
         }
+        updateLoginState(SimpleClient.getUser());
+
     }
 
     /**
@@ -83,14 +83,8 @@ public class AppShellController {
      * @param loggedIn whether the user is currently logged in
      */
     public void setLoggedIn(boolean loggedIn) {
-        if (loginButton != null && profileButton != null) {
-            loginButton.setVisible(!loggedIn);
-            profileButton.setVisible(loggedIn);
-        }
-        if (!loggedIn && accountNameLabel != null) {
-            accountNameLabel.setVisible(false);
-            accountNameLabel.setText("");
-        }
+        Account account = loggedIn ? SimpleClient.getUser() : null;
+        updateLoginState(account);
     }
 
     /**
@@ -103,27 +97,43 @@ public class AppShellController {
             statusLabel.setText(message);
         }
     }
-
-    /**
-     * Displays the logged-in account name in the header and toggles the
-     * appropriate login/profile buttons.
-     *
-     * @param fullName The display name of the logged-in account
-     */
-    public void showAccountName(String fullName) {
-        setLoggedIn(true);
-        if (accountNameLabel != null) {
-            accountNameLabel.setText(fullName != null ? fullName : "");
-            accountNameLabel.setVisible(fullName != null && !fullName.isBlank());
-        }
+    @Subscribe
+    public void onAccountReceived(PassAccountEvent event) {
+        updateLoginState(event.getRecievedAccount());
     }
 
-    @Subscribe
-    public void handlePassAccountEvent(PassAccountEvent event) {
-        Account account = event.getRecievedAccount();
-        if (account == null) {
+    private void updateLoginState(Account account) {
+        if (loginButton == null || profileButton == null || profileContainer == null || profileNameLabel == null) {
             return;
         }
-        Platform.runLater(() -> showAccountName(account.getFullName()));
+
+        Account effectiveAccount = account;
+        if (effectiveAccount == null || (isNullOrBlank(effectiveAccount.getFullName()) && isNullOrBlank(effectiveAccount.getEmail()))) {
+            effectiveAccount = SimpleClient.getUser();
+        }
+
+        final Account finalAccount = effectiveAccount;
+        Platform.runLater(() -> {
+            boolean loggedIn = finalAccount != null;
+            String displayName = "";
+            if (loggedIn) {
+                displayName = isNullOrBlank(finalAccount.getFullName()) ? finalAccount.getEmail() : finalAccount.getFullName();
+                if (isNullOrBlank(displayName)) {
+                    loggedIn = false;
+                }
+            }
+
+            profileNameLabel.setText(loggedIn ? displayName : "");
+
+            loginButton.setVisible(!loggedIn);
+            loginButton.setManaged(!loggedIn);
+
+            profileContainer.setVisible(loggedIn);
+            profileContainer.setManaged(loggedIn);
+        });
+    }
+
+    private boolean isNullOrBlank(String value) {
+        return value == null || value.isBlank();
     }
 }
