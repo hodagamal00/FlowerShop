@@ -12,6 +12,8 @@ import javax.persistence.criteria.Root;
 public class ComplaintUpdateManager {
     public static int complaintsnum = 0;
     public static List<Complaint> complaintGeneralList = new ArrayList<Complaint>();
+    private static final Object complaintIdLock = new Object();
+    private static Integer nextComplaintIdCache = null;
 
     private static List<Complaint> getAllComplaints() {
         System.out.println("Arrived to getAllComplaints 1");
@@ -35,8 +37,13 @@ public class ComplaintUpdateManager {
         SimpleServer.session = sessionFactory.openSession();
         Transaction tx = SimpleServer.session.beginTransaction();
         System.out.println("inside additemTocatalog8");
-        int newComplaintId = getNextComplaintId(SimpleServer.session);
-        recievedComplaint.setComplaintID(newComplaintId);
+        int incomingId = recievedComplaint.getComplaintID();
+        if (incomingId <= 0) {
+            int newComplaintId = reserveNextComplaintId(SimpleServer.session);
+            recievedComplaint.setComplaintID(newComplaintId);
+        } else {
+            ensureNextComplaintIdAfter(incomingId, SimpleServer.session);
+        }
 
 
 
@@ -64,6 +71,38 @@ public class ComplaintUpdateManager {
         }
         return maxId + 1;
     }
+
+
+    private static int reserveNextComplaintId(Session session) {
+        synchronized (complaintIdLock) {
+            if (nextComplaintIdCache == null) {
+                nextComplaintIdCache = getNextComplaintId(session);
+            }
+            return nextComplaintIdCache++;
+        }
+    }
+
+    private static void ensureNextComplaintIdAfter(int complaintId, Session session) {
+        synchronized (complaintIdLock) {
+            if (nextComplaintIdCache == null) {
+                nextComplaintIdCache = getNextComplaintId(session);
+            }
+            if (nextComplaintIdCache <= complaintId) {
+                nextComplaintIdCache = complaintId + 1;
+            }
+        }
+    }
+
+    public static int previewNextComplaintId() {
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        try {
+            return reserveNextComplaintId(session);
+        } finally {
+            session.close();
+        }
+    }
+
     public static void editComplaint(Complaint recievedComplaint){
         System.out.println("Arrived to edit Complaint");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();

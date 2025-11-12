@@ -217,6 +217,14 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 
+		if (msg instanceof NextComplaintIdMessage) {
+			NextComplaintIdMessage request = (NextComplaintIdMessage) msg;
+			int nextId = ComplaintUpdateManager.previewNextComplaintId();
+			request.setNextComplaintId(nextId);
+			client.sendToClient(request);
+			return;
+		}
+
 
 		if (msg instanceof UpdateMessage) {
 			System.out.println("Arrived At UpdateMessage 1");
