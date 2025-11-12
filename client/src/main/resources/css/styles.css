@@ -228,6 +228,13 @@
 }
 
 /* Navigation links */
+nav-bar {
+    -fx-padding: 0 12 6 12;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1 0 0 0;
+    -fx-background-color: transparent;
+}
+
 .nav-link {
     -fx-text-fill: -fx-secondary;
     -fx-font-weight: 600;
@@ -238,6 +245,29 @@
 .nav-link:hover {
     -fx-background-color: -fx-accent-light;
     -fx-underline: false;
+}
+
+.toggle-button.nav-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-secondary;
+    -fx-border-color: transparent;
+    -fx-font-weight: 600;
+    -fx-padding: 6 14 6 14;
+    -fx-background-radius: 999;
+    -fx-cursor: hand;
+}
+
+.toggle-button.nav-link:hover {
+    -fx-background-color: -fx-accent-light;
+}
+
+.toggle-button.nav-link:selected {
+    -fx-background-color: -fx-primary-light;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.toggle-button.nav-link:focused {
+    -fx-effect: dropshadow(gaussian, rgba(241, 169, 251, 0.82), 10, 0, 0, 0);
 }
 
 /* Buttons – pill option */

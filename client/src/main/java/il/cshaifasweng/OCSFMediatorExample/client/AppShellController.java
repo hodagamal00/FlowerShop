@@ -4,13 +4,22 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.FlowPane;
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import javafx.application.Platform;
 import javafx.scene.layout.VBox;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 
 /**
  * Controller for the {@code AppShell.fxml}.  This class manages the
@@ -29,6 +38,25 @@ public class AppShellController {
     @FXML private Button cartButton;
     @FXML private Label statusLabel;
     @FXML private StackPane contentPane;
+    @FXML private FlowPane navBar;
+
+    private final ToggleGroup navToggleGroup = new ToggleGroup();
+    private final Map<String, ToggleButton> navButtons = new HashMap<>();
+
+    private static final List<NavDestination> NAV_LINKS = List.of(
+            new NavDestination("Home", "primary"),
+            new NavDestination("Cart", "cart"),
+            new NavDestination("Checkout", "checkout"),
+            new NavDestination("Orders", "myorders"),
+            new NavDestination("Complaints", "mycomplaints"),
+            new NavDestination("Profile", "Profile"),
+            new NavDestination("About", "About"),
+            new NavDestination("Login", "Login"),
+            new NavDestination("Register", "register"),
+            new NavDestination("Admin Panel", "admincontrol"),
+            new NavDestination("Deliveries", "delivery"),
+            new NavDestination("Reports", "BranchReports")
+    );
     /**
      * Called by the FXML loader after the fields have been injected.
      * Registers this controller with the {@link NavigationService} and
@@ -51,6 +79,7 @@ public class AppShellController {
         if (cartButton != null) {
             cartButton.setOnAction(e -> NavigationService.getInstance().navigate("cart"));
         }
+        buildNavigationBar();
         updateLoginState(SimpleClient.getUser());
 
     }
@@ -61,9 +90,23 @@ public class AppShellController {
      * @param node the node to display in the centre
      */
     public void setContent(Node node) {
+
         contentPane.getChildren().setAll(node);
     }
-
+    public void handleNavigationChange(String viewName) {
+        if (navBar == null) {
+            return;
+        }
+        String normalized = normalizeViewName(viewName);
+        ToggleButton button = navButtons.get(normalized);
+        Platform.runLater(() -> {
+            if (button != null) {
+                navToggleGroup.selectToggle(button);
+            } else {
+                navToggleGroup.selectToggle(null);
+            }
+        });
+    }
     /**
      * Updates the cart button text to show the current item count.
      *
@@ -135,5 +178,46 @@ public class AppShellController {
 
     private boolean isNullOrBlank(String value) {
         return value == null || value.isBlank();
+    }
+    private void buildNavigationBar() {
+        if (navBar == null) {
+            return;
+        }
+        navButtons.clear();
+        navBar.getChildren().clear();
+
+        for (NavDestination destination : NAV_LINKS) {
+            ToggleButton button = new ToggleButton(destination.getLabel());
+            button.setToggleGroup(navToggleGroup);
+            button.setFocusTraversable(false);
+            button.getStyleClass().addAll("nav-link", "pill");
+            button.setOnAction(event -> NavigationService.getInstance().navigate(destination.getViewName()));
+
+            String normalized = normalizeViewName(destination.getViewName());
+            navButtons.put(normalized, button);
+            navBar.getChildren().add(button);
+        }
+    }
+
+    private String normalizeViewName(String viewName) {
+        return viewName == null ? "" : viewName.toLowerCase(Locale.ROOT);
+    }
+
+    private static class NavDestination {
+        private final String label;
+        private final String viewName;
+
+        private NavDestination(String label, String viewName) {
+            this.label = label;
+            this.viewName = viewName;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public String getViewName() {
+            return viewName;
+        }
     }
 }

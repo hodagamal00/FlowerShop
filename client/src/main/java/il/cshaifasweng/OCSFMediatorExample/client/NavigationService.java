@@ -61,6 +61,7 @@ public class NavigationService {
             Parent view = loader.load();
             Node content = ensureScrollable(view);
             appShellController.setContent(content);
+            appShellController.handleNavigationChange(fxml);
         } catch (IOException e) {
             e.printStackTrace();
         }
