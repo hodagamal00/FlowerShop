@@ -94,6 +94,13 @@
                                      textAlignment="CENTER" wrapText="true" />
                            </children>
                         </VBox>
+                        <!-- Privilege breakdown -->
+                        <VBox alignment="CENTER" spacing="10.0" maxWidth="560.0">
+                           <children>
+                              <Label text="Role permissions by level" styleClass="strong"/>
+                              <VBox fx:id="privilegeDetailsBox" spacing="10.0" prefWidth="520.0" />
+                           </children>
+                        </VBox>
 
                         <!-- Actions -->
                         <HBox alignment="CENTER" spacing="12.0">
