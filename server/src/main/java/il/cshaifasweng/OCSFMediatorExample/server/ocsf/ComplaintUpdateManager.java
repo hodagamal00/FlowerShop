@@ -26,29 +26,20 @@ public class ComplaintUpdateManager {
         return result;
     }
 
-    static Long countRowsComplaint() {
-        System.out.println("Arrived to coutnrwos 1");
-        final CriteriaBuilder criteriaBuilder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to coutnrwos 2");
-        CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-        System.out.println("Arrived to coutnrwos 3");
-        Root<Complaint> root = criteria.from(Complaint.class);
-        System.out.println("Arrived to coutnrwos 4");
-        criteria.select(criteriaBuilder.count(root));
-        System.out.println("Arrived to coutnrwos 5");
-        return SimpleServer.session.createQuery(criteria).getSingleResult();
-    }
+
 
     public static void addComplaint(Complaint recievedComplaint) {
         System.out.println("inside addCompliTocatalog1");
-        long numOfRowsComplaint = countRowsComplaint();
-        int castedId = (int)numOfRowsComplaint;
-        int newComplaintId = castedId + 1;
-        recievedComplaint.setComplaintID(newComplaintId);
+
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         SimpleServer.session = sessionFactory.openSession();
         Transaction tx = SimpleServer.session.beginTransaction();
         System.out.println("inside additemTocatalog8");
+        int newComplaintId = getNextComplaintId(SimpleServer.session);
+        recievedComplaint.setComplaintID(newComplaintId);
+
+
+
 
         SimpleServer.session.save(recievedComplaint);
         System.out.println("inside additemTocatalog9");
@@ -58,6 +49,20 @@ public class ComplaintUpdateManager {
         System.out.println("inside additemTocatalog11");
 
         System.out.println("inside additemTocatalog12");
+    }
+
+
+    private static int getNextComplaintId(Session session) {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+        Root<Complaint> root = query.from(Complaint.class);
+        query.select(builder.max(root.get("complaintID")));
+
+        Integer maxId = session.createQuery(query).uniqueResult();
+        if (maxId == null) {
+            return 1;
+        }
+        return maxId + 1;
     }
     public static void editComplaint(Complaint recievedComplaint){
         System.out.println("Arrived to edit Complaint");
