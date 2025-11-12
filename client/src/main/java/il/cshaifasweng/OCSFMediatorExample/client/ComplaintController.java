@@ -14,6 +14,7 @@ import java.util.*;
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
 import il.cshaifasweng.OCSFMediatorExample.entities.Message;
+import il.cshaifasweng.OCSFMediatorExample.entities.NextComplaintIdMessage;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import il.cshaifasweng.OCSFMediatorExample.client.SimpleClient;
 import javafx.beans.property.SimpleObjectProperty;
@@ -50,6 +51,10 @@ public class  ComplaintController{
     private Button submitcomp;
 
     @FXML
+    private TextField complaintIdField;
+
+
+    @FXML
     private TextField topictxt;
 
     @FXML
@@ -73,12 +78,17 @@ public class  ComplaintController{
             return;
         }
         // Build a new Complaint object.  We set default values for fields not captured in the form
-        // such as order ID (0 by default) and shop ID (0).  The complaint ID will be assigned by the server.
+        // such as order ID (0 by default) and shop ID (0).  If we already reserved an ID when the
+        // form opened, reuse it so that the number shown to the user matches the stored complaint.
         java.util.Calendar cal = java.util.Calendar.getInstance();
         int day = cal.get(java.util.Calendar.DAY_OF_MONTH);
         int month = cal.get(java.util.Calendar.MONTH) + 1; // Calendar months are 0-based
         int year = cal.get(java.util.Calendar.YEAR);
         Complaint newComplaint = new Complaint();
+        if (reservedComplaintId != null) {
+            newComplaint.setComplaintID(reservedComplaintId);
+        }
+
         newComplaint.setCustomerID(currentUser.getAccountID());
         newComplaint.setOrderID(0);
         newComplaint.setAccepted(false);
@@ -124,6 +134,8 @@ public class  ComplaintController{
     {
         // Register this controller to receive EventBus events
         EventBus.getDefault().register(this);
+        requestNextComplaintId();
+
     }
 
     /**
@@ -131,13 +143,28 @@ public class  ComplaintController{
      * a PassAccountEventComplaints event when the complaint form is opened.
      */
     private Account currentUser;
+    private Integer reservedComplaintId;
 
     @Subscribe
     public void handlePassAccountEvent(PassAccountEventComplaints passAcc) {
         // Assign the received account to currentUser
         this.currentUser = passAcc.getRecievedAccount();
     }
+    @Subscribe
+    public void handleNextComplaintId(NextComplaintIdEvent event) {
+        reservedComplaintId = event.getComplaintId();
+        if (complaintIdField != null) {
+            complaintIdField.setText(Integer.toString(reservedComplaintId));
+        }
+    }
 
+    private void requestNextComplaintId() {
+        try {
+            SimpleClient.getClient().sendToServer(new NextComplaintIdMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }
