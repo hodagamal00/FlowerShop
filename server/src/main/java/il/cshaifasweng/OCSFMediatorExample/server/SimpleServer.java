@@ -109,6 +109,7 @@ public class SimpleServer extends AbstractServer {
 					.build();
 
 			cachedSessionFactory = configuration.buildSessionFactory(serviceRegistry);
+			DemoDataInitializer.initialize(cachedSessionFactory);
 			return cachedSessionFactory;
 		}
 	}
