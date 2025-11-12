@@ -241,7 +241,7 @@ public class LoginController {
     private ActionEvent lastLoginEvent;
     private Account authenticatedAccount;
     private boolean navigationPendingAccount;
-
+    private boolean accountDetailsRequested;
     @FXML
     void handleLogin(ActionEvent event) {
         lastLoginEvent = event;
@@ -277,6 +277,9 @@ public class LoginController {
         }
         // Remember the triggering event so we can navigate after a successful login
         lastLoginEvent = event;
+        // Reset any stale state from previous attempts
+        accountDetailsRequested = false;
+
 
         // Disable login button during processing
         LogIn.setDisable(true);
@@ -313,6 +316,7 @@ public class LoginController {
         if (account == null) {
             navigationPendingAccount = true;
             showSuccessMessage("Login successful! Loading your account details...");
+            requestAccountDetails();
             return;
         }
 
@@ -323,9 +327,12 @@ public class LoginController {
             displayName = account.getEmail();
         }
         showSuccessMessage(String.format("Welcome %s! Redirecting to your dashboard...", displayName));
+        sendPostLoginData(account);
         CatalogFlag.setFlagg(1);
         navigateAfterLogin(account);
         lastLoginEvent = null;
+        accountDetailsRequested = false;
+
     }
     private void showSuccessMessage(String message) {
         Platform.runLater(() -> {
@@ -433,5 +440,45 @@ public class LoginController {
         }
         return account;
     }
+    private void requestAccountDetails() {
+        String email = Email.getText().trim();
+        if (email.isEmpty()) {
+            return;
+        }
+        if (accountDetailsRequested) {
+            return;
+        }
+        accountDetailsRequested = true;
+        new Thread(() -> {
+            try {
+                SimpleClient.getClient().sendToServer(new MailClass(email));
+            } catch (IOException e) {
+                accountDetailsRequested = false;
+                navigationPendingAccount = false;
+                Platform.runLater(() -> {
+                    logSucc.setVisible(false);
+                    alLog.setText("Unable to load account details. Please try again.");
+                    alLog.setVisible(true);
+                });
+                resetLoginButton();
+            }
+        }).start();
+    }
 
+    private void sendPostLoginData(Account account) {
+        if (account == null) {
+            return;
+        }
+        new Thread(() -> {
+            try {
+                SimpleClient.getClient().sendToServer(new GetAllComplaints());
+                SimpleClient.getClient().sendToServer(new GetAllMessages());
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    alLog.setText("Logged in, but we couldn't refresh account data.");
+                    alLog.setVisible(true);
+                });
+            }
+        }).start();
+    }
 }
