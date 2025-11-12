@@ -64,15 +64,15 @@ public class Promotion implements Serializable {
     private Date modifiedDate;
 
     // Constructors
-    public Promotion(String summerBlossoms, String s, java.sql.Date date, java.sql.Date valueOf, boolean b, Object o) {
+    public Promotion() {
         this.createdDate = new Date();
         this.modifiedDate = new Date();
         this.isActive = true;
     }
 
-    public Promotion(String promotionName, String description, double discountPercent, 
-                    Date startDate, Date endDate, boolean isNetworkWide, Integer branchId) {
-        this("Summer Blossoms", "15% off all sunflower arrangements", java.sql.Date.valueOf(today.minusDays(7)), java.sql.Date.valueOf(today.plusDays(21)), true, null);
+    public Promotion(String promotionName, String description, double discountPercent,
+                     Date startDate, Date endDate, boolean isNetworkWide, Integer branchId) {
+        this();
         this.promotionName = promotionName;
         this.description = description;
         this.discountPercent = discountPercent;
@@ -82,9 +82,8 @@ public class Promotion implements Serializable {
         this.branchId = branchId;
     }
 
-    public Promotion() {
 
-    }
+
 
     // Getters and Setters
     public int getPromotionId() {
