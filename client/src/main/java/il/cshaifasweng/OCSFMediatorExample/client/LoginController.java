@@ -239,9 +239,12 @@ public class LoginController {
     int requestFix = 0;
     boolean alreadyLogged = false;
     private ActionEvent lastLoginEvent;
+    private Account authenticatedAccount;
+    private boolean navigationPendingAccount;
 
     @FXML
     void handleLogin(ActionEvent event) {
+        lastLoginEvent = event;
         // Clear previous error messages
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
@@ -285,67 +288,112 @@ public class LoginController {
             SimpleClient.getClient().sendToServer(loginRequest);
 
         } catch (IOException e) {
-            LogIn.setDisable(false);
-            LogIn.setText("Log In");
+            resetLoginButton();
+
             ErrorMsg.setText("Unable to connect to server. Please check your internet connection.");
             ErrorMsg.setVisible(true);
         } catch (Exception e) {
-            LogIn.setDisable(false);
-            LogIn.setText("Log In");
+            resetLoginButton();
+
             ErrorMsg.setText("An error occurred. Please try again.");
             ErrorMsg.setVisible(true);
             e.printStackTrace();
         }
     }
 
-    private void navigateToHomePage() {
-        ActionEvent event = lastLoginEvent;
-        if (event == null) {
+    private void resetLoginButton() {
+        Platform.runLater(() -> {
+            LogIn.setDisable(false);
+            LogIn.setText("Log In");
+        });
+    }
+
+    private void handleLoginSuccess(Account account) {
+        resetLoginButton();
+        if (account == null) {
+            navigationPendingAccount = true;
+            showSuccessMessage("Login successful! Loading your account details...");
             return;
         }
 
+        authenticatedAccount = account;
+        navigationPendingAccount = false;
+        String displayName = account.getFullName();
+        if (displayName == null || displayName.isBlank()) {
+            displayName = account.getEmail();
+        }
+        showSuccessMessage(String.format("Welcome %s! Redirecting to your dashboard...", displayName));
+        CatalogFlag.setFlagg(1);
+        navigateAfterLogin(account);
+        lastLoginEvent = null;
+    }
+    private void showSuccessMessage(String message) {
         Platform.runLater(() -> {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("HomePage.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.show();
-                lastLoginEvent = null;
-            } catch (IOException e) {
-                ErrorMsg.setText("Unable to load home page.");
-                ErrorMsg.setVisible(true);
+            logSucc.setText(message);
+            logSucc.setVisible(true);
+            OpenCatalogplz.setVisible(false);
+            alLog.setVisible(false);
+        });
+    }
+    private void navigateAfterLogin(Account account) {
+        Platform.runLater(() -> {
+            int privilege = account.getPrivialge();
+            String targetView;
+            if (privilege >= 4) {
+                targetView = "NetworkDashboard";
+            } else if (privilege >= 3) {
+                targetView = "log_manager";
+            } else if (privilege >= 2) {
+                targetView = "WorkerDashboard";
+            } else {
+                targetView = "primary";
             }
+            NavigationService.getInstance().navigate(targetView);
         });
     }
 
     @Subscribe
-    public void checkMailInDB(MailChecker checkML) throws IOException {
-        Platform.runLater(() -> {
-            LogIn.setDisable(false);
-            LogIn.setText("Log In");
+    public void checkMailInDB(MailChecker checkML) throws IOException
+    {
+        System.out.println("IM HERE :DDD");
+        if(checkML.getExistsMail() == false){ // case incorrect email
+            System.out.println("arrived to case incorrect email succesfully");
+            ErrorMsg.setVisible(true);
+            resetLoginButton();
 
-            ErrorMsg.setVisible(false);
-            ErrorMsgPass.setVisible(false);
-            alLog.setVisible(false);
-
-            if (!checkML.getExistsMail()) {
-                ErrorMsg.setText("Account not found. Please check your email or create a new account.");
-                ErrorMsg.setVisible(true);
-                Password.clear();
-            } else if (!checkML.getExistsPassword()) {
-                ErrorMsgPass.setText("Incorrect password. Please try again.");
-                ErrorMsgPass.setVisible(true);
-                Password.clear();
-            } else if (checkML.isLoggedIn()) {
-                alLog.setText("This account is already logged in on another device.");
+            /*MailPassMatch checkEmailPass = new MailPassMatch(Email.getText(),Password.getText(),login_flag);
+            try {
+                SimpleClient.getClient().sendToServer(checkEmailPass);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }*/
+        }
+        else if(checkML.getExistsPassword() == false)
+        { // case email found but the password is incorrect
+            System.out.println("arrived to case incorrect password  succesfully");
+            ErrorMsgPass.setVisible(true);
+            resetLoginButton();
+        }
+        else if(checkML.isLoggedIn() == false)
+        {
+            System.out.println("WE GOT HERE, GOOD EMAIL");
+            itWorked = true;
+            requestFix++;
+            Account account = resolveAuthenticatedAccount();
+            handleLoginSuccess(account);
+        }
+        else if(checkML.isLoggedIn() == true)
+        {
+            System.out.println("Already Logged In");
+            alreadyLogged = true;
+            resetLoginButton();
+            Platform.runLater(() -> {
+                alLog.setText("User already logged in from another session.");
                 alLog.setVisible(true);
-            } else {
-                logSucc.setText("Login successful! Redirecting to the home page...");
-                logSucc.setVisible(true);
-                navigateToHomePage();
-            }
-        });
+            });
+        }
+
     }
     boolean itWorked = false;
 
@@ -354,11 +402,36 @@ public class LoginController {
         System.out.println("Checking Mail IN DB");
         if(checkEmailPass.getexists()==true)
         {
-            navigateToHomePage();
+            Account account = resolveAuthenticatedAccount();
+            handleLoginSuccess(account);
         }
         else{
             ErrorMsgPass.setVisible(true);
+            resetLoginButton();
         }
+    }
+
+    @Subscribe
+    public void onAccountReceived(PassAccountEvent event) {
+        Account account = SimpleClient.getUser();
+        if (account == null) {
+            account = event.getRecievedAccount();
+        }
+        if (account == null) {
+            return;
+        }
+        authenticatedAccount = account;
+        if (navigationPendingAccount) {
+            handleLoginSuccess(account);
+        }
+    }
+
+    private Account resolveAuthenticatedAccount() {
+        Account account = authenticatedAccount;
+        if (account == null) {
+            account = SimpleClient.getUser();
+        }
+        return account;
     }
 
 }
