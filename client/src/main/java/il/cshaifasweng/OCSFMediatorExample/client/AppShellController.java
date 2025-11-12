@@ -42,20 +42,21 @@ public class AppShellController {
 
     private final ToggleGroup navToggleGroup = new ToggleGroup();
     private final Map<String, ToggleButton> navButtons = new HashMap<>();
+    private String currentViewName = "";
 
     private static final List<NavDestination> NAV_LINKS = List.of(
-            new NavDestination("Home", "primary"),
-            new NavDestination("Cart", "cart"),
-            new NavDestination("Checkout", "checkout"),
-            new NavDestination("Orders", "myorders"),
-            new NavDestination("Complaints", "mycomplaints"),
-            new NavDestination("Profile", "Profile"),
-            new NavDestination("About", "About"),
-            new NavDestination("Login", "Login"),
-            new NavDestination("Register", "register"),
-            new NavDestination("Admin Panel", "admincontrol"),
-            new NavDestination("Deliveries", "delivery"),
-            new NavDestination("Reports", "BranchReports")
+            NavDestination.forAllUsers("Home", "primary"),
+            NavDestination.forLoggedIn("Cart", "cart", 0),
+            NavDestination.forLoggedIn("Checkout", "checkout", 1),
+            NavDestination.forLoggedIn("Orders", "myorders", 1),
+            NavDestination.forLoggedIn("Complaints", "mycomplaints", 1),
+            NavDestination.forLoggedIn("Profile", "Profile", 1),
+            NavDestination.forAllUsers("About", "About"),
+            NavDestination.forGuestsOnly("Login", "Login"),
+            NavDestination.forGuestsOnly("Register", "register"),
+            NavDestination.forLoggedIn("Admin Panel", "admincontrol", 3),
+            NavDestination.forLoggedIn("Deliveries", "delivery", 2),
+            NavDestination.forLoggedIn("Reports", "BranchReports", 3)
     );
     /**
      * Called by the FXML loader after the fields have been injected.
@@ -79,7 +80,7 @@ public class AppShellController {
         if (cartButton != null) {
             cartButton.setOnAction(e -> NavigationService.getInstance().navigate("cart"));
         }
-        buildNavigationBar();
+        buildNavigationBar(SimpleClient.getUser());
         updateLoginState(SimpleClient.getUser());
 
     }
@@ -99,6 +100,7 @@ public class AppShellController {
         }
         String normalized = normalizeViewName(viewName);
         ToggleButton button = navButtons.get(normalized);
+        currentViewName = normalized;
         Platform.runLater(() -> {
             if (button != null) {
                 navToggleGroup.selectToggle(button);
@@ -173,6 +175,8 @@ public class AppShellController {
 
             profileContainer.setVisible(loggedIn);
             profileContainer.setManaged(loggedIn);
+            buildNavigationBar(finalAccount);
+
         });
     }
 
@@ -180,13 +184,23 @@ public class AppShellController {
         return value == null || value.isBlank();
     }
     private void buildNavigationBar() {
+        buildNavigationBar(SimpleClient.getUser());
+    }
+
+    private void buildNavigationBar(Account account) {
         if (navBar == null) {
             return;
         }
         navButtons.clear();
         navBar.getChildren().clear();
 
+        int privilege = account != null ? account.getPrivilegeLevel() : 0;
+        boolean loggedIn = account != null;
+
         for (NavDestination destination : NAV_LINKS) {
+            if (!destination.isVisibleFor(privilege, loggedIn)) {
+                continue;
+            }
             ToggleButton button = new ToggleButton(destination.getLabel());
             button.setToggleGroup(navToggleGroup);
             button.setFocusTraversable(false);
@@ -197,27 +211,67 @@ public class AppShellController {
             navButtons.put(normalized, button);
             navBar.getChildren().add(button);
         }
+        selectCurrentNavButton();
+
     }
 
     private String normalizeViewName(String viewName) {
         return viewName == null ? "" : viewName.toLowerCase(Locale.ROOT);
     }
-
+    private void selectCurrentNavButton() {
+        if (currentViewName == null) {
+            return;
+        }
+        ToggleButton button = navButtons.get(currentViewName);
+        if (button != null) {
+            navToggleGroup.selectToggle(button);
+        } else {
+            navToggleGroup.selectToggle(null);
+        }
+    }
     private static class NavDestination {
         private final String label;
         private final String viewName;
+        private final int minPrivilege;
+        private final boolean requiresLogin;
+        private final boolean guestOnly;
 
-        private NavDestination(String label, String viewName) {
+        private NavDestination(String label, String viewName, int minPrivilege, boolean requiresLogin, boolean guestOnly) {
             this.label = label;
             this.viewName = viewName;
+            this.minPrivilege = minPrivilege;
+            this.requiresLogin = requiresLogin;
+            this.guestOnly = guestOnly;
         }
 
-        public String getLabel() {
+        static NavDestination forAllUsers(String label, String viewName) {
+            return new NavDestination(label, viewName, 0, false, false);
+        }
+
+        static NavDestination forLoggedIn(String label, String viewName, int minPrivilege) {
+            return new NavDestination(label, viewName, minPrivilege, true, false);
+        }
+
+        static NavDestination forGuestsOnly(String label, String viewName) {
+            return new NavDestination(label, viewName, 0, false, true);
+        }
+
+        String getLabel() {
             return label;
         }
 
-        public String getViewName() {
+        String getViewName() {
             return viewName;
+        }
+
+        boolean isVisibleFor(int privilege, boolean loggedIn) {
+            if (guestOnly) {
+                return !loggedIn;
+            }
+            if (requiresLogin && !loggedIn) {
+                return false;
+            }
+            return privilege >= minPrivilege;
         }
     }
 }
