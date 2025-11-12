@@ -249,7 +249,7 @@ public final class DemoDataInitializer {
         }
 
         LocalDate today = LocalDate.now();
-        Promotion summerSale = new Promotion("Summer Blossoms", "15% off all sunflower arrangements",
+        Promotion summerSale = new Promotion("Summer Blossoms", "15% off all sunflower arrangements",15.0,
                 java.sql.Date.valueOf(today.minusDays(7)),
                 java.sql.Date.valueOf(today.plusDays(21)), true, null);
         summerSale.setDiscountPercent(15.0);
