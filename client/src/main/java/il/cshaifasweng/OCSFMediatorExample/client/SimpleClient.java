@@ -103,15 +103,8 @@ public class SimpleClient extends AbstractClient {
 			setCurrentUser(recAcc);
 			PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
 			System.out.println("the server sent me the account , NICE 3 !!");
-			new java.util.Timer().schedule(
-					new java.util.TimerTask() {
-						@Override
-						public void run() {
-							EventBus.getDefault().post(recievedAcc);
-							System.out.println("the server sent me the account , NICE 4 !!");
-						}
-					},4000
-			);
+			EventBus.getDefault().post(recievedAcc);
+			System.out.println("the server sent me the account , NICE 4 !!");
 		}
 
 		else if(msg instanceof Manager){ // added today
@@ -122,15 +115,8 @@ public class SimpleClient extends AbstractClient {
 			setCurrentUser((Account)recAcc);
 			PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
 			System.out.println("the server sent me the account , NICE 3 !!");
-			new java.util.Timer().schedule(
-					new java.util.TimerTask() {
-						@Override
-						public void run() {
-							EventBus.getDefault().post(recievedAcc);
-							System.out.println("the server sent me the account , NICE 4 !!");
-						}
-					},4000
-			);
+			EventBus.getDefault().post(recievedAcc);
+			System.out.println("the server sent me the account , NICE 4 !!");
 		}
 
 		else if(msg instanceof Worker){ // added today
@@ -141,15 +127,8 @@ public class SimpleClient extends AbstractClient {
 			setCurrentUser((Account)recWorker);
 			PassAccountEvent recievedAcc = new PassAccountEvent(recWorker);
 			System.out.println("the server sent me the account , NICE 3 !!");
-			new java.util.Timer().schedule(
-					new java.util.TimerTask() {
-						@Override
-						public void run() {
-							EventBus.getDefault().post(recievedAcc);
-							System.out.println("the server sent me the account , NICE 4 !!");
-						}
-					},4000
-			);
+			EventBus.getDefault().post(recievedAcc);
+			System.out.println("the server sent me the account , NICE 4 !!");
 		}
 		else if(msg instanceof getAllOrdersMessage){ // added 18/7
 			getAllOrdersMessage recievedOrders = (getAllOrdersMessage) msg;

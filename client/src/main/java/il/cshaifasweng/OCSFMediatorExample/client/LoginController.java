@@ -312,16 +312,29 @@ public class LoginController {
         resetLoginButton();
         if (account == null) {
             navigationPendingAccount = true;
+            showSuccessMessage("Login successful! Loading your account details...");
             return;
         }
 
         authenticatedAccount = account;
         navigationPendingAccount = false;
+        String displayName = account.getFullName();
+        if (displayName == null || displayName.isBlank()) {
+            displayName = account.getEmail();
+        }
+        showSuccessMessage(String.format("Welcome %s! Redirecting to your dashboard...", displayName));
         CatalogFlag.setFlagg(1);
         navigateAfterLogin(account);
         lastLoginEvent = null;
     }
-
+    private void showSuccessMessage(String message) {
+        Platform.runLater(() -> {
+            logSucc.setText(message);
+            logSucc.setVisible(true);
+            OpenCatalogplz.setVisible(false);
+            alLog.setVisible(false);
+        });
+    }
     private void navigateAfterLogin(Account account) {
         Platform.runLater(() -> {
             int privilege = account.getPrivialge();
