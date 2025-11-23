@@ -12,6 +12,7 @@ import java.util.Date;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
@@ -45,7 +46,7 @@ public class MyComplaintsController {
     private ListView<String> complaintList; // Value injected by FXMLLoader
 
     @FXML // fx:id="complaintText"
-    private TextField complaintText; // Value injected by FXMLLoader
+    private TextArea complaintText; // Value injected by FXMLLoader
 
     @FXML // fx:id="loadButton"
     private Button loadButton; // Value injected by FXMLLoader
