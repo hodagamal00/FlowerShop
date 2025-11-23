@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -90,7 +91,7 @@
                      <Font name="System Bold" size="22.0" />
                   </font>
                </Text>
-               <TextField fx:id="complaintText" editable="false" prefHeight="250.0" prefWidth="500.0" style="-fx-background-color: #f0f0f0;" />
+               <TextArea fx:id="complaintText" prefHeight="250.0" prefWidth="500.0" promptText="Enter your complaint here..." wrapText="true" />
             </VBox>
 
             <!-- Status Information -->
