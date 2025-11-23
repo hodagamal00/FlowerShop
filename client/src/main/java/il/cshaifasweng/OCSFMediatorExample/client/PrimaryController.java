@@ -27,6 +27,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import javafx.scene.layout.VBox;
+
 // Event to pass current account to complaint controller
 import il.cshaifasweng.OCSFMediatorExample.client.PassAccountEventComplaints;
 
@@ -65,27 +67,28 @@ public class PrimaryController {
 	private Button logout; // Value injected by FXMLLoader
 
 
+
 	@FXML
 	private Button checkout;
 
 
 	@FXML
-	private AnchorPane container1;
+	private VBox container1;
 
 	@FXML
-	private AnchorPane container2;
+	private VBox container2;
 
 	@FXML
-	private AnchorPane container3;
+	private VBox container3;
 
 	@FXML
-	private AnchorPane container4;
+	private VBox container4;
 
 	@FXML
-	private AnchorPane container5;
+	private VBox container5;
 
 	@FXML
-	private AnchorPane container6;
+	private VBox container6;
 
 	@FXML
 	private AnchorPane init_container;
@@ -167,22 +170,22 @@ public class PrimaryController {
 	private javafx.scene.control.Label flower_name6; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price1"
-	private DialogPane flower_price1; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price1; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price2"
-	private DialogPane flower_price2; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price2; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price3"
-	private DialogPane flower_price3; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price3; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price4"
-	private DialogPane flower_price4; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price4; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price5"
-	private DialogPane flower_price5; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price5; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price6"
-	private DialogPane flower_price6; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price6; // Value injected by FXMLLoader
 
 
 	@FXML // fx:id="AddItem"
@@ -1190,23 +1193,23 @@ public class PrimaryController {
 			flower_name6.setText(allProducts.get(5).getName());
 
             // Populate the price labels for the first six products.  Each call
-            // wraps the price in String.valueOf(...) and closes the setContentText
+			// wraps the price in String.valueOf(...) and closes the setText
             // invocation properly with a double closing parenthesis.  Without the
             // second closing parenthesis the code would fail to compile.
-            flower_price1.setContentText(String.valueOf(allProducts.get(0).getPrice()));
-            flower_price2.setContentText(String.valueOf(allProducts.get(1).getPrice()));
-            flower_price3.setContentText(String.valueOf(allProducts.get(2).getPrice()));
-            flower_price4.setContentText(String.valueOf(allProducts.get(3).getPrice()));
-            flower_price5.setContentText(String.valueOf(allProducts.get(4).getPrice()));
-            flower_price6.setContentText(String.valueOf(allProducts.get(5).getPrice()));
+			flower_price1.setText(String.valueOf(allProducts.get(0).getPrice()));
+			flower_price2.setText(String.valueOf(allProducts.get(1).getPrice()));
+			flower_price3.setText(String.valueOf(allProducts.get(2).getPrice()));
+			flower_price4.setText(String.valueOf(allProducts.get(3).getPrice()));
+			flower_price5.setText(String.valueOf(allProducts.get(4).getPrice()));
+			flower_price6.setText(String.valueOf(allProducts.get(5).getPrice()));
 
-            // Duplicate population of price labels.  Fix missing closing parentheses.
-            flower_price1.setContentText(String.valueOf(allProducts.get(0).getPrice()));
-            flower_price2.setContentText(String.valueOf(allProducts.get(1).getPrice()));
-            flower_price3.setContentText(String.valueOf(allProducts.get(2).getPrice()));
-            flower_price4.setContentText(String.valueOf(allProducts.get(3).getPrice()));
-            flower_price5.setContentText(String.valueOf(allProducts.get(4).getPrice()));
-            flower_price6.setContentText(String.valueOf(allProducts.get(5).getPrice()));
+			// Duplicate population of price labels.  Fix missing closing parentheses.
+			flower_price1.setText(String.valueOf(allProducts.get(0).getPrice()));
+			flower_price2.setText(String.valueOf(allProducts.get(1).getPrice()));
+			flower_price3.setText(String.valueOf(allProducts.get(2).getPrice()));
+			flower_price4.setText(String.valueOf(allProducts.get(3).getPrice()));
+			flower_price5.setText(String.valueOf(allProducts.get(4).getPrice()));
+			flower_price6.setText(String.valueOf(allProducts.get(5).getPrice()));
 		}
 		else
 		{
@@ -1222,12 +1225,12 @@ public class PrimaryController {
 				System.out.println("END INDEX = " + CatalogENDIndex);
 			}
 
-			flower_price1.setContentText("/");
-			flower_price2.setContentText("/");
-			flower_price3.setContentText("/");
-			flower_price4.setContentText("/");
-			flower_price5.setContentText("/");
-			flower_price6.setContentText("/");
+			flower_price1.setText("/");
+			flower_price2.setText("/");
+			flower_price3.setText("/");
+			flower_price4.setText("/");
+			flower_price5.setText("/");
+			flower_price6.setText("/");
 
 			flower_name1.setText("/");
 			flower_name2.setText("/");
@@ -1250,7 +1253,7 @@ public class PrimaryController {
 			{
 				flower_name1.setText(allProducts.get(CatalogSTARTIndex).getName());
                 // Corrected missing closing parenthesis when setting the price text
-                flower_price1.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex).getPrice()));
+				flower_price1.setText(String.valueOf(allProducts.get(CatalogSTARTIndex).getPrice()));
 				flower_button1.setVisible(true);
 				flower_price1.setVisible(true);
 				flower_name1.setVisible(true);
@@ -1261,8 +1264,8 @@ public class PrimaryController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 1)
 			{
 				flower_name2.setText(allProducts.get(CatalogSTARTIndex + 1).getName());
-                // Ensure call to setContentText is properly closed
-                flower_price2.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 1).getPrice()));
+				// Ensure call to setText is properly closed
+				flower_price2.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 1).getPrice()));
 				flower_button2.setVisible(true);
 				flower_price2.setVisible(true);
 				flower_name2.setVisible(true);
@@ -1273,7 +1276,7 @@ public class PrimaryController {
 			{
 				flower_name3.setText(allProducts.get(CatalogSTARTIndex + 2).getName());
                 // Closing parenthesis added
-                flower_price3.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 2).getPrice()));
+				flower_price3.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 2).getPrice()));
 				flower_button3.setVisible(true);
 				flower_price3.setVisible(true);
 				flower_name3.setVisible(true);
@@ -1284,7 +1287,7 @@ public class PrimaryController {
 			{
 				flower_name4.setText(allProducts.get(CatalogSTARTIndex + 3).getName());
                 // Closing parenthesis added
-                flower_price4.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 3).getPrice()));
+				flower_price4.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 3).getPrice()));
 				flower_button4.setVisible(true);
 				flower_price4.setVisible(true);
 				flower_name4.setVisible(true);
@@ -1295,7 +1298,7 @@ public class PrimaryController {
 			{
 				flower_name5.setText(allProducts.get(CatalogSTARTIndex + 4).getName());
                 // Closing parenthesis added
-                flower_price5.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 4).getPrice()));
+				flower_price5.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 4).getPrice()));
 				flower_button5.setVisible(true);
 				flower_price5.setVisible(true);
 				flower_name5.setVisible(true);
@@ -1308,7 +1311,7 @@ public class PrimaryController {
                 // select the sixth element in the current window and update the corresponding
                 // UI components (name, price, button, cart button and container) for slot 6.
                 flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
-                flower_price6.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
+				flower_price6.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
                 flower_button6.setVisible(true);
                 flower_price6.setVisible(true);
                 flower_name6.setVisible(true);
@@ -1319,7 +1322,7 @@ public class PrimaryController {
 			{
 				flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
                 // Closing parenthesis added
-                flower_price6.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
+				flower_price6.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
 				flower_button6.setVisible(true);
 				flower_price6.setVisible(true);
 				flower_name6.setVisible(true);
@@ -1698,9 +1701,9 @@ public class PrimaryController {
 
 		System.out.println("arrived to databaseInit");
         // When constructing Product instances we must pass the price as a double.
-        // DialogPane#getContentText() returns a String, so parse it to double
-        // before calling the Product constructor.  This avoids "String cannot be
-        // converted to double" compilation errors.
+		// Label#getText() returns a String, so parse it to double before calling
+		// the Product constructor.  This avoids "String cannot be converted to
+		// double" compilation errors.
         double price1 = 0.0;
         double price2 = 0.0;
         double price3 = 0.0;
@@ -1709,12 +1712,12 @@ public class PrimaryController {
         double price6 = 0.0;
         try {
             // Strip any non-numeric characters (e.g. currency symbols) before parsing
-            price1 = Double.parseDouble(flower_price1.getContentText().replaceAll("[^\\d.]", ""));
-            price2 = Double.parseDouble(flower_price2.getContentText().replaceAll("[^\\d.]", ""));
-            price3 = Double.parseDouble(flower_price3.getContentText().replaceAll("[^\\d.]", ""));
-            price4 = Double.parseDouble(flower_price4.getContentText().replaceAll("[^\\d.]", ""));
-            price5 = Double.parseDouble(flower_price5.getContentText().replaceAll("[^\\d.]", ""));
-            price6 = Double.parseDouble(flower_price6.getContentText().replaceAll("[^\\d.]", ""));
+			price1 = Double.parseDouble(flower_price1.getText().replaceAll("[^\\d.]", ""));
+			price2 = Double.parseDouble(flower_price2.getText().replaceAll("[^\\d.]", ""));
+			price3 = Double.parseDouble(flower_price3.getText().replaceAll("[^\\d.]", ""));
+			price4 = Double.parseDouble(flower_price4.getText().replaceAll("[^\\d.]", ""));
+			price5 = Double.parseDouble(flower_price5.getText().replaceAll("[^\\d.]", ""));
+			price6 = Double.parseDouble(flower_price6.getText().replaceAll("[^\\d.]", ""));
         } catch (NumberFormatException ex) {
             // If parsing fails, leave default 0.0; you may want to handle this case
             // by showing an error to the user or skipping product creation
