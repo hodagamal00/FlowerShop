@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0bb18218-7279-421c-be7c-316f5dd0b851" name="Changes" comment="change">
+    <list default="true" id="0bb18218-7279-421c-be7c-316f5dd0b851" name="Changes" comment="Review home page UI/UX design plan">
+      <change afterPath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/HomePageController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/RegisterController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/RegisterController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/resources/il/cshaifasweng/OCSFMediatorExample/client/HomePage.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/resources/il/cshaifasweng/OCSFMediatorExample/client/HomePage.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +46,7 @@
     &quot;Maven.server [clean,install,exec:java].executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;hoda&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -201,6 +202,8 @@
       <workItem from="1761657759285" duration="386000" />
       <workItem from="1762644497609" duration="2185000" />
       <workItem from="1762647191258" duration="1884000" />
+      <workItem from="1763336631500" duration="381000" />
+      <workItem from="1763932437718" duration="14928000" />
     </task>
     <task id="LOCAL‎-00001" summary="change">
       <option name="closed" value="true" />
@@ -210,14 +213,97 @@
       <option name="project" value="LOCAL‎" />
       <updated>1762648116447</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL‎-00002" summary="log in صح">
+      <option name="closed" value="true" />
+      <created>1762968230328</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL‎-00002" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1762968230328</updated>
+    </task>
+    <task id="LOCAL‎-00003" summary="change">
+      <option name="closed" value="true" />
+      <created>1763938131241</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL‎-00003" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763938131241</updated>
+    </task>
+    <task id="LOCAL‎-00004" summary="change">
+      <option name="closed" value="true" />
+      <created>1763938142164</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL‎-00004" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763938142165</updated>
+    </task>
+    <task id="LOCAL‎-00005" summary="change">
+      <option name="closed" value="true" />
+      <created>1763940140592</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL‎-00005" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763940140592</updated>
+    </task>
+    <task id="LOCAL‎-00006" summary="change">
+      <option name="closed" value="true" />
+      <created>1763941665897</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL‎-00006" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763941665897</updated>
+    </task>
+    <task id="LOCAL‎-00007" summary="change">
+      <option name="closed" value="true" />
+      <created>1763943361191</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL‎-00007" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763943361191</updated>
+    </task>
+    <task id="LOCAL‎-00008" summary="change">
+      <option name="closed" value="true" />
+      <created>1763944182944</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL‎-00008" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763944182944</updated>
+    </task>
+    <task id="LOCAL‎-00009" summary="change">
+      <option name="closed" value="true" />
+      <created>1763944309320</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL‎-00009" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763944309320</updated>
+    </task>
+    <task id="LOCAL‎-00010" summary="Add timestamps and SLA status to Complaint">
+      <option name="closed" value="true" />
+      <created>1763947102633</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL‎-00010" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763947102633</updated>
+    </task>
+    <task id="LOCAL‎-00011" summary="Review home page UI/UX design plan">
+      <option name="closed" value="true" />
+      <created>1763947980312</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL‎-00011" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1763947980312</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
+    <MESSAGE value="log in صح" />
     <MESSAGE value="change" />
-    <option name="LAST_COMMIT_MESSAGE" value="change" />
+    <MESSAGE value="Add timestamps and SLA status to Complaint" />
+    <MESSAGE value="Review home page UI/UX design plan" />
+    <option name="LAST_COMMIT_MESSAGE" value="Review home page UI/UX design plan" />
   </component>
 </project>
