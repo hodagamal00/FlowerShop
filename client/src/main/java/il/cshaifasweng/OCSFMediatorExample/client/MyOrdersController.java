@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Date;
+
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.event.ActionEvent;
@@ -253,6 +255,10 @@ public class MyOrdersController {
             returned = true;
 
         Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refund/100*SelectedOrder.getTotalPrice(),currentDay,currentMonth,currentYear,"Automated Reply");
+        cancelComplaint.setCreatedAt(new Date());
+        cancelComplaint.setRespondedAt(new Date());
+        cancelComplaint.setSlaStatus("RESOLVED_ON_TIME");
+        cancelComplaint.setCompensationDecision(refund > 0 ? "Automatic refund " + refund + "%" : "No compensation" );
         UpdateMessage new_msg=new UpdateMessage("complaint","add");
         new_msg.setComplaint(cancelComplaint);
         try {
@@ -331,6 +337,9 @@ public class MyOrdersController {
         newComplaint.setMonth(currentMonth);
         newComplaint.setYear(currentYear);
         newComplaint.setReplyText("");
+        newComplaint.setCreatedAt(new Date());
+        newComplaint.setSlaStatus("IN_PROGRESS");
+        newComplaint.setCompensationDecision("Pending review");
         sendComplaint.setVisible(false);
         complaintText.setVisible(false);
         UpdateMessage new_msg=new UpdateMessage("complaint","add");

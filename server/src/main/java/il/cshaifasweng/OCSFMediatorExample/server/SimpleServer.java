@@ -550,6 +550,9 @@ public class SimpleServer extends AbstractServer {
 			complaintsToClient.setComplaintsList(recievedComplaints);
 			client.sendToClient(complaintsToClient);
 
+			tx1.commit();
+			session.close();
+
 		}
 		if(msg instanceof GetAllMessages){ // added 16.8
 			SessionFactory sessionFactory = getSessionFactory();
@@ -634,6 +637,7 @@ public class SimpleServer extends AbstractServer {
 		query.from(Complaint.class);
 		System.out.println("Arrived to getAllComplaints 4");
 		List<Complaint> result = session.createQuery(query).getResultList();
+		ComplaintUpdateManager.refreshComplaintSlaStatuses(session, result);
 		System.out.println("Arrived to getAllComplaints 5");
 		return result;
 	}

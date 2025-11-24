@@ -1,8 +1,11 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
+import java.util.List;;
 
 
 @Entity
@@ -37,6 +40,19 @@ public class Complaint implements Serializable {
     private int year;
     @Column(name = "Reply")
     private String ReplyText;   // This is the reply text - Update
+    @Column(name = "created_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+
+    @Column(name = "responded_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date respondedAt;
+
+    @Column(name = "sla_status")
+    private String slaStatus;
+
+    @Column(name = "compensation_decision")
+    private String compensationDecision;
 
 
     public Complaint(int complaintID, int customerID, int orderID, boolean accepted, boolean in24Hours, String complaintText, int shopID, int answerworkerID, boolean returnedMoney, int returnedmoneyvalue, int day, int month, int year, String replyText) {
@@ -54,9 +70,14 @@ public class Complaint implements Serializable {
         this.month = month;
         this.year = year;
         this.ReplyText = replyText;
+        this.createdAt = buildCreatedAtFromLegacyDate(day, month, year);
+        this.slaStatus = "PENDING";
     }
 
     public  Complaint() {
+        this.createdAt = new Date();
+        this.slaStatus = "PENDING";
+        this.compensationDecision = "";
     }
 
     public void setComplaintID(int complaintID) {
@@ -113,6 +134,38 @@ public class Complaint implements Serializable {
 
     public void setReplyText(String replyText) {
         ReplyText = replyText;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getRespondedAt() {
+        return respondedAt;
+    }
+
+    public void setRespondedAt(Date respondedAt) {
+        this.respondedAt = respondedAt;
+    }
+
+    public String getSlaStatus() {
+        return slaStatus;
+    }
+
+    public void setSlaStatus(String slaStatus) {
+        this.slaStatus = slaStatus;
+    }
+
+    public String getCompensationDecision() {
+        return compensationDecision;
+    }
+
+    public void setCompensationDecision(String compensationDecision) {
+        this.compensationDecision = compensationDecision;
     }
 
     public int getComplaintID() {
@@ -181,11 +234,14 @@ public class Complaint implements Serializable {
     }
 
     public String getStatus() {
+        if (slaStatus != null) {
+            return slaStatus;
+        }
         if (isAccepted()) {
             return "Accepted";
-        } else {
-            return "Pending";
         }
+        return "Pending";
+
     }
 
     public void setStatus(String status) {
@@ -194,15 +250,21 @@ public class Complaint implements Serializable {
         } else {
             setAccepted(false);
         }
+        this.slaStatus = status;
     }
 
     public int getResponseTime() {
-        // Calculate response time in hours based on creation date
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        java.time.LocalDateTime complaintDate = java.time.LocalDateTime.of(
-            getYear(), getMonth(), getDay(), 12, 0
-        );
-        return (int) java.time.Duration.between(complaintDate, now).toHours();
+        if (createdAt == null) {
+            return 0;
+        }
+        LocalDateTime start = LocalDateTime.ofInstant(createdAt.toInstant(), ZoneId.systemDefault());
+        LocalDateTime end;
+        if (respondedAt != null) {
+            end = LocalDateTime.ofInstant(respondedAt.toInstant(), ZoneId.systemDefault());
+        } else {
+            end = LocalDateTime.now();
+        }
+        return (int) java.time.Duration.between(start, end).toHours();
     }
 
     public void setResponseTime(int responseTime) {
@@ -213,15 +275,21 @@ public class Complaint implements Serializable {
     public String getDate()
     {
         String result = "";
-        result = this.day + "/" + this.month + "/" + this.year;
-        return result;
+        if (createdAt != null) {
+            LocalDate localDate = createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            result = localDate.getDayOfMonth() + "/" + localDate.getMonthValue() + "/" + localDate.getYear();
+        } else {
+            result = this.day + "/" + this.month + "/" + this.year;
+        }        return result;
     }
     public boolean sameDate(Complaint other)
     {
-        if(this.day == other.day && this.month == other.month && this.year == other.year)
-            return true;
-        else
-            return false;
+        if (this.createdAt != null && other.createdAt != null) {
+            LocalDate a = this.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate b = other.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            return a.equals(b);
+        }
+        return this.day == other.day && this.month == other.month && this.year == other.year;
     }
 
     @Override
@@ -241,6 +309,18 @@ public class Complaint implements Serializable {
                 ", month=" + month +
                 ", year=" + year +
                 ", ReplyText='" + ReplyText + '\'' +
+                ", createdAt=" + createdAt +
+                ", respondedAt=" + respondedAt +
+                ", slaStatus='" + slaStatus + '\'' +
+                ", compensationDecision='" + compensationDecision + '\'' +
                 '}';
+    }
+
+    private Date buildCreatedAtFromLegacyDate(int day, int month, int year) {
+        if (day == 0 || month == 0 || year == 0) {
+            return null;
+        }
+        LocalDate legacyDate = LocalDate.of(year, month, day);
+        return Date.from(legacyDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 }

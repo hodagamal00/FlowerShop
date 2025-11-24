@@ -95,6 +95,9 @@ public class  ComplaintController{
         newComplaint.setMonth(month);
         newComplaint.setYear(year);
         newComplaint.setReplyText("");
+        newComplaint.setCreatedAt(new Date());
+        newComplaint.setSlaStatus("IN_PROGRESS");
+        newComplaint.setCompensationDecision("Pending review");
         // Prepare update message to add the complaint
         UpdateMessage msg = new UpdateMessage("complaint", "add");
         msg.setComplaint(newComplaint);

@@ -216,6 +216,10 @@ pickupOrder.setRefundStatus("NONE");
         Complaint complaint = new Complaint(1, 1, 2, false, true,
                 "Flowers arrived later than expected", 2, 2002, true,
                 50, 16, 6, 2024, "We apologize for the delay and refunded 50 ILS");
+        complaint.setCreatedAt(new Date());
+        complaint.setRespondedAt(new Date());
+        complaint.setSlaStatus("RESOLVED_ON_TIME");
+        complaint.setCompensationDecision("50% refund approved");
         session.save(complaint);
     }
 
