@@ -14,6 +14,7 @@
 <ScrollPane
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.HomePageController"
         stylesheets="@styles.css"
         fitToWidth="true"
         pannable="true"
@@ -28,8 +29,8 @@
                         <Label text="Welcome to Lilach" styleClass="header-title" />
                         <Text text="Modern bouquets, same-day delivery, and thoughtful gifts wrapped in a soft purple vibe." styleClass="muted-text" wrappingWidth="520" />
                         <HBox spacing="10.0">
-                            <Button text="Browse Catalog" styleClass="btn-primary" />
-                            <Button text="Track My Orders" styleClass="btn-outline" />
+                            <Button fx:id="browseCatalogButton" text="Browse Catalog" styleClass="btn-primary" onAction="#handleBrowseCatalog" />
+                            <Button fx:id="trackOrdersButton" text="Track My Orders" styleClass="btn-outline" onAction="#handleTrackOrders" />
                         </HBox>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS" />
@@ -49,17 +50,17 @@
                         <VBox spacing="8.0" styleClass="quick-card" GridPane.columnIndex="0">
                             <Label text="Browse Catalog" styleClass="card-header" />
                             <Text text="See seasonal bouquets, plants, and accessories with fast add-to-cart." styleClass="muted-text" wrappingWidth="220" />
-                            <Button text="Open Catalog" styleClass="btn-secondary" />
+                            <Button fx:id="openCatalogButton" text="Open Catalog" styleClass="btn-secondary" onAction="#handleOpenCatalog" />
                         </VBox>
                         <VBox spacing="8.0" styleClass="quick-card" GridPane.columnIndex="1">
                             <Label text="Create Custom" styleClass="card-header" />
                             <Text text="Mix stems, pick colors, and add a note for your perfect bundle." styleClass="muted-text" wrappingWidth="220" />
-                            <Button text="Start a Custom" styleClass="btn-secondary" />
+                            <Button fx:id="startCustomButton" text="Start a Custom" styleClass="btn-secondary" onAction="#handleStartCustom" />
                         </VBox>
                         <VBox spacing="8.0" styleClass="quick-card" GridPane.columnIndex="2">
                             <Label text="Track Orders" styleClass="card-header" />
                             <Text text="Stay updated on preparation, delivery, and pickup windows." styleClass="muted-text" wrappingWidth="220" />
-                            <Button text="View My Orders" styleClass="btn-secondary" />
+                            <Button fx:id="viewOrdersButton" text="View My Orders" styleClass="btn-secondary" onAction="#handleTrackOrders" />
                         </VBox>
                     </children>
                 </GridPane>
@@ -69,7 +70,7 @@
                     <HBox alignment="CENTER_LEFT" spacing="8.0">
                         <Label text="Popular Now" styleClass="card-header" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button text="View All" styleClass="btn-outline" />
+                        <Button fx:id="viewAllButton" text="View All" styleClass="btn-outline" onAction="#handleViewAll" />
                     </HBox>
                     <HBox spacing="14.0" alignment="CENTER_LEFT">
                         <VBox spacing="8.0" styleClass="popular-card">
