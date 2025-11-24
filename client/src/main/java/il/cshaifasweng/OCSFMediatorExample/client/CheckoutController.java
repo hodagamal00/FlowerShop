@@ -268,6 +268,7 @@ public class CheckoutController {
             String deliveredAddress = "";
             String recepName = "";
             long recepPhone = 0;
+            double deliveryFee = 0.0;
             if (deliverToHome.isSelected()) {
                 pickUp = true;
                 gift = false;
@@ -281,6 +282,8 @@ public class CheckoutController {
                 deliveredAddress = recepAddressField.getText();
                 gift = true;
                 pickUp = false;
+                deliveryFee = 15.0;
+
 
 
             }
@@ -331,14 +334,15 @@ public class CheckoutController {
                 totalPrice = totalPrice + (int) Math.round(cart.get(z).getPrice());
             }
             if (deliveryBox.isSelected())
-                totalPrice = totalPrice + 15;
+                totalPrice = totalPrice + (int) deliveryFee;
             if (currentUser.isSubscription() == true) {
                 if (totalPrice > 50)
                     totalPrice = (int) (totalPrice * 0.9);
             }
 
-            Order newOrder = new Order(0, pickUp, shopID, greeting, totalPrice, deliveredAddress, currentUser.getAccountID(), gift, false, dayCheckoutInt, monthCheckoutInt, yearCheckoutInt, currentDay, currentMonth, currentYear, creditCardNumber, creditCardMonth, creditCardYear, creditCardCVV, recepName, recepPhone, deliveredAddress, OrderedProducts, currentHour, currentMintue, prepareHour, prepareMinute);
+            String paymentMethod = "CREDIT_CARD";
 
+            Order newOrder = new Order(0, pickUp, shopID, greeting, totalPrice, deliveredAddress, currentUser.getAccountID(), gift, false, dayCheckoutInt, monthCheckoutInt, yearCheckoutInt, currentDay, currentMonth, currentYear, creditCardNumber, creditCardMonth, creditCardYear, creditCardCVV, recepName, recepPhone, deliveredAddress, OrderedProducts, currentHour, currentMintue, prepareHour, prepareMinute, deliveryFee, paymentMethod);
             System.out.println(newOrder);
             UpdateMessage new_msg2 = new UpdateMessage("order", "add");
             new_msg2.setOrder(newOrder);
