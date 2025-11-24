@@ -42,10 +42,9 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
-        // Start at the catalog (home) screen inside the AppShell.  Guests can
-        // browse the catalog without logging in.  The login page is still
-        // accessible via the header's login button.
-        NavigationService.getInstance().navigate("primary");
+        // Start at the new HomePage landing screen. Guests can browse the
+        // catalog or log in from there.
+        NavigationService.getInstance().navigate("HomePage");
     }
 
     static void setRoot(String fxml) throws IOException {
