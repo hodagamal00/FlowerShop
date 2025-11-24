@@ -382,12 +382,14 @@ public class BranchReportsController {
         
         // Group complaints by status
         Map<String, Long> complaintsByStatus = branchComplaints.stream()
-            .collect(Collectors.groupingBy(Complaint::getStatus, Collectors.counting()));
+                .collect(Collectors.groupingBy(this::resolveStatusLabel, Collectors.counting()));
         
         // Calculate total complaints
         int totalComplaints = branchComplaints.size();
-        totalComplaintsLabel.setText("Total: " + totalComplaints);
-        
+        long overdueCount = complaintsByStatus.getOrDefault("OVERDUE", 0L);
+        totalComplaintsLabel.setText(overdueCount > 0
+                ? "Total: " + totalComplaints + " (" + overdueCount + " overdue)"
+                : "Total: " + totalComplaints);
         // Create pie chart data
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
         ObservableList<ComplaintData> complaintDataList = FXCollections.observableArrayList();
@@ -399,7 +401,7 @@ public class BranchReportsController {
             
             // Calculate average response time for this status
             double avgResponseTime = branchComplaints.stream()
-                .filter(c -> status.equals(c.getStatus()))
+                    .filter(c -> status.equals(resolveStatusLabel(c)))
                 .mapToInt(Complaint::getResponseTime)
                 .average()
                 .orElse(0.0);
@@ -425,6 +427,13 @@ public class BranchReportsController {
             int totalComplaintsCount = branchComplaints.size();
             totalComplaintsLabel.setText("Total: " + totalComplaintsCount + " (" + complaintsByDateSummary + ")");
         }
+    }
+    private String resolveStatusLabel(Complaint complaint) {
+        String status = complaint.getSlaStatus();
+        if (status == null || status.isEmpty()) {
+            status = complaint.getStatus();
+        }
+        return status != null ? status : "Pending";
     }
 
     /**

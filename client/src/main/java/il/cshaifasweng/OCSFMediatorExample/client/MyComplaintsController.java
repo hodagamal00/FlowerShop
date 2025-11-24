@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -51,6 +53,17 @@ public class MyComplaintsController {
     @FXML // fx:id="orderID"
     private TextField orderID; // Value injected by FXMLLoader
 
+    @FXML
+    private TextField createdAt;
+
+    @FXML
+    private TextField respondedAt;
+
+    @FXML
+    private TextField slaStatus;
+
+    @FXML
+    private TextField compensationDecision;
     @FXML // fx:id="refundMoney"
     private TextField refundMoney; // Value injected by FXMLLoader
 
@@ -118,16 +131,18 @@ public class MyComplaintsController {
             }
             complaintID.setText(Integer.toString(selectedComplaint.getComplaintID()));
             orderID.setText(Integer.toString(selectedComplaint.getOrderID()));
-            if(selectedComplaint.isAccepted() == true) {
-                answerBool.setText("Yes");
+            answerBool.setText(selectedComplaint.getSlaStatus());
+            if (selectedComplaint.getCompensationDecision() != null && !selectedComplaint.getCompensationDecision().isEmpty()) {
+                refundMoney.setText(selectedComplaint.getCompensationDecision());
+            } else {
                 refundMoney.setText(Integer.toString(selectedComplaint.getReturnedmoneyvalue()));
-            }
-            else {
-                answerBool.setText("No");
-                refundMoney.setText("0");
             }
             replyWorker.setText(Integer.toString(selectedComplaint.getAnswerworkerID()));
             complaintText.setText(selectedComplaint.getComplaintText());
+            createdAt.setText(formatTimestamp(selectedComplaint.getCreatedAt()));
+            respondedAt.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
+            slaStatus.setText(selectedComplaint.getSlaStatus());
+            compensationDecision.setText(selectedComplaint.getCompensationDecision());
         }
     }
 
@@ -144,7 +159,10 @@ public class MyComplaintsController {
         assert refundMoney != null : "fx:id=\"refundMoney\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert replyWorker != null : "fx:id=\"replyWorker\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-
+        assert createdAt != null : "fx:id=\"createdAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert respondedAt != null : "fx:id=\"respondedAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert slaStatus != null : "fx:id=\"slaStatus\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert compensationDecision != null : "fx:id=\"compensationDecision\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         loadButton.setDisable(true);
         backToCatalog.setDisable(true);
         wait.setVisible(true);
@@ -181,5 +199,11 @@ public class MyComplaintsController {
         for(int i=0;i<recievedComplaints.size();i++){
             System.out.println(recievedComplaints.get(i).getDay());
         }
+    }
+    private String formatTimestamp(Date date) {
+        if (date == null) {
+            return "-";
+        }
+        return new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date);
     }
 }
