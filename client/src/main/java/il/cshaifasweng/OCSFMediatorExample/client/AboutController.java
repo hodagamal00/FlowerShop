@@ -2,16 +2,10 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
-import javafx.stage.Stage;
-
-import java.io.IOException;
+import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
 
 /**
  * Controller for the About page
@@ -21,17 +15,16 @@ public class AboutController {
 
     @FXML private Label usernameLabel;
     @FXML private Button logoutBtn;
-    
+
     @FXML private Hyperlink catalogLink;
     @FXML private Hyperlink ordersLink;
     @FXML private Hyperlink complaintsLink;
     @FXML private Hyperlink accountLink;
-    
+
     @FXML private Label versionLabel;
     @FXML private Label buildDateLabel;
     @FXML private Label platformLabel;
     @FXML private Label javaVersionLabel;
-
     @FXML
     private void initialize() {
         // Load current user information
@@ -161,39 +154,32 @@ public class AboutController {
      * Navigate to a specific page
      */
     private void navigateToPage(ActionEvent event, String page) {
+        String view = resolveViewName(page);
         try {
-            Parent root = null;
-            
-            switch (page.toLowerCase()) {
-                case "catalog":
-                    root = FXMLLoader.load(getClass().getResource("primary.fxml"));
-                    break;
-                case "orders":
-                    root = FXMLLoader.load(getClass().getResource("orders.fxml"));
-                    break;
-                case "complaints":
-                    root = FXMLLoader.load(getClass().getResource("complaints.fxml"));
-                    break;
-                case "account":
-                    root = FXMLLoader.load(getClass().getResource("account.fxml"));
-                    break;
-                default:
-                    root = FXMLLoader.load(getClass().getResource("primary.fxml"));
-                    break;
-            }
-            
-            if (root != null) {
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                Scene scene = new Scene(root);
-                stage.setScene(scene);
-                stage.show();
-            }
-            
-        } catch (IOException e) {
+            NavigationService.getInstance().navigate(view);
+        } catch (Exception e) {
             System.err.println("Error navigating to page: " + page);
             e.printStackTrace();
-            // Show error page if navigation fails
             showErrorPage(event, "Navigation Error", "Failed to navigate to " + page);
+        }
+    }
+
+    private String resolveViewName(String page) {
+        if (page == null) {
+            return "primary";
+        }
+
+        switch (page.toLowerCase()) {
+            case "catalog":
+                return "primary";
+            case "orders":
+                return "myorders";
+            case "complaints":
+                return "mycomplaints";
+            case "account":
+                return "Profile";
+            default:
+                return page;
         }
     }
 
@@ -204,13 +190,13 @@ public class AboutController {
         try {
             ErrorController.setErrorInfo(title, message, "NAV_ERROR", "Failed to load requested page");
             ErrorController.setReturnPage("about");
-            
+
             Parent root = FXMLLoader.load(getClass().getResource("Error.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
-            
+
         } catch (IOException ex) {
             System.err.println("ERROR: " + title + " - " + message);
             ex.printStackTrace();
