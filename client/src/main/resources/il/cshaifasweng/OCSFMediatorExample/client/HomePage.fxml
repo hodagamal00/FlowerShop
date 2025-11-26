@@ -21,8 +21,10 @@
         styleClass="app-scroll-container">
     <content>
         <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-              alignment="TOP_CENTER" spacing="18.0" prefWidth="960.0" padding="20">
-            <children>
+              alignment="TOP_CENTER" spacing="18.0" prefWidth="960.0">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>            <children>
                 <!-- Hero banner -->
                 <HBox alignment="CENTER_LEFT" spacing="18.0" styleClass="hero-card" prefHeight="180.0">
                     <VBox spacing="8.0">
