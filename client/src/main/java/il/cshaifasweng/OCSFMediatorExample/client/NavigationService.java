@@ -19,6 +19,7 @@ public class NavigationService {
 
     private static NavigationService instance;
     private AppShellController appShellController;
+    private String pendingView;
 
     private NavigationService() {
         // private to enforce singleton pattern
@@ -43,6 +44,15 @@ public class NavigationService {
      */
     public void setAppShellController(AppShellController controller) {
         this.appShellController = controller;
+
+        // If a navigation attempt happened before the shell controller was
+        // registered, replay it now so the initial view (e.g., the Home page)
+        // is visible instead of leaving the content area empty.
+        if (pendingView != null) {
+            String viewToNavigate = pendingView;
+            pendingView = null;
+            navigate(viewToNavigate);
+        }
     }
 
     /**
@@ -53,7 +63,9 @@ public class NavigationService {
      */
     public void navigate(String fxml) {
         if (appShellController == null) {
-            // Controller not yet registered; do nothing
+            // Controller not yet registered; remember request so it can be
+            // executed once the shell is ready.
+            pendingView = fxml;
             return;
         }
         try {
@@ -80,6 +92,7 @@ public class NavigationService {
             configureScrollPane(existing, false);
             return existing;
         }
+
 
         ScrollPane wrapper = new ScrollPane(view);
         configureScrollPane(wrapper, true);
