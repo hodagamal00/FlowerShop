@@ -22,7 +22,7 @@
 <ScrollPane
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
-        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.PrimaryController"
+        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController"
         stylesheets="@mycsss.css"
         fitToWidth="true"
         pannable="true"

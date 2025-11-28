@@ -99,7 +99,7 @@ public class BranchOrdersController {
 
     @FXML
     void goToHome() {
-        loadScene("primary.fxml", homeBtn);
+        loadScene("Catalog.fxml", homeBtn);
     }
 
     private void loadScene(String fxml, Button sourceButton) {

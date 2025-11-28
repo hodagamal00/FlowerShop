@@ -18,8 +18,6 @@ import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import javax.persistence.criteria.CriteriaBuilder;
-
 public class AdminControlController {
 
     @FXML // ResourceBundle that was given to the FXMLLoader
@@ -317,9 +315,9 @@ public class AdminControlController {
                 },4000
         );
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");

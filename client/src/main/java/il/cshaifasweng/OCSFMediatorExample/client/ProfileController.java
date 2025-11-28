@@ -249,7 +249,7 @@ public class ProfileController {
     @FXML
     void goBack() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) backBtn.getScene().getWindow();
             Scene scene = new Scene(root);

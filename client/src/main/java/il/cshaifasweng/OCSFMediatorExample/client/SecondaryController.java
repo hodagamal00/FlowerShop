@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.PrimitiveIterator;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -60,7 +59,7 @@ public class SecondaryController {
     void edit_product(ActionEvent event)
     {
         apply_changes.setVisible(true);
-        Product currtProduct  = il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.getCurrent_button();
+        Product currtProduct  = CatalogController.getCurrent_button();
 
         flower_details.setVisible(false);
         flower_name.setVisible(false);
@@ -79,14 +78,14 @@ public class SecondaryController {
 
     @FXML
     void returnWindow(ActionEvent event) throws IOException {
-        PrimaryController.setReturnedFromSecondaryController(true);
+        CatalogController.setReturnedFromSecondaryController(true);
         App.setRoot("primary");
     }
 
     @FXML
     void updateProduct(ActionEvent event)
     {
-        Product currtProduct  = il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.getCurrent_button();
+        Product currtProduct  = CatalogController.getCurrent_button();
 
 
         // setPrice expects a double; parse the text field into a double
@@ -146,7 +145,7 @@ public class SecondaryController {
         flower_price.setVisible(false);
 
         // set all fields details using product object
-        Product currentProduct = il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.getCurrent_button();
+        Product currentProduct = CatalogController.getCurrent_button();
         flower_details.setContentText(currentProduct.getDetails());
         // Convert price to string before setting content text
         flower_price.setContentText(String.valueOf(currentProduct.getPrice()));

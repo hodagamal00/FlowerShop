@@ -187,7 +187,7 @@ public class OrderConfirmationController {
     @FXML
     void goToHome() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) backToHomeBtn.getScene().getWindow();
             Scene scene = new Scene(root);

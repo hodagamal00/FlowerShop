@@ -5,7 +5,6 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 // introduces ambiguous references for classes like Button and List.  This
 // controller uses JavaFX exclusively, so AWT imports are unnecessary and
 // problematic.
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -14,32 +13,21 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.*;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.scene.control.*;
-import javafx.scene.control.TextField;
-import javafx.scene.control.DialogPane;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 // Added for detailed product navigation
-import il.cshaifasweng.OCSFMediatorExample.client.ProductDetailsController;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import javafx.scene.layout.VBox;
 
 // Event to pass current account to complaint controller
-import il.cshaifasweng.OCSFMediatorExample.client.PassAccountEventComplaints;
 
 
-
-
-
-public class PrimaryController {
+public class CatalogController {
 	public int flowersnum2 = 6;
 	public int workernum2 =0;
 	public int managernum2 =0;
@@ -1066,7 +1054,7 @@ public class PrimaryController {
 		allProducts.get(TargerID).setPrice(Double.parseDouble(newPrice));
 		allProducts.get(TargerID).setDetails(newDesc);
 
-		Product currtProduct  = il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.getCurrent_button();
+		Product currtProduct  = CatalogController.getCurrent_button();
 
 
 		currtProduct.setPrice(Double.parseDouble(newPrice));
@@ -1428,27 +1416,27 @@ public class PrimaryController {
 
 		System.out.println("arrived to initialize 1");
 		EventBus.getDefault().register(this);
-		assert flower_button1 != null : "fx:id=\"flower_button1\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button2 != null : "fx:id=\"flower_button2\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button3 != null : "fx:id=\"flower_button3\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button4 != null : "fx:id=\"flower_button4\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button5 != null : "fx:id=\"flower_button5\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button6 != null : "fx:id=\"flower_button6\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name1 != null : "fx:id=\"flower_name1\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name2 != null : "fx:id=\"flower_name2\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name3 != null : "fx:id=\"flower_name3\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name4 != null : "fx:id=\"flower_name4\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name5 != null : "fx:id=\"flower_name5\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name6 != null : "fx:id=\"flower_name6\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price1 != null : "fx:id=\"flower_price1\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price2 != null : "fx:id=\"flower_price2\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price3 != null : "fx:id=\"flower_price3\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price4 != null : "fx:id=\"flower_price4\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price5 != null : "fx:id=\"flower_price5\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price6 != null : "fx:id=\"flower_price6\" was not injected: check your FXML file 'primary.fxml'.";
-		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'primary.fxml'.";
-		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'primary.fxml'.";
-		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'primary.fxml'.";
+		assert flower_button1 != null : "fx:id=\"flower_button1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button2 != null : "fx:id=\"flower_button2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button3 != null : "fx:id=\"flower_button3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button4 != null : "fx:id=\"flower_button4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button5 != null : "fx:id=\"flower_button5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button6 != null : "fx:id=\"flower_button6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name1 != null : "fx:id=\"flower_name1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name2 != null : "fx:id=\"flower_name2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name3 != null : "fx:id=\"flower_name3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name4 != null : "fx:id=\"flower_name4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name5 != null : "fx:id=\"flower_name5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name6 != null : "fx:id=\"flower_name6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price1 != null : "fx:id=\"flower_price1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price2 != null : "fx:id=\"flower_price2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price3 != null : "fx:id=\"flower_price3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price4 != null : "fx:id=\"flower_price4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price5 != null : "fx:id=\"flower_price5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price6 != null : "fx:id=\"flower_price6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
 
 		customError.setVisible(false);
 		messageField.setVisible(false);

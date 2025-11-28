@@ -8,7 +8,6 @@ import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
-import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 import il.cshaifasweng.OCSFMediatorExample.entities.getAllOrdersMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,10 +21,6 @@ import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import javax.swing.*;
-
-import static com.sun.xml.bind.v2.schemagen.Util.equal;
 
 public class DeliveryController {
 
@@ -113,9 +108,9 @@ public class DeliveryController {
                     }
                 },4000
         );
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");

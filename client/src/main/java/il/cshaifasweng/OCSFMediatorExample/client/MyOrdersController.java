@@ -1,12 +1,9 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Date;
 
 
@@ -24,8 +21,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import javax.persistence.Column;
 
 public class MyOrdersController {
 
@@ -277,9 +272,9 @@ public class MyOrdersController {
     int complaint_num = 0;
     @FXML
     void GoToCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");
