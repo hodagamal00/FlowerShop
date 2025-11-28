@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
@@ -19,8 +20,20 @@ public class HomePageController {
     @FXML private Button viewAllButton;
 
     @FXML
+    private void initialize() {
+        // Wire buttons defensively so the landing page always navigates, even
+        // if the onAction attributes are removed during scene editor tweaks.
+        attachHandler(browseCatalogButton, this::handleBrowseCatalog);
+        attachHandler(openCatalogButton, this::handleOpenCatalog);
+        attachHandler(viewAllButton, this::handleViewAll);
+        attachHandler(trackOrdersButton, this::handleTrackOrders);
+        attachHandler(viewOrdersButton, this::handleTrackOrders);
+        attachHandler(startCustomButton, this::handleStartCustom);
+    }
+
+    @FXML
     private void handleBrowseCatalog(ActionEvent event) {
-        NavigationService.getInstance().navigate("primary");
+        NavigationService.getInstance().navigate("Catalog");
     }
 
     @FXML
@@ -48,6 +61,12 @@ public class HomePageController {
             NavigationService.getInstance().navigate("cart");
         } else {
             NavigationService.getInstance().navigate("Login");
+        }
+    }
+
+    private void attachHandler(Button button, EventHandler<ActionEvent> handler) {
+        if (button != null && handler != null) {
+            button.setOnAction(handler);
         }
     }
 

@@ -75,9 +75,9 @@ public class MyComplaintsController {
 
     @FXML
     void openCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");
