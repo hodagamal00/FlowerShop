@@ -327,10 +327,12 @@ public class LoginController {
         Platform.runLater(() -> {
             if (!checkML.getExistsMail()) {   // incorrect email
                 System.out.println("arrived to case incorrect email succesfully");
+                ErrorMsg.setText("We couldn't find an account with that email.");
                 ErrorMsg.setVisible(true);
                 resetLoginButton();
             } else if (!checkML.getExistsPassword()) {  // wrong password
                 System.out.println("arrived to case incorrect password succesfully");
+                ErrorMsgPass.setText("The password you entered is incorrect.");
                 ErrorMsgPass.setVisible(true);
                 resetLoginButton();
             } else if (!checkML.isLoggedIn()) {         // good email + pass
