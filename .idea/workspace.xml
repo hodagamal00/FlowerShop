@@ -4,14 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0bb18218-7279-421c-be7c-316f5dd0b851" name="Changes" comment="change">
+    <list default="true" id="0bb18218-7279-421c-be7c-316f5dd0b851" name="Changes" comment="اقدر اكتب بحقل الشكوى">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/96873f2c-058f-4652-a5f4-6f6717510d2c.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/96873f2c-058f-4652-a5f4-6f6717510d2c.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/RegisterController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/RegisterController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/MyComplaintsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/MyComplaintsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/MyOrdersController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/MyOrdersController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/PrimaryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/il/cshaifasweng/OCSFMediatorExample/client/PrimaryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/resources/il/cshaifasweng/OCSFMediatorExample/client/mycomplaints.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/resources/il/cshaifasweng/OCSFMediatorExample/client/mycomplaints.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -25,9 +38,12 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/hodagamal00/FlowerShop.git&quot;,
-    &quot;accountId&quot;: &quot;5a6ea31b-eb99-4cf9-bab8-85c959358505&quot;
+    &quot;accountId&quot;: &quot;57c5f071-600a-42ba-86cf-bf40bf8c51e5&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -37,31 +53,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Maven.OCSFMediatorExample [clean,install].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.OCSFMediatorExample [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.client [javafx:run].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.server [clean,install,exec:java].executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Maven.OCSFMediatorExample [clean,install].executor": "Run",
+    "Maven.OCSFMediatorExample [clean].executor": "Run",
+    "Maven.client [javafx:run].executor": "Run",
+    "Maven.server [clean,install,exec:java].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "boshra",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Maven.client [javafx:run]">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="E-COMMERCE-Client-Server-" />
@@ -176,8 +195,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-84258761d1cc-intellij.indexing.shared.core-IU-243.28141.18" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.28141.18" />
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
       </set>
     </attachedChunks>
   </component>
@@ -201,6 +220,8 @@
       <workItem from="1761657759285" duration="386000" />
       <workItem from="1762644497609" duration="2185000" />
       <workItem from="1762647191258" duration="1884000" />
+      <workItem from="1764167129463" duration="3541000" />
+      <workItem from="1765276436969" duration="2535000" />
     </task>
     <task id="LOCAL‎-00001" summary="change">
       <option name="closed" value="true" />
@@ -210,7 +231,39 @@
       <option name="project" value="LOCAL‎" />
       <updated>1762648116447</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="نزلت المستطيل الازرق شوي">
+      <option name="closed" value="true" />
+      <created>1762959445649</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1762959445649</updated>
+    </task>
+    <task id="LOCAL-00003" summary="يصير السيستم يعطي complaint id اوتوماتي">
+      <option name="closed" value="true" />
+      <created>1762963068745</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1762963068746</updated>
+    </task>
+    <task id="LOCAL-00004" summary="يصير السيستم يعطي complaint id اوتوماتي 2">
+      <option name="closed" value="true" />
+      <created>1762969570320</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1762969570322</updated>
+    </task>
+    <task id="LOCAL-00005" summary="اقدر اكتب بحقل الشكوى">
+      <option name="closed" value="true" />
+      <created>1763929795595</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1763929795596</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -218,6 +271,10 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="change" />
-    <option name="LAST_COMMIT_MESSAGE" value="change" />
+    <MESSAGE value="نزلت المستطيل الازرق شوي" />
+    <MESSAGE value="يصير السيستم يعطي complaint id اوتوماتي" />
+    <MESSAGE value="يصير السيستم يعطي complaint id اوتوماتي 2" />
+    <MESSAGE value="اقدر اكتب بحقل الشكوى" />
+    <option name="LAST_COMMIT_MESSAGE" value="اقدر اكتب بحقل الشكوى" />
   </component>
 </project>

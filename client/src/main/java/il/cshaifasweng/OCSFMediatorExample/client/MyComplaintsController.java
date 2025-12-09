@@ -2,6 +2,10 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
+import il.cshaifasweng.OCSFMediatorExample.entities.GetAllComplaints;
+import il.cshaifasweng.OCSFMediatorExample.entities.Message;
+import il.cshaifasweng.OCSFMediatorExample.entities.NextComplaintIdMessage;
+import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,14 +16,18 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Calendar;
 
 public class MyComplaintsController {
 
@@ -52,6 +60,9 @@ public class MyComplaintsController {
     @FXML // fx:id="orderID"
     private TextField orderID; // Value injected by FXMLLoader
 
+    @FXML
+    private Button submitComplaint; // Value injected by FXMLLoader
+
     @FXML // fx:id="refundMoney"
     private TextField refundMoney; // Value injected by FXMLLoader
 
@@ -60,6 +71,9 @@ public class MyComplaintsController {
 
     @FXML // fx:id="wait"
     private Label wait; // Value injected by FXMLLoader
+
+    private Integer nextComplaintId;
+
 
     @FXML
     void openCatalog(ActionEvent event) throws IOException {
@@ -93,43 +107,84 @@ public class MyComplaintsController {
 
     @FXML
     void loadComplaints(ActionEvent event) {
-        String aString = "";
-        if (loadButton.getText().equals("Load Complaints")) {
-            for (int z = 0; z < allComplaints.size(); z++) {
-                if(currentUser.getAccountID() == allComplaints.get(z).getCustomerID()) {
-                    aString = "#" + allComplaints.get(z).getComplaintID() + " - " + allComplaints.get(z).getDay() + "/" + allComplaints.get(z).getMonth() + "/" + allComplaints.get(z).getYear();
-                    complaintList.getItems().add(aString);
-                    aString = "";
-                }
-            }
-            loadButton.setText("Load Selected Complaint");
-        } else {
-            String SelectedIDString = "";
-            int SelectedID;
-            String SelectedComplaint = complaintList.getSelectionModel().getSelectedItem();
-            Complaint selectedComplaint = new Complaint();
-            for (int i = 1; SelectedComplaint.charAt(i) != ' '; i++) {
-                SelectedIDString = SelectedIDString + Character.toString(SelectedComplaint.charAt(i));
-            }
-            SelectedID = Integer.parseInt(SelectedIDString);
-            for (int i = 0; i < complaintList.getItems().size(); i++) {
-                if (allComplaints.get(i).getComplaintID() == SelectedID) {
-                    selectedComplaint = allComplaints.get(i);
-                }
-            }
-            complaintID.setText(Integer.toString(selectedComplaint.getComplaintID()));
-            orderID.setText(Integer.toString(selectedComplaint.getOrderID()));
-            if(selectedComplaint.isAccepted() == true) {
-                answerBool.setText("Yes");
-                refundMoney.setText(Integer.toString(selectedComplaint.getReturnedmoneyvalue()));
-            }
-            else {
-                answerBool.setText("No");
-                refundMoney.setText("0");
-            }
-            replyWorker.setText(Integer.toString(selectedComplaint.getAnswerworkerID()));
-            complaintText.setText(selectedComplaint.getComplaintText());
+        requestAllComplaints();
+        refreshComplaintList();
+    }
+
+    @FXML
+    void submitComplaint(ActionEvent event) {
+        if (currentUser == null) {
+            showAlert("You must be logged in to submit a complaint.");
+            return;
         }
+
+        String complaintBody = complaintText.getText() == null ? "" : complaintText.getText().trim();
+        if (complaintBody.isEmpty()) {
+            showAlert("Please enter a complaint before submitting.");
+            return;
+        }
+
+        String orderText = orderID.getText() == null ? "" : orderID.getText().trim();
+        if (orderText.isEmpty()) {
+            showAlert("Please enter a related order ID.");
+            return;
+        }
+
+        int parsedOrderId = parseOrderId(orderText);
+        if (parsedOrderId < 0) {
+            showAlert("Please enter a valid numeric order ID.");
+            return;
+        }
+        Calendar cal = Calendar.getInstance();
+        Complaint newComplaint = new Complaint();
+        if (nextComplaintId != null) {
+            newComplaint.setComplaintID(nextComplaintId);
+        }
+
+        newComplaint.setCustomerID(currentUser.getAccountID());
+        newComplaint.setOrderID(parsedOrderId);
+        newComplaint.setAccepted(false);
+        newComplaint.setIn24Hours(false);
+        newComplaint.setComplaintText(complaintBody);
+        newComplaint.setShopID(0);
+        newComplaint.setAnswerworkerID(0);
+        newComplaint.setReturnedMoney(false);
+        newComplaint.setReturnedmoneyvalue(0);
+        newComplaint.setDay(cal.get(Calendar.DAY_OF_MONTH));
+        newComplaint.setMonth(cal.get(Calendar.MONTH) + 1);
+        newComplaint.setYear(cal.get(Calendar.YEAR));
+        newComplaint.setReplyText("");
+
+        UpdateMessage msg = new UpdateMessage("complaint", "add");
+        msg.setComplaint(newComplaint);
+        try {
+            SimpleClient.getClient().sendToServer(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Message confirm = new Message();
+        confirm.setCustomerID(currentUser.getAccountID());
+        confirm.setMsgText("We have received your complaint and will respond within 24 hours.");
+        UpdateMessage messageUpdate = new UpdateMessage("message", "add");
+        messageUpdate.setMessage(confirm);
+        try {
+            SimpleClient.getClient().sendToServer(messageUpdate);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (allComplaints == null) {
+            allComplaints = new ArrayList<>();
+        }
+        if (newComplaint.getComplaintID() == 0 && nextComplaintId != null) {
+            newComplaint.setComplaintID(nextComplaintId);
+        }
+        allComplaints.add(newComplaint);
+
+        refreshComplaintList();
+        selectComplaint(newComplaint.getComplaintID());
+        requestNextComplaintId();
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -149,6 +204,15 @@ public class MyComplaintsController {
         loadButton.setDisable(true);
         backToCatalog.setDisable(true);
         wait.setVisible(true);
+        complaintList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                Complaint selected = findComplaintByListEntry(newValue);
+                if (selected != null) {
+                    showComplaintDetails(selected);
+                }
+            }
+        });
+
 
         new java.util.Timer().schedule(
                 new java.util.TimerTask() {
@@ -160,6 +224,8 @@ public class MyComplaintsController {
                     }
                 },4500
         );
+        requestAllComplaints();
+        requestNextComplaintId();
     }
     @Subscribe
     public void PassAccountEvent(PassAccountEventComplaints passAcc){ // added today
@@ -173,6 +239,8 @@ public class MyComplaintsController {
         System.out.println(recvAccount.getCreditCardNumber());
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
+        requestAllComplaints();
+        requestNextComplaintId();
     }
     @Subscribe
     public void complaintEvent(PassAllComplaintsEvent allComps){ // added new 30/7
@@ -181,6 +249,133 @@ public class MyComplaintsController {
         allComplaints = allComps.getComplaintsToPass();
         for(int i=0;i<recievedComplaints.size();i++){
             System.out.println(recievedComplaints.get(i).getDay());
+        }
+        refreshComplaintList();
+    }
+
+    @Subscribe
+    public void handleNextComplaintId(NextComplaintIdEvent event) {
+        nextComplaintId = event.getComplaintId();
+        if (complaintList.getSelectionModel().getSelectedItem() == null && complaintID != null) {
+            complaintID.setText(Integer.toString(nextComplaintId));
+        }
+    }
+
+    private void requestNextComplaintId() {
+        try {
+            SimpleClient.getClient().sendToServer(new NextComplaintIdMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void requestAllComplaints() {
+        try {
+            SimpleClient.getClient().sendToServer(new GetAllComplaints());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshComplaintList() {
+        complaintList.getItems().clear();
+        if (allComplaints == null || currentUser == null) {
+            return;
+        }
+
+        allComplaints.stream()
+                .filter(c -> c.getCustomerID() == currentUser.getAccountID())
+                .sorted((a, b) -> Integer.compare(a.getComplaintID(), b.getComplaintID()))
+                .forEach(c -> complaintList.getItems().add(formatListEntry(c)));
+    }
+
+    private void selectComplaint(int complaintId) {
+        String entry = null;
+        for (String item : complaintList.getItems()) {
+            if (parseComplaintId(item) == complaintId) {
+                entry = item;
+                break;
+            }
+        }
+        if (entry != null) {
+            complaintList.getSelectionModel().select(entry);
+            Complaint selected = findComplaintByListEntry(entry);
+            if (selected != null) {
+                showComplaintDetails(selected);
+            }
+        }
+    }
+
+    private Complaint findComplaintByListEntry(String listEntry) {
+        int id = parseComplaintId(listEntry);
+        if (id == -1 || allComplaints == null) {
+            return null;
+        }
+        for (Complaint complaint : allComplaints) {
+            if (complaint.getComplaintID() == id) {
+                return complaint;
+            }
+        }
+        return null;
+    }
+
+    private int parseComplaintId(String listEntry) {
+        if (listEntry == null || listEntry.length() < 2) {
+            return -1;
+        }
+        StringBuilder idBuilder = new StringBuilder();
+        for (int i = 1; i < listEntry.length(); i++) {
+            char c = listEntry.charAt(i);
+            if (Character.isDigit(c)) {
+                idBuilder.append(c);
+            } else {
+                break;
+            }
+        }
+        try {
+            return Integer.parseInt(idBuilder.toString());
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
+
+    private String formatListEntry(Complaint complaint) {
+        return "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
+    }
+
+    private void showComplaintDetails(Complaint selectedComplaint) {
+        if (selectedComplaint == null) {
+            return;
+        }
+        complaintID.setText(Integer.toString(selectedComplaint.getComplaintID()));
+        orderID.setText(Integer.toString(selectedComplaint.getOrderID()));
+        if(selectedComplaint.isAccepted()) {
+            answerBool.setText("Yes");
+            refundMoney.setText(Integer.toString(selectedComplaint.getReturnedmoneyvalue()));
+        }
+        else {
+            answerBool.setText("No");
+            refundMoney.setText("0");
+        }
+        replyWorker.setText(Integer.toString(selectedComplaint.getAnswerworkerID()));
+        complaintText.setText(selectedComplaint.getComplaintText());
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private int parseOrderId(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(text.trim());
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 }

@@ -433,39 +433,39 @@ public class MyOrdersController {
                 else
                     currentProduct = "";
             }
-                openComplaint.setVisible(true);
-                orderID.setText(String.valueOf(retrievedOrder.getOrderID()));
-                accountID.setText(String.valueOf(currentUser.getAccountID()));
-                creditNumber.setText(String.valueOf(retrievedOrder.getCreditCardNumber()));
-                String creditXpire = "" + retrievedOrder.getCreditCardExpMonth() + "/" + retrievedOrder.getCreditCardExpYear();
-                creditExpire.setText(creditXpire);
-                creditCVV.setText(String.valueOf(retrievedOrder.getCreditCardCVV()));
-                totalPrice.setText(String.valueOf(retrievedOrder.getTotalPrice()));
-                shopID.setText(String.valueOf(retrievedOrder.getShopID()));
-                if (retrievedOrder.isGift() == true)
-                    gift.setText("true");
-                else
-                    gift.setText("false");
-                String orderDate = "" + retrievedOrder.getOrderDay() + "/" + retrievedOrder.getOrderMonth() + "/" + retrievedOrder.getOrderYear();
-                dateOrder.setText(orderDate);
-                String prepareDate = "" + retrievedOrder.getPrepareDay() + "/" + retrievedOrder.getPrepareMonth() + "/" + retrievedOrder.getPrepareYear();
-                datePrepare.setText(prepareDate);
-                if (retrievedOrder.isPickUp() == true)
-                    deliverService.setText("Pick Up");
-                else
-                    deliverService.setText("Delivery");
-                if (retrievedOrder.isDelivered() == true)
-                    deliverService.setText("Delivered/Picked Up");
-                else
-                    deliverService.setText("Not Delivered/Picked Up");
-                RecepName.setText(retrievedOrder.getRecepName());
-                RecepAddress.setText(retrievedOrder.getRecepAddress());
-                RecepNumber.setText(String.valueOf(retrievedOrder.getRecepPhone()));
-                if (retrievedOrder.getGreeting() != "")
-                    greetingText.setText(retrievedOrder.getGreeting());
-                else
-                    greetingText.setText("No Greeting");
-                currentOrderShopID = retrievedOrder.getShopID();
+            openComplaint.setVisible(true);
+            orderID.setText(String.valueOf(retrievedOrder.getOrderID()));
+            accountID.setText(String.valueOf(currentUser.getAccountID()));
+            creditNumber.setText(String.valueOf(retrievedOrder.getCreditCardNumber()));
+            String creditXpire = "" + retrievedOrder.getCreditCardExpMonth() + "/" + retrievedOrder.getCreditCardExpYear();
+            creditExpire.setText(creditXpire);
+            creditCVV.setText(String.valueOf(retrievedOrder.getCreditCardCVV()));
+            totalPrice.setText(String.valueOf(retrievedOrder.getTotalPrice()));
+            shopID.setText(String.valueOf(retrievedOrder.getShopID()));
+            if (retrievedOrder.isGift() == true)
+                gift.setText("true");
+            else
+                gift.setText("false");
+            String orderDate = "" + retrievedOrder.getOrderDay() + "/" + retrievedOrder.getOrderMonth() + "/" + retrievedOrder.getOrderYear();
+            dateOrder.setText(orderDate);
+            String prepareDate = "" + retrievedOrder.getPrepareDay() + "/" + retrievedOrder.getPrepareMonth() + "/" + retrievedOrder.getPrepareYear();
+            datePrepare.setText(prepareDate);
+            if (retrievedOrder.isPickUp() == true)
+                deliverService.setText("Pick Up");
+            else
+                deliverService.setText("Delivery");
+            if (retrievedOrder.isDelivered() == true)
+                deliverService.setText("Delivered/Picked Up");
+            else
+                deliverService.setText("Not Delivered/Picked Up");
+            RecepName.setText(retrievedOrder.getRecepName());
+            RecepAddress.setText(retrievedOrder.getRecepAddress());
+            RecepNumber.setText(String.valueOf(retrievedOrder.getRecepPhone()));
+            if (retrievedOrder.getGreeting() != "")
+                greetingText.setText(retrievedOrder.getGreeting());
+            else
+                greetingText.setText("No Greeting");
+            currentOrderShopID = retrievedOrder.getShopID();
         }
     }
     int currentOrderShopID;
