@@ -58,7 +58,7 @@
                   </VBox>
                   <VBox prefWidth="250.0" spacing="8.0">
                      <Text strokeType="OUTSIDE" text="Related Order ID:"><font><Font size="14.0" /></font></Text>
-                     <TextField fx:id="orderID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                     <TextField fx:id="orderID" promptText="Enter related order ID" prefWidth="250.0" />
                   </VBox>
                </HBox>
 
@@ -92,6 +92,7 @@
                   </font>
                </Text>
                <TextArea fx:id="complaintText" prefHeight="250.0" prefWidth="500.0" promptText="Enter your complaint here..." wrapText="true" />
+               <Button fx:id="submitComplaint" mnemonicParsing="false" onAction="#submitComplaint" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Submit Complaint" />
             </VBox>
 
             <!-- Status Information -->
