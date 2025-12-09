@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.application.Platform;
 
 // Removed unused AWT imports.  Including AWT packages alongside JavaFX
 // introduces ambiguous references for classes like Button and List.  This
@@ -1704,25 +1705,27 @@ public class PrimaryController {
 
 	@Subscribe
 	public void PassAccountEvent(PassAccountEvent passAcc){ // added today
-		System.out.println("arrived to passAccountToPrimary sucessfuly");
-		Account recvAccount = passAcc.getRecievedAccount();
-		System.out.println(recvAccount.getPassword());
-		if(recvAccount.getPrivialge() == 1)
-		{
-			//TO:DO Adjust the buttons
-		}
-		System.out.println(recvAccount.getAccountID());
-		System.out.println(recvAccount.getEmail());
-		System.out.println(recvAccount.getFullName());
-		//System.out.println(recvAccount.getAddress());
-		//System.out.println(recvAccount.getCreditCardNumber());
-		//System.out.println(recvAccount.getCreditMonthExpire());
-		System.out.println("Acc Priv: " + recvAccount.getPrivialge());
-		currentLoggedAccount = recvAccount;
-		System.out.println(" Current Priv : " + currentLoggedAccount.getPrivialge());
-		SimpleClient.setAccount(currentLoggedAccount);
-		applyPrivilegeBasedUI();
-		navigateAfterLogin(currentLoggedAccount);
+		Platform.runLater(() -> {
+			System.out.println("arrived to passAccountToPrimary sucessfuly");
+			Account recvAccount = passAcc.getRecievedAccount();
+			System.out.println(recvAccount.getPassword());
+			if(recvAccount.getPrivialge() == 1)
+			{
+				//TO:DO Adjust the buttons
+			}
+			System.out.println(recvAccount.getAccountID());
+			System.out.println(recvAccount.getEmail());
+			System.out.println(recvAccount.getFullName());
+			//System.out.println(recvAccount.getAddress());
+			//System.out.println(recvAccount.getCreditCardNumber());
+			//System.out.println(recvAccount.getCreditMonthExpire());
+			System.out.println("Acc Priv: " + recvAccount.getPrivialge());
+			currentLoggedAccount = recvAccount;
+			System.out.println(" Current Priv : " + currentLoggedAccount.getPrivialge());
+			SimpleClient.setAccount(currentLoggedAccount);
+			applyPrivilegeBasedUI();
+			navigateAfterLogin(currentLoggedAccount);
+		});
 
 	}
 	@Subscribe
