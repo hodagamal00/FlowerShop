@@ -514,15 +514,36 @@ public class PrimaryController {
 		if (button == null || CatalogSTARTIndex + offset >= allProducts.size()) {
 			return;
 		}
+
 		Product product = allProducts.get(CatalogSTARTIndex + offset);
+
 		if (canEdit) {
 			button.setText("Edit");
 			button.setOnAction(event -> {
-				setCurrent_button(product);
-				try {
-					App.setRoot("secondary");
-				} catch (IOException e) {
-					e.printStackTrace();
+				Alert chooser = new Alert(Alert.AlertType.CONFIRMATION);
+				chooser.setTitle("Choose Action");
+				chooser.setHeaderText("What would you like to do?");
+				chooser.setContentText("You can add this product to the cart or edit its details.");
+
+				ButtonType addToCart = new ButtonType("Add to Cart", ButtonBar.ButtonData.OK_DONE);
+				ButtonType editProduct = new ButtonType("Edit Product", ButtonBar.ButtonData.APPLY);
+				ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+				chooser.getButtonTypes().setAll(addToCart, editProduct, cancel);
+
+				Optional<ButtonType> result = chooser.showAndWait();
+
+				if (result.isPresent()) {
+					if (result.get() == addToCart) {
+						addProductToCartByIndex(offset);
+					} else if (result.get() == editProduct) {
+						setCurrent_button(product);
+						try {
+							App.setRoot("secondary");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			});
 		} else {
@@ -530,8 +551,6 @@ public class PrimaryController {
 			button.setOnAction(event -> addProductToCartByIndex(offset));
 		}
 	}
-
-
 	@FXML
 	private TextField cartText;
 
