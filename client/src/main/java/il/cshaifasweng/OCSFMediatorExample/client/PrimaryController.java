@@ -1484,6 +1484,15 @@ public class PrimaryController {
 		viewInboxPlz.setVisible(false);
 		inboxList.setVisible(false);
 		openMessage.setVisible(false);
+
+		// Restore persisted login so customer-specific buttons become
+		// available even if the PassAccountEvent arrived before this
+		// controller was initialized (after registration).
+		Account persistedAccount = SimpleClient.getUser();
+		if (persistedAccount != null) {
+			currentLoggedAccount = persistedAccount;
+			applyPrivilegeBasedUI();
+		}
 		checkout.setVisible(false);
 		if (cartTextPrice != null) cartTextPrice.setVisible(false);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
