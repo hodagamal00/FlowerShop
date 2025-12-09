@@ -4,29 +4,21 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 // Removed unused AWT imports.  Keeping AWT alongside JavaFX can
 // introduce ambiguous references (e.g., both have a Button class).  This
 // controller relies on JavaFX for UI, so these imports are unnecessary.
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
 import javafx.application.Platform;
-import javafx.scene.Node;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.*;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+
 import javafx.scene.control.*;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
+
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
@@ -55,8 +47,7 @@ public class LoginController {
     private Button LogIn; // Value injected by FXMLLoader
 
     @FXML // fx:id="Password"
-    private TextField Password; // Value injected by FXMLLoader
-
+    private PasswordField Password; // Value injected by FXMLLoader
     @FXML // fx:id="RegisterTab"
     private Button RegisterTab; // Value injected by FXMLLoader
 
@@ -164,15 +155,9 @@ public class LoginController {
     }
     @FXML
     void openCatalogFunc(ActionEvent event) throws IOException {
-        // A guest or authenticated user can proceed to the catalog.  We
-        // persist the current email (for message retrieval) but rely on
-        // the NavigationService to swap the centre content instead of
-        // opening a new window.  This method is invoked when the
-        // "Continue to Catalog" button is clicked after successful
-        // authentication.
         CatalogFlag.setFlagg(1);
+
         String theEmail = Email.getText();
-        // Send current email to server for message retrieval
         try {
             SimpleClient.getClient().sendToServer(new MailClass(theEmail));
             SimpleClient.getClient().sendToServer(new GetAllComplaints());
@@ -180,7 +165,7 @@ public class LoginController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // Navigate to the catalog (primary) view within the AppShell
+
         NavigationService.getInstance().navigate("primary");
     }
 
@@ -244,7 +229,6 @@ public class LoginController {
     private boolean accountDetailsRequested;
     @FXML
     void handleLogin(ActionEvent event) {
-        lastLoginEvent = event;
         // Clear previous error messages
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
