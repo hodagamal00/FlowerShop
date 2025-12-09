@@ -19,6 +19,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import il.cshaifasweng.OCSFMediatorExample.client.SimpleClient;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
