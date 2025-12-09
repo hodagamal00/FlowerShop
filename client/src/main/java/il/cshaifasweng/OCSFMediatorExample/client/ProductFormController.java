@@ -40,7 +40,11 @@ public class ProductFormController {
     @FXML private TextField minPriceField;
     @FXML private TextField maxPriceField;
     @FXML private Button saveBtn;
+    @FXML private Button approveBtn;
     @FXML private Button cancelBtn;
+    @FXML private Button scrollDownBtn;
+    @FXML private Button scrollUpBtn;
+    @FXML private ScrollPane formScrollPane;
     @FXML private Label statusLabel;
 
     private Product currentProduct;
@@ -230,6 +234,26 @@ public class ProductFormController {
             maxPriceField.clear();
         }
     }
+    /**
+     * Scrolls the view to the bottom of the form
+     */
+    @FXML
+    void scrollToBottom() {
+        if (formScrollPane != null) {
+            formScrollPane.setVvalue(1.0);
+        }
+    }
+
+    /**
+     * Scrolls the view back to the top of the form
+     */
+    @FXML
+    void scrollToTop() {
+        if (formScrollPane != null) {
+            formScrollPane.setVvalue(0.0);
+        }
+    }
+
 
     /**
      * Validates and saves the product
@@ -318,6 +342,13 @@ public class ProductFormController {
             e.printStackTrace();
             showStatus("Error saving product: " + e.getMessage(), true);
         }
+    }
+    /**
+     * Approves and saves the product changes
+     */
+    @FXML
+    void approveChanges() {
+        saveProduct();
     }
 
     /**
