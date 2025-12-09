@@ -10,6 +10,7 @@ import javafx.application.Platform;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
+import il.cshaifasweng.OCSFMediatorExample.client.SimpleClient;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -354,6 +355,10 @@ public class RegisterController {
         registrationPending = false;
         pendingEmail = null;
         RegisteredAccounts.add(createdAccount.getEmail());
+        // Persist the newly created account so other controllers (like the
+        // PrimaryController) can immediately apply privilege-based UI logic
+        // after navigation without waiting for another PassAccountEvent.
+        SimpleClient.setAccount(createdAccount);
 
         Platform.runLater(() -> {
             RegisterButton.setDisable(false);

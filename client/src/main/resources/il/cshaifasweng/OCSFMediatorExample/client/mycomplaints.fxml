@@ -24,7 +24,7 @@
             <Button fx:id="backToCatalog" layoutX="1350.0" layoutY="25.0" mnemonicParsing="false" onAction="#openCatalog" prefHeight="35.0" prefWidth="150.0" style="-fx-font-size: 14px;" text="← Back to Catalog" />
          </children>
       </AnchorPane>
-      
+
       <!-- Left Panel - Complaints List -->
       <AnchorPane layoutX="20.0" layoutY="100.0" prefHeight="680.0" prefWidth="350.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
          <children>
@@ -39,7 +39,7 @@
             </VBox>
          </children>
       </AnchorPane>
-      
+
       <!-- Right Panel - Complaint Details -->
       <AnchorPane layoutX="387.0" layoutY="120.0" prefHeight="680.0" prefWidth="1110.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
          <children>
@@ -50,7 +50,7 @@
                      <Font name="System Bold" size="22.0" />
                   </font>
                </Text>
-               
+
                <HBox spacing="15.0">
                   <VBox prefWidth="250.0" spacing="8.0">
                      <Text strokeType="OUTSIDE" text="Complaint ID:"><font><Font size="14.0" /></font></Text>
@@ -58,10 +58,10 @@
                   </VBox>
                   <VBox prefWidth="250.0" spacing="8.0">
                      <Text strokeType="OUTSIDE" text="Related Order ID:"><font><Font size="14.0" /></font></Text>
-                     <TextField fx:id="orderID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                     <TextField fx:id="orderID" promptText="Enter related order ID" prefWidth="250.0" />
                   </VBox>
                </HBox>
-               
+
                <HBox spacing="15.0">
                   <VBox prefWidth="250.0" spacing="8.0">
                      <Text strokeType="OUTSIDE" text="Response Status:"><font><Font size="14.0" /></font></Text>
@@ -72,7 +72,7 @@
                      <TextField fx:id="replyWorker" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
                   </VBox>
                </HBox>
-               
+
                <VBox spacing="8.0">
                   <Text strokeType="OUTSIDE" text="Refund Amount:"><font><Font size="14.0" /></font></Text>
                   <Text fill="#2c3e50" text="Complaint Status Information">
@@ -92,6 +92,7 @@
                   </font>
                </Text>
                <TextArea fx:id="complaintText" prefHeight="250.0" prefWidth="500.0" promptText="Enter your complaint here..." wrapText="true" />
+               <Button fx:id="submitComplaint" mnemonicParsing="false" onAction="#submitComplaint" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Submit Complaint" />
             </VBox>
 
             <!-- Status Information -->
@@ -106,7 +107,7 @@
                   <font><Font size="14.0" /></font>
                </Text>
             </VBox>
-            
+
             <!-- Loading Indicator -->
             <Label fx:id="wait" layoutX="400.0" layoutY="300.0" text="Please Wait" textFill="#3498db" visible="false">
                <font>
