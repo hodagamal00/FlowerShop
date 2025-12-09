@@ -108,12 +108,7 @@
                </Text>
             </VBox>
 
-            <!-- Loading Indicator -->
-            <Label fx:id="wait" layoutX="400.0" layoutY="300.0" text="Please Wait" textFill="#3498db" visible="false">
-               <font>
-                  <Font size="72.0" />
-               </font>
-            </Label>
+
          </children>
       </AnchorPane>
    </children>

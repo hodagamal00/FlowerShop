@@ -12,7 +12,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -69,8 +68,6 @@ public class MyComplaintsController {
     @FXML // fx:id="replyWorker"
     private TextField replyWorker; // Value injected by FXMLLoader
 
-    @FXML // fx:id="wait"
-    private Label wait; // Value injected by FXMLLoader
 
     private Integer nextComplaintId;
 
@@ -200,11 +197,9 @@ public class MyComplaintsController {
         assert submitComplaint != null : "fx:id=\"submitComplaint\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert refundMoney != null : "fx:id=\"refundMoney\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert replyWorker != null : "fx:id=\"replyWorker\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'mycomplaints.fxml'.";
 
         loadButton.setDisable(true);
         backToCatalog.setDisable(true);
-        wait.setVisible(true);
         complaintList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 Complaint selected = findComplaintByListEntry(newValue);
@@ -221,7 +216,6 @@ public class MyComplaintsController {
                     public void run() {
                         loadButton.setDisable(false);
                         backToCatalog.setDisable(false);
-                        wait.setVisible(false);
                     }
                 },4500
         );
