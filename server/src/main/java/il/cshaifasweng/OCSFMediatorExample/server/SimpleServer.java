@@ -460,36 +460,25 @@ public class SimpleServer extends AbstractServer {
 
 			MailClass recievedMessage = (MailClass) msg;
 			String recievedMailStr = recievedMessage.getMail();
-			Account tempAccount = new Account() ; // in case the user is a customer
 
+			Account matchedAccount = null;
 
-			boolean foundAlready = false ;
-
-			for (int i=0;i<accountsList.size();i++) // search the email in all customer accounts and save the result object in the tempAccount object
-			{
-				System.out.println(accountsList.get(i).getEmail());
-				if(accountsList.get(i).getEmail().equals(recievedMailStr))
-				{
-					foundAlready = true ;
-					tempAccount.setAccountID(accountsList.get(i).getAccountID());
-					tempAccount.setAddress(accountsList.get(i).getAddress());
-					tempAccount.setBelongShop(accountsList.get(i).getBelongShop());
-					tempAccount.setCcv(accountsList.get(i).getCcv());
-					tempAccount.setCreditCardNumber(accountsList.get(i).getCreditCardNumber());
-					tempAccount.setEmail(accountsList.get(i).getEmail());
-					tempAccount.setFullName(accountsList.get(i).getFullName());
-					tempAccount.setLoggedIn(accountsList.get(i).getLoggedIn());
-					tempAccount.setPassword(accountsList.get(i).getPassword());
-					tempAccount.setPhoneNumber(accountsList.get(i).getPhoneNumber());
-					tempAccount.setCreditMonthExpire(accountsList.get(i).getCreditMonthExpire());
-					tempAccount.setPrivialge(accountsList.get(i).getPrivialge()); //Added
+			for (Account account : accountsList) { // search the email in all customer accounts and return the matched account
+				System.out.println(account.getEmail());
+				if (account.getEmail().equals(recievedMailStr)) {
+					matchedAccount = account;
+					break;
 				}
-
-				client.sendToClient(tempAccount);
-
 			}
 
+			if (matchedAccount != null) {
+				client.sendToClient(matchedAccount);
+			} else {
+				client.sendToClient("mail not found");
+			}
 
+			tx1.commit();
+			session.close();
 		}
 
 		if(msg instanceof LogOut){
