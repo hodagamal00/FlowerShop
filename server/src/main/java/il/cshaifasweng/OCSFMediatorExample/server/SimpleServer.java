@@ -447,6 +447,8 @@ public class SimpleServer extends AbstractServer {
 				session.update(matchedAccount);
 				tx1.commit();
 				session.close();
+
+				client.sendToClient(matchedAccount);
 				client.sendToClient("found mail and password");
 			}
 		}
@@ -462,7 +464,6 @@ public class SimpleServer extends AbstractServer {
 			String recievedMailStr = recievedMessage.getMail();
 
 			Account matchedAccount = null;
-
 			for (Account account : accountsList) { // search the email in all customer accounts and return the matched account
 				System.out.println(account.getEmail());
 				if (account.getEmail().equals(recievedMailStr)) {
