@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.geometry.Insets?>
 
 <ScrollPane
         fx:id="formScrollPane"
@@ -24,19 +14,19 @@
         stylesheets="@mycsss.css"
         fitToWidth="true"
         pannable="true"
+        hbarPolicy="NEVER"
+        vbarPolicy="ALWAYS"
         styleClass="app-scroll-container">
 
     <content>
-        <AnchorPane maxHeight="720.0" maxWidth="600.0"
-                    minHeight="720.0" minWidth="600.0"
-                    prefHeight="720.0" prefWidth="600.0">
+        <!-- مهم: إزالة maxHeight/minHeight حتى يصير طولها ديناميكي -->
+        <AnchorPane prefWidth="600.0">
 
             <children>
 
                 <!-- Header -->
                 <AnchorPane styleClass="navbar"
                             layoutY="0.0"
-                            maxHeight="60.0" minHeight="60.0"
                             prefHeight="60.0" prefWidth="600.0">
                     <children>
                         <Label fx:id="formTitleLabel"
@@ -174,8 +164,7 @@
                     <VBox spacing="10.0"
                           styleClass="card"
                           style="-fx-padding: 20; -fx-background-color: white;">
-                        <Text text="Promotion"
-                              fill="#4a148c">
+                        <Text text="Promotion" fill="#4a148c">
                             <font>
                                 <Font name="System Bold" size="16.0"/>
                             </font>
@@ -198,6 +187,7 @@
                         </HBox>
                     </VBox>
 
+                    <!-- Custom Product Options -->
                     <VBox spacing="12.0"
                           styleClass="card"
                           style="-fx-padding: 20; -fx-background-color: white;">
@@ -244,31 +234,19 @@
                                 styleClass="btn-primary"
                                 text="💾 Save Product"
                                 onAction="#saveProduct"
-                                prefWidth="160.0" prefHeight="45.0">
-                            <font>
-                                <Font name="System Bold" size="14.0"/>
-                            </font>
-                        </Button>
+                                prefWidth="160.0" prefHeight="45.0"/>
 
                         <Button fx:id="approveBtn"
                                 styleClass="btn-success"
                                 text="✅ Approve"
                                 onAction="#approveChanges"
-                                prefWidth="140.0" prefHeight="45.0">
-                            <font>
-                                <Font name="System Bold" size="14.0"/>
-                            </font>
-                        </Button>
+                                prefWidth="140.0" prefHeight="45.0"/>
 
                         <Button fx:id="cancelBtn"
                                 styleClass="btn-secondary"
                                 text="Cancel"
                                 onAction="#cancel"
-                                prefWidth="140.0" prefHeight="45.0">
-                            <font>
-                                <Font size="14.0"/>
-                            </font>
-                        </Button>
+                                prefWidth="140.0" prefHeight="45.0"/>
                     </HBox>
 
                     <!-- Status Messages -->
@@ -286,12 +264,9 @@
                                 onAction="#scrollToTop"
                                 prefWidth="200.0" prefHeight="36.0"
                                 styleClass="btn-secondary"
-                                text="⇧ Back to Top">
-                            <font>
-                                <Font name="System Bold" size="13.0"/>
-                            </font>
-                        </Button>
+                                text="⇧ Back to Top"/>
                     </HBox>
+
                 </VBox>
             </children>
         </AnchorPane>
