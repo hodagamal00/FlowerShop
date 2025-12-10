@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,6 +15,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
+import javafx.animation.PauseTransition;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -68,6 +71,7 @@ public class LoginController {
     private Account authenticatedAccount;
     private boolean navigationPendingAccount;
     private boolean accountDetailsRequested;
+    private PauseTransition loginTimeout;
 
     @FXML
     void ReturnFromLogin(ActionEvent event) {
@@ -218,14 +222,39 @@ public class LoginController {
 
         LogIn.setDisable(true);
         LogIn.setText("Logging in...");
-
+        startLoginTimeout();
         attemptLoginAsync(email, password);
     }
 
     private void resetLoginButton() {
         Platform.runLater(() -> {
+            cancelLoginTimeout();
             LogIn.setDisable(false);
             LogIn.setText("Log In");
+        });
+    }
+
+    private void startLoginTimeout() {
+        cancelLoginTimeout();
+        loginTimeout = new PauseTransition(Duration.seconds(10));
+        loginTimeout.setOnFinished(evt -> handleLoginTimeout());
+        loginTimeout.playFromStart();
+    }
+
+    private void cancelLoginTimeout() {
+        if (loginTimeout != null) {
+            loginTimeout.stop();
+            loginTimeout = null;
+        }
+    }
+
+    private void handleLoginTimeout() {
+        Platform.runLater(() -> {
+            LogIn.setDisable(false);
+            LogIn.setText("Log In");
+            logSucc.setVisible(false);
+            alLog.setText("Login is taking longer than expected. Please try again.");
+            alLog.setVisible(true);
         });
     }
 
@@ -278,6 +307,9 @@ public class LoginController {
             navigationPendingAccount = true;
             showSuccessMessage("Login successful! Loading your account details...");
             requestAccountDetails();
+            // Fall back to the catalog so the user is not blocked if account
+            // details arrive slowly or fail to load.
+            Platform.runLater(() -> NavigationService.getInstance().navigate("primary"));
             return;
         }
 

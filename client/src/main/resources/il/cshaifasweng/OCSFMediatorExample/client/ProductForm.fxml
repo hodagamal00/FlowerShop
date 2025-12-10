@@ -112,8 +112,91 @@
                         </HBox>
                     </VBox>
 
-                    <!-- هنا باقي أقسام النموذج (اسم المنتج، السعر، الوصف، الخ...) -->
-                    <!-- Custom Product Section مثالاً: -->
+                    <!-- Product Details Section -->
+                    <VBox spacing="12.0"
+                          styleClass="card"
+                          style="-fx-padding: 20; -fx-background-color: white;">
+                        <Text text="Product Details" fill="#4a148c">
+                            <font>
+                                <Font name="System Bold" size="16.0"/>
+                            </font>
+                        </Text>
+
+                        <VBox spacing="10.0">
+                            <Label text="Product Name" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="nameField"
+                                       promptText="Enter product name"
+                                       prefHeight="38.0"/>
+                        </VBox>
+
+                        <HBox spacing="15.0">
+                            <VBox spacing="8.0" prefWidth="250.0">
+                                <Label text="SKU" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="skuField"
+                                           promptText="e.g., LIL-12345"
+                                           prefHeight="38.0"/>
+                            </VBox>
+
+                            <VBox spacing="8.0" prefWidth="250.0">
+                                <Label text="Price ($)" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="priceField"
+                                           promptText="0.00"
+                                           prefHeight="38.0"/>
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="15.0">
+                            <VBox spacing="8.0" prefWidth="250.0">
+                                <Label text="Category" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="categoryCombo"
+                                          promptText="Select category"
+                                          prefHeight="38.0" prefWidth="250.0"/>
+                            </VBox>
+
+                            <VBox spacing="8.0" prefWidth="250.0">
+                                <Label text="Color" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="colorCombo"
+                                          promptText="Select color"
+                                          prefHeight="38.0" prefWidth="250.0"/>
+                            </VBox>
+                        </HBox>
+
+                        <VBox spacing="8.0">
+                            <Label text="Details" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="detailsArea"
+                                      promptText="Describe the product"
+                                      prefRowCount="4"
+                                      wrapText="true"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- Promotion Section -->
+                    <VBox spacing="10.0"
+                          styleClass="card"
+                          style="-fx-padding: 20; -fx-background-color: white;">
+                        <Text text="Promotion"
+                              fill="#4a148c">
+                            <font>
+                                <Font name="System Bold" size="16.0"/>
+                            </font>
+                        </Text>
+
+                        <CheckBox fx:id="promotionCheckBox"
+                                  text="Apply discount to this product"
+                                  onAction="#togglePromotionFields"/>
+
+                        <HBox spacing="12.0" alignment="CENTER_LEFT">
+                            <Label fx:id="discountLabel"
+                                   text="Discount (%)"
+                                   style="-fx-font-weight: bold;"
+                                   disable="true"/>
+                            <TextField fx:id="discountField"
+                                       promptText="0"
+                                       prefHeight="36.0"
+                                       prefWidth="100.0"
+                                       disable="true"/>
+                        </HBox>
+                    </VBox>
 
                     <VBox spacing="12.0"
                           styleClass="card"

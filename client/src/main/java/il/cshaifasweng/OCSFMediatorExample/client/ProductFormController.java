@@ -58,6 +58,19 @@ public class ProductFormController {
         setupComboBoxes();
         setupValidation();
         setDefaultImage();
+        if (promotionCheckBox != null) {
+            promotionCheckBox.setSelected(false);
+            togglePromotionFields();
+        }
+
+        if (customProductCheckBox != null) {
+            customProductCheckBox.setSelected(false);
+            toggleCustomFields();
+        }
+
+        if (statusLabel != null) {
+            statusLabel.setVisible(false);
+        }
     }
 
     private void setupComboBoxes() {
