@@ -119,9 +119,7 @@
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
-                                                    <StackPane.alignment>
-                                                        <Pos>TOP_RIGHT</Pos>
-                                                    </StackPane.alignment>
+                                                    <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                 </Label>
                                             </children>
                                         </StackPane>
@@ -152,9 +150,7 @@
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
-                                                    <StackPane.alignment>
-                                                        <Pos>TOP_RIGHT</Pos>
-                                                    </StackPane.alignment>
+                                                    <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                 </Label>
                                             </children>
                                         </StackPane>
@@ -185,9 +181,7 @@
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
-                                                    <StackPane.alignment>
-                                                        <Pos>TOP_RIGHT</Pos>
-                                                    </StackPane.alignment>
+                                                    <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                 </Label>
                                             </children>
                                         </StackPane>
@@ -219,9 +213,7 @@
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
-                                                    <StackPane.alignment>
-                                                        <Pos>TOP_RIGHT</Pos>
-                                                    </StackPane.alignment>
+                                                    <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                 </Label>
                                             </children>
                                         </StackPane>
@@ -252,9 +244,7 @@
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
-                                                    <StackPane.alignment>
-                                                        <Pos>TOP_RIGHT</Pos>
-                                                    </StackPane.alignment>
+                                                    <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                 </Label>
                                             </children>
                                         </StackPane>
@@ -285,9 +275,7 @@
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
-                                                    <StackPane.alignment>
-                                                        <Pos>TOP_RIGHT</Pos>
-                                                    </StackPane.alignment>
+                                                    <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                 </Label>
                                             </children>
                                         </StackPane>
