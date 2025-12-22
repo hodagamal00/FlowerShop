@@ -118,4 +118,29 @@ public class NavigationService {
             scrollPane.getStyleClass().add("app-scroll-container");
         }
     }
+
+    /**
+     * Updates the shell to reflect the current login state.  Controllers can
+     * call this after a successful authentication to toggle the login/profile
+     * buttons in the header.
+     *
+     * @param loggedIn whether the user is logged in
+     */
+    public void setLoggedIn(boolean loggedIn) {
+        if (appShellController != null) {
+            appShellController.setLoggedIn(loggedIn);
+        }
+    }
+
+    /**
+     * Convenience helper that forwards status updates to the shell's status
+     * bar.  When the shell hasn't been initialised yet the call is ignored.
+     *
+     * @param message the status message to display
+     */
+    public void setStatus(String message) {
+        if (appShellController != null) {
+            appShellController.setStatus(message);
+        }
+    }
 }

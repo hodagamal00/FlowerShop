@@ -244,15 +244,22 @@ public class CatalogManagementController {
 
             Stage stage = new Stage();
             stage.setTitle("Add New Product");
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setResizable(false);
+            stage.setWidth(650);
+            stage.setHeight(750);
+            stage.setMinWidth(600);
+            stage.setMinHeight(600);
+            stage.centerOnScreen();
+            stage.setResizable(true);
 
-            // Refresh table when dialog closes
+// Refresh table when dialog closes
             stage.setOnHiding(event -> refreshProducts());
-            
+
             stage.showAndWait();
-            
+
+
         } catch (IOException e) {
             e.printStackTrace();
             showError("Error opening product form: " + e.getMessage());
@@ -269,18 +276,25 @@ public class CatalogManagementController {
             
             ProductFormController controller = loader.getController();
             controller.setProduct(product);
-            
+
             Stage stage = new Stage();
             stage.setTitle("Edit Product");
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setResizable(false);
-            
-            // Refresh table when dialog closes
+
+            stage.setWidth(650);
+            stage.setHeight(750);
+            stage.setMinWidth(600);
+            stage.setMinHeight(600);
+            stage.centerOnScreen();
+            stage.setResizable(true);
+
             stage.setOnHiding(event -> refreshProducts());
-            
+
             stage.showAndWait();
-            
+
+
         } catch (IOException e) {
             e.printStackTrace();
             showError("Error opening product form: " + e.getMessage());

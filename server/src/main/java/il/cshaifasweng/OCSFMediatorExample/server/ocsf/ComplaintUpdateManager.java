@@ -14,6 +14,8 @@ import javax.persistence.criteria.Root;
 public class ComplaintUpdateManager {
     public static int complaintsnum = 0;
     public static List<Complaint> complaintGeneralList = new ArrayList<Complaint>();
+    private static final Object complaintIdLock = new Object();
+    private static Integer nextComplaintIdCache = null;
 
     private static List<Complaint> getAllComplaints() {
         System.out.println("Arrived to getAllComplaints 1");
@@ -29,18 +31,7 @@ public class ComplaintUpdateManager {
         return result;
     }
 
-    static Long countRowsComplaint() {
-        System.out.println("Arrived to coutnrwos 1");
-        final CriteriaBuilder criteriaBuilder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to coutnrwos 2");
-        CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-        System.out.println("Arrived to coutnrwos 3");
-        Root<Complaint> root = criteria.from(Complaint.class);
-        System.out.println("Arrived to coutnrwos 4");
-        criteria.select(criteriaBuilder.count(root));
-        System.out.println("Arrived to coutnrwos 5");
-        return SimpleServer.session.createQuery(criteria).getSingleResult();
-    }
+
 
     public static void addComplaint(Complaint recievedComplaint) {
         System.out.println("inside addCompliTocatalog1");
@@ -55,6 +46,16 @@ public class ComplaintUpdateManager {
         SimpleServer.session = sessionFactory.openSession();
         Transaction tx = SimpleServer.session.beginTransaction();
         System.out.println("inside additemTocatalog8");
+        int incomingId = recievedComplaint.getComplaintID();
+        if (incomingId <= 0) {
+            int newComplaintId = reserveNextComplaintId(SimpleServer.session);
+            recievedComplaint.setComplaintID(newComplaintId);
+        } else {
+            ensureNextComplaintIdAfter(incomingId, SimpleServer.session);
+        }
+
+
+
 
         int responseWindow = resolveResponseWindowHours(SimpleServer.session);
         applySlaStatus(recievedComplaint, responseWindow);
@@ -68,6 +69,52 @@ public class ComplaintUpdateManager {
 
         System.out.println("inside additemTocatalog12");
     }
+
+
+    private static int getNextComplaintId(Session session) {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+        Root<Complaint> root = query.from(Complaint.class);
+        query.select(builder.max(root.get("complaintID")));
+
+        Integer maxId = session.createQuery(query).uniqueResult();
+        if (maxId == null) {
+            return 1;
+        }
+        return maxId + 1;
+    }
+
+
+    private static int reserveNextComplaintId(Session session) {
+        synchronized (complaintIdLock) {
+            if (nextComplaintIdCache == null) {
+                nextComplaintIdCache = getNextComplaintId(session);
+            }
+            return nextComplaintIdCache++;
+        }
+    }
+
+    private static void ensureNextComplaintIdAfter(int complaintId, Session session) {
+        synchronized (complaintIdLock) {
+            if (nextComplaintIdCache == null) {
+                nextComplaintIdCache = getNextComplaintId(session);
+            }
+            if (nextComplaintIdCache <= complaintId) {
+                nextComplaintIdCache = complaintId + 1;
+            }
+        }
+    }
+
+    public static int previewNextComplaintId() {
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        try {
+            return reserveNextComplaintId(session);
+        } finally {
+            session.close();
+        }
+    }
+
     public static void editComplaint(Complaint recievedComplaint){
         System.out.println("Arrived to edit Complaint");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();

@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.application.Platform;
 
 // Removed unused AWT imports.  Including AWT packages alongside JavaFX
 // introduces ambiguous references for classes like Button and List.  This
@@ -448,46 +449,126 @@ public class CatalogController {
 		navigateInShell("admincontrol");
 	}
 
-	@FXML
-	void addToCartFlower1(ActionEvent event)
-	{
-		if (CatalogSTARTIndex < allProducts.size()) {
-			addProductToCart(allProducts.get(CatalogSTARTIndex));
-		}
+    @FXML
+    void addToCartFlower1(ActionEvent event) {
+        addToCart(0);
+    }
+
+    @FXML
+    void addToCartFlower2(ActionEvent event) {
+        addToCart(1);
+    }
+
+    @FXML
+    void addToCartFlower3(ActionEvent event) {
+        addToCart(2);
+    }
+
+    @FXML
+    void addToCartFlower4(ActionEvent event) {
+        addToCart(3);
+    }
+
+    @FXML
+    void addToCartFlower5(ActionEvent event) {
+        addToCart(4);
+    }
+
+    @FXML
+    void addToCartFlower6(ActionEvent event) {
+        addToCart(5);
+    }
+
+    /* ========================= */
+    /*   الدالة المشتركة الصحيحة  */
+    /* ========================= */
+
+    private void addToCart(int offset) {
+
+        int index = CatalogSTARTIndex + offset;
+        if (index < 0 || index >= allProducts.size()) {
+            return; // حماية من IndexOutOfBounds
+        }
+
+        // السعر الحالي (إذا الحقل فاضي يبدأ من 0)
+        int basePrice = 0;
+        if (!cartTextPrice.getText().isEmpty()) {
+            basePrice = Integer.parseInt(cartTextPrice.getText());
+        }
+
+        int addedPrice = (int) Math.round(allProducts.get(index).getPrice());
+        basePrice += addedPrice;
+
+        // إضافة المنتج
+        CartItemsList.getItems().add(allProducts.get(index).getName());
+        userCart.add(allProducts.get(index));
+
+        // تحديث السعر قبل الخصم
+        cartTextPrice.setText(String.valueOf(basePrice));
+
+        // الخصم: 10% فقط إذا مشترك والمجموع أكبر من 50₪
+        if (currentLoggedAccount != null
+                && currentLoggedAccount.isSubscription()
+                && basePrice > 50) {
+            cartTextDiscount.setText(String.valueOf((int)(basePrice * 0.9)));
+        } else {
+            cartTextDiscount.setText(String.valueOf(basePrice));
+        }
+    }
+
+
+	private void configureProductCardActions() {
+		Account account = SimpleClient.getUser();
+		int privilege = account != null ? account.getPrivilegeLevel() : 0;
+		boolean canEdit = privilege >= 2;
+
+		configureSingleProductAction(flower1_addCart, 0, canEdit);
+		configureSingleProductAction(flower2_addCart, 1, canEdit);
+		configureSingleProductAction(flower3_addCart, 2, canEdit);
+		configureSingleProductAction(flower4_addCart, 3, canEdit);
+		configureSingleProductAction(flower5_addCart, 4, canEdit);
+		configureSingleProductAction(flower6_addCart, 5, canEdit);
 	}
 
-	@FXML
-	void addToCartFlower2(ActionEvent event) {
-		if (CatalogSTARTIndex + 1 < allProducts.size()) {
-			addProductToCart(allProducts.get(CatalogSTARTIndex + 1));
+	private void configureSingleProductAction(Button button, int offset, boolean canEdit) {
+		if (button == null || CatalogSTARTIndex + offset >= allProducts.size()) {
+			return;
 		}
-	}
 
-	@FXML
-	void addToCartFlower3(ActionEvent event) {
-		if (CatalogSTARTIndex + 2 < allProducts.size()) {
-			addProductToCart(allProducts.get(CatalogSTARTIndex + 2));
-		}
-	}
+		Product product = allProducts.get(CatalogSTARTIndex + offset);
 
-	@FXML
-	void addToCartFlower4(ActionEvent event) {
-		if (CatalogSTARTIndex + 3 < allProducts.size()) {
-			addProductToCart(allProducts.get(CatalogSTARTIndex + 3));
-		}
-	}
+		if (canEdit) {
+			button.setText("Edit");
+			button.setOnAction(event -> {
+				Alert chooser = new Alert(Alert.AlertType.CONFIRMATION);
+				chooser.setTitle("Choose Action");
+				chooser.setHeaderText("What would you like to do?");
+				chooser.setContentText("You can add this product to the cart or edit its details.");
 
-	@FXML
-	void addToCartFlower5(ActionEvent event) {
-		if (CatalogSTARTIndex + 4 < allProducts.size()) {
-			addProductToCart(allProducts.get(CatalogSTARTIndex + 4));
-		}
-	}
+				ButtonType addToCart = new ButtonType("Add to Cart", ButtonBar.ButtonData.OK_DONE);
+				ButtonType editProduct = new ButtonType("Edit Product", ButtonBar.ButtonData.APPLY);
+				ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-	@FXML
-	void addToCartFlower6(ActionEvent event) 	{
-		if (CatalogSTARTIndex + 5 < allProducts.size()) {
-			addProductToCart(allProducts.get(CatalogSTARTIndex + 5));
+				chooser.getButtonTypes().setAll(addToCart, editProduct, cancel);
+
+				Optional<ButtonType> result = chooser.showAndWait();
+
+				if (result.isPresent()) {
+					if (result.get() == addToCart) {
+						addProductToCartByIndex(offset);
+					} else if (result.get() == editProduct) {
+						setCurrent_button(product);
+						try {
+							App.setRoot("secondary");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			});
+		} else {
+			button.setText("Add to Cart");
+			button.setOnAction(event -> addProductToCartByIndex(offset));
 		}
 	}
 	@FXML
@@ -1194,13 +1275,13 @@ public class CatalogController {
 			flower_price5.setText(String.valueOf(allProducts.get(4).getPrice()));
 			flower_price6.setText(String.valueOf(allProducts.get(5).getPrice()));
 
-			// Duplicate population of price labels.  Fix missing closing parentheses.
-			flower_price1.setText(String.valueOf(allProducts.get(0).getPrice()));
-			flower_price2.setText(String.valueOf(allProducts.get(1).getPrice()));
-			flower_price3.setText(String.valueOf(allProducts.get(2).getPrice()));
-			flower_price4.setText(String.valueOf(allProducts.get(3).getPrice()));
-			flower_price5.setText(String.valueOf(allProducts.get(4).getPrice()));
-			flower_price6.setText(String.valueOf(allProducts.get(5).getPrice()));
+            // Duplicate population of price labels.  Fix missing closing parentheses.
+            flower_price1.setContentText(String.valueOf(allProducts.get(0).getPrice()));
+            flower_price2.setContentText(String.valueOf(allProducts.get(1).getPrice()));
+            flower_price3.setContentText(String.valueOf(allProducts.get(2).getPrice()));
+            flower_price4.setContentText(String.valueOf(allProducts.get(3).getPrice()));
+            flower_price5.setContentText(String.valueOf(allProducts.get(4).getPrice()));
+            flower_price6.setContentText(String.valueOf(allProducts.get(5).getPrice()));
 		}
 		else
 		{
@@ -1449,6 +1530,15 @@ public class CatalogController {
 		viewInboxPlz.setVisible(false);
 		inboxList.setVisible(false);
 		openMessage.setVisible(false);
+
+		// Restore persisted login so customer-specific buttons become
+		// available even if the PassAccountEvent arrived before this
+		// controller was initialized (after registration).
+		Account persistedAccount = SimpleClient.getUser();
+		if (persistedAccount != null) {
+			currentLoggedAccount = persistedAccount;
+			applyPrivilegeBasedUI();
+		}
 		checkout.setVisible(false);
 		if (cartTextPrice != null) cartTextPrice.setVisible(false);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
@@ -1653,25 +1743,27 @@ public class CatalogController {
 
 	@Subscribe
 	public void PassAccountEvent(PassAccountEvent passAcc){ // added today
-		System.out.println("arrived to passAccountToPrimary sucessfuly");
-		Account recvAccount = passAcc.getRecievedAccount();
-		System.out.println(recvAccount.getPassword());
-		if(recvAccount.getPrivialge() == 1)
-		{
-			//TO:DO Adjust the buttons
-		}
-		System.out.println(recvAccount.getAccountID());
-		System.out.println(recvAccount.getEmail());
-		System.out.println(recvAccount.getFullName());
-		//System.out.println(recvAccount.getAddress());
-		//System.out.println(recvAccount.getCreditCardNumber());
-		//System.out.println(recvAccount.getCreditMonthExpire());
-		System.out.println("Acc Priv: " + recvAccount.getPrivialge());
-		currentLoggedAccount = recvAccount;
-		System.out.println(" Current Priv : " + currentLoggedAccount.getPrivialge());
-		SimpleClient.setAccount(currentLoggedAccount);
-		applyPrivilegeBasedUI();
-		navigateAfterLogin(currentLoggedAccount);
+		Platform.runLater(() -> {
+			System.out.println("arrived to passAccountToPrimary sucessfuly");
+			Account recvAccount = passAcc.getRecievedAccount();
+			System.out.println(recvAccount.getPassword());
+			if(recvAccount.getPrivialge() == 1)
+			{
+				//TO:DO Adjust the buttons
+			}
+			System.out.println(recvAccount.getAccountID());
+			System.out.println(recvAccount.getEmail());
+			System.out.println(recvAccount.getFullName());
+			//System.out.println(recvAccount.getAddress());
+			//System.out.println(recvAccount.getCreditCardNumber());
+			//System.out.println(recvAccount.getCreditMonthExpire());
+			System.out.println("Acc Priv: " + recvAccount.getPrivialge());
+			currentLoggedAccount = recvAccount;
+			System.out.println(" Current Priv : " + currentLoggedAccount.getPrivialge());
+			SimpleClient.setAccount(currentLoggedAccount);
+			applyPrivilegeBasedUI();
+			navigateAfterLogin(currentLoggedAccount);
+		});
 
 	}
 	@Subscribe
@@ -1744,24 +1836,30 @@ public class CatalogController {
 	}
 
 	static Product getCurrent_button() {
-			for (int i = 0; i < allProducts.size(); i++) {
-				// Compare the button references directly.  The original code attempted to
-				// call a non-existent method `equal(a,b)`.  In JavaFX each product has its
-				// own Button instance, so pointer comparison is sufficient to identify
-				// which product matches the current_button.
-				if (allProducts.get(i).getButton() == current_button) {
-					return allProducts.get(i);
-				}
+		for (int i = 0; i < allProducts.size(); i++) {
+			// Compare the button references directly.  The original code attempted to
+			// call a non-existent method `equal(a,b)`.  In JavaFX each product has its
+			// own Button instance, so pointer comparison is sufficient to identify
+			// which product matches the current_button.
+			if (allProducts.get(i).getButton() == current_button) {
+				return allProducts.get(i);
 			}
-			// As a fallback, return the first product if no match is found.  Ideally,
-			// this case should not occur since current_button should always refer to
-			// one of the product buttons.
-			return allProducts.isEmpty() ? null : allProducts.get(0);
+		}
+		// As a fallback, return the first product if no match is found.  Ideally,
+		// this case should not occur since current_button should always refer to
+		// one of the product buttons.
+		return allProducts.isEmpty() ? null : allProducts.get(0);
 	}
+
+	static void setCurrent_button(Product product) {
+		current_button = product != null ? product.getButton() : null;
+	}
+
 
 	static void setReturnedFromSecondaryController(boolean retFromSecond) {
 		returnedFromSecondaryController = retFromSecond;
 	}
+
 
 	static boolean getReturnedFromSecondaryController() {
 		return returnedFromSecondaryController;
@@ -1899,14 +1997,23 @@ public class CatalogController {
 	 * Privilege 4 (Chain Manager): + Network-wide access
 	 */
 	private void applyPrivilegeBasedUI() {
-		hideAllPrivilegedFeatures();
-
-		int privilege = resolveCurrentPrivilegeLevel();
-		System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
-
-		// Guest baseline: browse catalog and manage a temporary cart
-		enableGuestFeatures();
-		if (privilege <= 0) {
+        // If no account is logged in yet (e.g., user opens catalog as guest),
+        // default to privilege 0 to avoid NullPointerExceptions.  This ensures
+        // the catalog can still be browsed without requiring authentication.
+		Account account = SimpleClient.getUser();
+		if (account == null) {
+            hideAllPrivilegedFeatures();
+			configureProductCardActions();
+            System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
+            return;
+        }
+		currentLoggedAccount = account;
+		int privilege = account.getPrivilegeLevel();
+        System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
+		
+		// GUEST (0): Can only browse catalog - all interactive features hidden
+		if (privilege == 0) {
+			hideAllPrivilegedFeatures();
 			System.out.println("Guest mode: Browse-only access");
 			return;
 		}
@@ -1930,6 +2037,8 @@ public class CatalogController {
 			enableChainManagerFeatures();
 			System.out.println("Chain Manager mode: Network-wide admin access enabled");
 		}
+
+		configureProductCardActions();
 	}
 
 	/**

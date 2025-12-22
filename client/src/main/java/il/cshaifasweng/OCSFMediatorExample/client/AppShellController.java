@@ -1,5 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -37,6 +39,7 @@ public class AppShellController {
     @FXML private Label profileNameLabel;
     @FXML private Button cartButton;
     @FXML private Label statusLabel;
+    @FXML private Label accountNameLabel;
     @FXML private StackPane contentPane;
     @FXML private FlowPane navBar;
 
@@ -65,8 +68,12 @@ public class AppShellController {
      */
     public void initialize() {
         NavigationService.getInstance().setAppShellController(this);
+
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
+        }
+        if (accountNameLabel != null) {
+            accountNameLabel.setVisible(false);
         }
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
@@ -128,8 +135,14 @@ public class AppShellController {
      * @param loggedIn whether the user is currently logged in
      */
     public void setLoggedIn(boolean loggedIn) {
-        Account account = loggedIn ? SimpleClient.getUser() : null;
-        updateLoginState(account);
+        if (loginButton != null && profileButton != null) {
+            loginButton.setVisible(!loggedIn);
+            profileButton.setVisible(loggedIn);
+        }
+        if (!loggedIn && accountNameLabel != null) {
+            accountNameLabel.setVisible(false);
+            accountNameLabel.setText("");
+        }
     }
 
     /**
@@ -142,7 +155,29 @@ public class AppShellController {
             statusLabel.setText(message);
         }
     }
+
+    /**
+     * Displays the logged-in account name in the header and toggles the
+     * appropriate login/profile buttons.
+     *
+     * @param fullName The display name of the logged-in account
+     */
+    public void showAccountName(String fullName) {
+        setLoggedIn(true);
+        if (accountNameLabel != null) {
+            accountNameLabel.setText(fullName != null ? fullName : "");
+            accountNameLabel.setVisible(fullName != null && !fullName.isBlank());
+        }
+    }
+
     @Subscribe
+    public void handlePassAccountEvent(PassAccountEvent event) {
+        Account account = event.getRecievedAccount();
+        if (account == null) {
+            return;
+        }
+        Platform.runLater(() -> showAccountName(account.getFullName()));
+    }
     public void onAccountReceived(PassAccountEvent event) {
         updateLoginState(event.getRecievedAccount());
     }
