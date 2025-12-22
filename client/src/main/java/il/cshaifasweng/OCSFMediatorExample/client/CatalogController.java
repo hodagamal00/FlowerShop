@@ -1518,15 +1518,15 @@ public class CatalogController {
 
 		customError.setVisible(false);
 		messageField.setVisible(false);
-		viewMyOrders.setVisible(false);
-		viewMyComplaints.setVisible(false);
-		deliveryButton.setVisible(false);
-		openComplaints.setVisible(false);
-		infoo.setVisible(false);
-		adminControlButtton.setVisible(false);
-		viewInboxPlz.setVisible(false);
-		inboxList.setVisible(false);
-		openMessage.setVisible(false);
+		if (viewMyOrders != null) viewMyOrders.setVisible(false);
+		if (viewMyComplaints != null) viewMyComplaints.setVisible(false);
+		if (deliveryButton != null) deliveryButton.setVisible(false);
+		if (openComplaints != null) openComplaints.setVisible(false);
+		if (infoo != null) infoo.setVisible(false);
+		if (adminControlButtton != null) adminControlButtton.setVisible(false);
+		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
+		if (inboxList != null) inboxList.setVisible(false);
+		if (openMessage != null) openMessage.setVisible(false);
 
 		// Restore persisted login so customer-specific buttons become
 		// available even if the PassAccountEvent arrived before this
