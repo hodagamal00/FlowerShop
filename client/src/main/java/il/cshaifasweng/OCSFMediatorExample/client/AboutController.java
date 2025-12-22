@@ -172,12 +172,12 @@ public class AboutController {
 
     private String resolveViewName(String page) {
         if (page == null) {
-            return "primary";
+            return "Catalog";
         }
 
         switch (page.toLowerCase()) {
             case "catalog":
-                return "primary";
+                return "Catalog";
             case "orders":
                 return "myorders";
             case "complaints":

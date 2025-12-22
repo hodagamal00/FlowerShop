@@ -319,7 +319,7 @@ public class AccessDeniedController {
         String target;
         switch (page.toLowerCase()) {
             case "catalog":
-                target = "primary";
+                target = "Catalog";
                 break;
             case "orders":
                 target = "myorders";
@@ -331,7 +331,7 @@ public class AccessDeniedController {
                 target = "Profile";
                 break;
             default:
-                target = "primary";
+                target = "Catalog";
                 break;
         }
 

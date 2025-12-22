@@ -86,7 +86,7 @@ public class App extends Application {
                 "ERR_CONNECTION",
                 ex != null ? ex.getMessage() : "The server connection failed."
         );
-        ErrorController.setReturnPage("primary");
+        ErrorController.setReturnPage("Catalog");
 
         try {
             FXMLLoader loader = new FXMLLoader(App.class.getResource("Error.fxml"));

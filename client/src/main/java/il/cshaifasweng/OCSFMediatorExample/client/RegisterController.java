@@ -368,7 +368,7 @@ public class RegisterController {
             alert.setHeaderText("Welcome to FlowerShop!");
             alert.setContentText("Your account has been created and you're now signed in.");
             alert.showAndWait();
-            NavigationService.getInstance().navigate("primary");
+            NavigationService.getInstance().navigate("Catalog");
         });
     }
 
