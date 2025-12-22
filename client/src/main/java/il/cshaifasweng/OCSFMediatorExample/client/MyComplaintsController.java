@@ -3,9 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
 import il.cshaifasweng.OCSFMediatorExample.entities.GetAllComplaints;
-import il.cshaifasweng.OCSFMediatorExample.entities.Message;
 import il.cshaifasweng.OCSFMediatorExample.entities.NextComplaintIdMessage;
-import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +27,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Calendar;
 
 public class MyComplaintsController {
 
@@ -157,43 +154,15 @@ public class MyComplaintsController {
         complaintList.getSelectionModel().selectFirst();
         Complaint selected = complaintList.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            fillComplaintDetails(selected);
+            showComplaintDetails(selected);
         }
 
         // 8) عند تغيير الاختيار اعرض التفاصيل
         complaintList.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             if (newV != null) {
-                fillComplaintDetails(newV);
+                showComplaintDetails(newV);
             }
         });
-    }
-
-    /* ============================= */
-    /* Helpers: تفاصيل الشكوى بالواجهة */
-    /* ============================= */
-
-    private void fillComplaintDetails(Complaint selectedComplaint) {
-
-        complaintID.setText(String.valueOf(selectedComplaint.getComplaintID()));
-        orderID.setText(String.valueOf(selectedComplaint.getOrderID()));
-
-        // Accepted / Answer
-        if (selectedComplaint.isAccepted()) {
-            answerBool.setText("Yes");
-            refundMoney.setText(String.valueOf(selectedComplaint.getReturnedmoneyvalue()));
-        } else {
-            answerBool.setText("No");
-            refundMoney.setText("0");
-        }
-
-        replyWorker.setText(String.valueOf(selectedComplaint.getAnswerworkerID()));
-        complaintText.setText(selectedComplaint.getComplaintText() == null ? "" : selectedComplaint.getComplaintText());
-
-        // إذا عندك حقول إضافية مثل SLA / respondedAt / compensationDecision:
-        // slaStatus.setText(selectedComplaint.getSlaStatus());
-        // compensationDecision.setText(selectedComplaint.getCompensationDecision());
-        // createdAt.setText(formatTimestamp(selectedComplaint.getCreatedAt()));
-        // respondedAt.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
     }
 
     private void clearComplaintDetails() {
