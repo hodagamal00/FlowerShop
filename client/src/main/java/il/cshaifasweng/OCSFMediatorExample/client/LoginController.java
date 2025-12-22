@@ -91,22 +91,6 @@ public class LoginController {
     }
 
     @FXML
-    void openCatalogFunc(ActionEvent event) throws IOException {
-        CatalogFlag.setFlagg(1);
-
-        String theEmail = Email.getText();
-        try {
-            SimpleClient.getClient().sendToServer(new MailClass(theEmail));
-            SimpleClient.getClient().sendToServer(new GetAllComplaints());
-            SimpleClient.getClient().sendToServer(new GetAllMessages());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        NavigationService.getInstance().navigate("primary");
-    }
-
-    @FXML
     void initialize() {
         assert Email != null : "fx:id=\"Email\" was not injected: check your FXML file 'Login.fxml'.";
         assert ErrorMsg != null : "fx:id=\"ErrorMsg\" was not injected: check your FXML file 'Login.fxml'.";
@@ -206,6 +190,7 @@ public class LoginController {
 
     int requestFix = 0;
     boolean alreadyLogged = false;
+    private String login_flag;
     private ActionEvent lastLoginEvent;
     private Account authenticatedAccount;
     private boolean navigationPendingAccount;
@@ -311,40 +296,25 @@ public class LoginController {
         Account account = SimpleClient.getUser();
         if (account == null) {
             account = event.getRecievedAccount();
-            navigationPendingAccount = true;
-            showSuccessMessage("Login successful! Loading your account details...");
-            requestAccountDetails();
+        }
+        if (account == null) {
             return;
         }
-        if (account == null) return;
-
-        authenticatedAccount = account;
-        navigationPendingAccount = false;
-        String displayName = account.getFullName();
-        if (displayName == null || displayName.isBlank()) {
-            displayName = account.getEmail();
-        }
-        final Account acc = account;
-        showSuccessMessage(String.format("Welcome %s! Redirecting to your dashboard...", displayName));
-        sendPostLoginData(account);
-        CatalogFlag.setFlagg(1);
-        navigateAfterLogin(account);
-        lastLoginEvent = null;
-        accountDetailsRequested = false;
-
+        handleLoginSuccess(account);
     }
-    private void showSuccessMessage(String message) {
+
+    private void showSuccessMessage(Account account) {
         Platform.runLater(() -> {
             resetLoginButton();
-            logSucc.setText("Welcome " + (acc.getFullName() == null || acc.getFullName().isBlank()
-                    ? acc.getEmail()
-                    : acc.getFullName()) + "!");
+            logSucc.setText("Welcome " + (account.getFullName() == null || account.getFullName().isBlank()
+                    ? account.getEmail()
+                    : account.getFullName()) + "!");
             logSucc.setVisible(true);
             ErrorMsg.setVisible(false);
             ErrorMsgPass.setVisible(false);
             alLog.setVisible(false);
 
-            int privilege = acc.getPrivialge();
+            int privilege = account.getPrivialge();
             String targetView;
             if (privilege >= 4) {
                 targetView = "NetworkDashboard";
@@ -404,21 +374,6 @@ public class LoginController {
         }
     }
 
-    @Subscribe
-    public void onAccountReceived(PassAccountEvent event) {
-        Account account = SimpleClient.getUser();
-        if (account == null) {
-            account = event.getRecievedAccount();
-        }
-        if (account == null) {
-            return;
-        }
-        authenticatedAccount = account;
-        if (navigationPendingAccount) {
-            handleLoginSuccess(account);
-        }
-    }
-
     private Account resolveAuthenticatedAccount() {
         Account account = authenticatedAccount;
         if (account == null) {
@@ -466,5 +421,19 @@ public class LoginController {
                 });
             }
         }).start();
+    }
+
+    private void handleLoginSuccess(Account account) {
+        if (account == null) {
+            resetLoginButton();
+            return;
+        }
+        authenticatedAccount = account;
+        navigationPendingAccount = false;
+        showSuccessMessage(account);
+        sendPostLoginData(account);
+        CatalogFlag.setFlagg(1);
+        lastLoginEvent = null;
+        accountDetailsRequested = false;
     }
 }
