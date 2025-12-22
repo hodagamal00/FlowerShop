@@ -113,16 +113,16 @@
                                                     <image><Image url="@../../../../images/flower2.jpg"/></image>
                                                 </ImageView>
 
-                                                <DialogPane id="btttn" fx:id="flower_price1" contentText="150₪"
-                                                            prefHeight="40.0" prefWidth="65.0"
-                                                            style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
+                                                <Label fx:id="flower_price1" text="150₪"
+                                                       prefHeight="40.0" prefWidth="65.0"
+                                                       style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
                                                     <StackPane.alignment>
                                                         <Pos>TOP_RIGHT</Pos>
                                                     </StackPane.alignment>
-                                                </DialogPane>
+                                                </Label>
                                             </children>
                                         </StackPane>
 
@@ -146,16 +146,16 @@
                                                     <image><Image url="@../../../../images/flower1.jpg"/></image>
                                                 </ImageView>
 
-                                                <DialogPane id="btttn" fx:id="flower_price2" contentText="100₪"
-                                                            prefHeight="40.0" prefWidth="65.0"
-                                                            style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
+                                                <Label fx:id="flower_price2" text="100₪"
+                                                       prefHeight="40.0" prefWidth="65.0"
+                                                       style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
                                                     <StackPane.alignment>
                                                         <Pos>TOP_RIGHT</Pos>
                                                     </StackPane.alignment>
-                                                </DialogPane>
+                                                </Label>
                                             </children>
                                         </StackPane>
 
@@ -179,16 +179,16 @@
                                                     <image><Image url="@../../../../images/flower4.jpg"/></image>
                                                 </ImageView>
 
-                                                <DialogPane id="btttn" fx:id="flower_price3" contentText="80₪"
-                                                            prefHeight="40.0" prefWidth="65.0"
-                                                            style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
+                                                <Label fx:id="flower_price3" text="80₪"
+                                                       prefHeight="40.0" prefWidth="65.0"
+                                                       style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
                                                     <StackPane.alignment>
                                                         <Pos>TOP_RIGHT</Pos>
                                                     </StackPane.alignment>
-                                                </DialogPane>
+                                                </Label>
                                             </children>
                                         </StackPane>
 
@@ -213,16 +213,16 @@
                                                     <image><Image url="@../../../../images/flower3.jpg"/></image>
                                                 </ImageView>
 
-                                                <DialogPane id="btttn" fx:id="flower_price4" contentText="60₪"
-                                                            prefHeight="40.0" prefWidth="65.0"
-                                                            style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
+                                                <Label fx:id="flower_price4" text="60₪"
+                                                       prefHeight="40.0" prefWidth="65.0"
+                                                       style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
                                                     <StackPane.alignment>
                                                         <Pos>TOP_RIGHT</Pos>
                                                     </StackPane.alignment>
-                                                </DialogPane>
+                                                </Label>
                                             </children>
                                         </StackPane>
 
@@ -246,16 +246,16 @@
                                                     <image><Image url="@../../../../images/flower6.jpg"/></image>
                                                 </ImageView>
 
-                                                <DialogPane id="btttn" fx:id="flower_price5" contentText="15₪"
-                                                            prefHeight="40.0" prefWidth="65.0"
-                                                            style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
+                                                <Label fx:id="flower_price5" text="15₪"
+                                                       prefHeight="40.0" prefWidth="65.0"
+                                                       style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
                                                     <StackPane.alignment>
                                                         <Pos>TOP_RIGHT</Pos>
                                                     </StackPane.alignment>
-                                                </DialogPane>
+                                                </Label>
                                             </children>
                                         </StackPane>
 
@@ -279,16 +279,16 @@
                                                     <image><Image url="@../../../../images/flower5.jpg"/></image>
                                                 </ImageView>
 
-                                                <DialogPane id="btttn" fx:id="flower_price6" contentText="120₪"
-                                                            prefHeight="40.0" prefWidth="65.0"
-                                                            style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
+                                                <Label fx:id="flower_price6" text="120₪"
+                                                       prefHeight="40.0" prefWidth="65.0"
+                                                       style="-fx-border-color: black; -fx-background-radius: 5px; -fx-border-radius: 5px; -fx-font-size: 14px; -fx-font-weight: bold;">
                                                     <StackPane.margin>
                                                         <Insets top="10" right="10"/>
                                                     </StackPane.margin>
                                                     <StackPane.alignment>
                                                         <Pos>TOP_RIGHT</Pos>
                                                     </StackPane.alignment>
-                                                </DialogPane>
+                                                </Label>
                                             </children>
                                         </StackPane>
 
