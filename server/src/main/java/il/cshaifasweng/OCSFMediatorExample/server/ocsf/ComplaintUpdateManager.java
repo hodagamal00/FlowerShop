@@ -35,10 +35,6 @@ public class ComplaintUpdateManager {
 
     public static void addComplaint(Complaint recievedComplaint) {
         System.out.println("inside addCompliTocatalog1");
-        long numOfRowsComplaint = countRowsComplaint();
-        int castedId = (int)numOfRowsComplaint;
-        int newComplaintId = castedId + 1;
-        recievedComplaint.setComplaintID(newComplaintId);
         if (recievedComplaint.getCreatedAt() == null) {
             recievedComplaint.setCreatedAt(new Date());
         }
@@ -48,8 +44,8 @@ public class ComplaintUpdateManager {
         System.out.println("inside additemTocatalog8");
         int incomingId = recievedComplaint.getComplaintID();
         if (incomingId <= 0) {
-            int newComplaintId = reserveNextComplaintId(SimpleServer.session);
-            recievedComplaint.setComplaintID(newComplaintId);
+            int generatedComplaintId = reserveNextComplaintId(SimpleServer.session);
+            recievedComplaint.setComplaintID(generatedComplaintId);
         } else {
             ensureNextComplaintIdAfter(incomingId, SimpleServer.session);
         }
@@ -82,6 +78,21 @@ public class ComplaintUpdateManager {
             return 1;
         }
         return maxId + 1;
+    }
+
+    public static long countRowsComplaint() {
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        try {
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Long> query = builder.createQuery(Long.class);
+            Root<Complaint> root = query.from(Complaint.class);
+            query.select(builder.count(root));
+            Long count = session.createQuery(query).uniqueResult();
+            return count != null ? count : 0;
+        } finally {
+            session.close();
+        }
     }
 
 
