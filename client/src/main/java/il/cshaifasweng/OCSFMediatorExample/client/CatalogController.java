@@ -48,10 +48,10 @@ public class CatalogController {
 
 	@FXML // Filter ComboBoxes
 	private ComboBox<String> categoryFilter;
-	
+
 	@FXML
 	private ComboBox<String> colorFilter;
-	
+
 	@FXML
 	private ComboBox<String> priceFilter;
 
@@ -110,8 +110,8 @@ public class CatalogController {
 	@FXML // fx:id="customType"
 	private TextField customType; // Value injected by FXMLLoader
 
-    @FXML // fx:id="CreateCustomItem"
-    public Button CreateCustomItem; // Value injected by FXMLLoader
+	@FXML // fx:id="CreateCustomItem"
+	public Button CreateCustomItem; // Value injected by FXMLLoader
 
 	@FXML
 	public Button infoo;
@@ -449,72 +449,76 @@ public class CatalogController {
 		navigateInShell("admincontrol");
 	}
 
-    @FXML
-    void addToCartFlower1(ActionEvent event) {
-        addToCart(0);
-    }
+	@FXML
+	void addToCartFlower1(ActionEvent event) {
+		addToCart(0);
+	}
 
-    @FXML
-    void addToCartFlower2(ActionEvent event) {
-        addToCart(1);
-    }
+	@FXML
+	void addToCartFlower2(ActionEvent event) {
+		addToCart(1);
+	}
 
-    @FXML
-    void addToCartFlower3(ActionEvent event) {
-        addToCart(2);
-    }
+	@FXML
+	void addToCartFlower3(ActionEvent event) {
+		addToCart(2);
+	}
 
-    @FXML
-    void addToCartFlower4(ActionEvent event) {
-        addToCart(3);
-    }
+	@FXML
+	void addToCartFlower4(ActionEvent event) {
+		addToCart(3);
+	}
 
-    @FXML
-    void addToCartFlower5(ActionEvent event) {
-        addToCart(4);
-    }
+	@FXML
+	void addToCartFlower5(ActionEvent event) {
+		addToCart(4);
+	}
 
-    @FXML
-    void addToCartFlower6(ActionEvent event) {
-        addToCart(5);
-    }
+	@FXML
+	void addToCartFlower6(ActionEvent event) {
+		addToCart(5);
+	}
 
-    /* ========================= */
-    /*   الدالة المشتركة الصحيحة  */
-    /* ========================= */
+	/* ========================= */
+	/*   الدالة المشتركة الصحيحة  */
+	/* ========================= */
 
-    private void addToCart(int offset) {
+	private void addToCart(int offset) {
 
-        int index = CatalogSTARTIndex + offset;
-        if (index < 0 || index >= allProducts.size()) {
-            return; // حماية من IndexOutOfBounds
-        }
+		int index = CatalogSTARTIndex + offset;
+		if (index < 0 || index >= allProducts.size()) {
+			return; // حماية من IndexOutOfBounds
+		}
 
-        // السعر الحالي (إذا الحقل فاضي يبدأ من 0)
-        int basePrice = 0;
-        if (!cartTextPrice.getText().isEmpty()) {
-            basePrice = Integer.parseInt(cartTextPrice.getText());
-        }
+		// السعر الحالي (إذا الحقل فاضي يبدأ من 0)
+		int basePrice = 0;
+		if (!cartTextPrice.getText().isEmpty()) {
+			basePrice = Integer.parseInt(cartTextPrice.getText());
+		}
 
-        int addedPrice = (int) Math.round(allProducts.get(index).getPrice());
-        basePrice += addedPrice;
+		int addedPrice = (int) Math.round(allProducts.get(index).getPrice());
+		basePrice += addedPrice;
 
-        // إضافة المنتج
-        CartItemsList.getItems().add(allProducts.get(index).getName());
-        userCart.add(allProducts.get(index));
+		// إضافة المنتج
+		CartItemsList.getItems().add(allProducts.get(index).getName());
+		userCart.add(allProducts.get(index));
 
-        // تحديث السعر قبل الخصم
-        cartTextPrice.setText(String.valueOf(basePrice));
+		// تحديث السعر قبل الخصم
+		cartTextPrice.setText(String.valueOf(basePrice));
 
-        // الخصم: 10% فقط إذا مشترك والمجموع أكبر من 50₪
-        if (currentLoggedAccount != null
-                && currentLoggedAccount.isSubscription()
-                && basePrice > 50) {
-            cartTextDiscount.setText(String.valueOf((int)(basePrice * 0.9)));
-        } else {
-            cartTextDiscount.setText(String.valueOf(basePrice));
-        }
-    }
+		// الخصم: 10% فقط إذا مشترك والمجموع أكبر من 50₪
+		if (currentLoggedAccount != null
+				&& currentLoggedAccount.isSubscription()
+				&& basePrice > 50) {
+			cartTextDiscount.setText(String.valueOf((int)(basePrice * 0.9)));
+		} else {
+			cartTextDiscount.setText(String.valueOf(basePrice));
+		}
+	}
+
+	private void addProductToCartByIndex(int offset) {
+		addToCart(offset);
+	}
 
 
 	private void configureProductCardActions() {
@@ -838,7 +842,7 @@ public class CatalogController {
 		);
 		justText.setVisible(false);
 		justButton.setVisible(false);
-		
+
 		// Apply privilege-based UI visibility
 		applyPrivilegeBasedUI();
 	}
@@ -901,9 +905,9 @@ public class CatalogController {
 		CancelCustomItem.setVisible(true);
 		FinishCustomItem.setVisible(true);
 
-        // When creating a placeholder product, provide a numeric price (e.g., 0.0)
-        // instead of a string to match the Product constructor signature.
-        Product newProduct = new Product(0, "test", "test", "test", 0.0);  // Please insert real values
+		// When creating a placeholder product, provide a numeric price (e.g., 0.0)
+		// instead of a string to match the Product constructor signature.
+		Product newProduct = new Product(0, "test", "test", "test", 0.0);  // Please insert real values
 		//CREATE A NEW PRODUCT DYNAMICALLY
 		// Tips: A global variable called ProductID which is incremented after each product created.
 		// A function GetNextProductID that returns a fresh ID for the new product to be added.
@@ -981,18 +985,18 @@ public class CatalogController {
 		{
 			String color = chooseCustomColor.getSelectionModel().getSelectedItem();
 			String Type = chooseCustomType.getSelectionModel().getSelectedItem();
-            // Parse the custom price text into a double before constructing the Product.
-            double priceValue;
-            try {
-                priceValue = Double.parseDouble(customPrice.getText());
-            } catch (NumberFormatException ex) {
-                // Fallback to 0 if parsing fails; you might show an error to the user.
-                priceValue = 0.0;
-            }
-            // Use the selected type and color strings rather than the ComboBox objects themselves.
-            String selectedType = chooseCustomType.getSelectionModel().getSelectedItem();
-            String selectedColor = chooseCustomColor.getSelectionModel().getSelectedItem();
-            Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor, priceValue);
+			// Parse the custom price text into a double before constructing the Product.
+			double priceValue;
+			try {
+				priceValue = Double.parseDouble(customPrice.getText());
+			} catch (NumberFormatException ex) {
+				// Fallback to 0 if parsing fails; you might show an error to the user.
+				priceValue = 0.0;
+			}
+			// Use the selected type and color strings rather than the ComboBox objects themselves.
+			String selectedType = chooseCustomType.getSelectionModel().getSelectedItem();
+			String selectedColor = chooseCustomColor.getSelectionModel().getSelectedItem();
+			Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor, priceValue);
 
 			addProductToCart(product);
 
@@ -1264,10 +1268,10 @@ public class CatalogController {
 			flower_name5.setText(allProducts.get(4).getName());
 			flower_name6.setText(allProducts.get(5).getName());
 
-            // Populate the price labels for the first six products.  Each call
+			// Populate the price labels for the first six products.  Each call
 			// wraps the price in String.valueOf(...) and closes the setText
-            // invocation properly with a double closing parenthesis.  Without the
-            // second closing parenthesis the code would fail to compile.
+			// invocation properly with a double closing parenthesis.  Without the
+			// second closing parenthesis the code would fail to compile.
 			flower_price1.setText(String.valueOf(allProducts.get(0).getPrice()));
 			flower_price2.setText(String.valueOf(allProducts.get(1).getPrice()));
 			flower_price3.setText(String.valueOf(allProducts.get(2).getPrice()));
@@ -1275,13 +1279,6 @@ public class CatalogController {
 			flower_price5.setText(String.valueOf(allProducts.get(4).getPrice()));
 			flower_price6.setText(String.valueOf(allProducts.get(5).getPrice()));
 
-            // Duplicate population of price labels.  Fix missing closing parentheses.
-            flower_price1.setContentText(String.valueOf(allProducts.get(0).getPrice()));
-            flower_price2.setContentText(String.valueOf(allProducts.get(1).getPrice()));
-            flower_price3.setContentText(String.valueOf(allProducts.get(2).getPrice()));
-            flower_price4.setContentText(String.valueOf(allProducts.get(3).getPrice()));
-            flower_price5.setContentText(String.valueOf(allProducts.get(4).getPrice()));
-            flower_price6.setContentText(String.valueOf(allProducts.get(5).getPrice()));
 		}
 		else
 		{
@@ -1324,7 +1321,7 @@ public class CatalogController {
 			if(CatalogENDIndex - CatalogSTARTIndex > 0)
 			{
 				flower_name1.setText(allProducts.get(CatalogSTARTIndex).getName());
-                // Corrected missing closing parenthesis when setting the price text
+				// Corrected missing closing parenthesis when setting the price text
 				flower_price1.setText(String.valueOf(allProducts.get(CatalogSTARTIndex).getPrice()));
 				flower_button1.setVisible(true);
 				flower_price1.setVisible(true);
@@ -1347,7 +1344,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 2)
 			{
 				flower_name3.setText(allProducts.get(CatalogSTARTIndex + 2).getName());
-                // Closing parenthesis added
+				// Closing parenthesis added
 				flower_price3.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 2).getPrice()));
 				flower_button3.setVisible(true);
 				flower_price3.setVisible(true);
@@ -1358,7 +1355,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 3)
 			{
 				flower_name4.setText(allProducts.get(CatalogSTARTIndex + 3).getName());
-                // Closing parenthesis added
+				// Closing parenthesis added
 				flower_price4.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 3).getPrice()));
 				flower_button4.setVisible(true);
 				flower_price4.setVisible(true);
@@ -1369,7 +1366,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 4)
 			{
 				flower_name5.setText(allProducts.get(CatalogSTARTIndex + 4).getName());
-                // Closing parenthesis added
+				// Closing parenthesis added
 				flower_price5.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 4).getPrice()));
 				flower_button5.setVisible(true);
 				flower_price5.setVisible(true);
@@ -1379,21 +1376,21 @@ public class CatalogController {
 			}
 			if (CatalogENDIndex - CatalogSTARTIndex > 5)
 			{
-                // Display the sixth product when more than five items remain.  Use index + 5 to
-                // select the sixth element in the current window and update the corresponding
-                // UI components (name, price, button, cart button and container) for slot 6.
-                flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
+				// Display the sixth product when more than five items remain.  Use index + 5 to
+				// select the sixth element in the current window and update the corresponding
+				// UI components (name, price, button, cart button and container) for slot 6.
+				flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
 				flower_price6.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
-                flower_button6.setVisible(true);
-                flower_price6.setVisible(true);
-                flower_name6.setVisible(true);
-                flower6_addCart.setVisible(true);
-                container6.setVisible(true);
+				flower_button6.setVisible(true);
+				flower_price6.setVisible(true);
+				flower_name6.setVisible(true);
+				flower6_addCart.setVisible(true);
+				container6.setVisible(true);
 			}
 			if (CatalogENDIndex - CatalogSTARTIndex == 6)
 			{
 				flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
-                // Closing parenthesis added
+				// Closing parenthesis added
 				flower_price6.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
 				flower_button6.setVisible(true);
 				flower_price6.setVisible(true);
@@ -1408,35 +1405,35 @@ public class CatalogController {
 
 	static List<Product> allProducts = new ArrayList<>();
 
-    /**
-     * Handle clicks on a product image in the catalog.  When a user clicks a product
-     * image, this method determines which {@link Product} was clicked based on the
-     * ImageView’s fx:id and opens the detailed product page.  The detailed page
-     * (ProductDetails.fxml) displays additional fields such as SKU, category and
-     * colour and allows the user to add multiple quantities or customise the
-     * order.  This replaces the previous behaviour, which always navigated to
-     * `secondary.fxml` (an admin editing form) regardless of the user’s role.
-     */
-    @FXML
-    void product_clicked(javafx.scene.input.MouseEvent event) throws IOException {
-        // Determine which ImageView triggered the event.  Each Product stores the
-        // fx:id of its corresponding image in the `button` field.  When the
-        // ImageView is clicked, we retrieve its id and find the matching product.
-        String clickedId = ((ImageView) event.getSource()).getId();
-        Product selected = null;
-        for (Product p : allProducts) {
-            if (p.getButton() != null && p.getButton().equals(clickedId)) {
-                selected = p;
-                break;
-            }
-        }
-        // If a matching product is found, load the detailed view and pass the
-        // product to the controller.  Otherwise, simply return.
-        if (selected != null) {
-            ProductDetailsController.setProduct(selected);
-            App.setRoot("ProductDetails");
-        }
-    }
+	/**
+	 * Handle clicks on a product image in the catalog.  When a user clicks a product
+	 * image, this method determines which {@link Product} was clicked based on the
+	 * ImageView’s fx:id and opens the detailed product page.  The detailed page
+	 * (ProductDetails.fxml) displays additional fields such as SKU, category and
+	 * colour and allows the user to add multiple quantities or customise the
+	 * order.  This replaces the previous behaviour, which always navigated to
+	 * `secondary.fxml` (an admin editing form) regardless of the user’s role.
+	 */
+	@FXML
+	void product_clicked(javafx.scene.input.MouseEvent event) throws IOException {
+		// Determine which ImageView triggered the event.  Each Product stores the
+		// fx:id of its corresponding image in the `button` field.  When the
+		// ImageView is clicked, we retrieve its id and find the matching product.
+		String clickedId = ((ImageView) event.getSource()).getId();
+		Product selected = null;
+		for (Product p : allProducts) {
+			if (p.getButton() != null && p.getButton().equals(clickedId)) {
+				selected = p;
+				break;
+			}
+		}
+		// If a matching product is found, load the detailed view and pass the
+		// product to the controller.  Otherwise, simply return.
+		if (selected != null) {
+			ProductDetailsController.setProduct(selected);
+			App.setRoot("ProductDetails");
+		}
+	}
 
 
 	public void ViewItems(boolean mode)
@@ -1642,67 +1639,67 @@ public class CatalogController {
 		//cartTextPriceDiscount.setVisible(false);
 		//cartTextPriceFinal.setVisible(false);
 
-        // Populate filter combo boxes after data initialisation.  We only have six
-        // products at present; categories and colours are pulled from the Product
-        // objects.  Price ranges are hard coded for illustrative purposes.
-        initializeData();
-        // Collect distinct categories and colours from available products
-        java.util.Set<String> categories = new java.util.HashSet<>();
-        java.util.Set<String> colours = new java.util.HashSet<>();
-        for (Product p : allProducts) {
-            if (p.getCategory() != null && !p.getCategory().isEmpty()) {
-                categories.add(p.getCategory());
-            }
-            if (p.getColor() != null && !p.getColor().isEmpty()) {
-                colours.add(p.getColor());
-            }
-        }
-        categoryFilter.getItems().clear();
-        categoryFilter.getItems().add("All");
-        categoryFilter.getItems().addAll(categories);
-        categoryFilter.getSelectionModel().selectFirst();
+		// Populate filter combo boxes after data initialisation.  We only have six
+		// products at present; categories and colours are pulled from the Product
+		// objects.  Price ranges are hard coded for illustrative purposes.
+		initializeData();
+		// Collect distinct categories and colours from available products
+		java.util.Set<String> categories = new java.util.HashSet<>();
+		java.util.Set<String> colours = new java.util.HashSet<>();
+		for (Product p : allProducts) {
+			if (p.getCategory() != null && !p.getCategory().isEmpty()) {
+				categories.add(p.getCategory());
+			}
+			if (p.getColor() != null && !p.getColor().isEmpty()) {
+				colours.add(p.getColor());
+			}
+		}
+		categoryFilter.getItems().clear();
+		categoryFilter.getItems().add("All");
+		categoryFilter.getItems().addAll(categories);
+		categoryFilter.getSelectionModel().selectFirst();
 
-        colorFilter.getItems().clear();
-        colorFilter.getItems().add("All");
-        colorFilter.getItems().addAll(colours);
-        colorFilter.getSelectionModel().selectFirst();
+		colorFilter.getItems().clear();
+		colorFilter.getItems().add("All");
+		colorFilter.getItems().addAll(colours);
+		colorFilter.getSelectionModel().selectFirst();
 
-        priceFilter.getItems().clear();
-        priceFilter.getItems().add("All");
-        priceFilter.getItems().add("0-50");
-        priceFilter.getItems().add("50-100");
-        priceFilter.getItems().add("100-200");
-        priceFilter.getSelectionModel().selectFirst();
+		priceFilter.getItems().clear();
+		priceFilter.getItems().add("All");
+		priceFilter.getItems().add("0-50");
+		priceFilter.getItems().add("50-100");
+		priceFilter.getItems().add("100-200");
+		priceFilter.getSelectionModel().selectFirst();
 
-        // Attach listeners to apply filters when a selection changes
-        categoryFilter.setOnAction(e -> applyFilters());
-        colorFilter.setOnAction(e -> applyFilters());
-        priceFilter.setOnAction(e -> applyFilters());
+		// Attach listeners to apply filters when a selection changes
+		categoryFilter.setOnAction(e -> applyFilters());
+		colorFilter.setOnAction(e -> applyFilters());
+		priceFilter.setOnAction(e -> applyFilters());
 
-        if (returnedFromSecondaryController) {
-            updateFields(0);
-        }
-        init_container.setVisible(true);
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        justButton.setVisible(true);
-                    }
-                },5000
-        );
-        System.out.println("PRINTING FLAG");
-        System.out.println(CatalogFlag.getFlagg());
-        cartTextPrice.setText("0");
-        cartTextDiscount.setText("0");
+		if (returnedFromSecondaryController) {
+			updateFields(0);
+		}
+		init_container.setVisible(true);
+		new java.util.Timer().schedule(
+				new java.util.TimerTask() {
+					@Override
+					public void run() {
+						justButton.setVisible(true);
+					}
+				},5000
+		);
+		System.out.println("PRINTING FLAG");
+		System.out.println(CatalogFlag.getFlagg());
+		cartTextPrice.setText("0");
+		cartTextDiscount.setText("0");
 		updateCartSummary(0);
-        worker_edit.setVisible(false);
+		worker_edit.setVisible(false);
 
-        inboxList.setVisible(false);
-        openMessage.setVisible(false);
+		inboxList.setVisible(false);
+		openMessage.setVisible(false);
 		applyPrivilegeBasedUI();
 
-    }
+	}
 
 
 	void initializeData() {
@@ -1783,41 +1780,41 @@ public class CatalogController {
 	public void initDatabase(InitDatabaseEvent event) {
 
 		System.out.println("arrived to databaseInit");
-        // When constructing Product instances we must pass the price as a double.
+		// When constructing Product instances we must pass the price as a double.
 		// Label#getText() returns a String, so parse it to double before calling
 		// the Product constructor.  This avoids "String cannot be converted to
 		// double" compilation errors.
-        double price1 = 0.0;
-        double price2 = 0.0;
-        double price3 = 0.0;
-        double price4 = 0.0;
-        double price5 = 0.0;
-        double price6 = 0.0;
-        try {
-            // Strip any non-numeric characters (e.g. currency symbols) before parsing
+		double price1 = 0.0;
+		double price2 = 0.0;
+		double price3 = 0.0;
+		double price4 = 0.0;
+		double price5 = 0.0;
+		double price6 = 0.0;
+		try {
+			// Strip any non-numeric characters (e.g. currency symbols) before parsing
 			price1 = Double.parseDouble(flower_price1.getText().replaceAll("[^\\d.]", ""));
 			price2 = Double.parseDouble(flower_price2.getText().replaceAll("[^\\d.]", ""));
 			price3 = Double.parseDouble(flower_price3.getText().replaceAll("[^\\d.]", ""));
 			price4 = Double.parseDouble(flower_price4.getText().replaceAll("[^\\d.]", ""));
 			price5 = Double.parseDouble(flower_price5.getText().replaceAll("[^\\d.]", ""));
 			price6 = Double.parseDouble(flower_price6.getText().replaceAll("[^\\d.]", ""));
-        } catch (NumberFormatException ex) {
-            // If parsing fails, leave default 0.0; you may want to handle this case
-            // by showing an error to the user or skipping product creation
-            ex.printStackTrace();
-        }
-        Product flower1 = new Product(1, flower_button1.getId(), flower_name1.getText(), "", price1);
-        allProducts.add(flower1);
-        Product flower2 = new Product(2, flower_button2.getId(), flower_name2.getText(), "", price2);
-        allProducts.add(flower2);
-        Product flower3 = new Product(3, flower_button3.getId(), flower_name3.getText(), "", price3);
-        allProducts.add(flower3);
-        Product flower4 = new Product(4, flower_button4.getId(), flower_name4.getText(), "", price4);
-        allProducts.add(flower4);
-        Product flower5 = new Product(5, flower_button5.getId(), flower_name5.getText(), "", price5);
-        allProducts.add(flower5);
-        Product flower6 = new Product(6, flower_button6.getId(), flower_name6.getText(), "", price6);
-        allProducts.add(flower6);
+		} catch (NumberFormatException ex) {
+			// If parsing fails, leave default 0.0; you may want to handle this case
+			// by showing an error to the user or skipping product creation
+			ex.printStackTrace();
+		}
+		Product flower1 = new Product(1, flower_button1.getId(), flower_name1.getText(), "", price1);
+		allProducts.add(flower1);
+		Product flower2 = new Product(2, flower_button2.getId(), flower_name2.getText(), "", price2);
+		allProducts.add(flower2);
+		Product flower3 = new Product(3, flower_button3.getId(), flower_name3.getText(), "", price3);
+		allProducts.add(flower3);
+		Product flower4 = new Product(4, flower_button4.getId(), flower_name4.getText(), "", price4);
+		allProducts.add(flower4);
+		Product flower5 = new Product(5, flower_button5.getId(), flower_name5.getText(), "", price5);
+		allProducts.add(flower5);
+		Product flower6 = new Product(6, flower_button6.getId(), flower_name6.getText(), "", price6);
+		allProducts.add(flower6);
 
 		List<Product> productList = new ArrayList<Product>();
 		productList.add(flower1);
@@ -1878,15 +1875,15 @@ public class CatalogController {
 			PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentLoggedAccount);
 			// Delay posting by a short time to ensure the new controller has registered
 			new java.util.Timer().schedule(
-				new java.util.TimerTask() {
-					@Override
-					public void run() {
-						EventBus.getDefault().post(recievedAcc);
-					}
-				}, 500);
+					new java.util.TimerTask() {
+						@Override
+						public void run() {
+							EventBus.getDefault().post(recievedAcc);
+						}
+					}, 500);
 		}
 	}
-	
+
 	@FXML
 	void clearFilters(ActionEvent event) {
 		if (categoryFilter != null) {
@@ -1902,78 +1899,78 @@ public class CatalogController {
 			priceFilter.setPromptText("Price Range");
 		}
 		// Refresh the product display
-        // Reset selections to "All" and reapply filters
-        if (categoryFilter != null && categoryFilter.getItems().contains("All")) {
-            categoryFilter.getSelectionModel().select("All");
-        }
-        if (colorFilter != null && colorFilter.getItems().contains("All")) {
-            colorFilter.getSelectionModel().select("All");
-        }
-        if (priceFilter != null && priceFilter.getItems().contains("All")) {
-            priceFilter.getSelectionModel().select("All");
-        }
-        applyFilters();
+		// Reset selections to "All" and reapply filters
+		if (categoryFilter != null && categoryFilter.getItems().contains("All")) {
+			categoryFilter.getSelectionModel().select("All");
+		}
+		if (colorFilter != null && colorFilter.getItems().contains("All")) {
+			colorFilter.getSelectionModel().select("All");
+		}
+		if (priceFilter != null && priceFilter.getItems().contains("All")) {
+			priceFilter.getSelectionModel().select("All");
+		}
+		applyFilters();
 	}
 
-    /**
-     * Apply the selected filters to the product cards.  Each of the six
-     * containers corresponds to a product in {@code allProducts}.  If a
-     * product does not satisfy the selected category, colour or price range,
-     * its container and controls will be hidden; otherwise they are shown.
-     */
-    private void applyFilters() {
-        String selectedCategory = (categoryFilter != null && categoryFilter.getValue() != null) ? categoryFilter.getValue() : "All";
-        String selectedColor    = (colorFilter != null && colorFilter.getValue() != null) ? colorFilter.getValue() : "All";
-        String selectedPrice    = (priceFilter != null && priceFilter.getValue() != null) ? priceFilter.getValue() : "All";
+	/**
+	 * Apply the selected filters to the product cards.  Each of the six
+	 * containers corresponds to a product in {@code allProducts}.  If a
+	 * product does not satisfy the selected category, colour or price range,
+	 * its container and controls will be hidden; otherwise they are shown.
+	 */
+	private void applyFilters() {
+		String selectedCategory = (categoryFilter != null && categoryFilter.getValue() != null) ? categoryFilter.getValue() : "All";
+		String selectedColor    = (colorFilter != null && colorFilter.getValue() != null) ? colorFilter.getValue() : "All";
+		String selectedPrice    = (priceFilter != null && priceFilter.getValue() != null) ? priceFilter.getValue() : "All";
 
-        for (int i = 0; i < allProducts.size() && i < 6; i++) {
-            Product p = allProducts.get(i);
-            boolean visible = true;
-            // Category filter
-            if (!"All".equals(selectedCategory) && p.getCategory() != null && !selectedCategory.equalsIgnoreCase(p.getCategory())) {
-                visible = false;
-            }
-            // Colour filter
-            if (!"All".equals(selectedColor) && p.getColor() != null && !selectedColor.equalsIgnoreCase(p.getColor())) {
-                visible = false;
-            }
-            // Price filter
-            if (!"All".equals(selectedPrice)) {
-                double price = p.getPrice();
-                try {
-                    String[] parts = selectedPrice.split("-");
-                    double min = Double.parseDouble(parts[0]);
-                    double max = Double.parseDouble(parts[1]);
-                    if (price < min || price > max) {
-                        visible = false;
-                    }
-                } catch (Exception e) {
-                    // Ignore malformed price range
-                }
-            }
-            // Update visibility for this product index
-            switch (i) {
-                case 0:
-                    container1.setVisible(visible);
-                    break;
-                case 1:
-                    container2.setVisible(visible);
-                    break;
-                case 2:
-                    container3.setVisible(visible);
-                    break;
-                case 3:
-                    container4.setVisible(visible);
-                    break;
-                case 4:
-                    container5.setVisible(visible);
-                    break;
-                case 5:
-                    container6.setVisible(visible);
-                    break;
-            }
-        }
-    }
+		for (int i = 0; i < allProducts.size() && i < 6; i++) {
+			Product p = allProducts.get(i);
+			boolean visible = true;
+			// Category filter
+			if (!"All".equals(selectedCategory) && p.getCategory() != null && !selectedCategory.equalsIgnoreCase(p.getCategory())) {
+				visible = false;
+			}
+			// Colour filter
+			if (!"All".equals(selectedColor) && p.getColor() != null && !selectedColor.equalsIgnoreCase(p.getColor())) {
+				visible = false;
+			}
+			// Price filter
+			if (!"All".equals(selectedPrice)) {
+				double price = p.getPrice();
+				try {
+					String[] parts = selectedPrice.split("-");
+					double min = Double.parseDouble(parts[0]);
+					double max = Double.parseDouble(parts[1]);
+					if (price < min || price > max) {
+						visible = false;
+					}
+				} catch (Exception e) {
+					// Ignore malformed price range
+				}
+			}
+			// Update visibility for this product index
+			switch (i) {
+				case 0:
+					container1.setVisible(visible);
+					break;
+				case 1:
+					container2.setVisible(visible);
+					break;
+				case 2:
+					container3.setVisible(visible);
+					break;
+				case 3:
+					container4.setVisible(visible);
+					break;
+				case 4:
+					container5.setVisible(visible);
+					break;
+				case 5:
+					container6.setVisible(visible);
+					break;
+			}
+		}
+	}
 
 
 	@FXML // fx:id="RemoveItem"
@@ -1983,11 +1980,11 @@ public class CatalogController {
 	void accbtnlogin(ActionEvent event) throws IOException {
 		System.out.println(".");
 	}
-	
+
 	// ========================================
 	// PRIVILEGE-BASED UI MANAGEMENT
 	// ========================================
-	
+
 	/**
 	 * Apply UI element visibility based on user privilege level
 	 * Privilege 0 (Guest): Browse catalog only
@@ -1997,20 +1994,20 @@ public class CatalogController {
 	 * Privilege 4 (Chain Manager): + Network-wide access
 	 */
 	private void applyPrivilegeBasedUI() {
-        // If no account is logged in yet (e.g., user opens catalog as guest),
-        // default to privilege 0 to avoid NullPointerExceptions.  This ensures
-        // the catalog can still be browsed without requiring authentication.
+		// If no account is logged in yet (e.g., user opens catalog as guest),
+		// default to privilege 0 to avoid NullPointerExceptions.  This ensures
+		// the catalog can still be browsed without requiring authentication.
 		Account account = SimpleClient.getUser();
 		if (account == null) {
-            hideAllPrivilegedFeatures();
+			hideAllPrivilegedFeatures();
 			configureProductCardActions();
-            System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
-            return;
-        }
+			System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
+			return;
+		}
 		currentLoggedAccount = account;
 		int privilege = account.getPrivilegeLevel();
-        System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
-		
+		System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
+
 		// GUEST (0): Can only browse catalog - all interactive features hidden
 		if (privilege == 0) {
 			hideAllPrivilegedFeatures();
@@ -2205,10 +2202,10 @@ public class CatalogController {
 		if (infoo != null) infoo.setVisible(true);
 		if (adminControlButtton != null) adminControlButtton.setVisible(true);
 		if (adminEditCatalog != null) adminEditCatalog.setVisible(true);
-		
+
 		System.out.println("  \u2713 Manager features enabled (Admin Dashboard)");
 	}
-	
+
 	/**
 	 * Enable chain manager features (privilege >= 4)
 	 * Allows: Network-wide dashboard, global settings
@@ -2218,11 +2215,11 @@ public class CatalogController {
 		// Additional network-wide features can be added here
 		System.out.println("  \u2713 Chain Manager features enabled (Network Dashboard)");
 	}
-	
+
 	// ===============================================================
 	// NAVIGATION METHODS FOR NEW PAGES (PHASES 1-5)
 	// ===============================================================
-	
+
 	/**
 	 * Navigate to Product Details page
 	 * Shows detailed information about a specific product
@@ -2231,7 +2228,7 @@ public class CatalogController {
 	void openProductDetails(ActionEvent event) throws IOException {
 		navigateInShell("ProductDetails");
 	}
-	
+
 	/**
 	 * Navigate to Order Confirmation page
 	 * Shows confirmation after placing an order
@@ -2246,8 +2243,8 @@ public class CatalogController {
 	 */
 	@FXML
 	void openProfile(ActionEvent event) throws IOException {
-			navigateInShell("Profile");
-		}
+		navigateInShell("Profile");
+	}
 	/**
 	 * Navigate to Order Details page
 	 * Shows detailed information about a specific order
@@ -2256,7 +2253,7 @@ public class CatalogController {
 	void openOrderDetails(ActionEvent event) throws IOException {
 		navigateInShell("OrderDetails");
 	}
-	
+
 	/**
 	 * Navigate to Worker Dashboard
 	 * Shows worker panel with orders and tasks (Privilege >= 2 required)
@@ -2271,7 +2268,7 @@ public class CatalogController {
 
 		navigateInShell("WorkerDashboard");
 	}
-	
+
 	/**
 	 * Navigate to Branch Orders page
 	 * Shows all orders for the branch (Privilege >= 2 required)
@@ -2315,7 +2312,7 @@ public class CatalogController {
 		navigateInShell("BranchReports");
 
 	}
-	
+
 	/**
 	 * Navigate to Promotions Management page
 	 * Manage branch promotional campaigns (Privilege >= 3 required)
@@ -2331,7 +2328,7 @@ public class CatalogController {
 		navigateInShell("PromotionsManagement");
 
 	}
-	
+
 	/**
 	 * Navigate to Branch Settings page
 	 * Configure branch settings (Privilege >= 3 required)
@@ -2347,7 +2344,7 @@ public class CatalogController {
 		navigateInShell("BranchSettings");
 
 	}
-	
+
 	/**
 	 * Navigate to Network Dashboard
 	 * Network-wide overview with charts (Privilege >= 4 required)
@@ -2363,7 +2360,7 @@ public class CatalogController {
 		navigateInShell("NetworkDashboard");
 
 	}
-	
+
 	/**
 	 * Navigate to Cross-Branch Reports page
 	 * Advanced analytics across all branches (Privilege >= 4 required)
@@ -2379,7 +2376,7 @@ public class CatalogController {
 		navigateInShell("CrossBranchReports");
 
 	}
-	
+
 	/**
 	 * Navigate to Global Settings page
 	 * Network-wide configuration (Privilege >= 4 required)
@@ -2395,7 +2392,7 @@ public class CatalogController {
 		navigateInShell("GlobalSettings");
 
 	}
-	
+
 	/**
 	 * Navigate to Network Promotions page
 	 * Chain-wide promotional campaigns (Privilege >= 4 required)
@@ -2411,7 +2408,7 @@ public class CatalogController {
 		navigateInShell("NetworkPromotions");
 
 	}
-	
+
 	/**
 	 * Navigate to Role Management page
 	 * Manage user roles and privileges (Privilege >= 4 required)
@@ -2427,7 +2424,7 @@ public class CatalogController {
 		navigateInShell("RoleManagement");
 
 	}
-	
+
 	/**
 	 * Navigate to Error page
 	 * Generic error display page

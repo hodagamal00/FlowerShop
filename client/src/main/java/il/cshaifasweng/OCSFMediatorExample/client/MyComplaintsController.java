@@ -3,9 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
 import il.cshaifasweng.OCSFMediatorExample.entities.GetAllComplaints;
-import il.cshaifasweng.OCSFMediatorExample.entities.Message;
 import il.cshaifasweng.OCSFMediatorExample.entities.NextComplaintIdMessage;
-import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +27,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Calendar;
 
 public class MyComplaintsController {
 
@@ -51,7 +48,7 @@ public class MyComplaintsController {
     private TextField complaintID; // Value injected by FXMLLoader
 
     @FXML // fx:id="complaintList"
-    private ListView<String> complaintList; // Value injected by FXMLLoader
+    private ListView<Complaint> complaintList;
 
     @FXML // fx:id="complaintText"
     private TextArea complaintText; // Value injected by FXMLLoader
@@ -86,8 +83,6 @@ public class MyComplaintsController {
     private Label wait; // Value injected by FXMLLoader
 
     private Integer nextComplaintId;
-    @FXML
-    private javafx.scene.control.ListView<Complaint> complaintList;
 
 
 
@@ -153,60 +148,21 @@ public class MyComplaintsController {
         }
 
         // 6) طريقة العرض داخل الـListView (بدل ما نخزن String)
-        complaintList.setCellFactory(lv -> new javafx.scene.control.ListCell<Complaint>() {
-            @Override
-            protected void updateItem(Complaint item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText("#" + item.getComplaintID() + " - " +
-                            item.getDay() + "/" + item.getMonth() + "/" + item.getYear());
-                }
-            }
-        });
+        configureComplaintListCellFactory();
 
         // 7) اعرض أول شكوى تلقائيًا (اختياري)
         complaintList.getSelectionModel().selectFirst();
         Complaint selected = complaintList.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            fillComplaintDetails(selected);
+            showComplaintDetails(selected);
         }
 
         // 8) عند تغيير الاختيار اعرض التفاصيل
         complaintList.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             if (newV != null) {
-                fillComplaintDetails(newV);
+                showComplaintDetails(newV);
             }
         });
-    }
-
-    /* ============================= */
-    /* Helpers: تفاصيل الشكوى بالواجهة */
-    /* ============================= */
-
-    private void fillComplaintDetails(Complaint selectedComplaint) {
-
-        complaintID.setText(String.valueOf(selectedComplaint.getComplaintID()));
-        orderID.setText(String.valueOf(selectedComplaint.getOrderID()));
-
-        // Accepted / Answer
-        if (selectedComplaint.isAccepted()) {
-            answerBool.setText("Yes");
-            refundMoney.setText(String.valueOf(selectedComplaint.getReturnedmoneyvalue()));
-        } else {
-            answerBool.setText("No");
-            refundMoney.setText("0");
-        }
-
-        replyWorker.setText(String.valueOf(selectedComplaint.getAnswerworkerID()));
-        complaintText.setText(selectedComplaint.getComplaintText() == null ? "" : selectedComplaint.getComplaintText());
-
-        // إذا عندك حقول إضافية مثل SLA / respondedAt / compensationDecision:
-        // slaStatus.setText(selectedComplaint.getSlaStatus());
-        // compensationDecision.setText(selectedComplaint.getCompensationDecision());
-        // createdAt.setText(formatTimestamp(selectedComplaint.getCreatedAt()));
-        // respondedAt.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
     }
 
     private void clearComplaintDetails() {
@@ -223,15 +179,6 @@ public class MyComplaintsController {
         // createdAt.setText("");
         // respondedAt.setText("");
     }
-
-    /* مثال بسيط للـAlert (إذا عندك واحد جاهز استخدميه) */
-    private void showAlert(String msg) {
-        javafx.scene.control.Alert a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
-    }
-
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
@@ -254,12 +201,10 @@ public class MyComplaintsController {
         loadButton.setDisable(true);
         backToCatalog.setDisable(true);
         wait.setVisible(true);
+        configureComplaintListCellFactory();
         complaintList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                Complaint selected = findComplaintByListEntry(newValue);
-                if (selected != null) {
-                    showComplaintDetails(selected);
-                }
+                showComplaintDetails(newValue);
             }
         });
 
@@ -336,68 +281,14 @@ public class MyComplaintsController {
         allComplaints.stream()
                 .filter(c -> c.getCustomerID() == currentUser.getAccountID())
                 .sorted((a, b) -> Integer.compare(a.getComplaintID(), b.getComplaintID()))
-                .forEach(c -> complaintList.getItems().add(formatListEntry(c)));
+                .forEach(c -> complaintList.getItems().add(c));
     }
 
-    private void selectComplaint(int complaintId) {
-        String entry = null;
-        for (String item : complaintList.getItems()) {
-            if (parseComplaintId(item) == complaintId) {
-                entry = item;
-                break;
-            }
-        }
-        if (entry != null) {
-            complaintList.getSelectionModel().select(entry);
-            Complaint selected = findComplaintByListEntry(entry);
-            if (selected != null) {
-                showComplaintDetails(selected);
-            }
-        }
-    }
-
-    private Complaint findComplaintByListEntry(String listEntry) {
-        int id = parseComplaintId(listEntry);
-        if (id == -1 || allComplaints == null) {
-            return null;
-        }
-        for (Complaint complaint : allComplaints) {
-            if (complaint.getComplaintID() == id) {
-                return complaint;
-            }
-        }
-        return null;
-    }
     private String formatTimestamp(Date date) {
         if (date == null) {
             return "-";
         }
         return new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date);
-    }
-}
-
-    private int parseComplaintId(String listEntry) {
-        if (listEntry == null || listEntry.length() < 2) {
-            return -1;
-        }
-        StringBuilder idBuilder = new StringBuilder();
-        for (int i = 1; i < listEntry.length(); i++) {
-            char c = listEntry.charAt(i);
-            if (Character.isDigit(c)) {
-                idBuilder.append(c);
-            } else {
-                break;
-            }
-        }
-        try {
-            return Integer.parseInt(idBuilder.toString());
-        } catch (NumberFormatException ex) {
-            return -1;
-        }
-    }
-
-    private String formatListEntry(Complaint complaint) {
-        return "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
     }
 
     private void showComplaintDetails(Complaint selectedComplaint) {
@@ -423,6 +314,21 @@ public class MyComplaintsController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void configureComplaintListCellFactory() {
+        complaintList.setCellFactory(lv -> new javafx.scene.control.ListCell<Complaint>() {
+            @Override
+            protected void updateItem(Complaint item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText("#" + item.getComplaintID() + " - " +
+                            item.getDay() + "/" + item.getMonth() + "/" + item.getYear());
+                }
+            }
+        });
     }
 
     private int parseOrderId(String text) {
