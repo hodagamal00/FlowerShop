@@ -516,6 +516,10 @@ public class CatalogController {
         }
     }
 
+    private void addProductToCartByIndex(int offset) {
+        addToCart(offset);
+    }
+
 
 	private void configureProductCardActions() {
 		Account account = SimpleClient.getUser();
@@ -1275,13 +1279,6 @@ public class CatalogController {
 			flower_price5.setText(String.valueOf(allProducts.get(4).getPrice()));
 			flower_price6.setText(String.valueOf(allProducts.get(5).getPrice()));
 
-            // Duplicate population of price labels.  Fix missing closing parentheses.
-            flower_price1.setContentText(String.valueOf(allProducts.get(0).getPrice()));
-            flower_price2.setContentText(String.valueOf(allProducts.get(1).getPrice()));
-            flower_price3.setContentText(String.valueOf(allProducts.get(2).getPrice()));
-            flower_price4.setContentText(String.valueOf(allProducts.get(3).getPrice()));
-            flower_price5.setContentText(String.valueOf(allProducts.get(4).getPrice()));
-            flower_price6.setContentText(String.valueOf(allProducts.get(5).getPrice()));
 		}
 		else
 		{
