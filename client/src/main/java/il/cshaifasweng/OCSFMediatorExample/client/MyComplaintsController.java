@@ -374,8 +374,6 @@ public class MyComplaintsController {
         }
         return new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date);
     }
-}
-
     private int parseComplaintId(String listEntry) {
         if (listEntry == null || listEntry.length() < 2) {
             return -1;
