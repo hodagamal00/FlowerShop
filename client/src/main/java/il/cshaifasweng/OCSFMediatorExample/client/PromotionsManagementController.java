@@ -398,7 +398,7 @@ public class PromotionsManagementController {
     @FXML
     private void handleBackToCatalog() {
         try {
-            App.setRoot("primary");
+            App.setRoot("Catalog");
         } catch (IOException e) {
             e.printStackTrace();
             showError("Failed to navigate to catalog.");

@@ -49,7 +49,8 @@ public class AppShellController {
 
     private static final List<NavDestination> NAV_LINKS = List.of(
             NavDestination.forAllUsers("Home", "HomePage"),
-            NavDestination.forAllUsers("Catalog", "primary"),            NavDestination.forLoggedIn("Cart", "cart", 0),
+            NavDestination.forAllUsers("Catalog", "Catalog"),
+            NavDestination.forLoggedIn("Cart", "cart", 0),
             NavDestination.forLoggedIn("Checkout", "checkout", 1),
             NavDestination.forLoggedIn("Orders", "myorders", 1),
             NavDestination.forLoggedIn("Complaints", "mycomplaints", 1),

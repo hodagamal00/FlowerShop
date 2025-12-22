@@ -359,7 +359,7 @@ public class CatalogController {
 
 	private void navigateAfterLogin(Account account) {
 		if (account == null) {
-			navigateInShell("primary");
+			navigateInShell("Catalog");
 			return;
 		}
 
@@ -371,7 +371,7 @@ public class CatalogController {
 		} else if (privilege >= 2) {
 			navigateInShell("WorkerDashboard");
 		} else {
-			navigateInShell("primary");
+			navigateInShell("Catalog");
 		}
 	}
 

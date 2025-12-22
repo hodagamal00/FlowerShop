@@ -69,14 +69,26 @@ public class NavigationService {
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+            String resolvedView = resolveViewName(fxml);
+            FXMLLoader loader = new FXMLLoader(App.class.getResource(resolvedView + ".fxml"));
             Parent view = loader.load();
             Node content = ensureScrollable(view);
             appShellController.setContent(content);
-            appShellController.handleNavigationChange(fxml);
+            appShellController.handleNavigationChange(resolvedView);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String resolveViewName(String fxml) {
+        if (fxml == null) {
+            return "Catalog";
+        }
+        String normalized = fxml.trim();
+        if (normalized.equalsIgnoreCase("primary") || normalized.equalsIgnoreCase("catalog")) {
+            return "Catalog";
+        }
+        return normalized;
     }
     /**
      * Ensures that the supplied view is scrollable by wrapping it in a

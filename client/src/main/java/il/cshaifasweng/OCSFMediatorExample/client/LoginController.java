@@ -72,7 +72,7 @@ public class LoginController {
     @FXML
     void gotoCatalog(ActionEvent event) throws IOException {
         CatalogFlag.setFlagg(0);
-        NavigationService.getInstance().navigate("primary");
+        NavigationService.getInstance().navigate("Catalog");
     }
 
     @FXML
@@ -133,7 +133,7 @@ public class LoginController {
             e.printStackTrace();
         }
         // Navigate to the catalog (primary) view within the AppShell
-        NavigationService.getInstance().navigate("primary");
+        NavigationService.getInstance().navigate("Catalog");
     }
 
 
@@ -323,7 +323,7 @@ public class LoginController {
             } else if (privilege >= 2) {
                 targetView = "WorkerDashboard";
             } else {
-                targetView = "primary";
+                targetView = "Catalog";
             }
 
             CatalogFlag.setFlagg(1);

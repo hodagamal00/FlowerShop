@@ -71,7 +71,7 @@ public class SecondaryController {
     @FXML
     void returnWindow(ActionEvent event) throws IOException {
         CatalogController.setReturnedFromSecondaryController(true);
-        App.setRoot("primary");
+        App.setRoot("Catalog");
     }
 
     @FXML

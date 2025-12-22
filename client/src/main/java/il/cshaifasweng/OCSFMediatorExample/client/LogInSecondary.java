@@ -108,7 +108,7 @@ public class LogInSecondary {
 
         // When using the AppShell, navigate to the catalog view by replacing
         // the centre content instead of opening a new window.
-        NavigationService.getInstance().navigate("primary");
+        NavigationService.getInstance().navigate("Catalog");
     }
 
 
