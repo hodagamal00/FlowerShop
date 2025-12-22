@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -53,7 +54,7 @@ public class SecondaryController {
 
     /** Load selected product */
     private Product requireSelectedProduct(String actionContext) {
-        Product p = PrimaryController.getCurrent_button();
+        Product p = CatalogController.getCurrent_button();
         if (p == null) {
             showAlert(Alert.AlertType.ERROR,
                     "Product Unavailable",
@@ -69,12 +70,13 @@ public class SecondaryController {
 
     @FXML
     void returnWindow(ActionEvent event) throws IOException {
-        PrimaryController.setReturnedFromSecondaryController(true);
+        CatalogController.setReturnedFromSecondaryController(true);
         App.setRoot("primary");
     }
 
     @FXML
     void edit_product(ActionEvent event) {
+        apply_changes.setVisible(true);
         canEditProducts = hasProductEditPermission();
         if (!canEditProducts) {
             showAlert(Alert.AlertType.WARNING, "Insufficient Permissions",
@@ -82,16 +84,16 @@ public class SecondaryController {
                     "Only employees and managers can modify product details.");
             return;
         }
-
         currentProduct = requireSelectedProduct("edit product details");
-        if (currentProduct == null) return;
+        if (currentProduct == null) {
+            return;
+        }
 
         // Show editable fields
         setDetails.setVisible(true);
         setName.setVisible(true);
         setPrice.setVisible(true);
         apply_changes.setVisible(true);
-
         // Load existing details
         setDetails.setText(currentProduct.getDetails());
         setName.setText(currentProduct.getName());
@@ -99,8 +101,8 @@ public class SecondaryController {
     }
 
     @FXML
-    void updateProduct(ActionEvent event) {
-
+    void updateProduct(ActionEvent event)
+    {
         if (!hasProductEditPermission()) {
             showAlert(Alert.AlertType.WARNING, "Insufficient Permissions",
                     "Editing Restricted",
@@ -163,8 +165,8 @@ public class SecondaryController {
         setPrice.setVisible(false);
         apply_changes.setVisible(false);
 
-        currentProduct = PrimaryController.getCurrent_button();
-
+        // set all fields details using product object
+        currentProduct = CatalogController.getCurrent_button();
         if (currentProduct == null) {
             showAlert(Alert.AlertType.ERROR,
                     "Product Unavailable",

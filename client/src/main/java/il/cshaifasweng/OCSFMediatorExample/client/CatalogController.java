@@ -6,36 +6,29 @@ import javafx.application.Platform;
 // introduces ambiguous references for classes like Button and List.  This
 // controller uses JavaFX exclusively, so AWT imports are unnecessary and
 // problematic.
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.*;
-import javafx.beans.property.SimpleObjectProperty;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.scene.control.*;
-import javafx.scene.control.TextField;
-import javafx.scene.control.DialogPane;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 // Added for detailed product navigation
-import il.cshaifasweng.OCSFMediatorExample.client.ProductDetailsController;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
 // Event to pass current account to complaint controller
-import il.cshaifasweng.OCSFMediatorExample.client.PassAccountEventComplaints;
 
 
-
-
-
-public class PrimaryController {
+public class CatalogController {
 	public int flowersnum2 = 6;
 	public int workernum2 =0;
 	public int managernum2 =0;
@@ -55,10 +48,10 @@ public class PrimaryController {
 
 	@FXML // Filter ComboBoxes
 	private ComboBox<String> categoryFilter;
-	
+
 	@FXML
 	private ComboBox<String> colorFilter;
-	
+
 	@FXML
 	private ComboBox<String> priceFilter;
 
@@ -66,27 +59,28 @@ public class PrimaryController {
 	private Button logout; // Value injected by FXMLLoader
 
 
+
 	@FXML
 	private Button checkout;
 
 
 	@FXML
-	private AnchorPane container1;
+	private VBox container1;
 
 	@FXML
-	private AnchorPane container2;
+	private VBox container2;
 
 	@FXML
-	private AnchorPane container3;
+	private VBox container3;
 
 	@FXML
-	private AnchorPane container4;
+	private VBox container4;
 
 	@FXML
-	private AnchorPane container5;
+	private VBox container5;
 
 	@FXML
-	private AnchorPane container6;
+	private VBox container6;
 
 	@FXML
 	private AnchorPane init_container;
@@ -116,8 +110,8 @@ public class PrimaryController {
 	@FXML // fx:id="customType"
 	private TextField customType; // Value injected by FXMLLoader
 
-    @FXML // fx:id="CreateCustomItem"
-    public Button CreateCustomItem; // Value injected by FXMLLoader
+	@FXML // fx:id="CreateCustomItem"
+	public Button CreateCustomItem; // Value injected by FXMLLoader
 
 	@FXML
 	public Button infoo;
@@ -168,22 +162,22 @@ public class PrimaryController {
 	private javafx.scene.control.Label flower_name6; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price1"
-	private DialogPane flower_price1; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price1; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price2"
-	private DialogPane flower_price2; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price2; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price3"
-	private DialogPane flower_price3; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price3; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price4"
-	private DialogPane flower_price4; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price4; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price5"
-	private DialogPane flower_price5; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price5; // Value injected by FXMLLoader
 
 	@FXML // fx:id="flower_price6"
-	private DialogPane flower_price6; // Value injected by FXMLLoader
+	private javafx.scene.control.Label flower_price6; // Value injected by FXMLLoader
 
 
 	@FXML // fx:id="AddItem"
@@ -414,8 +408,11 @@ public class PrimaryController {
 	@FXML
 	void ReplyToComplaints(ActionEvent event) throws IOException {
 
-		PassAccountEventReplyComplaint recievedAcc = new PassAccountEventReplyComplaint(currentLoggedAccount);
+		if (!ensurePrivilege(event, 2, "Complaint Handling")) {
+			return;
+		}
 
+		PassAccountEventReplyComplaint recievedAcc = new PassAccountEventReplyComplaint(currentLoggedAccount);
 		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
 					@Override
@@ -434,8 +431,11 @@ public class PrimaryController {
 	@FXML
 	void openControlPanel(ActionEvent event) throws IOException {
 
-		PassAccountEventAdmin recievedAcc = new PassAccountEventAdmin(currentLoggedAccount);
+		if (!ensurePrivilege(event, 3, "Admin Panel")) {
+			return;
+		}
 
+		PassAccountEventAdmin recievedAcc = new PassAccountEventAdmin(currentLoggedAccount);
 		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
 					@Override
@@ -450,53 +450,76 @@ public class PrimaryController {
 	}
 
 	@FXML
-	void addToCartFlower1(ActionEvent event)
-	{
-		addProductToCartByIndex(0);
+	void addToCartFlower1(ActionEvent event) {
+		addToCart(0);
 	}
 
 	@FXML
 	void addToCartFlower2(ActionEvent event) {
-		addProductToCartByIndex(1);
+		addToCart(1);
 	}
 
 	@FXML
 	void addToCartFlower3(ActionEvent event) {
-		addProductToCartByIndex(2);
+		addToCart(2);
 	}
 
 	@FXML
 	void addToCartFlower4(ActionEvent event) {
-		addProductToCartByIndex(3);
+		addToCart(3);
 	}
 
 	@FXML
 	void addToCartFlower5(ActionEvent event) {
-		addProductToCartByIndex(4);
+		addToCart(4);
 	}
 
 	@FXML
-	void addToCartFlower6(ActionEvent event){
-		addProductToCartByIndex(5);
+	void addToCartFlower6(ActionEvent event) {
+		addToCart(5);
 	}
 
+	/* ========================= */
+	/*   الدالة المشتركة الصحيحة  */
+	/* ========================= */
+
+	private void addToCart(int offset) {
+
+		int index = CatalogSTARTIndex + offset;
+		if (index < 0 || index >= allProducts.size()) {
+			return; // حماية من IndexOutOfBounds
+		}
+
+		// السعر الحالي (إذا الحقل فاضي يبدأ من 0)
+		int basePrice = 0;
+		if (!cartTextPrice.getText().isEmpty()) {
+			basePrice = Integer.parseInt(cartTextPrice.getText());
+		}
+
+		int addedPrice = (int) Math.round(allProducts.get(index).getPrice());
+		basePrice += addedPrice;
+
+		// إضافة المنتج
+		CartItemsList.getItems().add(allProducts.get(index).getName());
+		userCart.add(allProducts.get(index));
+
+		// تحديث السعر قبل الخصم
+		cartTextPrice.setText(String.valueOf(basePrice));
+
+		// الخصم: 10% فقط إذا مشترك والمجموع أكبر من 50₪
+		if (currentLoggedAccount != null
+				&& currentLoggedAccount.isSubscription()
+				&& basePrice > 50) {
+			cartTextDiscount.setText(String.valueOf((int)(basePrice * 0.9)));
+		} else {
+			cartTextDiscount.setText(String.valueOf(basePrice));
+		}
+	}
 
 	private void addProductToCartByIndex(int offset) {
-		if (CatalogSTARTIndex + offset >= allProducts.size()) {
-			return;
-		}
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		Product product = allProducts.get(CatalogSTARTIndex + offset);
-		int addedPrice = (int) Math.round(product.getPrice());
-		CartItemsList.getItems().add(product.getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(product);
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		addToCart(offset);
 	}
+
 
 	private void configureProductCardActions() {
 		Account account = SimpleClient.getUser();
@@ -558,6 +581,9 @@ public class PrimaryController {
 	@FXML
 	void openDelivery(ActionEvent event) throws IOException
 	{
+		if (!ensurePrivilege(event, 2, "Deliveries")) {
+			return;
+		}
 		PassAccountEventDelivery recievedAcc = new PassAccountEventDelivery(currentLoggedAccount);
 		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
@@ -616,6 +642,10 @@ public class PrimaryController {
 	@FXML
 	void openComplaintManager(ActionEvent event) throws IOException {
 
+		if (!ensurePrivilege(event, 3, "Manager Dashboard")) {
+			return;
+		}
+
 		GetAllComplaints allComplaints = new GetAllComplaints();
 		System.out.println("send request for complaints !!");
 		try {
@@ -648,6 +678,10 @@ public class PrimaryController {
 	@FXML
 	void openCheckout(ActionEvent event) throws IOException
 	{
+		if (!ensurePrivilege(event, 1, "Checkout")) {
+			return;
+		}
+
 		System.out.println("arrived to checkout 1");
 		navigateInShell("checkout");
 		System.out.println("arrived to checkout 2");
@@ -701,8 +735,10 @@ public class PrimaryController {
 
 	@FXML
 	void openMyComplaints(ActionEvent event) throws IOException {
+		if (!ensurePrivilege(event, 1, "Complaints")) {
+			return;
+		}
 		navigateInShell("mycomplaints");
-
 		PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentLoggedAccount);
 
 		new java.util.Timer().schedule(
@@ -732,6 +768,9 @@ public class PrimaryController {
 	@FXML
 	void openMyOrders(ActionEvent event) throws IOException
 	{
+		if (!ensurePrivilege(event, 1, "My Orders")) {
+			return;
+		}
 		navigateInShell("myorders");
 
 		PassAccountEventOrders recievedAcc = new PassAccountEventOrders(currentLoggedAccount);
@@ -803,7 +842,7 @@ public class PrimaryController {
 		);
 		justText.setVisible(false);
 		justButton.setVisible(false);
-		
+
 		// Apply privilege-based UI visibility
 		applyPrivilegeBasedUI();
 	}
@@ -866,9 +905,9 @@ public class PrimaryController {
 		CancelCustomItem.setVisible(true);
 		FinishCustomItem.setVisible(true);
 
-        // When creating a placeholder product, provide a numeric price (e.g., 0.0)
-        // instead of a string to match the Product constructor signature.
-        Product newProduct = new Product(0, "test", "test", "test", 0.0);  // Please insert real values
+		// When creating a placeholder product, provide a numeric price (e.g., 0.0)
+		// instead of a string to match the Product constructor signature.
+		Product newProduct = new Product(0, "test", "test", "test", 0.0);  // Please insert real values
 		//CREATE A NEW PRODUCT DYNAMICALLY
 		// Tips: A global variable called ProductID which is incremented after each product created.
 		// A function GetNextProductID that returns a fresh ID for the new product to be added.
@@ -946,29 +985,21 @@ public class PrimaryController {
 		{
 			String color = chooseCustomColor.getSelectionModel().getSelectedItem();
 			String Type = chooseCustomType.getSelectionModel().getSelectedItem();
-            // Parse the custom price text into a double before constructing the Product.
-            double priceValue;
-            try {
-                priceValue = Double.parseDouble(customPrice.getText());
-            } catch (NumberFormatException ex) {
-                // Fallback to 0 if parsing fails; you might show an error to the user.
-                priceValue = 0.0;
-            }
-            // Use the selected type and color strings rather than the ComboBox objects themselves.
-            String selectedType = chooseCustomType.getSelectionModel().getSelectedItem();
-            String selectedColor = chooseCustomColor.getSelectionModel().getSelectedItem();
-            Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor, priceValue);
+			// Parse the custom price text into a double before constructing the Product.
+			double priceValue;
+			try {
+				priceValue = Double.parseDouble(customPrice.getText());
+			} catch (NumberFormatException ex) {
+				// Fallback to 0 if parsing fails; you might show an error to the user.
+				priceValue = 0.0;
+			}
+			// Use the selected type and color strings rather than the ComboBox objects themselves.
+			String selectedType = chooseCustomType.getSelectionModel().getSelectedItem();
+			String selectedColor = chooseCustomColor.getSelectionModel().getSelectedItem();
+			Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor, priceValue);
 
-            int basePrice = Integer.parseInt(cartTextPrice.getText());
-            int addedPrice = (int) Math.round(product.getPrice());
-            CartItemsList.getItems().add(product.getName());
-            basePrice = basePrice + addedPrice;
-            cartTextPrice.setText(String.valueOf(basePrice));
-            userCart.add(product);
-			if (currentLoggedAccount.isSubscription() == true && basePrice > 50)
-				cartTextDiscount.setText("" + basePrice * 0.9);
-			else
-				cartTextDiscount.setText("" + basePrice);
+			addProductToCart(product);
+
 
 
 			customid.setVisible(false);
@@ -1108,7 +1139,7 @@ public class PrimaryController {
 		allProducts.get(TargerID).setPrice(Double.parseDouble(newPrice));
 		allProducts.get(TargerID).setDetails(newDesc);
 
-		Product currtProduct  = il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.getCurrent_button();
+		Product currtProduct  = CatalogController.getCurrent_button();
 
 
 		currtProduct.setPrice(Double.parseDouble(newPrice));
@@ -1237,24 +1268,17 @@ public class PrimaryController {
 			flower_name5.setText(allProducts.get(4).getName());
 			flower_name6.setText(allProducts.get(5).getName());
 
-            // Populate the price labels for the first six products.  Each call
-            // wraps the price in String.valueOf(...) and closes the setContentText
-            // invocation properly with a double closing parenthesis.  Without the
-            // second closing parenthesis the code would fail to compile.
-            flower_price1.setContentText(String.valueOf(allProducts.get(0).getPrice()));
-            flower_price2.setContentText(String.valueOf(allProducts.get(1).getPrice()));
-            flower_price3.setContentText(String.valueOf(allProducts.get(2).getPrice()));
-            flower_price4.setContentText(String.valueOf(allProducts.get(3).getPrice()));
-            flower_price5.setContentText(String.valueOf(allProducts.get(4).getPrice()));
-            flower_price6.setContentText(String.valueOf(allProducts.get(5).getPrice()));
+			// Populate the price labels for the first six products.  Each call
+			// wraps the price in String.valueOf(...) and closes the setText
+			// invocation properly with a double closing parenthesis.  Without the
+			// second closing parenthesis the code would fail to compile.
+			flower_price1.setText(String.valueOf(allProducts.get(0).getPrice()));
+			flower_price2.setText(String.valueOf(allProducts.get(1).getPrice()));
+			flower_price3.setText(String.valueOf(allProducts.get(2).getPrice()));
+			flower_price4.setText(String.valueOf(allProducts.get(3).getPrice()));
+			flower_price5.setText(String.valueOf(allProducts.get(4).getPrice()));
+			flower_price6.setText(String.valueOf(allProducts.get(5).getPrice()));
 
-            // Duplicate population of price labels.  Fix missing closing parentheses.
-            flower_price1.setContentText(String.valueOf(allProducts.get(0).getPrice()));
-            flower_price2.setContentText(String.valueOf(allProducts.get(1).getPrice()));
-            flower_price3.setContentText(String.valueOf(allProducts.get(2).getPrice()));
-            flower_price4.setContentText(String.valueOf(allProducts.get(3).getPrice()));
-            flower_price5.setContentText(String.valueOf(allProducts.get(4).getPrice()));
-            flower_price6.setContentText(String.valueOf(allProducts.get(5).getPrice()));
 		}
 		else
 		{
@@ -1270,12 +1294,12 @@ public class PrimaryController {
 				System.out.println("END INDEX = " + CatalogENDIndex);
 			}
 
-			flower_price1.setContentText("/");
-			flower_price2.setContentText("/");
-			flower_price3.setContentText("/");
-			flower_price4.setContentText("/");
-			flower_price5.setContentText("/");
-			flower_price6.setContentText("/");
+			flower_price1.setText("/");
+			flower_price2.setText("/");
+			flower_price3.setText("/");
+			flower_price4.setText("/");
+			flower_price5.setText("/");
+			flower_price6.setText("/");
 
 			flower_name1.setText("/");
 			flower_name2.setText("/");
@@ -1297,8 +1321,8 @@ public class PrimaryController {
 			if(CatalogENDIndex - CatalogSTARTIndex > 0)
 			{
 				flower_name1.setText(allProducts.get(CatalogSTARTIndex).getName());
-                // Corrected missing closing parenthesis when setting the price text
-                flower_price1.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex).getPrice()));
+				// Corrected missing closing parenthesis when setting the price text
+				flower_price1.setText(String.valueOf(allProducts.get(CatalogSTARTIndex).getPrice()));
 				flower_button1.setVisible(true);
 				flower_price1.setVisible(true);
 				flower_name1.setVisible(true);
@@ -1309,8 +1333,8 @@ public class PrimaryController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 1)
 			{
 				flower_name2.setText(allProducts.get(CatalogSTARTIndex + 1).getName());
-                // Ensure call to setContentText is properly closed
-                flower_price2.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 1).getPrice()));
+				// Ensure call to setText is properly closed
+				flower_price2.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 1).getPrice()));
 				flower_button2.setVisible(true);
 				flower_price2.setVisible(true);
 				flower_name2.setVisible(true);
@@ -1320,8 +1344,8 @@ public class PrimaryController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 2)
 			{
 				flower_name3.setText(allProducts.get(CatalogSTARTIndex + 2).getName());
-                // Closing parenthesis added
-                flower_price3.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 2).getPrice()));
+				// Closing parenthesis added
+				flower_price3.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 2).getPrice()));
 				flower_button3.setVisible(true);
 				flower_price3.setVisible(true);
 				flower_name3.setVisible(true);
@@ -1331,8 +1355,8 @@ public class PrimaryController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 3)
 			{
 				flower_name4.setText(allProducts.get(CatalogSTARTIndex + 3).getName());
-                // Closing parenthesis added
-                flower_price4.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 3).getPrice()));
+				// Closing parenthesis added
+				flower_price4.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 3).getPrice()));
 				flower_button4.setVisible(true);
 				flower_price4.setVisible(true);
 				flower_name4.setVisible(true);
@@ -1342,8 +1366,8 @@ public class PrimaryController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 4)
 			{
 				flower_name5.setText(allProducts.get(CatalogSTARTIndex + 4).getName());
-                // Closing parenthesis added
-                flower_price5.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 4).getPrice()));
+				// Closing parenthesis added
+				flower_price5.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 4).getPrice()));
 				flower_button5.setVisible(true);
 				flower_price5.setVisible(true);
 				flower_name5.setVisible(true);
@@ -1352,22 +1376,22 @@ public class PrimaryController {
 			}
 			if (CatalogENDIndex - CatalogSTARTIndex > 5)
 			{
-                // Display the sixth product when more than five items remain.  Use index + 5 to
-                // select the sixth element in the current window and update the corresponding
-                // UI components (name, price, button, cart button and container) for slot 6.
-                flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
-                flower_price6.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
-                flower_button6.setVisible(true);
-                flower_price6.setVisible(true);
-                flower_name6.setVisible(true);
-                flower6_addCart.setVisible(true);
-                container6.setVisible(true);
+				// Display the sixth product when more than five items remain.  Use index + 5 to
+				// select the sixth element in the current window and update the corresponding
+				// UI components (name, price, button, cart button and container) for slot 6.
+				flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
+				flower_price6.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
+				flower_button6.setVisible(true);
+				flower_price6.setVisible(true);
+				flower_name6.setVisible(true);
+				flower6_addCart.setVisible(true);
+				container6.setVisible(true);
 			}
 			if (CatalogENDIndex - CatalogSTARTIndex == 6)
 			{
 				flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
-                // Closing parenthesis added
-                flower_price6.setContentText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
+				// Closing parenthesis added
+				flower_price6.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
 				flower_button6.setVisible(true);
 				flower_price6.setVisible(true);
 				flower_name6.setVisible(true);
@@ -1381,35 +1405,35 @@ public class PrimaryController {
 
 	static List<Product> allProducts = new ArrayList<>();
 
-    /**
-     * Handle clicks on a product image in the catalog.  When a user clicks a product
-     * image, this method determines which {@link Product} was clicked based on the
-     * ImageView’s fx:id and opens the detailed product page.  The detailed page
-     * (ProductDetails.fxml) displays additional fields such as SKU, category and
-     * colour and allows the user to add multiple quantities or customise the
-     * order.  This replaces the previous behaviour, which always navigated to
-     * `secondary.fxml` (an admin editing form) regardless of the user’s role.
-     */
-    @FXML
-    void product_clicked(javafx.scene.input.MouseEvent event) throws IOException {
-        // Determine which ImageView triggered the event.  Each Product stores the
-        // fx:id of its corresponding image in the `button` field.  When the
-        // ImageView is clicked, we retrieve its id and find the matching product.
-        String clickedId = ((ImageView) event.getSource()).getId();
-        Product selected = null;
-        for (Product p : allProducts) {
-            if (p.getButton() != null && p.getButton().equals(clickedId)) {
-                selected = p;
-                break;
-            }
-        }
-        // If a matching product is found, load the detailed view and pass the
-        // product to the controller.  Otherwise, simply return.
-        if (selected != null) {
-            ProductDetailsController.setProduct(selected);
-            App.setRoot("ProductDetails");
-        }
-    }
+	/**
+	 * Handle clicks on a product image in the catalog.  When a user clicks a product
+	 * image, this method determines which {@link Product} was clicked based on the
+	 * ImageView’s fx:id and opens the detailed product page.  The detailed page
+	 * (ProductDetails.fxml) displays additional fields such as SKU, category and
+	 * colour and allows the user to add multiple quantities or customise the
+	 * order.  This replaces the previous behaviour, which always navigated to
+	 * `secondary.fxml` (an admin editing form) regardless of the user’s role.
+	 */
+	@FXML
+	void product_clicked(javafx.scene.input.MouseEvent event) throws IOException {
+		// Determine which ImageView triggered the event.  Each Product stores the
+		// fx:id of its corresponding image in the `button` field.  When the
+		// ImageView is clicked, we retrieve its id and find the matching product.
+		String clickedId = ((ImageView) event.getSource()).getId();
+		Product selected = null;
+		for (Product p : allProducts) {
+			if (p.getButton() != null && p.getButton().equals(clickedId)) {
+				selected = p;
+				break;
+			}
+		}
+		// If a matching product is found, load the detailed view and pass the
+		// product to the controller.  Otherwise, simply return.
+		if (selected != null) {
+			ProductDetailsController.setProduct(selected);
+			App.setRoot("ProductDetails");
+		}
+	}
 
 
 	public void ViewItems(boolean mode)
@@ -1470,27 +1494,27 @@ public class PrimaryController {
 
 		System.out.println("arrived to initialize 1");
 		EventBus.getDefault().register(this);
-		assert flower_button1 != null : "fx:id=\"flower_button1\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button2 != null : "fx:id=\"flower_button2\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button3 != null : "fx:id=\"flower_button3\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button4 != null : "fx:id=\"flower_button4\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button5 != null : "fx:id=\"flower_button5\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_button6 != null : "fx:id=\"flower_button6\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name1 != null : "fx:id=\"flower_name1\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name2 != null : "fx:id=\"flower_name2\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name3 != null : "fx:id=\"flower_name3\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name4 != null : "fx:id=\"flower_name4\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name5 != null : "fx:id=\"flower_name5\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_name6 != null : "fx:id=\"flower_name6\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price1 != null : "fx:id=\"flower_price1\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price2 != null : "fx:id=\"flower_price2\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price3 != null : "fx:id=\"flower_price3\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price4 != null : "fx:id=\"flower_price4\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price5 != null : "fx:id=\"flower_price5\" was not injected: check your FXML file 'primary.fxml'.";
-		assert flower_price6 != null : "fx:id=\"flower_price6\" was not injected: check your FXML file 'primary.fxml'.";
-		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'primary.fxml'.";
-		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'primary.fxml'.";
-		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'primary.fxml'.";
+		assert flower_button1 != null : "fx:id=\"flower_button1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button2 != null : "fx:id=\"flower_button2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button3 != null : "fx:id=\"flower_button3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button4 != null : "fx:id=\"flower_button4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button5 != null : "fx:id=\"flower_button5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_button6 != null : "fx:id=\"flower_button6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name1 != null : "fx:id=\"flower_name1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name2 != null : "fx:id=\"flower_name2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name3 != null : "fx:id=\"flower_name3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name4 != null : "fx:id=\"flower_name4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name5 != null : "fx:id=\"flower_name5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_name6 != null : "fx:id=\"flower_name6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price1 != null : "fx:id=\"flower_price1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price2 != null : "fx:id=\"flower_price2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price3 != null : "fx:id=\"flower_price3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price4 != null : "fx:id=\"flower_price4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price5 != null : "fx:id=\"flower_price5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price6 != null : "fx:id=\"flower_price6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
 
 		customError.setVisible(false);
 		messageField.setVisible(false);
@@ -1615,65 +1639,67 @@ public class PrimaryController {
 		//cartTextPriceDiscount.setVisible(false);
 		//cartTextPriceFinal.setVisible(false);
 
-        // Populate filter combo boxes after data initialisation.  We only have six
-        // products at present; categories and colours are pulled from the Product
-        // objects.  Price ranges are hard coded for illustrative purposes.
-        initializeData();
-        // Collect distinct categories and colours from available products
-        java.util.Set<String> categories = new java.util.HashSet<>();
-        java.util.Set<String> colours = new java.util.HashSet<>();
-        for (Product p : allProducts) {
-            if (p.getCategory() != null && !p.getCategory().isEmpty()) {
-                categories.add(p.getCategory());
-            }
-            if (p.getColor() != null && !p.getColor().isEmpty()) {
-                colours.add(p.getColor());
-            }
-        }
-        categoryFilter.getItems().clear();
-        categoryFilter.getItems().add("All");
-        categoryFilter.getItems().addAll(categories);
-        categoryFilter.getSelectionModel().selectFirst();
+		// Populate filter combo boxes after data initialisation.  We only have six
+		// products at present; categories and colours are pulled from the Product
+		// objects.  Price ranges are hard coded for illustrative purposes.
+		initializeData();
+		// Collect distinct categories and colours from available products
+		java.util.Set<String> categories = new java.util.HashSet<>();
+		java.util.Set<String> colours = new java.util.HashSet<>();
+		for (Product p : allProducts) {
+			if (p.getCategory() != null && !p.getCategory().isEmpty()) {
+				categories.add(p.getCategory());
+			}
+			if (p.getColor() != null && !p.getColor().isEmpty()) {
+				colours.add(p.getColor());
+			}
+		}
+		categoryFilter.getItems().clear();
+		categoryFilter.getItems().add("All");
+		categoryFilter.getItems().addAll(categories);
+		categoryFilter.getSelectionModel().selectFirst();
 
-        colorFilter.getItems().clear();
-        colorFilter.getItems().add("All");
-        colorFilter.getItems().addAll(colours);
-        colorFilter.getSelectionModel().selectFirst();
+		colorFilter.getItems().clear();
+		colorFilter.getItems().add("All");
+		colorFilter.getItems().addAll(colours);
+		colorFilter.getSelectionModel().selectFirst();
 
-        priceFilter.getItems().clear();
-        priceFilter.getItems().add("All");
-        priceFilter.getItems().add("0-50");
-        priceFilter.getItems().add("50-100");
-        priceFilter.getItems().add("100-200");
-        priceFilter.getSelectionModel().selectFirst();
+		priceFilter.getItems().clear();
+		priceFilter.getItems().add("All");
+		priceFilter.getItems().add("0-50");
+		priceFilter.getItems().add("50-100");
+		priceFilter.getItems().add("100-200");
+		priceFilter.getSelectionModel().selectFirst();
 
-        // Attach listeners to apply filters when a selection changes
-        categoryFilter.setOnAction(e -> applyFilters());
-        colorFilter.setOnAction(e -> applyFilters());
-        priceFilter.setOnAction(e -> applyFilters());
+		// Attach listeners to apply filters when a selection changes
+		categoryFilter.setOnAction(e -> applyFilters());
+		colorFilter.setOnAction(e -> applyFilters());
+		priceFilter.setOnAction(e -> applyFilters());
 
-        if (returnedFromSecondaryController) {
-            updateFields(0);
-        }
-        init_container.setVisible(true);
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        justButton.setVisible(true);
-                    }
-                },5000
-        );
-        System.out.println("PRINTING FLAG");
-        System.out.println(CatalogFlag.getFlagg());
-        cartTextPrice.setText("0");
-        cartTextDiscount.setText("0");
-        worker_edit.setVisible(false);
+		if (returnedFromSecondaryController) {
+			updateFields(0);
+		}
+		init_container.setVisible(true);
+		new java.util.Timer().schedule(
+				new java.util.TimerTask() {
+					@Override
+					public void run() {
+						justButton.setVisible(true);
+					}
+				},5000
+		);
+		System.out.println("PRINTING FLAG");
+		System.out.println(CatalogFlag.getFlagg());
+		cartTextPrice.setText("0");
+		cartTextDiscount.setText("0");
+		updateCartSummary(0);
+		worker_edit.setVisible(false);
 
-        inboxList.setVisible(false);
-        openMessage.setVisible(false);
+		inboxList.setVisible(false);
+		openMessage.setVisible(false);
+		applyPrivilegeBasedUI();
 
-    }
+	}
 
 
 	void initializeData() {
@@ -1754,41 +1780,41 @@ public class PrimaryController {
 	public void initDatabase(InitDatabaseEvent event) {
 
 		System.out.println("arrived to databaseInit");
-        // When constructing Product instances we must pass the price as a double.
-        // DialogPane#getContentText() returns a String, so parse it to double
-        // before calling the Product constructor.  This avoids "String cannot be
-        // converted to double" compilation errors.
-        double price1 = 0.0;
-        double price2 = 0.0;
-        double price3 = 0.0;
-        double price4 = 0.0;
-        double price5 = 0.0;
-        double price6 = 0.0;
-        try {
-            // Strip any non-numeric characters (e.g. currency symbols) before parsing
-            price1 = Double.parseDouble(flower_price1.getContentText().replaceAll("[^\\d.]", ""));
-            price2 = Double.parseDouble(flower_price2.getContentText().replaceAll("[^\\d.]", ""));
-            price3 = Double.parseDouble(flower_price3.getContentText().replaceAll("[^\\d.]", ""));
-            price4 = Double.parseDouble(flower_price4.getContentText().replaceAll("[^\\d.]", ""));
-            price5 = Double.parseDouble(flower_price5.getContentText().replaceAll("[^\\d.]", ""));
-            price6 = Double.parseDouble(flower_price6.getContentText().replaceAll("[^\\d.]", ""));
-        } catch (NumberFormatException ex) {
-            // If parsing fails, leave default 0.0; you may want to handle this case
-            // by showing an error to the user or skipping product creation
-            ex.printStackTrace();
-        }
-        Product flower1 = new Product(1, flower_button1.getId(), flower_name1.getText(), "", price1);
-        allProducts.add(flower1);
-        Product flower2 = new Product(2, flower_button2.getId(), flower_name2.getText(), "", price2);
-        allProducts.add(flower2);
-        Product flower3 = new Product(3, flower_button3.getId(), flower_name3.getText(), "", price3);
-        allProducts.add(flower3);
-        Product flower4 = new Product(4, flower_button4.getId(), flower_name4.getText(), "", price4);
-        allProducts.add(flower4);
-        Product flower5 = new Product(5, flower_button5.getId(), flower_name5.getText(), "", price5);
-        allProducts.add(flower5);
-        Product flower6 = new Product(6, flower_button6.getId(), flower_name6.getText(), "", price6);
-        allProducts.add(flower6);
+		// When constructing Product instances we must pass the price as a double.
+		// Label#getText() returns a String, so parse it to double before calling
+		// the Product constructor.  This avoids "String cannot be converted to
+		// double" compilation errors.
+		double price1 = 0.0;
+		double price2 = 0.0;
+		double price3 = 0.0;
+		double price4 = 0.0;
+		double price5 = 0.0;
+		double price6 = 0.0;
+		try {
+			// Strip any non-numeric characters (e.g. currency symbols) before parsing
+			price1 = Double.parseDouble(flower_price1.getText().replaceAll("[^\\d.]", ""));
+			price2 = Double.parseDouble(flower_price2.getText().replaceAll("[^\\d.]", ""));
+			price3 = Double.parseDouble(flower_price3.getText().replaceAll("[^\\d.]", ""));
+			price4 = Double.parseDouble(flower_price4.getText().replaceAll("[^\\d.]", ""));
+			price5 = Double.parseDouble(flower_price5.getText().replaceAll("[^\\d.]", ""));
+			price6 = Double.parseDouble(flower_price6.getText().replaceAll("[^\\d.]", ""));
+		} catch (NumberFormatException ex) {
+			// If parsing fails, leave default 0.0; you may want to handle this case
+			// by showing an error to the user or skipping product creation
+			ex.printStackTrace();
+		}
+		Product flower1 = new Product(1, flower_button1.getId(), flower_name1.getText(), "", price1);
+		allProducts.add(flower1);
+		Product flower2 = new Product(2, flower_button2.getId(), flower_name2.getText(), "", price2);
+		allProducts.add(flower2);
+		Product flower3 = new Product(3, flower_button3.getId(), flower_name3.getText(), "", price3);
+		allProducts.add(flower3);
+		Product flower4 = new Product(4, flower_button4.getId(), flower_name4.getText(), "", price4);
+		allProducts.add(flower4);
+		Product flower5 = new Product(5, flower_button5.getId(), flower_name5.getText(), "", price5);
+		allProducts.add(flower5);
+		Product flower6 = new Product(6, flower_button6.getId(), flower_name6.getText(), "", price6);
+		allProducts.add(flower6);
 
 		List<Product> productList = new ArrayList<Product>();
 		productList.add(flower1);
@@ -1849,15 +1875,15 @@ public class PrimaryController {
 			PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentLoggedAccount);
 			// Delay posting by a short time to ensure the new controller has registered
 			new java.util.Timer().schedule(
-				new java.util.TimerTask() {
-					@Override
-					public void run() {
-						EventBus.getDefault().post(recievedAcc);
-					}
-				}, 500);
+					new java.util.TimerTask() {
+						@Override
+						public void run() {
+							EventBus.getDefault().post(recievedAcc);
+						}
+					}, 500);
 		}
 	}
-	
+
 	@FXML
 	void clearFilters(ActionEvent event) {
 		if (categoryFilter != null) {
@@ -1873,78 +1899,78 @@ public class PrimaryController {
 			priceFilter.setPromptText("Price Range");
 		}
 		// Refresh the product display
-        // Reset selections to "All" and reapply filters
-        if (categoryFilter != null && categoryFilter.getItems().contains("All")) {
-            categoryFilter.getSelectionModel().select("All");
-        }
-        if (colorFilter != null && colorFilter.getItems().contains("All")) {
-            colorFilter.getSelectionModel().select("All");
-        }
-        if (priceFilter != null && priceFilter.getItems().contains("All")) {
-            priceFilter.getSelectionModel().select("All");
-        }
-        applyFilters();
+		// Reset selections to "All" and reapply filters
+		if (categoryFilter != null && categoryFilter.getItems().contains("All")) {
+			categoryFilter.getSelectionModel().select("All");
+		}
+		if (colorFilter != null && colorFilter.getItems().contains("All")) {
+			colorFilter.getSelectionModel().select("All");
+		}
+		if (priceFilter != null && priceFilter.getItems().contains("All")) {
+			priceFilter.getSelectionModel().select("All");
+		}
+		applyFilters();
 	}
 
-    /**
-     * Apply the selected filters to the product cards.  Each of the six
-     * containers corresponds to a product in {@code allProducts}.  If a
-     * product does not satisfy the selected category, colour or price range,
-     * its container and controls will be hidden; otherwise they are shown.
-     */
-    private void applyFilters() {
-        String selectedCategory = (categoryFilter != null && categoryFilter.getValue() != null) ? categoryFilter.getValue() : "All";
-        String selectedColor    = (colorFilter != null && colorFilter.getValue() != null) ? colorFilter.getValue() : "All";
-        String selectedPrice    = (priceFilter != null && priceFilter.getValue() != null) ? priceFilter.getValue() : "All";
+	/**
+	 * Apply the selected filters to the product cards.  Each of the six
+	 * containers corresponds to a product in {@code allProducts}.  If a
+	 * product does not satisfy the selected category, colour or price range,
+	 * its container and controls will be hidden; otherwise they are shown.
+	 */
+	private void applyFilters() {
+		String selectedCategory = (categoryFilter != null && categoryFilter.getValue() != null) ? categoryFilter.getValue() : "All";
+		String selectedColor    = (colorFilter != null && colorFilter.getValue() != null) ? colorFilter.getValue() : "All";
+		String selectedPrice    = (priceFilter != null && priceFilter.getValue() != null) ? priceFilter.getValue() : "All";
 
-        for (int i = 0; i < allProducts.size() && i < 6; i++) {
-            Product p = allProducts.get(i);
-            boolean visible = true;
-            // Category filter
-            if (!"All".equals(selectedCategory) && p.getCategory() != null && !selectedCategory.equalsIgnoreCase(p.getCategory())) {
-                visible = false;
-            }
-            // Colour filter
-            if (!"All".equals(selectedColor) && p.getColor() != null && !selectedColor.equalsIgnoreCase(p.getColor())) {
-                visible = false;
-            }
-            // Price filter
-            if (!"All".equals(selectedPrice)) {
-                double price = p.getPrice();
-                try {
-                    String[] parts = selectedPrice.split("-");
-                    double min = Double.parseDouble(parts[0]);
-                    double max = Double.parseDouble(parts[1]);
-                    if (price < min || price > max) {
-                        visible = false;
-                    }
-                } catch (Exception e) {
-                    // Ignore malformed price range
-                }
-            }
-            // Update visibility for this product index
-            switch (i) {
-                case 0:
-                    container1.setVisible(visible);
-                    break;
-                case 1:
-                    container2.setVisible(visible);
-                    break;
-                case 2:
-                    container3.setVisible(visible);
-                    break;
-                case 3:
-                    container4.setVisible(visible);
-                    break;
-                case 4:
-                    container5.setVisible(visible);
-                    break;
-                case 5:
-                    container6.setVisible(visible);
-                    break;
-            }
-        }
-    }
+		for (int i = 0; i < allProducts.size() && i < 6; i++) {
+			Product p = allProducts.get(i);
+			boolean visible = true;
+			// Category filter
+			if (!"All".equals(selectedCategory) && p.getCategory() != null && !selectedCategory.equalsIgnoreCase(p.getCategory())) {
+				visible = false;
+			}
+			// Colour filter
+			if (!"All".equals(selectedColor) && p.getColor() != null && !selectedColor.equalsIgnoreCase(p.getColor())) {
+				visible = false;
+			}
+			// Price filter
+			if (!"All".equals(selectedPrice)) {
+				double price = p.getPrice();
+				try {
+					String[] parts = selectedPrice.split("-");
+					double min = Double.parseDouble(parts[0]);
+					double max = Double.parseDouble(parts[1]);
+					if (price < min || price > max) {
+						visible = false;
+					}
+				} catch (Exception e) {
+					// Ignore malformed price range
+				}
+			}
+			// Update visibility for this product index
+			switch (i) {
+				case 0:
+					container1.setVisible(visible);
+					break;
+				case 1:
+					container2.setVisible(visible);
+					break;
+				case 2:
+					container3.setVisible(visible);
+					break;
+				case 3:
+					container4.setVisible(visible);
+					break;
+				case 4:
+					container5.setVisible(visible);
+					break;
+				case 5:
+					container6.setVisible(visible);
+					break;
+			}
+		}
+	}
 
 
 	@FXML // fx:id="RemoveItem"
@@ -1954,11 +1980,11 @@ public class PrimaryController {
 	void accbtnlogin(ActionEvent event) throws IOException {
 		System.out.println(".");
 	}
-	
+
 	// ========================================
 	// PRIVILEGE-BASED UI MANAGEMENT
 	// ========================================
-	
+
 	/**
 	 * Apply UI element visibility based on user privilege level
 	 * Privilege 0 (Guest): Browse catalog only
@@ -1968,63 +1994,50 @@ public class PrimaryController {
 	 * Privilege 4 (Chain Manager): + Network-wide access
 	 */
 	private void applyPrivilegeBasedUI() {
-        // If no account is logged in yet (e.g., user opens catalog as guest),
-        // default to privilege 0 to avoid NullPointerExceptions.  This ensures
-        // the catalog can still be browsed without requiring authentication.
+		// If no account is logged in yet (e.g., user opens catalog as guest),
+		// default to privilege 0 to avoid NullPointerExceptions.  This ensures
+		// the catalog can still be browsed without requiring authentication.
 		Account account = SimpleClient.getUser();
 		if (account == null) {
-            hideAllPrivilegedFeatures();
+			hideAllPrivilegedFeatures();
 			configureProductCardActions();
-            System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
-            return;
-        }
+			System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
+			return;
+		}
 		currentLoggedAccount = account;
 		int privilege = account.getPrivilegeLevel();
-        System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
-		
+		System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
+
 		// GUEST (0): Can only browse catalog - all interactive features hidden
 		if (privilege == 0) {
 			hideAllPrivilegedFeatures();
 			System.out.println("Guest mode: Browse-only access");
+			return;
 		}
-		
+
 		// CUSTOMER (1): Can browse + checkout + manage own orders/complaints
-		else if (privilege == 1) {
-			hideAllPrivilegedFeatures();
-			enableCustomerFeatures();
-			System.out.println("Customer mode: Shopping and account management enabled");
-		}
-		
-		// WORKER (2): Customer features + worker panel
-		else if (privilege == 2) {
-			hideAllPrivilegedFeatures();
-			enableCustomerFeatures();
+		enableCustomerFeatures();
+		System.out.println("Customer mode: Shopping and account management enabled");
+
+		if (privilege >= 2) {
+			// WORKER (2): Customer features + worker panel
 			enableWorkerFeatures();
 			System.out.println("Worker mode: Customer + Worker panel enabled");
 		}
-		
-		// MANAGER (3): Worker features + admin dashboard + reports
-		else if (privilege == 3) {
-			hideAllPrivilegedFeatures();
-			enableCustomerFeatures();
-			enableWorkerFeatures();
+		if (privilege >= 3) {
+			// MANAGER (3): Worker features + admin dashboard + reports
 			enableManagerFeatures();
 			System.out.println("Manager mode: Full branch admin access enabled");
 		}
-		
-		// CHAIN MANAGER (4): All features + network-wide access
-		else if (privilege >= 4) {
-			hideAllPrivilegedFeatures();
-			enableCustomerFeatures();
-			enableWorkerFeatures();
-			enableManagerFeatures();
+		if (privilege >= 4) {
+			// CHAIN MANAGER (4): All features + network-wide access
 			enableChainManagerFeatures();
 			System.out.println("Chain Manager mode: Network-wide admin access enabled");
 		}
 
 		configureProductCardActions();
 	}
-	
+
 	/**
 	 * Hide all privileged features (reset to guest mode)
 	 */
@@ -2040,24 +2053,20 @@ public class PrimaryController {
 		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(false);
 		if (CartItemsList != null) CartItemsList.setVisible(false);
 		if (cartTopText != null) cartTopText.setVisible(false);
-		if (flower1_addCart != null) flower1_addCart.setVisible(false);
-		if (flower2_addCart != null) flower2_addCart.setVisible(false);
-		if (flower3_addCart != null) flower3_addCart.setVisible(false);
-		if (flower4_addCart != null) flower4_addCart.setVisible(false);
-		if (flower5_addCart != null) flower5_addCart.setVisible(false);
-		if (flower6_addCart != null) flower6_addCart.setVisible(false);
+		if (viewCart != null) viewCart.setVisible(false);
+		setAddToCartButtonsVisible(false);
 		if (CreateCustomItem != null) CreateCustomItem.setVisible(false);
-		
+
 		// Worker features
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
-		
+
 		// Manager features
 		if (infoo != null) infoo.setVisible(false);
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
 		if (adminEditCatalog != null) adminEditCatalog.setVisible(false);
 	}
-	
+
 	/**
 	 * Enable customer features (privilege >= 1)
 	 * Allows: Shopping cart, checkout, order management, complaints
@@ -2071,26 +2080,22 @@ public class PrimaryController {
 		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(true);
 		if (CartItemsList != null) CartItemsList.setVisible(true);
 		if (cartTopText != null) cartTopText.setVisible(true);
-		
+		if (viewCart != null) viewCart.setVisible(true);
+
 		// Add to cart buttons
-		if (flower1_addCart != null) flower1_addCart.setVisible(true);
-		if (flower2_addCart != null) flower2_addCart.setVisible(true);
-		if (flower3_addCart != null) flower3_addCart.setVisible(true);
-		if (flower4_addCart != null) flower4_addCart.setVisible(true);
-		if (flower5_addCart != null) flower5_addCart.setVisible(true);
-		if (flower6_addCart != null) flower6_addCart.setVisible(true);
-		
+		setAddToCartButtonsVisible(true);
+
 		// Custom products
 		if (CreateCustomItem != null) CreateCustomItem.setVisible(true);
-		
+
 		// Account management
 		if (viewMyOrders != null) viewMyOrders.setVisible(true);
 		if (viewMyComplaints != null) viewMyComplaints.setVisible(true);
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(true);
-		
+
 		System.out.println("  \u2713 Customer features enabled");
 	}
-	
+
 	/**
 	 * Enable worker features (privilege >= 2)
 	 * Allows: Worker panel, delivery management, complaint handling
@@ -2099,10 +2104,95 @@ public class PrimaryController {
 		// Worker panel access
 		if (deliveryButton != null) deliveryButton.setVisible(true);
 		if (openComplaints != null) openComplaints.setVisible(true);
-		
+
 		System.out.println("  \u2713 Worker features enabled");
 	}
-	
+
+	/**
+	 * Enable guest features (privilege = 0)
+	 * Allows: catalog browsing, temporary cart management
+	 */
+	private void enableGuestFeatures() {
+		if (viewCart != null) viewCart.setVisible(true);
+		setAddToCartButtonsVisible(true);
+	}
+
+	private void setAddToCartButtonsVisible(boolean visible) {
+		if (flower1_addCart != null) flower1_addCart.setVisible(visible);
+		if (flower2_addCart != null) flower2_addCart.setVisible(visible);
+		if (flower3_addCart != null) flower3_addCart.setVisible(visible);
+		if (flower4_addCart != null) flower4_addCart.setVisible(visible);
+		if (flower5_addCart != null) flower5_addCart.setVisible(visible);
+		if (flower6_addCart != null) flower6_addCart.setVisible(visible);
+	}
+
+	private int resolveCurrentPrivilegeLevel() {
+		if (currentLoggedAccount != null) {
+			return currentLoggedAccount.getPrivialge();
+		}
+		Account sessionAccount = SimpleClient.getUser();
+		if (sessionAccount != null) {
+			return sessionAccount.getPrivilegeLevel();
+		}
+		return 0;
+	}
+
+	private void addProductToCart(Product product) {
+		if (product == null) {
+			return;
+		}
+
+		if (CartItemsList != null) {
+			CartItemsList.getItems().add(product.getName());
+		}
+		userCart.add(product);
+
+		int basePrice = parseCartTotal();
+		basePrice += (int) Math.round(product.getPrice());
+		updateCartSummary(basePrice);
+	}
+
+	private int parseCartTotal() {
+		if (cartTextPrice == null) {
+			return 0;
+		}
+		String value = cartTextPrice.getText();
+		if (value == null || value.isBlank()) {
+			return 0;
+		}
+		try {
+			return Integer.parseInt(value.trim());
+		} catch (NumberFormatException ignored) {
+			return 0;
+		}
+	}
+
+	private void updateCartSummary(int basePrice) {
+		if (cartTextPrice != null) {
+			cartTextPrice.setText(String.valueOf(basePrice));
+		}
+
+		boolean discountApplied = hasSubscriptionDiscount() && basePrice > 50;
+		int discountedTotal = discountApplied ? (int) Math.round(basePrice * 0.9) : basePrice;
+
+		if (cartTextDiscount != null) {
+			cartTextDiscount.setText(String.valueOf(discountedTotal));
+		}
+		if (cartTextPriceDiscount != null) {
+			cartTextPriceDiscount.setText(discountApplied ? "Subscriber discount applied" : "No discounts applied");
+		}
+		if (cartTextPriceFinal != null) {
+			cartTextPriceFinal.setText("Final total: " + discountedTotal);
+		}
+	}
+
+	private boolean hasSubscriptionDiscount() {
+		if (currentLoggedAccount != null) {
+			return currentLoggedAccount.isSubscription();
+		}
+		Account account = SimpleClient.getUser();
+		return account != null && account.isSubscription();
+	}
 	/**
 	 * Enable manager features (privilege >= 3)
 	 * Allows: Admin dashboard, user management, reports
@@ -2112,10 +2202,10 @@ public class PrimaryController {
 		if (infoo != null) infoo.setVisible(true);
 		if (adminControlButtton != null) adminControlButtton.setVisible(true);
 		if (adminEditCatalog != null) adminEditCatalog.setVisible(true);
-		
+
 		System.out.println("  \u2713 Manager features enabled (Admin Dashboard)");
 	}
-	
+
 	/**
 	 * Enable chain manager features (privilege >= 4)
 	 * Allows: Network-wide dashboard, global settings
@@ -2125,11 +2215,11 @@ public class PrimaryController {
 		// Additional network-wide features can be added here
 		System.out.println("  \u2713 Chain Manager features enabled (Network Dashboard)");
 	}
-	
+
 	// ===============================================================
 	// NAVIGATION METHODS FOR NEW PAGES (PHASES 1-5)
 	// ===============================================================
-	
+
 	/**
 	 * Navigate to Product Details page
 	 * Shows detailed information about a specific product
@@ -2138,7 +2228,7 @@ public class PrimaryController {
 	void openProductDetails(ActionEvent event) throws IOException {
 		navigateInShell("ProductDetails");
 	}
-	
+
 	/**
 	 * Navigate to Order Confirmation page
 	 * Shows confirmation after placing an order
@@ -2153,8 +2243,8 @@ public class PrimaryController {
 	 */
 	@FXML
 	void openProfile(ActionEvent event) throws IOException {
-			navigateInShell("Profile");
-		}
+		navigateInShell("Profile");
+	}
 	/**
 	 * Navigate to Order Details page
 	 * Shows detailed information about a specific order
@@ -2163,7 +2253,7 @@ public class PrimaryController {
 	void openOrderDetails(ActionEvent event) throws IOException {
 		navigateInShell("OrderDetails");
 	}
-	
+
 	/**
 	 * Navigate to Worker Dashboard
 	 * Shows worker panel with orders and tasks (Privilege >= 2 required)
@@ -2178,7 +2268,7 @@ public class PrimaryController {
 
 		navigateInShell("WorkerDashboard");
 	}
-	
+
 	/**
 	 * Navigate to Branch Orders page
 	 * Shows all orders for the branch (Privilege >= 2 required)
@@ -2222,7 +2312,7 @@ public class PrimaryController {
 		navigateInShell("BranchReports");
 
 	}
-	
+
 	/**
 	 * Navigate to Promotions Management page
 	 * Manage branch promotional campaigns (Privilege >= 3 required)
@@ -2238,7 +2328,7 @@ public class PrimaryController {
 		navigateInShell("PromotionsManagement");
 
 	}
-	
+
 	/**
 	 * Navigate to Branch Settings page
 	 * Configure branch settings (Privilege >= 3 required)
@@ -2254,7 +2344,7 @@ public class PrimaryController {
 		navigateInShell("BranchSettings");
 
 	}
-	
+
 	/**
 	 * Navigate to Network Dashboard
 	 * Network-wide overview with charts (Privilege >= 4 required)
@@ -2270,7 +2360,7 @@ public class PrimaryController {
 		navigateInShell("NetworkDashboard");
 
 	}
-	
+
 	/**
 	 * Navigate to Cross-Branch Reports page
 	 * Advanced analytics across all branches (Privilege >= 4 required)
@@ -2286,7 +2376,7 @@ public class PrimaryController {
 		navigateInShell("CrossBranchReports");
 
 	}
-	
+
 	/**
 	 * Navigate to Global Settings page
 	 * Network-wide configuration (Privilege >= 4 required)
@@ -2302,7 +2392,7 @@ public class PrimaryController {
 		navigateInShell("GlobalSettings");
 
 	}
-	
+
 	/**
 	 * Navigate to Network Promotions page
 	 * Chain-wide promotional campaigns (Privilege >= 4 required)
@@ -2318,7 +2408,7 @@ public class PrimaryController {
 		navigateInShell("NetworkPromotions");
 
 	}
-	
+
 	/**
 	 * Navigate to Role Management page
 	 * Manage user roles and privileges (Privilege >= 4 required)
@@ -2334,7 +2424,7 @@ public class PrimaryController {
 		navigateInShell("RoleManagement");
 
 	}
-	
+
 	/**
 	 * Navigate to Error page
 	 * Generic error display page
@@ -2344,14 +2434,19 @@ public class PrimaryController {
 		navigateInShell("Error");
 
 	}
-	
+	private boolean ensurePrivilege(ActionEvent event, int requiredPrivilege, String pageName) throws IOException {
+		if (resolveCurrentPrivilegeLevel() < requiredPrivilege) {
+			openAccessDenied(event, requiredPrivilege, pageName);
+			return false;
+		}
+		return true;
+	}
 	/**
 	 * Navigate to Access Denied page with custom privilege information
 	 */
 	private void openAccessDenied(ActionEvent event, int requiredPrivilege, String pageName) throws IOException {
-		int currentPrivilege = SimpleClient.getClient().getUser() != null ? 
-			SimpleClient.getClient().getUser().getPrivilegeLevel() : 0;
-		
+		int currentPrivilege = resolveCurrentPrivilegeLevel();
+
 		AccessDeniedController.setAccessInfo(currentPrivilege, requiredPrivilege, pageName);
 
 		navigateInShell("AccessDenied");
