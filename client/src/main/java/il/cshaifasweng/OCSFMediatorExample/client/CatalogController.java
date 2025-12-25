@@ -98,25 +98,17 @@ public class CatalogController {
 	@FXML // fx:id="EditItemExtra"
 	private TextField EditItemExtra; // Value injected by FXMLLoader
 
-	@FXML // fx:id="customColor"
-	private TextField customColor; // Value injected by FXMLLoader
-
 	@FXML // fx:id="customPrice"
 	private TextField customPrice; // Value injected by FXMLLoader
 
 	@FXML
 	private TextField customid;
 
-	@FXML // fx:id="customType"
-	private TextField customType; // Value injected by FXMLLoader
-
 	@FXML // fx:id="CreateCustomItem"
 	public Button CreateCustomItem; // Value injected by FXMLLoader
 
 	@FXML
 	public Button infoo;
-	@FXML
-	public Button cartt; // Value injected by FXMLLoader
 
 	@FXML // fx:id="CancelCustomItem"
 	private Button CancelCustomItem; // Value injected by FXMLLoader
@@ -575,9 +567,6 @@ public class CatalogController {
 			button.setOnAction(event -> addProductToCartByIndex(offset));
 		}
 	}
-	@FXML
-	private TextField cartText;
-
 	@FXML
 	void openDelivery(ActionEvent event) throws IOException
 	{
