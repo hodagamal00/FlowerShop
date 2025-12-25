@@ -386,6 +386,16 @@
                 <TextField fx:id="customid" layoutX="-100.0" layoutY="-100.0" visible="false"/>
                 <Button fx:id="printProd" layoutX="-100.0" layoutY="-100.0" visible="false"
                         mnemonicParsing="false" onAction="#printProducts" text="Print"/>
+                <Button fx:id="viewMyOrders" layoutX="-100.0" layoutY="-100.0" visible="false"
+                        mnemonicParsing="false" onAction="#openMyOrders" text="My Orders"/>
+                <Button fx:id="viewMyComplaints" layoutX="-100.0" layoutY="-100.0" visible="false"
+                        mnemonicParsing="false" onAction="#openMyComplaints" text="My Complaints"/>
+                <Button fx:id="deliveryButton" layoutX="-100.0" layoutY="-100.0" visible="false"
+                        mnemonicParsing="false" onAction="#openDelivery" text="Deliveries"/>
+                <Button fx:id="openComplaints" layoutX="-100.0" layoutY="-100.0" visible="false"
+                        mnemonicParsing="false" onAction="#openComplaintManager" text="Complaint Manager"/>
+                <Button fx:id="adminControlButtton" layoutX="-100.0" layoutY="-100.0" visible="false"
+                        mnemonicParsing="false" onAction="#openControlPanel" text="Admin Control"/>
                 <Button fx:id="accbtn" layoutX="-100.0" layoutY="-100.0" visible="false"
                         mnemonicParsing="false" onAction="#accbtnlogin" text="Account"/>
                 <Button fx:id="compln" layoutX="-100.0" layoutY="-100.0" visible="false"
