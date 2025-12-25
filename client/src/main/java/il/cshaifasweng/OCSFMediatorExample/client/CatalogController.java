@@ -255,8 +255,10 @@ public class CatalogController {
 	private Text cartTopText;
 
 	@FXML
+	@FXML
 	private Button viewMyComplaints;
 
+	@FXML
 	@FXML
 	private Button viewMyOrders;
 
