@@ -70,6 +70,13 @@
                                     </children>
                                 </HBox>
 
+                                <Text fx:id="cartTextPriceDiscount" text="" fill="#6a1b9a">
+                                    <font><Font size="12.0"/></font>
+                                </Text>
+                                <Text fx:id="cartTextPriceFinal" text="" fill="#4a148c">
+                                    <font><Font name="System Bold" size="12.0"/></font>
+                                </Text>
+
                                 <Button fx:id="checkout" styleClass="btn-primary" mnemonicParsing="false"
                                         onAction="#openCheckout" prefHeight="45.0" prefWidth="240.0"
                                         text="Checkout"/>
@@ -354,11 +361,28 @@
                             </children>
                         </VBox>
 
-                        <!-- Inbox -->
-                        <VBox layoutX="10.0" layoutY="650.0" spacing="5.0" prefWidth="180.0" visible="false">
+                        <!-- Account & Tools -->
+                        <VBox layoutX="10.0" layoutY="600.0" spacing="8.0" prefWidth="180.0">
                             <children>
+                                <Text text="Account & Tools" strokeType="OUTSIDE" fill="#333">
+                                    <font><Font name="System Bold" size="14.0"/></font>
+                                </Text>
+                                <Button fx:id="viewMyOrders" mnemonicParsing="false"
+                                        onAction="#openMyOrders" prefWidth="180.0" text="My Orders"/>
+                                <Button fx:id="viewMyComplaints" mnemonicParsing="false"
+                                        onAction="#openMyComplaints" prefWidth="180.0" text="My Complaints"/>
                                 <Button fx:id="viewInboxPlz" mnemonicParsing="false"
                                         onAction="#openInbox" prefWidth="180.0" text="Inbox"/>
+                                <Button fx:id="openComplaints" mnemonicParsing="false"
+                                        onAction="#ReplyToComplaints" prefWidth="180.0" text="Handle Complaints"/>
+                                <Button fx:id="deliveryButton" mnemonicParsing="false"
+                                        onAction="#openDelivery" prefWidth="180.0" text="Deliveries"/>
+                                <Button fx:id="adminControlButtton" mnemonicParsing="false"
+                                        onAction="#openControlPanel" prefWidth="180.0" text="Admin Control"/>
+                                <Button fx:id="infoo" mnemonicParsing="false"
+                                        onAction="#openComplaintManager" prefWidth="180.0" text="Manager Reports"/>
+                                <Button fx:id="logout" mnemonicParsing="false"
+                                        onAction="#goLogOut" prefWidth="180.0" text="Logout"/>
                             </children>
                         </VBox>
 
