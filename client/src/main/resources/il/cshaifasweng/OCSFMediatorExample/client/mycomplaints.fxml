@@ -113,7 +113,7 @@
                   </font>
                </Text>
                <TextArea fx:id="complaintText" prefHeight="250.0" prefWidth="500.0" promptText="Enter your complaint here..." wrapText="true" />
-               <Button fx:id="submitComplaint" mnemonicParsing="false" onAction="#submitComplaint" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Submit Complaint" />
+               <Button fx:id="submitComplaint" mnemonicParsing="false" onAction="#submitComplaint" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Submit Complaint" />
             </VBox>
 
             <!-- Status Information -->
@@ -129,12 +129,7 @@
                </Text>
             </VBox>
 
-            <!-- Loading Indicator -->
-            <Label fx:id="wait" layoutX="400.0" layoutY="300.0" text="Please Wait" textFill="#3498db" visible="false">
-               <font>
-                  <Font size="72.0" />
-               </font>
-            </Label>
+
          </children>
       </AnchorPane>
    </children>
