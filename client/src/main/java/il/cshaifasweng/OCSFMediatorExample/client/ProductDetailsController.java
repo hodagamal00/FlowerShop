@@ -76,16 +76,8 @@ public class ProductDetailsController {
         colorLabel.setText(product.getColor() != null ? product.getColor() : "Mixed");
         descriptionText.setText(product.getDetails() != null ? product.getDetails() : "No description available");
 
-        // Load product image
-        if (product.getImage() != null && !product.getImage().isEmpty()) {
-            try {
-                Image img = new Image(getClass().getResourceAsStream(product.getImage()));
-                productImage.setImage(img);
-            } catch (Exception e) {
-                System.out.println("Could not load product image: " + product.getImage());
-                // Use placeholder if image not found
-            }
-        }
+        // Load product image (or fallback to placeholder)
+        setProductImage(product);
 
         // Handle pricing
         if (product.isCustomProduct()) {
@@ -236,6 +228,28 @@ public class ProductDetailsController {
         Stage stage = getCurrentStage();
         if (stage != null) {
             stage.close();
+        }
+    }
+
+    private void setProductImage(Product product) {
+        Image image = null;
+        String imagePath = product.getImage();
+        if (imagePath != null && !imagePath.isEmpty()) {
+            try {
+                image = new Image(getClass().getResourceAsStream(imagePath));
+            } catch (Exception e) {
+                System.out.println("Could not load product image: " + imagePath);
+            }
+        }
+        if (image == null) {
+            try {
+                image = new Image(getClass().getResourceAsStream("placeholder.png"));
+            } catch (Exception e) {
+                System.out.println("Placeholder image not found.");
+            }
+        }
+        if (image != null && productImage != null) {
+            productImage.setImage(image);
         }
     }
 
