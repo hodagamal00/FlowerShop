@@ -364,8 +364,7 @@
                         <!-- Account & Tools -->
                         <VBox layoutX="10.0" layoutY="600.0" spacing="8.0" prefWidth="180.0">
                             <children>
-                                <Text text="Account & Tools" strokeType="OUTSIDE" fill="#333">
-                                    <font><Font name="System Bold" size="14.0"/></font>
+                                <Text text="Account &amp; Tools" strokeType="OUTSIDE" fill="#333">                                    <font><Font name="System Bold" size="14.0"/></font>
                                 </Text>
                                 <Button fx:id="viewMyOrders" mnemonicParsing="false"
                                         onAction="#openMyOrders" prefWidth="180.0" text="My Orders"/>
