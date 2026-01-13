@@ -61,6 +61,12 @@
 
                                         <!-- SKU -->
                                         <HBox spacing="10.0">
+                                            <Label text="ID:" styleClass="label-bold" />
+                                            <Label fx:id="idLabel" text="0" />
+                                        </HBox>
+
+                                        <!-- SKU -->
+                                        <HBox spacing="10.0">
                                             <Label text="SKU:" styleClass="label-bold" />
                                             <Label fx:id="skuLabel" text="SKU-12345" />
                                         </HBox>
