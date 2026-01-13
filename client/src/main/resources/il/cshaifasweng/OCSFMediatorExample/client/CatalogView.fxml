@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController"
+            styleClass="page">
+
+    <top>
+        <VBox spacing="10" BorderPane.alignment="CENTER" styleClass="page-header">
+            <Label text="Catalog" styleClass="page-title"/>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Label text="Filters:" styleClass="form-label"/>
+                <ComboBox fx:id="categoryFilter" promptText="Category" prefWidth="160"/>
+                <ComboBox fx:id="colorFilter" promptText="Color" prefWidth="140"/>
+                <ComboBox fx:id="priceFilter" promptText="Price Range" prefWidth="160"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Clear" onAction="#clearFilters" styleClass="btn-outline"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <left>
+        <VBox spacing="12" prefWidth="300" BorderPane.alignment="TOP_LEFT"
+              styleClass="card" BorderPane.margin="10">
+            <Label text="Shopping Cart" styleClass="section-title"/>
+            <ListView fx:id="CartItemsList" VBox.vgrow="ALWAYS"/>
+            <Separator/>
+            <GridPane hgap="8" vgap="8">
+                <Label text="Subtotal:"/>
+                <TextField fx:id="cartTextDiscount" editable="false" GridPane.columnIndex="1"/>
+                <Label text="Total:" GridPane.rowIndex="1"/>
+                <TextField fx:id="cartTextPrice" editable="false" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            </GridPane>
+            <Button fx:id="checkout" text="Checkout" onAction="#openCheckout" styleClass="btn-primary"/>
+            <Button fx:id="viewCart" text="View Full Cart" onAction="#viewUserCart" styleClass="btn-secondary"/>
+        </VBox>
+    </left>
+
+    <center>
+        <ScrollPane fitToWidth="true" pannable="true" BorderPane.margin="10"
+                    styleClass="app-scroll-container">
+            <content>
+                <TilePane fx:id="productsTile"
+                          prefColumns="3"
+                          hgap="18" vgap="18"
+                          padding="10"
+                          tileAlignment="TOP_LEFT"/>
+            </content>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
