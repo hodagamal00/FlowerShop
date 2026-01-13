@@ -18,8 +18,10 @@ public class ProductDetailsController {
 
     @FXML private Button backToCatalogBtn;
     @FXML private Button viewCartBtn;
+    @FXML private Button closeBtn;
     @FXML private ImageView productImage;
     @FXML private Text productNameText;
+    @FXML private Label idLabel;
     @FXML private Label skuLabel;
     @FXML private Label categoryLabel;
     @FXML private Label colorLabel;
@@ -39,26 +41,24 @@ public class ProductDetailsController {
     @FXML private Label errorMessage;
 
     private Product currentProduct;
-    private static Product selectedProduct;
+    private Product selectedProduct;
 
     @FXML
     void initialize() {
         // Initialize quantity spinner
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
         quantitySpinner.setValueFactory(valueFactory);
-
-        // Load product details if a product was selected
-        if (selectedProduct != null) {
-            loadProductDetails(selectedProduct);
-        }
     }
 
     /**
-     * Static method to set the product to display
-     * Call this before loading the ProductDetails.fxml scene
+     * Instance method to set the product to display
+     * Call this after loading the ProductDetails.fxml scene
      */
-    public static void setProduct(Product product) {
+    public void setProduct(Product product) {
         selectedProduct = product;
+        if (selectedProduct != null) {
+            loadProductDetails(selectedProduct);
+        }
     }
 
     /**
@@ -69,6 +69,7 @@ public class ProductDetailsController {
 
         // Basic information
         productNameText.setText(product.getName());
+        idLabel.setText(String.valueOf(product.getID()));
         skuLabel.setText(product.getSku() != null ? product.getSku() : "N/A");
         categoryLabel.setText(product.getCategory() != null ? product.getCategory() : "General");
         colorLabel.setText(product.getColor() != null ? product.getColor() : "Mixed");
@@ -215,5 +216,14 @@ public class ProductDetailsController {
             e.printStackTrace();
             System.err.println("Error loading catalog page: " + e.getMessage());
         }
+    }
+
+    @FXML
+    void closeModal() {
+        if (closeBtn == null) {
+            return;
+        }
+        Stage stage = (Stage) closeBtn.getScene().getWindow();
+        stage.close();
     }
 }

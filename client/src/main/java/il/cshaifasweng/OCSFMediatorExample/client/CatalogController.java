@@ -12,12 +12,22 @@ import java.net.URL;
 import java.util.*;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+// Added for detailed product navigation
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -79,7 +89,7 @@ public class CatalogController {
 	private VBox container6;
 
 	@FXML
-	private VBox init_container;
+	private AnchorPane init_container;
 
 	@FXML // fx:id="EditItemDesc"
 	private TextField EditItemDesc; // Value injected by FXMLLoader
@@ -1391,32 +1401,70 @@ public class CatalogController {
 	static List<Product> allProducts = new ArrayList<>();
 
 	/**
-	 * Handle clicks on a product image in the catalog.  When a user clicks a product
-	 * image, this method determines which {@link Product} was clicked based on the
-	 * ImageView’s fx:id and opens the detailed product page.  The detailed page
-	 * (ProductDetails.fxml) displays additional fields such as SKU, category and
-	 * colour and allows the user to add multiple quantities or customise the
-	 * order.  This replaces the previous behaviour, which always navigated to
-	 * `secondary.fxml` (an admin editing form) regardless of the user’s role.
+	 * Handle clicks on a product card in the catalog.  When a user clicks a product
+	 * card, this method determines which {@link Product} was clicked based on the
+	 * container’s fx:id and opens a modal with detailed product information.
 	 */
 	@FXML
-	void product_clicked(javafx.scene.input.MouseEvent event) throws IOException {
-		// Determine which ImageView triggered the event.  Each Product stores the
-		// fx:id of its corresponding image in the `button` field.  When the
-		// ImageView is clicked, we retrieve its id and find the matching product.
-		String clickedId = ((ImageView) event.getSource()).getId();
-		Product selected = null;
-		for (Product p : allProducts) {
-			if (p.getButton() != null && p.getButton().equals(clickedId)) {
-				selected = p;
-				break;
-			}
+	void productCardClicked(MouseEvent event) {
+		if (event.getTarget() instanceof Button) {
+			return;
 		}
-		// If a matching product is found, load the detailed view and pass the
-		// product to the controller.  Otherwise, simply return.
+
+		String containerId = ((VBox) event.getSource()).getId();
+		Product selected = getProductForContainer(containerId);
 		if (selected != null) {
-			ProductDetailsController.setProduct(selected);
-			App.setRoot("ProductDetails");
+			openProductDetailsModal(selected);
+		}
+	}
+
+	private Product getProductForContainer(String containerId) {
+		int offset;
+		switch (containerId) {
+			case "container1":
+				offset = 0;
+				break;
+			case "container2":
+				offset = 1;
+				break;
+			case "container3":
+				offset = 2;
+				break;
+			case "container4":
+				offset = 3;
+				break;
+			case "container5":
+				offset = 4;
+				break;
+			case "container6":
+				offset = 5;
+				break;
+			default:
+				return null;
+		}
+
+		int productIndex = CatalogSTARTIndex + offset;
+		if (productIndex < 0 || productIndex >= allProducts.size()) {
+			return null;
+		}
+		return allProducts.get(productIndex);
+	}
+
+	private void openProductDetailsModal(Product product) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("ProductDetailsModal.fxml"));
+			Parent root = loader.load();
+			ProductDetailsController controller = loader.getController();
+			controller.setProduct(product);
+
+			Stage stage = new Stage();
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.setTitle(product.getName());
+			stage.setScene(new Scene(root));
+			stage.setResizable(false);
+			stage.showAndWait();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

@@ -86,12 +86,12 @@
                             <TilePane hgap="24.0" vgap="24.0" prefColumns="3" styleClass="catalog-product-grid">
                                 <children>
                                     <VBox styleClass="product-card" fx:id="container1" alignment="TOP_CENTER"
+                                          onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
                                             <StackPane prefHeight="200.0">
                                                 <children>
                                                     <ImageView fx:id="flower_button1" fitHeight="180.0" fitWidth="220.0"
-                                                               onMouseClicked="#product_clicked" pickOnBounds="true"
                                                                preserveRatio="true" styleClass="imgg">
                                                         <image><Image url="@../../../../images/flower2.jpg"/></image>
                                                     </ImageView>
@@ -114,12 +114,12 @@
                                     </VBox>
 
                                     <VBox styleClass="product-card" fx:id="container2" alignment="TOP_CENTER"
+                                          onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
                                             <StackPane prefHeight="200.0">
                                                 <children>
                                                     <ImageView fx:id="flower_button2" fitHeight="180.0" fitWidth="220.0"
-                                                               onMouseClicked="#product_clicked" pickOnBounds="true"
                                                                preserveRatio="true" styleClass="imgg">
                                                         <image><Image url="@../../../../images/flower1.jpg"/></image>
                                                     </ImageView>
@@ -142,12 +142,12 @@
                                     </VBox>
 
                                     <VBox styleClass="product-card" fx:id="container3" alignment="TOP_CENTER"
+                                          onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
                                             <StackPane prefHeight="200.0">
                                                 <children>
                                                     <ImageView fx:id="flower_button3" fitHeight="180.0" fitWidth="220.0"
-                                                               onMouseClicked="#product_clicked" pickOnBounds="true"
                                                                preserveRatio="true" styleClass="imgg">
                                                         <image><Image url="@../../../../images/flower4.jpg"/></image>
                                                     </ImageView>
@@ -170,12 +170,12 @@
                                     </VBox>
 
                                     <VBox styleClass="product-card" fx:id="container4" alignment="TOP_CENTER"
+                                          onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
                                             <StackPane prefHeight="200.0">
                                                 <children>
                                                     <ImageView fx:id="flower_button4" fitHeight="180.0" fitWidth="220.0"
-                                                               onMouseClicked="#product_clicked" pickOnBounds="true"
                                                                preserveRatio="true" styleClass="imgg">
                                                         <image><Image url="@../../../../images/flower3.jpg"/></image>
                                                     </ImageView>
@@ -198,12 +198,12 @@
                                     </VBox>
 
                                     <VBox styleClass="product-card" fx:id="container5" alignment="TOP_CENTER"
+                                          onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
                                             <StackPane prefHeight="200.0">
                                                 <children>
                                                     <ImageView fx:id="flower_button5" fitHeight="180.0" fitWidth="220.0"
-                                                               onMouseClicked="#product_clicked" pickOnBounds="true"
                                                                preserveRatio="true" styleClass="imgg">
                                                         <image><Image url="@../../../../images/flower6.jpg"/></image>
                                                     </ImageView>
@@ -226,12 +226,12 @@
                                     </VBox>
 
                                     <VBox styleClass="product-card" fx:id="container6" alignment="TOP_CENTER"
+                                          onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
                                             <StackPane prefHeight="200.0">
                                                 <children>
                                                     <ImageView fx:id="flower_button6" fitHeight="180.0" fitWidth="220.0"
-                                                               onMouseClicked="#product_clicked" pickOnBounds="true"
                                                                preserveRatio="true" styleClass="imgg">
                                                         <image><Image url="@../../../../images/flower5.jpg"/></image>
                                                     </ImageView>
