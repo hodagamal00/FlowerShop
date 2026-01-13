@@ -228,11 +228,18 @@
 }
 
 /* Navigation links */
-nav-bar {
+.nav-bar {
     -fx-padding: 0 12 6 12;
     -fx-border-color: -fx-border;
     -fx-border-width: 1 0 0 0;
     -fx-background-color: transparent;
+}
+
+.top-nav {
+    -fx-padding: 0 10 0 10;
+    -fx-border-width: 0;
+    -fx-pref-height: 40px;
+    -fx-alignment: center-left;
 }
 
 .nav-link {

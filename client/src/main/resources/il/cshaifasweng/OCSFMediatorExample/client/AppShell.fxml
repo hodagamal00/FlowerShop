@@ -29,8 +29,9 @@
                     <Label text="Lilach" styleClass="brand-title" />
                     <Label text="Flower Shop" styleClass="brand-tagline" />
                 </HBox>
-                <TextField fx:id="searchField" promptText="Search bouquets or gifts" maxWidth="340.0" styleClass="text-field" HBox.hgrow="ALWAYS" />
-                <HBox spacing="10.0" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+                <TextField fx:id="searchField" promptText="Search bouquets or gifts" maxWidth="320.0" prefWidth="260.0" styleClass="text-field" />
+                <FlowPane fx:id="navBar" hgap="8.0" vgap="10.0" orientation="HORIZONTAL" styleClass="nav-bar top-nav" HBox.hgrow="ALWAYS" />
+                <HBox spacing="10.0" alignment="CENTER_RIGHT">
                     <VBox fx:id="profileContainer" alignment="CENTER_RIGHT" spacing="4.0" visible="false" managed="false">
                         <Label fx:id="profileNameLabel" styleClass="profile-label" />
                         <Button fx:id="profileButton" text="Profile" styleClass="btn-secondary" />
@@ -39,16 +40,8 @@
                     <Button fx:id="cartButton" text="Cart (0)" styleClass="btn-secondary" />
                 </HBox>
             </HBox>
-            <HBox spacing="10.0" alignment="CENTER_LEFT">
-                <Label text="Browse" styleClass="nav-section-title" />
-            </HBox>
         </VBox>
     </top>
-    <left>
-        <VBox styleClass="side-nav" spacing="12.0" prefWidth="200.0" BorderPane.alignment="CENTER_LEFT">
-            <FlowPane fx:id="navBar" hgap="8.0" vgap="10.0" prefWrapLength="180.0" orientation="VERTICAL" styleClass="nav-bar" />
-        </VBox>
-    </left>
     <center>
         <StackPane fx:id="contentPane" styleClass="content-area" />
     </center>
