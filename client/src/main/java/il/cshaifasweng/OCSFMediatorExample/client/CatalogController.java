@@ -12,15 +12,11 @@ import java.net.URL;
 import java.util.*;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-// Added for detailed product navigation
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -83,7 +79,7 @@ public class CatalogController {
 	private VBox container6;
 
 	@FXML
-	private AnchorPane init_container;
+	private VBox init_container;
 
 	@FXML // fx:id="EditItemDesc"
 	private TextField EditItemDesc; // Value injected by FXMLLoader
