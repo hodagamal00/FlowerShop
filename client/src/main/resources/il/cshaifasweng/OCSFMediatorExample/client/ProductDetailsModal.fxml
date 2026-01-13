@@ -18,11 +18,11 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ProductDetailsController"
-            stylesheets="@mycsss.css"
+            stylesheets="@styles.css"
             prefWidth="980.0" prefHeight="720.0"
-            style="-fx-background-color: #faf8fc;">
+            styleClass="product-details-surface">
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="card" style="-fx-background-color: white; -fx-padding: 16 20; -fx-background-radius: 12;">
+        <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="card modal-header">
             <Text text="Product Details" styleClass="card-header" />
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="closeBtn" text="Close" styleClass="btn-outline" onAction="#closeModal" />
@@ -64,7 +64,7 @@
                         <Label fx:id="colorLabel" text="Red" />
                     </HBox>
 
-                    <VBox spacing="8.0" styleClass="card" style="-fx-padding: 16; -fx-background-color: #f3e5f5; -fx-border-radius: 8; -fx-background-radius: 8;">
+                    <VBox spacing="8.0" styleClass="card product-details-price-card">
                         <HBox spacing="12.0" alignment="CENTER_LEFT">
                             <Text fx:id="originalPriceText" text="$49.99" strikethrough="true" fill="#7b1fa2" visible="false">
                                 <font>
@@ -76,17 +76,17 @@
                                     <Font name="System Bold" size="26.0" />
                                 </font>
                             </Text>
-                            <Label fx:id="discountBadge" text="20% OFF" styleClass="badge-success" visible="false" style="-fx-background-color: #81c784; -fx-text-fill: white; -fx-padding: 4 8; -fx-background-radius: 5;" />
+                            <Label fx:id="discountBadge" text="20% OFF" styleClass="badge badge-success discount-badge" visible="false" />
                         </HBox>
-                        <Label fx:id="priceRangeLabel" text="Price Range: $30 - $100" visible="false" style="-fx-text-fill: #7b1fa2;" />
+                        <Label fx:id="priceRangeLabel" text="Price Range: $30 - $100" visible="false" styleClass="price-range-label" />
                     </VBox>
 
                     <VBox spacing="8.0">
                         <Label text="Description:" styleClass="label-bold" />
-                        <Text fx:id="descriptionText" text="Beautiful fresh flowers arranged with care..." wrappingWidth="460.0" style="-fx-fill: #212121;" />
+                        <Text fx:id="descriptionText" text="Beautiful fresh flowers arranged with care..." wrappingWidth="460.0" styleClass="product-description" />
                     </VBox>
 
-                    <VBox fx:id="customOptionsContainer" spacing="12.0" visible="false" managed="false" styleClass="card" style="-fx-padding: 16; -fx-background-color: #e1bee7; -fx-border-radius: 8; -fx-background-radius: 8;">
+                    <VBox fx:id="customOptionsContainer" spacing="12.0" visible="false" managed="false" styleClass="card product-details-custom-card">
                         <Label text="Customize Your Order:" styleClass="label-bold" />
                         <HBox spacing="10.0" alignment="CENTER_LEFT">
                             <Label text="Color Preference:" />
