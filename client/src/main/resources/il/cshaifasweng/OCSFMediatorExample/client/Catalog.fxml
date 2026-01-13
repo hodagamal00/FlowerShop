@@ -22,7 +22,7 @@
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController"
-            stylesheets="@mycsss.css"
+            stylesheets="@styles.css"
             styleClass="catalog-root">
     <top>
         <HBox alignment="CENTER_LEFT" styleClass="page-header" spacing="12.0">
