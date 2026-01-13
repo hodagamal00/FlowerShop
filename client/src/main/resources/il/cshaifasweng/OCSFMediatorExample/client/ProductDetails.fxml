@@ -86,12 +86,12 @@
                                         <!-- Price Section -->
                                         <VBox spacing="10.0" styleClass="card product-details-price-card">
                                             <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                                <Text fx:id="originalPriceText" text="$49.99" strikethrough="true" fill="#7b1fa2" visible="false">
+                                                <Text fx:id="originalPriceText" text="\\$49.99" strikethrough="true" fill="#7b1fa2" visible="false">
                                                     <font>
                                                         <Font size="20.0" />
                                                     </font>
                                                 </Text>
-                                                <Text fx:id="priceText" text="$39.99" fill="#4a148c">
+                                                <Text fx:id="priceText" text="\\$39.99" fill="#4a148c">
                                                     <font>
                                                         <Font name="System Bold" size="32.0" />
                                                     </font>

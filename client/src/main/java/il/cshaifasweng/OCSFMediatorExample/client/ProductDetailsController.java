@@ -45,9 +45,10 @@ public class ProductDetailsController {
 
     @FXML
     void initialize() {
-        // Initialize quantity spinner
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
-        quantitySpinner.setValueFactory(valueFactory);
+        if (quantitySpinner != null) {
+            SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
+            quantitySpinner.setValueFactory(valueFactory);
+        }
     }
 
     /**
@@ -121,6 +122,12 @@ public class ProductDetailsController {
         successMessage.setVisible(false);
         errorMessage.setVisible(false);
 
+        if (currentProduct == null) {
+            errorMessage.setText("Product details are not available.");
+            errorMessage.setVisible(true);
+            return;
+        }
+
         // Check if user is logged in
         if (SimpleClient.getAccount() == null) {
             errorMessage.setText("Please login to add items to cart");
@@ -193,7 +200,10 @@ public class ProductDetailsController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) viewCartBtn.getScene().getWindow();
+            Stage stage = getCurrentStage();
+            if (stage == null) {
+                return;
+            }
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -208,7 +218,10 @@ public class ProductDetailsController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) backToCatalogBtn.getScene().getWindow();
+            Stage stage = getCurrentStage();
+            if (stage == null) {
+                return;
+            }
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -220,10 +233,25 @@ public class ProductDetailsController {
 
     @FXML
     void closeModal() {
-        if (closeBtn == null) {
-            return;
+        Stage stage = getCurrentStage();
+        if (stage != null) {
+            stage.close();
         }
-        Stage stage = (Stage) closeBtn.getScene().getWindow();
-        stage.close();
+    }
+
+    private Stage getCurrentStage() {
+        if (closeBtn != null && closeBtn.getScene() != null) {
+            return (Stage) closeBtn.getScene().getWindow();
+        }
+        if (viewCartBtn != null && viewCartBtn.getScene() != null) {
+            return (Stage) viewCartBtn.getScene().getWindow();
+        }
+        if (backToCatalogBtn != null && backToCatalogBtn.getScene() != null) {
+            return (Stage) backToCatalogBtn.getScene().getWindow();
+        }
+        if (priceText != null && priceText.getScene() != null) {
+            return (Stage) priceText.getScene().getWindow();
+        }
+        return null;
     }
 }
