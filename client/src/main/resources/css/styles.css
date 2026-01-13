@@ -235,6 +235,13 @@ nav-bar {
     -fx-background-color: transparent;
 }
 
+.top-nav {
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-pref-height: 40px;
+    -fx-alignment: center-left;
+}
+
 .nav-link {
     -fx-text-fill: -fx-secondary;
     -fx-font-weight: 600;
