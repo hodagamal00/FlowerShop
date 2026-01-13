@@ -30,8 +30,8 @@
                     <Label text="Lilach" styleClass="brand-title" />
                     <Label text="Flower Shop" styleClass="brand-tagline" />
                 </HBox>
-                <TextField fx:id="searchField" promptText="Search bouquets or gifts" maxWidth="340.0" styleClass="text-field" />
-                <FlowPane fx:id="navBar" hgap="8.0" vgap="10.0" orientation="HORIZONTAL" styleClass="nav-bar top-nav" HBox.hgrow="ALWAYS" />
+                <TextField fx:id="searchField" promptText="Search bouquets or gifts" maxWidth="340.0" styleClass="text-field" HBox.hgrow="ALWAYS" />
+                <FlowPane fx:id="navBar" hgap="8.0" vgap="10.0" orientation="HORIZONTAL" styleClass="nav-bar top-nav" />
                 <Region HBox.hgrow="ALWAYS" />
                 <HBox spacing="10.0" alignment="CENTER_RIGHT">
                     <VBox fx:id="profileContainer" alignment="CENTER_RIGHT" spacing="4.0" visible="false" managed="false">
