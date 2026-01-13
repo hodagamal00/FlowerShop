@@ -89,7 +89,7 @@ public class CatalogController {
 	private VBox container6;
 
 	@FXML
-	private AnchorPane init_container;
+	private VBox init_container;
 
 	@FXML // fx:id="EditItemDesc"
 	private TextField EditItemDesc; // Value injected by FXMLLoader
