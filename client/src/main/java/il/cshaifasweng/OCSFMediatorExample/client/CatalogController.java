@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 
 // Removed unused AWT imports.  Including AWT packages alongside JavaFX
 // introduces ambiguous references for classes like Button and List.  This
@@ -16,7 +17,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.TilePane;
 import javafx.scene.text.Text;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -80,6 +83,9 @@ public class CatalogController {
 
 	@FXML
 	private VBox init_container;
+
+	@FXML
+	private TilePane productsTile;
 
 	@FXML // fx:id="EditItemDesc"
 	private TextField EditItemDesc; // Value injected by FXMLLoader
@@ -495,6 +501,33 @@ public class CatalogController {
 		cartTextPrice.setText(String.valueOf(basePrice));
 
 		// الخصم: 10% فقط إذا مشترك والمجموع أكبر من 50₪
+		if (currentLoggedAccount != null
+				&& currentLoggedAccount.isSubscription()
+				&& basePrice > 50) {
+			cartTextDiscount.setText(String.valueOf((int)(basePrice * 0.9)));
+		} else {
+			cartTextDiscount.setText(String.valueOf(basePrice));
+		}
+	}
+
+	private void addToCart(Product product) {
+		if (product == null) {
+			return;
+		}
+
+		int basePrice = 0;
+		if (!cartTextPrice.getText().isEmpty()) {
+			basePrice = Integer.parseInt(cartTextPrice.getText());
+		}
+
+		int addedPrice = (int) Math.round(product.getPrice());
+		basePrice += addedPrice;
+
+		CartItemsList.getItems().add(product.getName());
+		userCart.add(product);
+
+		cartTextPrice.setText(String.valueOf(basePrice));
+
 		if (currentLoggedAccount != null
 				&& currentLoggedAccount.isSubscription()
 				&& basePrice > 50) {
@@ -1242,6 +1275,11 @@ public class CatalogController {
 	int updateFieldsBounds = 0;
 	public void updateFields(int mode)
 	{
+		if (productsTile != null) {
+			renderProductTiles(allProducts);
+			return;
+		}
+
 		System.out.println("START INDEX = " + CatalogSTARTIndex);
 		System.out.println("END INDEX = " + CatalogENDIndex);
 		System.out.println("Length = " + allProducts.size());
@@ -1479,27 +1517,29 @@ public class CatalogController {
 
 		System.out.println("arrived to initialize 1");
 		EventBus.getDefault().register(this);
-		assert flower_button1 != null : "fx:id=\"flower_button1\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_button2 != null : "fx:id=\"flower_button2\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_button3 != null : "fx:id=\"flower_button3\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_button4 != null : "fx:id=\"flower_button4\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_button5 != null : "fx:id=\"flower_button5\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_button6 != null : "fx:id=\"flower_button6\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_name1 != null : "fx:id=\"flower_name1\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_name2 != null : "fx:id=\"flower_name2\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_name3 != null : "fx:id=\"flower_name3\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_name4 != null : "fx:id=\"flower_name4\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_name5 != null : "fx:id=\"flower_name5\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_name6 != null : "fx:id=\"flower_name6\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_price1 != null : "fx:id=\"flower_price1\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_price2 != null : "fx:id=\"flower_price2\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_price3 != null : "fx:id=\"flower_price3\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_price4 != null : "fx:id=\"flower_price4\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_price5 != null : "fx:id=\"flower_price5\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert flower_price6 != null : "fx:id=\"flower_price6\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
+		if (productsTile == null) {
+			assert flower_button1 != null : "fx:id=\"flower_button1\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_button2 != null : "fx:id=\"flower_button2\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_button3 != null : "fx:id=\"flower_button3\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_button4 != null : "fx:id=\"flower_button4\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_button5 != null : "fx:id=\"flower_button5\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_button6 != null : "fx:id=\"flower_button6\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_name1 != null : "fx:id=\"flower_name1\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_name2 != null : "fx:id=\"flower_name2\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_name3 != null : "fx:id=\"flower_name3\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_name4 != null : "fx:id=\"flower_name4\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_name5 != null : "fx:id=\"flower_name5\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_name6 != null : "fx:id=\"flower_name6\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_price1 != null : "fx:id=\"flower_price1\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_price2 != null : "fx:id=\"flower_price2\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_price3 != null : "fx:id=\"flower_price3\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_price4 != null : "fx:id=\"flower_price4\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_price5 != null : "fx:id=\"flower_price5\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert flower_price6 != null : "fx:id=\"flower_price6\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
+			assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
+		}
 
 		customError.setVisible(false);
 		messageField.setVisible(false);
@@ -1664,15 +1704,17 @@ public class CatalogController {
 		if (returnedFromSecondaryController) {
 			updateFields(0);
 		}
-		init_container.setVisible(true);
-		new java.util.Timer().schedule(
-				new java.util.TimerTask() {
-					@Override
-					public void run() {
-						justButton.setVisible(true);
-					}
-				},5000
-		);
+		if (init_container != null) {
+			init_container.setVisible(true);
+			new java.util.Timer().schedule(
+					new java.util.TimerTask() {
+						@Override
+						public void run() {
+							justButton.setVisible(true);
+						}
+					},5000
+			);
+		}
 		System.out.println("PRINTING FLAG");
 		System.out.println(CatalogFlag.getFlagg());
 		cartTextPrice.setText("0");
@@ -1684,6 +1726,47 @@ public class CatalogController {
 		openMessage.setVisible(false);
 		applyPrivilegeBasedUI();
 
+	}
+
+	private VBox createProductCard(Product product) {
+		ImageView imgView = new ImageView();
+		if (product.getImage() != null && !product.getImage().isEmpty()) {
+			try {
+				Image img = new Image(getClass().getResourceAsStream(product.getImage()));
+				imgView.setImage(img);
+			} catch (Exception e) {
+				System.out.println("Could not load product image: " + product.getImage());
+			}
+		}
+		imgView.setFitHeight(180);
+		imgView.setPreserveRatio(true);
+
+		Label name = new Label(product.getName());
+		name.getStyleClass().add("strong");
+
+		Label price = new Label(product.getPrice() + "₪");
+		price.getStyleClass().add("badge");
+
+		Button add = new Button("Add to Cart");
+		add.getStyleClass().add("btn-primary");
+		add.setOnAction(event -> addToCart(product));
+
+		VBox card = new VBox(10, imgView, name, price, add);
+		card.getStyleClass().addAll("product-card", "hover-lift");
+		card.setPadding(new Insets(12));
+		card.setPrefWidth(260);
+
+		return card;
+	}
+
+	private void renderProductTiles(List<Product> products) {
+		if (productsTile == null) {
+			return;
+		}
+		productsTile.getChildren().clear();
+		for (Product product : products) {
+			productsTile.getChildren().add(createProductCard(product));
+		}
 	}
 
 
@@ -1702,6 +1785,9 @@ public class CatalogController {
 		System.out.println("arrived to the update GUI  event");
 		allProducts = upEvent.getRecievedList();
 		availableProducts = true;
+		if (productsTile != null) {
+			Platform.runLater(this::applyFilters);
+		}
 	}
 	@Subscribe
 	public void complaintEvent(PassAllComplaintsEvent allComps){ // added new 21/7
@@ -1757,6 +1843,9 @@ public class CatalogController {
 			System.out.println(rtEvent.getRecievedList().get(i).getButton());
 		}
 		allProducts = rtEvent.getRecievedList();
+		if (productsTile != null) {
+			Platform.runLater(this::applyFilters);
+		}
 
 
 	}
@@ -1908,31 +1997,22 @@ public class CatalogController {
 		String selectedColor    = (colorFilter != null && colorFilter.getValue() != null) ? colorFilter.getValue() : "All";
 		String selectedPrice    = (priceFilter != null && priceFilter.getValue() != null) ? priceFilter.getValue() : "All";
 
+		List<Product> filteredProducts = new ArrayList<>();
+		for (Product p : allProducts) {
+			boolean visible = matchesFilters(p, selectedCategory, selectedColor, selectedPrice);
+			if (visible) {
+				filteredProducts.add(p);
+			}
+		}
+
+		if (productsTile != null) {
+			renderProductTiles(filteredProducts);
+			return;
+		}
+
 		for (int i = 0; i < allProducts.size() && i < 6; i++) {
 			Product p = allProducts.get(i);
-			boolean visible = true;
-			// Category filter
-			if (!"All".equals(selectedCategory) && p.getCategory() != null && !selectedCategory.equalsIgnoreCase(p.getCategory())) {
-				visible = false;
-			}
-			// Colour filter
-			if (!"All".equals(selectedColor) && p.getColor() != null && !selectedColor.equalsIgnoreCase(p.getColor())) {
-				visible = false;
-			}
-			// Price filter
-			if (!"All".equals(selectedPrice)) {
-				double price = p.getPrice();
-				try {
-					String[] parts = selectedPrice.split("-");
-					double min = Double.parseDouble(parts[0]);
-					double max = Double.parseDouble(parts[1]);
-					if (price < min || price > max) {
-						visible = false;
-					}
-				} catch (Exception e) {
-					// Ignore malformed price range
-				}
-			}
+			boolean visible = matchesFilters(p, selectedCategory, selectedColor, selectedPrice);
 			// Update visibility for this product index
 			switch (i) {
 				case 0:
@@ -1955,6 +2035,32 @@ public class CatalogController {
 					break;
 			}
 		}
+	}
+
+	private boolean matchesFilters(Product product, String selectedCategory, String selectedColor, String selectedPrice) {
+		boolean visible = true;
+		if (!"All".equals(selectedCategory) && product.getCategory() != null
+				&& !selectedCategory.equalsIgnoreCase(product.getCategory())) {
+			visible = false;
+		}
+		if (!"All".equals(selectedColor) && product.getColor() != null
+				&& !selectedColor.equalsIgnoreCase(product.getColor())) {
+			visible = false;
+		}
+		if (!"All".equals(selectedPrice)) {
+			double price = product.getPrice();
+			try {
+				String[] parts = selectedPrice.split("-");
+				double min = Double.parseDouble(parts[0]);
+				double max = Double.parseDouble(parts[1]);
+				if (price < min || price > max) {
+					visible = false;
+				}
+			} catch (Exception e) {
+				// Ignore malformed price range
+			}
+		}
+		return visible;
 	}
 
 
