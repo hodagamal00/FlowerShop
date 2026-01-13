@@ -45,9 +45,10 @@ public class ProductDetailsController {
 
     @FXML
     void initialize() {
-        // Initialize quantity spinner
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
-        quantitySpinner.setValueFactory(valueFactory);
+        if (quantitySpinner != null) {
+            SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
+            quantitySpinner.setValueFactory(valueFactory);
+        }
     }
 
     /**
@@ -75,16 +76,8 @@ public class ProductDetailsController {
         colorLabel.setText(product.getColor() != null ? product.getColor() : "Mixed");
         descriptionText.setText(product.getDetails() != null ? product.getDetails() : "No description available");
 
-        // Load product image
-        if (product.getImage() != null && !product.getImage().isEmpty()) {
-            try {
-                Image img = new Image(getClass().getResourceAsStream(product.getImage()));
-                productImage.setImage(img);
-            } catch (Exception e) {
-                System.out.println("Could not load product image: " + product.getImage());
-                // Use placeholder if image not found
-            }
-        }
+        // Load product image (or fallback to placeholder)
+        setProductImage(product);
 
         // Handle pricing
         if (product.isCustomProduct()) {
@@ -120,6 +113,12 @@ public class ProductDetailsController {
         // Hide previous messages
         successMessage.setVisible(false);
         errorMessage.setVisible(false);
+
+        if (currentProduct == null) {
+            errorMessage.setText("Product details are not available.");
+            errorMessage.setVisible(true);
+            return;
+        }
 
         // Check if user is logged in
         if (SimpleClient.getAccount() == null) {
@@ -193,7 +192,10 @@ public class ProductDetailsController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) viewCartBtn.getScene().getWindow();
+            Stage stage = getCurrentStage();
+            if (stage == null) {
+                return;
+            }
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -208,7 +210,10 @@ public class ProductDetailsController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) backToCatalogBtn.getScene().getWindow();
+            Stage stage = getCurrentStage();
+            if (stage == null) {
+                return;
+            }
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -220,10 +225,47 @@ public class ProductDetailsController {
 
     @FXML
     void closeModal() {
-        if (closeBtn == null) {
-            return;
+        Stage stage = getCurrentStage();
+        if (stage != null) {
+            stage.close();
         }
-        Stage stage = (Stage) closeBtn.getScene().getWindow();
-        stage.close();
+    }
+
+    private void setProductImage(Product product) {
+        Image image = null;
+        String imagePath = product.getImage();
+        if (imagePath != null && !imagePath.isEmpty()) {
+            try {
+                image = new Image(getClass().getResourceAsStream(imagePath));
+            } catch (Exception e) {
+                System.out.println("Could not load product image: " + imagePath);
+            }
+        }
+        if (image == null) {
+            try {
+                image = new Image(getClass().getResourceAsStream("placeholder.png"));
+            } catch (Exception e) {
+                System.out.println("Placeholder image not found.");
+            }
+        }
+        if (image != null && productImage != null) {
+            productImage.setImage(image);
+        }
+    }
+
+    private Stage getCurrentStage() {
+        if (closeBtn != null && closeBtn.getScene() != null) {
+            return (Stage) closeBtn.getScene().getWindow();
+        }
+        if (viewCartBtn != null && viewCartBtn.getScene() != null) {
+            return (Stage) viewCartBtn.getScene().getWindow();
+        }
+        if (backToCatalogBtn != null && backToCatalogBtn.getScene() != null) {
+            return (Stage) backToCatalogBtn.getScene().getWindow();
+        }
+        if (priceText != null && priceText.getScene() != null) {
+            return (Stage) priceText.getScene().getWindow();
+        }
+        return null;
     }
 }
