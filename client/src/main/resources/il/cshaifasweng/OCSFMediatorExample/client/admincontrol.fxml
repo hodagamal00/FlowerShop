@@ -9,7 +9,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AdminControlController"
-            stylesheets="@/css/styles.css">
+            stylesheets="@styles.css">
 
    <!-- Sticky Header -->
    <top>
@@ -75,7 +75,7 @@
                                           <Text text="Account ID:"/>
                                           <TextField fx:id="accID" editable="false"
                                                      promptText="Auto"
-                                                     style="-fx-background-color: derive(-fx-control-inner-background,5%);"/>
+                                                     styleClass="field-readonly"/>
                                        </children>
                                     </HBox>
                                     <HBox spacing="8.0" alignment="CENTER_LEFT">
@@ -169,7 +169,7 @@
                                           <Text text="Subscription:"/>
                                           <TextField fx:id="sub" editable="false"
                                                      promptText="—"
-                                                     style="-fx-background-color: derive(-fx-control-inner-background,5%);"/>
+                                                     styleClass="field-readonly"/>
                                        </children>
                                     </HBox>
                                     <HBox spacing="8.0" alignment="CENTER_LEFT">

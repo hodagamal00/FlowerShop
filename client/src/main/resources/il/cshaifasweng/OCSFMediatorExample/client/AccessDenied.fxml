@@ -9,7 +9,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AccessDeniedController"
-            stylesheets="@/css/styles.css">
+            stylesheets="@styles.css">
 
    <!-- Sticky Navbar -->
    <top>
@@ -69,8 +69,7 @@
 
                   <!-- Title -->
                   <Label text="Access Denied"
-                         styleClass="page-title"
-                         style="-fx-font-size: 28px;"/>
+                         styleClass="page-title page-title-large"/>
 
                   <!-- Message -->
                   <Label fx:id="deniedMessageLabel"
