@@ -18,63 +18,60 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<ScrollPane
-        xmlns="http://javafx.com/javafx/17"
-        xmlns:fx="http://javafx.com/fxml/1"
-        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController"
-        stylesheets="@mycsss.css"
-        fitToWidth="true"
-        pannable="true"
-        styleClass="app-scroll-container">
+<BorderPane fx:id="catalogRoot"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController"
+            stylesheets="@mycsss.css"
+            styleClass="catalog-root">
+    <top>
+        <HBox alignment="CENTER_LEFT" styleClass="page-header" spacing="12.0">
+            <Label text="Catalog" styleClass="page-title" />
+        </HBox>
+    </top>
+    <left>
+        <VBox spacing="16.0" styleClass="catalog-sidebar card">
+            <Text fx:id="cartTopText" text="Shopping Cart" styleClass="card-header">
+                <font>
+                    <Font name="System Bold" size="20.0"/>
+                </font>
+            </Text>
 
-    <content>
-        <BorderPane fx:id="catalogRoot" styleClass="catalog-root">
-            <top>
-                <HBox alignment="CENTER_LEFT" styleClass="page-header" spacing="12.0">
-                    <Label text="Catalog" styleClass="page-title" />
-                </HBox>
-            </top>
-            <left>
-                <VBox spacing="16.0" styleClass="catalog-sidebar card">
-                    <Text fx:id="cartTopText" text="Shopping Cart" styleClass="card-header">
-                        <font>
-                            <Font name="System Bold" size="20.0"/>
-                        </font>
-                    </Text>
+            <ListView fx:id="CartItemsList" styleClass="list-view" prefHeight="450.0" />
 
-                    <ListView fx:id="CartItemsList" styleClass="list-view" prefHeight="450.0" />
-
-                    <VBox spacing="15.0">
+            <VBox spacing="15.0">
+                <children>
+                    <HBox spacing="10.0" alignment="CENTER_LEFT">
                         <children>
-                            <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                <children>
-                                    <Text text="Subtotal:" strokeType="OUTSIDE" />
-                                    <TextField fx:id="cartTextDiscount" editable="false" prefWidth="120.0" />
-                                </children>
-                            </HBox>
-
-                            <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                <children>
-                                    <Text text="Total:" strokeType="OUTSIDE" styleClass="strong" />
-                                    <TextField fx:id="cartTextPrice" editable="false" prefWidth="120.0" styleClass="strong" />
-                                </children>
-                            </HBox>
-
-                            <Text fx:id="cartTextPriceDiscount" text="" styleClass="price-note" />
-                            <Text fx:id="cartTextPriceFinal" text="" styleClass="price-final" />
-
-                            <Button fx:id="checkout" styleClass="btn-primary" mnemonicParsing="false"
-                                    onAction="#openCheckout" prefHeight="45.0" prefWidth="240.0"
-                                    text="Checkout" />
-                            <Button fx:id="viewCart" styleClass="btn-outline" mnemonicParsing="false"
-                                    onAction="#viewUserCart" text="View Full Cart" prefWidth="240.0" />
+                            <Text text="Subtotal:" strokeType="OUTSIDE" />
+                            <TextField fx:id="cartTextDiscount" editable="false" prefWidth="120.0" />
                         </children>
-                    </VBox>
-                </VBox>
-            </left>
-            <center>
-                <StackPane styleClass="catalog-main">
-                    <children>
+                    </HBox>
+
+                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <children>
+                            <Text text="Total:" strokeType="OUTSIDE" styleClass="strong" />
+                            <TextField fx:id="cartTextPrice" editable="false" prefWidth="120.0" styleClass="strong" />
+                        </children>
+                    </HBox>
+
+                    <Text fx:id="cartTextPriceDiscount" text="" styleClass="price-note" />
+                    <Text fx:id="cartTextPriceFinal" text="" styleClass="price-final" />
+
+                    <Button fx:id="checkout" styleClass="btn-primary" mnemonicParsing="false"
+                            onAction="#openCheckout" prefHeight="45.0" prefWidth="240.0"
+                            text="Checkout" />
+                    <Button fx:id="viewCart" styleClass="btn-outline" mnemonicParsing="false"
+                            onAction="#viewUserCart" text="View Full Cart" prefWidth="240.0" />
+                </children>
+            </VBox>
+        </VBox>
+    </left>
+    <center>
+        <StackPane styleClass="catalog-main">
+            <children>
+                <ScrollPane fitToWidth="true" pannable="true" styleClass="app-scroll-container">
+                    <content>
                         <VBox spacing="20.0" styleClass="catalog-content">
                             <HBox spacing="15.0" alignment="CENTER_LEFT" styleClass="catalog-filters">
                                 <children>
@@ -269,84 +266,84 @@
                                 </children>
                             </HBox>
                         </VBox>
+                    </content>
+                </ScrollPane>
 
-                        <VBox fx:id="init_container" alignment="CENTER" spacing="20.0" styleClass="catalog-init card">
-                            <children>
-                                <Text fx:id="justText" text="Welcome to FlowerShop!" textAlignment="CENTER" styleClass="muted" />
-                                <Button fx:id="justButton" mnemonicParsing="false" onAction="#justView"
-                                        prefHeight="40.0" prefWidth="200.0" text="Continue" />
-                            </children>
-                        </VBox>
-                    </children>
-                </StackPane>
-            </center>
-            <right>
-                <VBox spacing="24.0" styleClass="catalog-rightbar">
-                    <VBox spacing="12.0" styleClass="catalog-panel">
-                        <Text text="Custom Order" styleClass="panel-title" />
-                        <Button fx:id="CreateCustomItem" mnemonicParsing="false"
-                                onAction="#createCustomitem" prefWidth="180.0" text="Create Custom Item" />
-                        <ComboBox fx:id="chooseCustomType" prefWidth="180.0" promptText="Item Type" />
-                        <ComboBox fx:id="chooseCustomColor" prefWidth="180.0" promptText="Color" />
-                        <TextField fx:id="customPrice" prefWidth="180.0" promptText="Price Range" />
-                        <Button id="btttn" fx:id="FinishCustomItem" mnemonicParsing="false"
-                                onAction="#addCartCustomitem" prefWidth="180.0" text="Add to Cart" />
-                        <Button id="btttn" fx:id="CancelCustomItem" mnemonicParsing="false"
-                                onAction="#cancelCustomitem" prefWidth="180.0" text="Cancel" />
-                        <Text fx:id="customError" styleClass="error-text" wrappingWidth="180.0" />
-                    </VBox>
-
-                    <VBox spacing="10.0" styleClass="catalog-panel">
-                        <Text text="Admin Catalog" styleClass="panel-title" />
-                        <ComboBox id="btttn" fx:id="adminEditCatalog" onAction="#chooseAdminEditCatalog"
-                                  prefWidth="180.0" promptText="Select Product" />
-                        <TextField fx:id="EditItemType" prefWidth="180.0" promptText="Item Type" />
-                        <TextField fx:id="EditItemDesc" prefWidth="180.0" promptText="Description" />
-                        <TextField fx:id="EditItemPrice" prefWidth="180.0" promptText="Price" />
-                        <TextField fx:id="EditItemExtra" prefWidth="180.0" promptText="Extra Info" />
-                        <Button id="btttn" fx:id="AddItem" mnemonicParsing="false"
-                                onAction="#adminAddItemFunc" prefWidth="180.0" text="Add Product" />
-                        <Button id="btttn" fx:id="UpdateItem" mnemonicParsing="false"
-                                onAction="#adminUpdateItemFunc" prefWidth="180.0" text="Update Product" />
-                        <Button id="btttn" fx:id="RemoveItem" mnemonicParsing="false"
-                                onAction="#adminRemoveItemFunc" prefWidth="180.0" text="Remove Product" />
-                    </VBox>
-
-                    <VBox spacing="8.0" styleClass="catalog-panel">
-                        <Text text="Account &amp; Tools" styleClass="panel-title" />
-                        <Button fx:id="viewMyOrders" mnemonicParsing="false"
-                                onAction="#openMyOrders" prefWidth="180.0" text="My Orders" />
-                        <Button fx:id="viewMyComplaints" mnemonicParsing="false"
-                                onAction="#openMyComplaints" prefWidth="180.0" text="My Complaints" />
-                        <Button fx:id="viewInboxPlz" mnemonicParsing="false"
-                                onAction="#openInbox" prefWidth="180.0" text="Inbox" />
-                        <Button fx:id="openComplaints" mnemonicParsing="false"
-                                onAction="#ReplyToComplaints" prefWidth="180.0" text="Handle Complaints" />
-                        <Button fx:id="deliveryButton" mnemonicParsing="false"
-                                onAction="#openDelivery" prefWidth="180.0" text="Deliveries" />
-                        <Button fx:id="adminControlButtton" mnemonicParsing="false"
-                                onAction="#openControlPanel" prefWidth="180.0" text="Admin Control" />
-                        <Button fx:id="infoo" mnemonicParsing="false"
-                                onAction="#openComplaintManager" prefWidth="180.0" text="Manager Reports" />
-                        <Button fx:id="logout" mnemonicParsing="false"
-                                onAction="#goLogOut" prefWidth="180.0" text="Logout" />
-                    </VBox>
-                </VBox>
-            </right>
-            <bottom>
-                <VBox fx:id="hiddenElements" visible="false" managed="false">
+                <VBox fx:id="init_container" alignment="CENTER" spacing="20.0" styleClass="catalog-init card">
                     <children>
-                        <TextField fx:id="customid" />
-                        <Button fx:id="printProd" mnemonicParsing="false" onAction="#printProducts" text="Print" />
-                        <Button fx:id="accbtn" mnemonicParsing="false" onAction="#accbtnlogin" text="Account" />
-                        <Button fx:id="compln" mnemonicParsing="false" onAction="#complinstart" text="Complaint" />
-                        <ComboBox fx:id="worker_edit" onAction="#chooseAdminEditCatalog" promptText="Workers" />
-                        <ListView fx:id="inboxList" prefHeight="0.0" prefWidth="0.0" />
-                        <Button fx:id="openMessage" mnemonicParsing="false" onAction="#viewMessage" text="Message" />
-                        <TextField fx:id="messageField" />
+                        <Text fx:id="justText" text="Welcome to FlowerShop!" textAlignment="CENTER" styleClass="muted" />
+                        <Button fx:id="justButton" mnemonicParsing="false" onAction="#justView"
+                                prefHeight="40.0" prefWidth="200.0" text="Continue" />
                     </children>
                 </VBox>
-            </bottom>
-        </BorderPane>
-    </content>
-</ScrollPane>
+            </children>
+        </StackPane>
+    </center>
+    <right>
+        <VBox spacing="24.0" styleClass="catalog-rightbar">
+            <VBox spacing="12.0" styleClass="catalog-panel">
+                <Text text="Custom Order" styleClass="panel-title" />
+                <Button fx:id="CreateCustomItem" mnemonicParsing="false"
+                        onAction="#createCustomitem" prefWidth="180.0" text="Create Custom Item" />
+                <ComboBox fx:id="chooseCustomType" prefWidth="180.0" promptText="Item Type" />
+                <ComboBox fx:id="chooseCustomColor" prefWidth="180.0" promptText="Color" />
+                <TextField fx:id="customPrice" prefWidth="180.0" promptText="Price Range" />
+                <Button id="btttn" fx:id="FinishCustomItem" mnemonicParsing="false"
+                        onAction="#addCartCustomitem" prefWidth="180.0" text="Add to Cart" />
+                <Button id="btttn" fx:id="CancelCustomItem" mnemonicParsing="false"
+                        onAction="#cancelCustomitem" prefWidth="180.0" text="Cancel" />
+                <Text fx:id="customError" styleClass="error-text" wrappingWidth="180.0" />
+            </VBox>
+
+            <VBox spacing="10.0" styleClass="catalog-panel">
+                <Text text="Admin Catalog" styleClass="panel-title" />
+                <ComboBox id="btttn" fx:id="adminEditCatalog" onAction="#chooseAdminEditCatalog"
+                          prefWidth="180.0" promptText="Select Product" />
+                <TextField fx:id="EditItemType" prefWidth="180.0" promptText="Item Type" />
+                <TextField fx:id="EditItemDesc" prefWidth="180.0" promptText="Description" />
+                <TextField fx:id="EditItemPrice" prefWidth="180.0" promptText="Price" />
+                <TextField fx:id="EditItemExtra" prefWidth="180.0" promptText="Extra Info" />
+                <Button id="btttn" fx:id="AddItem" mnemonicParsing="false"
+                        onAction="#adminAddItemFunc" prefWidth="180.0" text="Add Product" />
+                <Button id="btttn" fx:id="UpdateItem" mnemonicParsing="false"
+                        onAction="#adminUpdateItemFunc" prefWidth="180.0" text="Update Product" />
+                <Button id="btttn" fx:id="RemoveItem" mnemonicParsing="false"
+                        onAction="#adminRemoveItemFunc" prefWidth="180.0" text="Remove Product" />
+            </VBox>
+
+            <VBox spacing="8.0" styleClass="catalog-panel">
+                <Text text="Account &amp; Tools" styleClass="panel-title" />
+                <Button fx:id="viewMyOrders" mnemonicParsing="false"
+                        onAction="#openMyOrders" prefWidth="180.0" text="My Orders" />
+                <Button fx:id="viewMyComplaints" mnemonicParsing="false"
+                        onAction="#openMyComplaints" prefWidth="180.0" text="My Complaints" />
+                <Button fx:id="viewInboxPlz" mnemonicParsing="false"
+                        onAction="#openInbox" prefWidth="180.0" text="Inbox" />
+                <Button fx:id="openComplaints" mnemonicParsing="false"
+                        onAction="#ReplyToComplaints" prefWidth="180.0" text="Handle Complaints" />
+                <Button fx:id="deliveryButton" mnemonicParsing="false"
+                        onAction="#openDelivery" prefWidth="180.0" text="Deliveries" />
+                <Button fx:id="adminControlButtton" mnemonicParsing="false"
+                        onAction="#openControlPanel" prefWidth="180.0" text="Admin Control" />
+                <Button fx:id="infoo" mnemonicParsing="false"
+                        onAction="#openComplaintManager" prefWidth="180.0" text="Manager Reports" />
+                <Button fx:id="logout" mnemonicParsing="false"
+                        onAction="#goLogOut" prefWidth="180.0" text="Logout" />
+            </VBox>
+        </VBox>
+    </right>
+    <bottom>
+        <VBox fx:id="hiddenElements" visible="false" managed="false">
+            <children>
+                <TextField fx:id="customid" />
+                <Button fx:id="printProd" mnemonicParsing="false" onAction="#printProducts" text="Print" />
+                <Button fx:id="accbtn" mnemonicParsing="false" onAction="#accbtnlogin" text="Account" />
+                <Button fx:id="compln" mnemonicParsing="false" onAction="#complinstart" text="Complaint" />
+                <ComboBox fx:id="worker_edit" onAction="#chooseAdminEditCatalog" promptText="Workers" />
+                <ListView fx:id="inboxList" prefHeight="0.0" prefWidth="0.0" />
+                <Button fx:id="openMessage" mnemonicParsing="false" onAction="#viewMessage" text="Message" />
+                <TextField fx:id="messageField" />
+            </children>
+        </VBox>
+    </bottom>
+</BorderPane>
