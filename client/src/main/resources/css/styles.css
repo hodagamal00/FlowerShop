@@ -236,7 +236,7 @@
 }
 
 .top-nav {
-    -fx-padding: 0 6 0 6;
+    -fx-padding: 0 10 0 10;
     -fx-border-width: 0;
     -fx-pref-height: 40px;
     -fx-alignment: center-left;
