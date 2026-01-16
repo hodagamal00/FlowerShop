@@ -2,7 +2,8 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -548,14 +549,9 @@ public class Order implements Serializable {
      * @return Refund percentage (0.0, 0.5, or 1.0)
      */
     public double calculateRefund(int cancelDay, int cancelMonth, int cancelYear, int cancelHour, int cancelMinute) {
-        // Create simple time representations (in minutes from start of year)
-        // This is a simplified calculation - in production, use proper date/time libraries
-        long deliveryTimeInMinutes = (prepareDay * 24 * 60) + (prepareHour * 60) + prepareMin + 
-                                      (prepareMonth * 30 * 24 * 60) + (prepareYear * 365 * 24 * 60);
-        long cancelTimeInMinutes = (cancelDay * 24 * 60) + (cancelHour * 60) + cancelMinute + 
-                                   (cancelMonth * 30 * 24 * 60) + (cancelYear * 365 * 24 * 60);
-        
-        long hoursUntilDelivery = (deliveryTimeInMinutes - cancelTimeInMinutes) / 60;
+        LocalDateTime deliveryTime = LocalDateTime.of(prepareYear, prepareMonth, prepareDay, prepareHour, prepareMin);
+        LocalDateTime cancelTime = LocalDateTime.of(cancelYear, cancelMonth, cancelDay, cancelHour, cancelMinute);
+        long hoursUntilDelivery = Duration.between(cancelTime, deliveryTime).toHours();
         
         if (hoursUntilDelivery >= 3) {
             this.refundStatus = "FULL";
