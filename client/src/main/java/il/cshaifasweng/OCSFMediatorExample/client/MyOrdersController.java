@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -175,85 +176,23 @@ public class MyOrdersController {
     @FXML
     void cancelOrder(ActionEvent event)
     {
-        boolean in24Hour = false;
-        int refund = 0;
-        Calendar calle = Calendar.getInstance();
-        int currentYear = calle.get(Calendar.YEAR);
-        int currentMonth = calle.get(Calendar.MONTH);
-        currentMonth++;
-        int currentHour = calle.get(Calendar.HOUR_OF_DAY);
-        int currentMintue = calle.get(Calendar.MINUTE);
-        int currentDay = calle.get(Calendar.DAY_OF_MONTH);
+        LocalDateTime now = LocalDateTime.now();
+        double refundPercent = SelectedOrder.calculateRefund(
+                now.getDayOfMonth(),
+                now.getMonthValue(),
+                now.getYear(),
+                now.getHour(),
+                now.getMinute()
+        );
+        boolean returned = refundPercent > 0;
+        int refundPercentDisplay = (int) Math.round(refundPercent * 100);
+        double refundAmount = refundPercent * SelectedOrder.getTotalPrice();
 
-        int orderYear = SelectedOrder.getPrepareYear();
-        int orderMonth = SelectedOrder.getPrepareMonth();
-        int orderDay = SelectedOrder.getPrepareDay();
-
-        int orderHour = SelectedOrder.getOrderHour();
-        int orderMinute = SelectedOrder.getOrderMintue();
-
-        int diffYear = currentYear - orderYear;
-        int diffMonth = currentMonth - orderMonth;
-        int diffDay = currentDay - orderDay;
-        int diffHour = currentHour - orderHour;
-        int diffMinute = currentMintue - orderMinute;
-
-        if(diffMonth < 0) {
-            diffYear--;
-            diffMonth = 12 + diffMonth;
-        }
-        if(diffDay < 0) {
-            diffMonth--;
-            diffDay = 30 + diffDay;
-        }
-        if(diffHour < 0) {
-            diffDay--;
-            diffHour = 24 + diffHour;
-        }
-        if(diffMinute < 0) {
-            diffHour--;
-            diffMinute = 60 + diffMinute;
-        }
-        if(diffYear == 0)
-        {
-            if(diffMonth == 0)
-            {
-                if(diffDay == 0)
-                {
-                    if(diffHour > 3)
-                    {
-                        refund = 100;
-                    }
-                    else if(diffHour < 1)
-                        refund = 0;
-                    else
-                        refund = 50;
-                }
-                else
-                {
-                    refund = 100;
-                }
-
-            }
-            else
-            {
-                refund = 100;
-            }
-
-        }
-        else
-        {
-            refund = 100;
-        }
-        boolean returned = false;
-        if(refund > 0)
-            returned = true;
-
-        Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refund/100*SelectedOrder.getTotalPrice(),currentDay,currentMonth,currentYear,"Automated Reply");
+        Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refundAmount,now.getDayOfMonth(),now.getMonthValue(),now.getYear(),"Automated Reply");
         cancelComplaint.setCreatedAt(new Date());
         cancelComplaint.setRespondedAt(new Date());
         cancelComplaint.setSlaStatus("RESOLVED_ON_TIME");
-        cancelComplaint.setCompensationDecision(refund > 0 ? "Automatic refund " + refund + "%" : "No compensation" );
+        cancelComplaint.setCompensationDecision(refundPercent > 0 ? "Automatic refund " + refundPercentDisplay + "%" : "No compensation" );
         UpdateMessage new_msg=new UpdateMessage("complaint","add");
         new_msg.setComplaint(cancelComplaint);
         try {
