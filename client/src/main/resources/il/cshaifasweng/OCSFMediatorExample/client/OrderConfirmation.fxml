@@ -221,7 +221,7 @@
                                                 <Label text="• A confirmation email has been sent to your registered email address" wrapText="true" prefWidth="660.0" />
                                                 <Label text="• You can track your order status in 'My Orders' section" wrapText="true" prefWidth="660.0" />
                                                 <Label text="• Cancellation: Full refund if cancelled 3+ hours before delivery" wrapText="true" prefWidth="660.0" />
-                                                <Label text="• Cancellation: 50% refund if cancelled 1-3 hours before delivery" wrapText="true" prefWidth="660.0" />
+                                                <Label text="• Cancellation: 50 percent refund if cancelled 1-3 hours before delivery" wrapText="true" prefWidth="660.0" />
                                                 <Label text="• For assistance, please contact customer support" wrapText="true" prefWidth="660.0" />
                                             </VBox>
                                         </VBox>
