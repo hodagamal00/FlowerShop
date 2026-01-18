@@ -8,7 +8,6 @@ import javafx.application.Platform;
 // problematic.
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -40,12 +39,6 @@ public class CatalogController {
 	public int managernum2 =0;
 	static boolean returnedFromSecondaryController = false;
 	boolean firstRun = true;
-	@FXML // ResourceBundle that was given to the FXMLLoader
-	private ResourceBundle resources;
-
-	@FXML // URL location of the FXML file that was given to the FXMLLoader
-	private URL location;
-
 	@FXML // fx:id="adminEditCatalog"
 	private ComboBox<String> adminEditCatalog; // Value injected by FXMLLoader
 
