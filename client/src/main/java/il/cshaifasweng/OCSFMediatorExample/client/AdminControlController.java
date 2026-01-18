@@ -13,7 +13,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -29,32 +28,14 @@ public class AdminControlController {
     @FXML // fx:id="accID"
     private TextField accID; // Value injected by FXMLLoader
 
-    @FXML // fx:id="accIDTxt"
-    private Text accIDTxt; // Value injected by FXMLLoader
-
     @FXML // fx:id="accountsList"
     private ListView<String> accountsList; // Value injected by FXMLLoader
 
-    @FXML // fx:id="accountsText"
-    private Text accountsText; // Value injected by FXMLLoader
-
     @FXML // fx:id="address"
-    private TextField address; // Value injected by FXMLLoader
-
-    @FXML // fx:id="addressTxt"
-    private Text addressTxt; // Value injected by FXMLLoader
+    private TextArea address; // Value injected by FXMLLoader
 
     @FXML // fx:id="backButton"
     private Button backButton; // Value injected by FXMLLoader
-
-    @FXML // fx:id="creditMonthTxt"
-    private Text creditMonthTxt; // Value injected by FXMLLoader
-
-    @FXML // fx:id="creditNumTxt"
-    private Text creditNumTxt; // Value injected by FXMLLoader
-
-    @FXML // fx:id="creditexpYearTxt"
-    private Text creditexpYearTxt; // Value injected by FXMLLoader
 
     @FXML // fx:id="creditexpmonth"
     private TextField creditexpmonth; // Value injected by FXMLLoader
@@ -65,29 +46,17 @@ public class AdminControlController {
     @FXML // fx:id="creditnum"
     private TextField creditnum; // Value injected by FXMLLoader
 
-    @FXML // fx:id="cusIDTxt"
-    private Text cusIDTxt; // Value injected by FXMLLoader
-
     @FXML // fx:id="customerID"
     private TextField customerID; // Value injected by FXMLLoader
 
     @FXML // fx:id="cvv"
     private TextField cvv; // Value injected by FXMLLoader
 
-    @FXML // fx:id="cvvTxt"
-    private Text cvvTxt; // Value injected by FXMLLoader
-
     @FXML // fx:id="email"
     private TextField email; // Value injected by FXMLLoader
 
-    @FXML // fx:id="emailTxt"
-    private Text emailTxt; // Value injected by FXMLLoader
-
     @FXML // fx:id="freeze"
     private Button freeze; // Value injected by FXMLLoader
-
-    @FXML // fx:id="idk"
-    private Button idk; // Value injected by FXMLLoader
 
     @FXML // fx:id="loadProfile"
     private Button loadProfile; // Value injected by FXMLLoader
@@ -95,17 +64,8 @@ public class AdminControlController {
     @FXML // fx:id="logged"
     private TextField logged; // Value injected by FXMLLoader
 
-    @FXML // fx:id="loggedTxt"
-    private Text loggedTxt; // Value injected by FXMLLoader
-
     @FXML // fx:id="name"
     private TextField name; // Value injected by FXMLLoader
-
-    @FXML // fx:id="nameTxt"
-    private Text nameTxt; // Value injected by FXMLLoader
-
-    @FXML // fx:id="passTxt"
-    private Text passTxt; // Value injected by FXMLLoader
 
     @FXML // fx:id="password"
     private TextField password; // Value injected by FXMLLoader
@@ -113,23 +73,14 @@ public class AdminControlController {
     @FXML // fx:id="phone"
     private TextField phone; // Value injected by FXMLLoader
 
-    @FXML // fx:id="phoneTxt"
-    private Text phoneTxt; // Value injected by FXMLLoader
-
     @FXML // fx:id="profileType"
     private ComboBox<String> profileType; // Value injected by FXMLLoader
 
     @FXML // fx:id="shop"
     private TextField shop; // Value injected by FXMLLoader
 
-    @FXML // fx:id="shopTxt"
-    private Text shopTxt; // Value injected by FXMLLoader
-
     @FXML // fx:id="sub"
     private TextField sub; // Value injected by FXMLLoader
-
-    @FXML // fx:id="subTxt"
-    private Text subTxt; // Value injected by FXMLLoader
 
     @FXML // fx:id="wait"
     private Label wait; // Value injected by FXMLLoader
@@ -374,40 +325,24 @@ public class AdminControlController {
     void initialize() {
         EventBus.getDefault().register(this);
         assert accID != null : "fx:id=\"accID\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert accIDTxt != null : "fx:id=\"accIDTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert accountsList != null : "fx:id=\"accountsList\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert accountsText != null : "fx:id=\"accountsText\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert address != null : "fx:id=\"address\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert addressTxt != null : "fx:id=\"addressTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert backButton != null : "fx:id=\"backButton\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert creditMonthTxt != null : "fx:id=\"creditMonthTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert creditNumTxt != null : "fx:id=\"creditNumTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert creditexpYearTxt != null : "fx:id=\"creditexpYearTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert creditexpmonth != null : "fx:id=\"creditexpmonth\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert creditexpyear != null : "fx:id=\"creditexpyear\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert creditnum != null : "fx:id=\"creditnum\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert cusIDTxt != null : "fx:id=\"cusIDTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert customerID != null : "fx:id=\"customerID\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert cvv != null : "fx:id=\"cvv\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert cvvTxt != null : "fx:id=\"cvvTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert email != null : "fx:id=\"email\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert emailTxt != null : "fx:id=\"emailTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert freeze != null : "fx:id=\"freeze\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert idk != null : "fx:id=\"idk\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert loadProfile != null : "fx:id=\"loadProfile\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert logged != null : "fx:id=\"logged\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert loggedTxt != null : "fx:id=\"loggedTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert name != null : "fx:id=\"name\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert nameTxt != null : "fx:id=\"nameTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert passTxt != null : "fx:id=\"passTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert password != null : "fx:id=\"password\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert phone != null : "fx:id=\"phone\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert phoneTxt != null : "fx:id=\"phoneTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert profileType != null : "fx:id=\"profileType\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert shop != null : "fx:id=\"shop\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert shopTxt != null : "fx:id=\"shopTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert sub != null : "fx:id=\"sub\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert subTxt != null : "fx:id=\"subTxt\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert Save != null : "fx:id=\"Save\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert privilageField != null : "fx:id=\"privilageField\" was not injected: check your FXML file 'admincontrol.fxml'.";

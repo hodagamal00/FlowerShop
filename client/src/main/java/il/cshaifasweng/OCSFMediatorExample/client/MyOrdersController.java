@@ -18,7 +18,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -82,65 +81,11 @@ public class MyOrdersController {
     @FXML // fx:id="orderList"
     private ListView<String> orderList; // Value injected by FXMLLoader
 
-    @FXML // fx:id="refresh"
-    private Button refresh; // Value injected by FXMLLoader
-
     @FXML // fx:id="sendComplaint"
     private Button sendComplaint; // Value injected by FXMLLoader
 
     @FXML // fx:id="shopID"
     private TextField shopID; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text1"
-    private Text text1; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text10"
-    private Text text10; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text11"
-    private Text text11; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text12"
-    private Text text12; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text13"
-    private Text text13; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text14"
-    private Text text14; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text15"
-    private Text text15; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text16"
-    private Text text16; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text2"
-    private Text text2; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text3"
-    private Text text3; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text4"
-    private Text text4; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text5"
-    private Text text5; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text6"
-    private Text text6; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text7"
-    private Text text7; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text8"
-    private Text text8; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text9"
-    private Text text9; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text99"
-    private Text text99; // Value injected by FXMLLoader
 
     @FXML // fx:id="totalPrice"
     private TextField totalPrice; // Value injected by FXMLLoader
@@ -445,26 +390,8 @@ public class MyOrdersController {
         assert openComplaint != null : "fx:id=\"openComplaint\" was not injected: check your FXML file 'myorders.fxml'.";
         assert orderID != null : "fx:id=\"orderID\" was not injected: check your FXML file 'myorders.fxml'.";
         assert orderList != null : "fx:id=\"orderList\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert refresh != null : "fx:id=\"refresh\" was not injected: check your FXML file 'myorders.fxml'.";
         assert sendComplaint != null : "fx:id=\"sendComplaint\" was not injected: check your FXML file 'myorders.fxml'.";
         assert shopID != null : "fx:id=\"shopID\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text1 != null : "fx:id=\"text1\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text10 != null : "fx:id=\"text10\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text11 != null : "fx:id=\"text11\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text12 != null : "fx:id=\"text12\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text13 != null : "fx:id=\"text13\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text14 != null : "fx:id=\"text14\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text15 != null : "fx:id=\"text15\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text16 != null : "fx:id=\"text16\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text2 != null : "fx:id=\"text2\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text3 != null : "fx:id=\"text3\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text4 != null : "fx:id=\"text4\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text5 != null : "fx:id=\"text5\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text6 != null : "fx:id=\"text6\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text7 != null : "fx:id=\"text7\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text8 != null : "fx:id=\"text8\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text9 != null : "fx:id=\"text9\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text99 != null : "fx:id=\"text99\" was not injected: check your FXML file 'myorders.fxml'.";
         assert totalPrice != null : "fx:id=\"totalPrice\" was not injected: check your FXML file 'myorders.fxml'.";
         assert viewOrder != null : "fx:id=\"viewOrder\" was not injected: check your FXML file 'myorders.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'myorders.fxml'.";
