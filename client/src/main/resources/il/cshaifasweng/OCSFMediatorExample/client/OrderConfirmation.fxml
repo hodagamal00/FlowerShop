@@ -107,7 +107,7 @@
                                                         <Font size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <Text fx:id="totalAmountText" text="$149.97" fill="#4a148c">
+                                                <Text fx:id="totalAmountText" text="\$149.97" fill="#4a148c">
                                                     <font>
                                                         <Font name="System Bold" size="18.0" />
                                                     </font>
