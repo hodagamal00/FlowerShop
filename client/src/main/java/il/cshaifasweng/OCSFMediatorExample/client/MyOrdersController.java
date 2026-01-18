@@ -368,9 +368,15 @@ public class MyOrdersController {
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
         System.out.println("before sending getAllOrders message !");
-        getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
-        SimpleClient.getClient().sendToServer(getOrdersMsg);
-        System.out.println("after sending getAllOrders message !");
+        boolean requestedOrders = false;
+        try {
+            getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
+            SimpleClient.getClient().sendToServer(getOrdersMsg);
+            requestedOrders = true;
+            System.out.println("after sending getAllOrders message !");
+        } catch (Exception ex) {
+            System.out.println("Failed to request orders: " + ex.getMessage());
+        }
 
         assert RecepAddress != null : "fx:id=\"RecepAddress\" was not injected: check your FXML file 'myorders.fxml'.";
         assert RecepName != null : "fx:id=\"RecepName\" was not injected: check your FXML file 'myorders.fxml'.";
@@ -427,6 +433,14 @@ public class MyOrdersController {
 
         viewOrder.setDisable(true);
         backToCatalog.setDisable(true);
+
+        if (!requestedOrders) {
+            wait.setText("Offline / Not connected to server.");
+            wait.setVisible(true);
+            viewOrder.setDisable(true);
+            backToCatalog.setDisable(false);
+            return;
+        }
 
 
         new java.util.Timer().schedule(
