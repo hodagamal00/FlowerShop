@@ -42,6 +42,8 @@
                         <VBox layoutX="0.0" layoutY="0.0" spacing="15.0" prefWidth="350.0" alignment="CENTER">
                             <ImageView fx:id="flower_image" fitHeight="400.0" fitWidth="340.0" pickOnBounds="true" preserveRatio="true" style="-fx-border-color: #ddd; -fx-border-width: 2; -fx-border-radius: 5;" />
                             <DialogPane fx:id="flower_name" contentText="Product Name" prefHeight="60.0" prefWidth="340.0" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;" />
+                            <DialogPane fx:id="flower_price" contentText="Price" prefHeight="48.0" prefWidth="340.0" style="-fx-font-size: 16px; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;" />
+                            <DialogPane fx:id="flower_details" contentText="Details" prefHeight="120.0" prefWidth="340.0" style="-fx-font-size: 14px; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;" />
                         </VBox>
 
                         <!-- Right Side - Edit Form -->

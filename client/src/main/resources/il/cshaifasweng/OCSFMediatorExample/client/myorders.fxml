@@ -185,7 +185,7 @@
             </AnchorPane>
 
             <!-- Hidden Elements -->
-            <TextField fx:id="enterID" layoutX="-100.0" layoutY="-100.0" visible="false" />
+            <TextField layoutX="-100.0" layoutY="-100.0" visible="false" />
          </children>
       </AnchorPane>
    </content>
