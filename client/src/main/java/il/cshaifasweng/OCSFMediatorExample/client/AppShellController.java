@@ -39,7 +39,6 @@ public class AppShellController {
     @FXML private Label profileNameLabel;
     @FXML private Button cartButton;
     @FXML private Label statusLabel;
-    @FXML private Label accountNameLabel;
     @FXML private StackPane contentPane;
     @FXML private FlowPane navBar;
 
@@ -73,8 +72,8 @@ public class AppShellController {
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
-        if (accountNameLabel != null) {
-            accountNameLabel.setVisible(false);
+        if (profileNameLabel != null) {
+            profileNameLabel.setVisible(false);
         }
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
@@ -140,9 +139,9 @@ public class AppShellController {
             loginButton.setVisible(!loggedIn);
             profileButton.setVisible(loggedIn);
         }
-        if (!loggedIn && accountNameLabel != null) {
-            accountNameLabel.setVisible(false);
-            accountNameLabel.setText("");
+        if (!loggedIn && profileNameLabel != null) {
+            profileNameLabel.setVisible(false);
+            profileNameLabel.setText("");
         }
     }
 
@@ -165,9 +164,9 @@ public class AppShellController {
      */
     public void showAccountName(String fullName) {
         setLoggedIn(true);
-        if (accountNameLabel != null) {
-            accountNameLabel.setText(fullName != null ? fullName : "");
-            accountNameLabel.setVisible(fullName != null && !fullName.isBlank());
+        if (profileNameLabel != null) {
+            profileNameLabel.setText(fullName != null ? fullName : "");
+            profileNameLabel.setVisible(fullName != null && !fullName.isBlank());
         }
     }
 

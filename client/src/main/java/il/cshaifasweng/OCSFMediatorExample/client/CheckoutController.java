@@ -103,15 +103,6 @@ public class CheckoutController {
     @FXML
     private CheckBox deliverToHome;
 
-    @FXML // fx:id="desc1"
-    private Text desc1; // Value injected by FXMLLoader
-
-    @FXML // fx:id="desc2"
-    private Text desc2; // Value injected by FXMLLoader
-
-    @FXML // fx:id="totalPrice"
-    private Text totalPrice; // Value injected by FXMLLoader
-
     @FXML // fx:id="credit_regex"
     private Label credit_regex; // Value injected by FXMLLoader
 
@@ -121,9 +112,6 @@ public class CheckoutController {
 
     @FXML // fx:id="phone_regex"
     private Label phone_regex; // Value injected by FXMLLoader
-
-    @FXML // fx:id="viewInboxPlz"
-    private Button viewInboxPlz; // Value injected by FXMLLoader
 
     @FXML // fx:id="noShop"
     private Text noShop; // Value injected by FXMLLoader
