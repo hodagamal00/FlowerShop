@@ -121,7 +121,7 @@
 
                            <VBox spacing="15.0" style="-fx-padding: 10; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-color: #f9f9f9;">
                               <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                 <Text text="Card Number:" strokeType="OUTSIDE" prefWidth="130.0">
+                                 <Text text="Card Number:" strokeType="OUTSIDE" wrappingWidth="130.0">
                                     <font><Font size="14.0" /></font>
                                  </Text>
                                  <TextField fx:id="creditNumberField" prefWidth="280.0" promptText="16 digits" />
@@ -129,7 +129,7 @@
                               <Label fx:id="credit_regex" text="" textFill="RED" />
 
                               <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                 <Text text="Expiry Date:" strokeType="OUTSIDE" prefWidth="130.0">
+                                 <Text text="Expiry Date:" strokeType="OUTSIDE" wrappingWidth="130.0">
                                     <font><Font size="14.0" /></font>
                                  </Text>
                                  <ComboBox fx:id="expiryMonth" prefHeight="35.0" prefWidth="120.0" promptText="Month" />
@@ -138,7 +138,7 @@
                               <Text fx:id="noDateTwo" fill="RED" text="" wrappingWidth="450.0" />
 
                               <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                 <Text text="CVV:" strokeType="OUTSIDE" prefWidth="130.0">
+                                 <Text text="CVV:" strokeType="OUTSIDE" wrappingWidth="130.0">
                                     <font><Font size="14.0" /></font>
                                  </Text>
                                  <TextField fx:id="cvvField" prefWidth="80.0" promptText="3 digits" />
@@ -154,15 +154,15 @@
                                  </font>
                               </Text>
                               <HBox spacing="10.0">
-                                 <Text text="Subtotal:" prefWidth="150.0"><font><Font size="14.0" /></font></Text>
+                                 <Text text="Subtotal:" wrappingWidth="150.0"><font><Font size="14.0" /></font></Text>
                                  <Text text="---" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
                               </HBox>
                               <HBox spacing="10.0">
-                                 <Text text="Delivery:" prefWidth="150.0"><font><Font size="14.0" /></font></Text>
+                                 <Text text="Delivery:" wrappingWidth="150.0"><font><Font size="14.0" /></font></Text>
                                  <Text text="20₪" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
                               </HBox>
                               <HBox spacing="10.0">
-                                 <Text text="Total:" prefWidth="150.0" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
+                                 <Text text="Total:" wrappingWidth="150.0" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
                                  <Text text="---" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
                               </HBox>
                            </VBox>
