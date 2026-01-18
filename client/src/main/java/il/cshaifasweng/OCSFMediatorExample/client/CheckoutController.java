@@ -436,6 +436,7 @@ public class CheckoutController {
     private ComboBox<String> chooseShopID;
 
     Account currentUser;
+    private java.util.Timer shopTimer;
     @Subscribe
     public void PassAccountEvent(PassAccountEventCheckout passAcc){ // added today
         System.out.println("Arrived To Pass Account - CheckoutController");
@@ -449,6 +450,7 @@ public class CheckoutController {
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
         cart = passAcc.getProductsToCheckout();
+        scheduleShopSelectionEnable();
 
     }
     List<Product> cart = new ArrayList<>();
@@ -553,10 +555,23 @@ public class CheckoutController {
         back.setDisable(true);
         chooseShopID.setVisible(false);
 
-        new java.util.Timer().schedule(
+    }
+
+    private void scheduleShopSelectionEnable() {
+        if (currentUser == null) {
+            return;
+        }
+        if (shopTimer != null) {
+            shopTimer.cancel();
+        }
+        shopTimer = new java.util.Timer();
+        shopTimer.schedule(
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
+                        if (currentUser == null) {
+                            return;
+                        }
                         placeOrderButton.setDisable(false);
                         back.setDisable(false);
 
