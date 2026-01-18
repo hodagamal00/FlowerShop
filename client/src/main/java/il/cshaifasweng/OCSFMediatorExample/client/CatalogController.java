@@ -2164,8 +2164,7 @@ public class CatalogController {
 		try {
 			SimpleClient.getClient().sendToServer("first entry"); // sends the updated product to the server class
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Offline mode");
 		}
 	}
 
