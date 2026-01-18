@@ -484,7 +484,8 @@ public class CatalogController {
 	private void addToCart(int offset) {
 
 		int index = CatalogSTARTIndex + offset;
-		if (index < 0 || index >= allProducts.size()) {
+		List<Product> displayProducts = getDisplayedProducts();
+		if (index < 0 || index >= displayProducts.size()) {
 			return; // حماية من IndexOutOfBounds
 		}
 
@@ -494,12 +495,12 @@ public class CatalogController {
 			basePrice = Integer.parseInt(cartTextPrice.getText());
 		}
 
-		int addedPrice = (int) Math.round(allProducts.get(index).getPrice());
+		int addedPrice = (int) Math.round(displayProducts.get(index).getPrice());
 		basePrice += addedPrice;
 
 		// إضافة المنتج
-		CartItemsList.getItems().add(allProducts.get(index).getName());
-		userCart.add(allProducts.get(index));
+		CartItemsList.getItems().add(displayProducts.get(index).getName());
+		userCart.add(displayProducts.get(index));
 
 		// تحديث السعر قبل الخصم
 		cartTextPrice.setText(String.valueOf(basePrice));
@@ -533,11 +534,12 @@ public class CatalogController {
 	}
 
 	private void configureSingleProductAction(Button button, int offset, boolean canEdit) {
-		if (button == null || CatalogSTARTIndex + offset >= allProducts.size()) {
+		List<Product> displayProducts = getDisplayedProducts();
+		if (button == null || CatalogSTARTIndex + offset >= displayProducts.size()) {
 			return;
 		}
 
-		Product product = allProducts.get(CatalogSTARTIndex + offset);
+		Product product = displayProducts.get(CatalogSTARTIndex + offset);
 
 		if (canEdit) {
 			button.setText("Edit");
@@ -710,7 +712,8 @@ public class CatalogController {
 	@FXML
 	void nextPageUpate(ActionEvent event)
 	{
-		int difference = allProducts.size() - CatalogENDIndex;
+		List<Product> displayProducts = getDisplayedProducts();
+		int difference = displayProducts.size() - CatalogENDIndex;
 		if(difference == 0)
 		{
 
@@ -1252,27 +1255,28 @@ public class CatalogController {
 	int updateFieldsBounds = 0;
 	public void updateFields(int mode)
 	{
+		List<Product> displayProducts = getDisplayedProducts();
 		System.out.println("START INDEX = " + CatalogSTARTIndex);
 		System.out.println("END INDEX = " + CatalogENDIndex);
-		System.out.println("Length = " + allProducts.size());
+		System.out.println("Length = " + displayProducts.size());
 		if (mode == 0) {
-			flower_name1.setText(allProducts.get(0).getName());
-			flower_name2.setText(allProducts.get(1).getName());
-			flower_name3.setText(allProducts.get(2).getName());
-			flower_name4.setText(allProducts.get(3).getName());
-			flower_name5.setText(allProducts.get(4).getName());
-			flower_name6.setText(allProducts.get(5).getName());
+			flower_name1.setText(displayProducts.get(0).getName());
+			flower_name2.setText(displayProducts.get(1).getName());
+			flower_name3.setText(displayProducts.get(2).getName());
+			flower_name4.setText(displayProducts.get(3).getName());
+			flower_name5.setText(displayProducts.get(4).getName());
+			flower_name6.setText(displayProducts.get(5).getName());
 
 			// Populate the price labels for the first six products.  Each call
 			// wraps the price in String.valueOf(...) and closes the setText
 			// invocation properly with a double closing parenthesis.  Without the
 			// second closing parenthesis the code would fail to compile.
-			flower_price1.setText(String.valueOf(allProducts.get(0).getPrice()));
-			flower_price2.setText(String.valueOf(allProducts.get(1).getPrice()));
-			flower_price3.setText(String.valueOf(allProducts.get(2).getPrice()));
-			flower_price4.setText(String.valueOf(allProducts.get(3).getPrice()));
-			flower_price5.setText(String.valueOf(allProducts.get(4).getPrice()));
-			flower_price6.setText(String.valueOf(allProducts.get(5).getPrice()));
+			flower_price1.setText(String.valueOf(displayProducts.get(0).getPrice()));
+			flower_price2.setText(String.valueOf(displayProducts.get(1).getPrice()));
+			flower_price3.setText(String.valueOf(displayProducts.get(2).getPrice()));
+			flower_price4.setText(String.valueOf(displayProducts.get(3).getPrice()));
+			flower_price5.setText(String.valueOf(displayProducts.get(4).getPrice()));
+			flower_price6.setText(String.valueOf(displayProducts.get(5).getPrice()));
 
 		}
 		else
@@ -1281,10 +1285,10 @@ public class CatalogController {
 			{
 				// MODE = 1 Does Normal Updating , CatalogSTARTIndex and CatalogENDIndex
 				CatalogSTARTIndex = 0;          // Were updated from outside the function.
-				if (allProducts.size() > 5)    // MODE = 2, Do not use Mode 2, Ramiz knows what this shit does, ask him
+				if (displayProducts.size() > 5)    // MODE = 2, Do not use Mode 2, Ramiz knows what this shit does, ask him
 					CatalogENDIndex = 6;
 				else
-					CatalogENDIndex = allProducts.size();
+					CatalogENDIndex = displayProducts.size();
 				System.out.println("START INDEX = " + CatalogSTARTIndex);
 				System.out.println("END INDEX = " + CatalogENDIndex);
 			}
@@ -1303,11 +1307,11 @@ public class CatalogController {
 			flower_name5.setText("/");
 			flower_name6.setText("/");
 
-			for(int i = 0 ; i < allProducts.size() ; i++)
+			for(int i = 0 ; i < displayProducts.size() ; i++)
 			{
-				System.out.println("ID: " + allProducts.get(i).getID());
-				System.out.println("Name: " + allProducts.get(i).getName());
-				System.out.println("Price: " + allProducts.get(i).getPrice());
+				System.out.println("ID: " + displayProducts.get(i).getID());
+				System.out.println("Name: " + displayProducts.get(i).getName());
+				System.out.println("Price: " + displayProducts.get(i).getPrice());
 				System.out.println("### END ###");
 			}
 			ViewItems(false);
@@ -1315,9 +1319,9 @@ public class CatalogController {
 
 			if(CatalogENDIndex - CatalogSTARTIndex > 0)
 			{
-				flower_name1.setText(allProducts.get(CatalogSTARTIndex).getName());
+				flower_name1.setText(displayProducts.get(CatalogSTARTIndex).getName());
 				// Corrected missing closing parenthesis when setting the price text
-				flower_price1.setText(String.valueOf(allProducts.get(CatalogSTARTIndex).getPrice()));
+				flower_price1.setText(String.valueOf(displayProducts.get(CatalogSTARTIndex).getPrice()));
 				flower_button1.setVisible(true);
 				flower_price1.setVisible(true);
 				flower_name1.setVisible(true);
@@ -1327,9 +1331,9 @@ public class CatalogController {
 
 			if (CatalogENDIndex - CatalogSTARTIndex > 1)
 			{
-				flower_name2.setText(allProducts.get(CatalogSTARTIndex + 1).getName());
+				flower_name2.setText(displayProducts.get(CatalogSTARTIndex + 1).getName());
 				// Ensure call to setText is properly closed
-				flower_price2.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 1).getPrice()));
+				flower_price2.setText(String.valueOf(displayProducts.get(CatalogSTARTIndex + 1).getPrice()));
 				flower_button2.setVisible(true);
 				flower_price2.setVisible(true);
 				flower_name2.setVisible(true);
@@ -1338,9 +1342,9 @@ public class CatalogController {
 			}
 			if (CatalogENDIndex - CatalogSTARTIndex > 2)
 			{
-				flower_name3.setText(allProducts.get(CatalogSTARTIndex + 2).getName());
+				flower_name3.setText(displayProducts.get(CatalogSTARTIndex + 2).getName());
 				// Closing parenthesis added
-				flower_price3.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 2).getPrice()));
+				flower_price3.setText(String.valueOf(displayProducts.get(CatalogSTARTIndex + 2).getPrice()));
 				flower_button3.setVisible(true);
 				flower_price3.setVisible(true);
 				flower_name3.setVisible(true);
@@ -1349,9 +1353,9 @@ public class CatalogController {
 			}
 			if (CatalogENDIndex - CatalogSTARTIndex > 3)
 			{
-				flower_name4.setText(allProducts.get(CatalogSTARTIndex + 3).getName());
+				flower_name4.setText(displayProducts.get(CatalogSTARTIndex + 3).getName());
 				// Closing parenthesis added
-				flower_price4.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 3).getPrice()));
+				flower_price4.setText(String.valueOf(displayProducts.get(CatalogSTARTIndex + 3).getPrice()));
 				flower_button4.setVisible(true);
 				flower_price4.setVisible(true);
 				flower_name4.setVisible(true);
@@ -1360,9 +1364,9 @@ public class CatalogController {
 			}
 			if (CatalogENDIndex - CatalogSTARTIndex > 4)
 			{
-				flower_name5.setText(allProducts.get(CatalogSTARTIndex + 4).getName());
+				flower_name5.setText(displayProducts.get(CatalogSTARTIndex + 4).getName());
 				// Closing parenthesis added
-				flower_price5.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 4).getPrice()));
+				flower_price5.setText(String.valueOf(displayProducts.get(CatalogSTARTIndex + 4).getPrice()));
 				flower_button5.setVisible(true);
 				flower_price5.setVisible(true);
 				flower_name5.setVisible(true);
@@ -1374,8 +1378,8 @@ public class CatalogController {
 				// Display the sixth product when more than five items remain.  Use index + 5 to
 				// select the sixth element in the current window and update the corresponding
 				// UI components (name, price, button, cart button and container) for slot 6.
-				flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
-				flower_price6.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
+				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
+				flower_price6.setText(String.valueOf(displayProducts.get(CatalogSTARTIndex + 5).getPrice()));
 				flower_button6.setVisible(true);
 				flower_price6.setVisible(true);
 				flower_name6.setVisible(true);
@@ -1384,9 +1388,9 @@ public class CatalogController {
 			}
 			if (CatalogENDIndex - CatalogSTARTIndex == 6)
 			{
-				flower_name6.setText(allProducts.get(CatalogSTARTIndex + 5).getName());
+				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
 				// Closing parenthesis added
-				flower_price6.setText(String.valueOf(allProducts.get(CatalogSTARTIndex + 5).getPrice()));
+				flower_price6.setText(String.valueOf(displayProducts.get(CatalogSTARTIndex + 5).getPrice()));
 				flower_button6.setVisible(true);
 				flower_price6.setVisible(true);
 				flower_name6.setVisible(true);
@@ -1399,6 +1403,8 @@ public class CatalogController {
 	int CatalogENDIndex;
 
 	static List<Product> allProducts = new ArrayList<>();
+	private List<Product> filteredProducts = new ArrayList<>();
+	private boolean filtersApplied = false;
 
 	/**
 	 * Handle clicks on a product card in the catalog.  When a user clicks a product
@@ -1444,10 +1450,11 @@ public class CatalogController {
 		}
 
 		int productIndex = CatalogSTARTIndex + offset;
-		if (productIndex < 0 || productIndex >= allProducts.size()) {
+		List<Product> displayProducts = getDisplayedProducts();
+		if (productIndex < 0 || productIndex >= displayProducts.size()) {
 			return null;
 		}
-		return allProducts.get(productIndex);
+		return displayProducts.get(productIndex);
 	}
 
 	private void openProductDetailsModal(Product product) {
@@ -1749,6 +1756,7 @@ public class CatalogController {
 	public void updateGui(UpdateGuiEvent upEvent){
 		System.out.println("arrived to the update GUI  event");
 		allProducts = upEvent.getRecievedList();
+		resetFilteredProducts();
 		availableProducts = true;
 	}
 	@Subscribe
@@ -1805,6 +1813,7 @@ public class CatalogController {
 			System.out.println(rtEvent.getRecievedList().get(i).getButton());
 		}
 		allProducts = rtEvent.getRecievedList();
+		resetFilteredProducts();
 
 
 	}
@@ -1862,6 +1871,7 @@ public class CatalogController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		resetFilteredProducts();
 
 	}
 
@@ -1956,16 +1966,16 @@ public class CatalogController {
 		String selectedColor    = (colorFilter != null && colorFilter.getValue() != null) ? colorFilter.getValue() : "All";
 		String selectedPrice    = (priceFilter != null && priceFilter.getValue() != null) ? priceFilter.getValue() : "All";
 
-		for (int i = 0; i < allProducts.size() && i < 6; i++) {
-			Product p = allProducts.get(i);
-			boolean visible = true;
+		List<Product> updatedFilteredProducts = new ArrayList<>();
+		for (Product p : allProducts) {
+			boolean matches = true;
 			// Category filter
 			if (!"All".equals(selectedCategory) && p.getCategory() != null && !selectedCategory.equalsIgnoreCase(p.getCategory())) {
-				visible = false;
+				matches = false;
 			}
 			// Colour filter
 			if (!"All".equals(selectedColor) && p.getColor() != null && !selectedColor.equalsIgnoreCase(p.getColor())) {
-				visible = false;
+				matches = false;
 			}
 			// Price filter
 			if (!"All".equals(selectedPrice)) {
@@ -1975,34 +1985,30 @@ public class CatalogController {
 					double min = Double.parseDouble(parts[0]);
 					double max = Double.parseDouble(parts[1]);
 					if (price < min || price > max) {
-						visible = false;
+						matches = false;
 					}
 				} catch (Exception e) {
 					// Ignore malformed price range
 				}
 			}
-			// Update visibility for this product index
-			switch (i) {
-				case 0:
-					container1.setVisible(visible);
-					break;
-				case 1:
-					container2.setVisible(visible);
-					break;
-				case 2:
-					container3.setVisible(visible);
-					break;
-				case 3:
-					container4.setVisible(visible);
-					break;
-				case 4:
-					container5.setVisible(visible);
-					break;
-				case 5:
-					container6.setVisible(visible);
-					break;
+			if (matches) {
+				updatedFilteredProducts.add(p);
 			}
 		}
+		filteredProducts = updatedFilteredProducts;
+		filtersApplied = true;
+		CatalogSTARTIndex = 0;
+		CatalogENDIndex = Math.min(6, filteredProducts.size());
+		updateFields(1);
+	}
+
+	private List<Product> getDisplayedProducts() {
+		return filtersApplied ? filteredProducts : allProducts;
+	}
+
+	private void resetFilteredProducts() {
+		filteredProducts = new ArrayList<>(allProducts);
+		filtersApplied = false;
 	}
 
 
