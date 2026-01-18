@@ -583,6 +583,9 @@ public class CatalogController {
 	/* ========================= */
 
 	private void addToCart(int offset) {
+		if (!ensureLoggedInForCart()) {
+			return;
+		}
 
 		int index = CatalogSTARTIndex + offset;
 		List<Product> displayProducts = getDisplayedProducts();
@@ -614,6 +617,21 @@ public class CatalogController {
 		} else {
 			cartTextDiscount.setText(String.valueOf(basePrice));
 		}
+	}
+
+	private boolean ensureLoggedInForCart() {
+		if (resolveCurrentPrivilegeLevel() >= 1) {
+			return true;
+		}
+
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Login Required");
+		alert.setHeaderText("Please log in to add items to your cart.");
+		alert.setContentText("Guests can browse the catalog, but checkout and ordering require a user account.");
+		alert.showAndWait();
+
+		NavigationService.getInstance().navigate("Login");
+		return false;
 	}
 
 	private void addProductToCartByIndex(int offset) {
