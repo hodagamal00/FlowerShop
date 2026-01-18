@@ -171,7 +171,7 @@
                                                             <Font size="14.0" />
                                                         </font>
                                                     </Label>
-                                                    <Label fx:id="deliveryFeeLabel" text="$9.99">
+                                                    <Label fx:id="deliveryFeeLabel" text="\$9.99">
                                                         <font>
                                                             <Font size="14.0" />
                                                         </font>
