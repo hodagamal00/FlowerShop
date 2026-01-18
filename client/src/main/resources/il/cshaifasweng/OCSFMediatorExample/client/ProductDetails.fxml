@@ -187,7 +187,7 @@
 
                                 <!-- Additional Information Section -->
                                 <VBox spacing="20.0" layoutX="60.0" layoutY="700.0" prefWidth="1400.0" styleClass="card product-details-info-card">
-                                    <Label text="Delivery & Guarantee Information" styleClass="section-header">
+                                    <Label text="Delivery &amp; Guarantee Information" styleClass="section-header">
                                         <font>
                                             <Font name="System Bold" size="20.0" />
                                         </font>

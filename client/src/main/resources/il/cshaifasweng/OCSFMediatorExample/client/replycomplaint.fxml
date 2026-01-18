@@ -166,11 +166,11 @@
                         <Font size="72.0" />
                      </font>
                   </Label>
+                  <Text fx:id="other" visible="false" />
                </children>
             </AnchorPane>
 
             <!-- Hidden Elements -->
-            <Text fx:id="other" visible="false" />
          </children>
       </AnchorPane>
    </content>
