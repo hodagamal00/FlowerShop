@@ -103,10 +103,23 @@
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
+
+                                                    <Label fx:id="flower_promo1" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                        <StackPane.margin>
+                                                            <Insets top="10" left="10" />
+                                                        </StackPane.margin>
+                                                        <StackPane.alignment>TOP_LEFT</StackPane.alignment>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name1" text="Sunflower" styleClass="product-name" />
+                                            <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
+                                                <children>
+                                                    <Label fx:id="flower_price_before1" text="200₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after1" text="150₪" styleClass="price-after" />
+                                                </children>
+                                            </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
                                                 <children>
                                                     <Label fx:id="flower_sku1" text="SKU: -" styleClass="product-meta" />
@@ -138,10 +151,23 @@
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
+
+                                                    <Label fx:id="flower_promo2" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                        <StackPane.margin>
+                                                            <Insets top="10" left="10" />
+                                                        </StackPane.margin>
+                                                        <StackPane.alignment>TOP_LEFT</StackPane.alignment>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name2" text="Daisy" styleClass="product-name" />
+                                            <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
+                                                <children>
+                                                    <Label fx:id="flower_price_before2" text="120₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after2" text="100₪" styleClass="price-after" />
+                                                </children>
+                                            </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
                                                 <children>
                                                     <Label fx:id="flower_sku2" text="SKU: -" styleClass="product-meta" />
@@ -173,10 +199,23 @@
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
+
+                                                    <Label fx:id="flower_promo3" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                        <StackPane.margin>
+                                                            <Insets top="10" left="10" />
+                                                        </StackPane.margin>
+                                                        <StackPane.alignment>TOP_LEFT</StackPane.alignment>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name3" text="Lily" styleClass="product-name" />
+                                            <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
+                                                <children>
+                                                    <Label fx:id="flower_price_before3" text="100₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after3" text="80₪" styleClass="price-after" />
+                                                </children>
+                                            </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
                                                 <children>
                                                     <Label fx:id="flower_sku3" text="SKU: -" styleClass="product-meta" />
@@ -208,10 +247,23 @@
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
+
+                                                    <Label fx:id="flower_promo4" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                        <StackPane.margin>
+                                                            <Insets top="10" left="10" />
+                                                        </StackPane.margin>
+                                                        <StackPane.alignment>TOP_LEFT</StackPane.alignment>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name4" text="Tulip" styleClass="product-name" />
+                                            <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
+                                                <children>
+                                                    <Label fx:id="flower_price_before4" text="70₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after4" text="60₪" styleClass="price-after" />
+                                                </children>
+                                            </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
                                                 <children>
                                                     <Label fx:id="flower_sku4" text="SKU: -" styleClass="product-meta" />
@@ -243,10 +295,23 @@
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
+
+                                                    <Label fx:id="flower_promo5" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                        <StackPane.margin>
+                                                            <Insets top="10" left="10" />
+                                                        </StackPane.margin>
+                                                        <StackPane.alignment>TOP_LEFT</StackPane.alignment>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name5" text="Rose" styleClass="product-name" />
+                                            <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
+                                                <children>
+                                                    <Label fx:id="flower_price_before5" text="25₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after5" text="15₪" styleClass="price-after" />
+                                                </children>
+                                            </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
                                                 <children>
                                                     <Label fx:id="flower_sku5" text="SKU: -" styleClass="product-meta" />
@@ -278,10 +343,23 @@
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
+
+                                                    <Label fx:id="flower_promo6" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                        <StackPane.margin>
+                                                            <Insets top="10" left="10" />
+                                                        </StackPane.margin>
+                                                        <StackPane.alignment>TOP_LEFT</StackPane.alignment>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name6" text="Orchid" styleClass="product-name" />
+                                            <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
+                                                <children>
+                                                    <Label fx:id="flower_price_before6" text="150₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after6" text="120₪" styleClass="price-after" />
+                                                </children>
+                                            </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
                                                 <children>
                                                     <Label fx:id="flower_sku6" text="SKU: -" styleClass="product-meta" />

@@ -303,6 +303,27 @@
     -fx-font-weight: bold;
 }
 
+.price-row {
+    -fx-spacing: 6px;
+}
+
+.price-before {
+    -fx-text-fill: -fx-secondary;
+    -fx-font-size: 12px;
+    -fx-strikethrough: true;
+}
+
+.price-after {
+    -fx-text-fill: -fx-primary-dark;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.promo-badge {
+    -fx-padding: 4px 10px;
+    -fx-font-size: 12px;
+}
+
 .product-name {
     -fx-font-size: 18px;
     -fx-font-weight: bold;
