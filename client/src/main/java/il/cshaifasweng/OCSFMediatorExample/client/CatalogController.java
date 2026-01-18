@@ -1970,12 +1970,16 @@ public class CatalogController {
 		for (Product p : allProducts) {
 			boolean matches = true;
 			// Category filter
-			if (!"All".equals(selectedCategory) && p.getCategory() != null && !selectedCategory.equalsIgnoreCase(p.getCategory())) {
-				matches = false;
+			if (!"All".equals(selectedCategory)) {
+				if (p.getCategory() == null || !selectedCategory.equalsIgnoreCase(p.getCategory())) {
+					matches = false;
+				}
 			}
 			// Colour filter
-			if (!"All".equals(selectedColor) && p.getColor() != null && !selectedColor.equalsIgnoreCase(p.getColor())) {
-				matches = false;
+			if (!"All".equals(selectedColor)) {
+				if (p.getColor() == null || !selectedColor.equalsIgnoreCase(p.getColor())) {
+					matches = false;
+				}
 			}
 			// Price filter
 			if (!"All".equals(selectedPrice)) {
