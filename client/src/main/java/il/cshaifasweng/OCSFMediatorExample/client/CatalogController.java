@@ -1369,6 +1369,81 @@ public class CatalogController {
 		return label + ": " + value;
 	}
 
+	private void ensureProductMetadata(List<Product> products) {
+		if (products == null) {
+			return;
+		}
+		for (int i = 0; i < products.size(); i++) {
+			applyDefaultMetadata(products.get(i), i);
+		}
+	}
+
+	private void applyDefaultMetadata(Product product, int index) {
+		if (product == null) {
+			return;
+		}
+		if (product.getSku() == null || product.getSku().isBlank()) {
+			product.setSku(defaultSkuFor(product, index));
+		}
+		if (product.getCategory() == null || product.getCategory().isBlank()) {
+			product.setCategory(defaultCategoryFor(index));
+		}
+		if (product.getColor() == null || product.getColor().isBlank()) {
+			product.setColor(defaultColorFor(index));
+		}
+	}
+
+	private String defaultSkuFor(Product product, int index) {
+		String[] defaultSkus = {
+				"SUN-001",
+				"DAI-001",
+				"LIL-001",
+				"TUL-001",
+				"ROS-001",
+				"ORC-001"
+		};
+		if (index >= 0 && index < defaultSkus.length) {
+			return defaultSkus[index];
+		}
+		if (product != null && product.getID() > 0) {
+			return "SKU-" + product.getID();
+		}
+		if (product != null && product.getName() != null && !product.getName().isBlank()) {
+			return "SKU-" + product.getName().trim().toUpperCase(Locale.US).replaceAll("[^A-Z0-9]+", "-");
+		}
+		return "SKU-UNKNOWN";
+	}
+
+	private String defaultCategoryFor(int index) {
+		String[] defaultCategories = {
+				"Bouquet",
+				"Bouquet",
+				"Arrangement",
+				"Bouquet",
+				"Bouquet",
+				"Arrangement"
+		};
+		if (index >= 0 && index < defaultCategories.length) {
+			return defaultCategories[index];
+		}
+		return "Other";
+	}
+
+	private String defaultColorFor(int index) {
+		String[] defaultColors = {
+				"Yellow",
+				"White",
+				"White",
+				"Pink",
+				"Red",
+				"Purple"
+		};
+		if (index >= 0 && index < defaultColors.length) {
+			return defaultColors[index];
+		}
+		return "Mixed";
+	}
+
 	private String formatPrice(double price) {
 		if (price == Math.floor(price)) {
 			return String.format(Locale.US, "%.0f₪", price);
@@ -2087,6 +2162,7 @@ public class CatalogController {
 	public void updateGui(UpdateGuiEvent upEvent){
 		System.out.println("arrived to the update GUI  event");
 		allProducts = upEvent.getRecievedList();
+		ensureProductMetadata(allProducts);
 		resetFilteredProducts();
 		availableProducts = true;
 	}
@@ -2144,6 +2220,7 @@ public class CatalogController {
 			System.out.println(rtEvent.getRecievedList().get(i).getButton());
 		}
 		allProducts = rtEvent.getRecievedList();
+		ensureProductMetadata(allProducts);
 		resetFilteredProducts();
 
 
@@ -2177,16 +2254,22 @@ public class CatalogController {
 			ex.printStackTrace();
 		}
 		Product flower1 = new Product(1, flower_button1.getId(), flower_name1.getText(), "", price1);
+		applyDefaultMetadata(flower1, 0);
 		allProducts.add(flower1);
 		Product flower2 = new Product(2, flower_button2.getId(), flower_name2.getText(), "", price2);
+		applyDefaultMetadata(flower2, 1);
 		allProducts.add(flower2);
 		Product flower3 = new Product(3, flower_button3.getId(), flower_name3.getText(), "", price3);
+		applyDefaultMetadata(flower3, 2);
 		allProducts.add(flower3);
 		Product flower4 = new Product(4, flower_button4.getId(), flower_name4.getText(), "", price4);
+		applyDefaultMetadata(flower4, 3);
 		allProducts.add(flower4);
 		Product flower5 = new Product(5, flower_button5.getId(), flower_name5.getText(), "", price5);
+		applyDefaultMetadata(flower5, 4);
 		allProducts.add(flower5);
 		Product flower6 = new Product(6, flower_button6.getId(), flower_name6.getText(), "", price6);
+		applyDefaultMetadata(flower6, 5);
 		allProducts.add(flower6);
 
 		List<Product> productList = new ArrayList<Product>();
