@@ -349,8 +349,11 @@ public class MyOrdersController {
         {
             cancelButton.setVisible(true);
 
-            int selected = orderList.getSelectionModel().getSelectedItem().charAt(0) - 48;
+            int selected = parseSelectedOrderId();
             System.out.println("Selected is " + selected);
+            if (selected == -1) {
+                return;
+            }
             //int theID = Integer.parseInt(enterID.getText());
             for (int i = 0; i < allOrders.size(); i++) {
                 if (allOrders.get(i).getOrderID() == selected) {
@@ -398,13 +401,13 @@ public class MyOrdersController {
             else
                 deliverService.setText("Delivery");
             if (retrievedOrder.isDelivered() == true)
-                deliverService.setText("Delivered/Picked Up");
+                deliverStatus.setText("Delivered/Picked Up");
             else
-                deliverService.setText("Not Delivered/Picked Up");
+                deliverStatus.setText("Not Delivered/Picked Up");
             RecepName.setText(retrievedOrder.getRecepName());
             RecepAddress.setText(retrievedOrder.getRecepAddress());
             RecepNumber.setText(String.valueOf(retrievedOrder.getRecepPhone()));
-            if (retrievedOrder.getGreeting() != "")
+            if (retrievedOrder.getGreeting() != null && !retrievedOrder.getGreeting().isEmpty())
                 greetingText.setText(retrievedOrder.getGreeting());
             else
                 greetingText.setText("No Greeting");
@@ -528,6 +531,22 @@ public class MyOrdersController {
         System.out.println("arrived to subscriebr of passOrders !");
         List<Order> recievedOrders = passOrders.getRecievedOrders();
         allOrders = recievedOrders;
+    }
+
+    private int parseSelectedOrderId() {
+        String selectedItem = orderList.getSelectionModel().getSelectedItem();
+        if (selectedItem == null || selectedItem.isBlank()) {
+            return -1;
+        }
+        String[] parts = selectedItem.split(" - ", 2);
+        if (parts.length == 0) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(parts[0].trim());
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
     }
 
 
