@@ -102,7 +102,7 @@
 
                                             <!-- Total Amount -->
                                             <HBox spacing="15.0" alignment="CENTER_LEFT">
-                                                <Label text="Total Amount:" prefWidth="180.0">
+                                                <Label text="Total Amount:" wrapText="true" prefWidth="180.0">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
