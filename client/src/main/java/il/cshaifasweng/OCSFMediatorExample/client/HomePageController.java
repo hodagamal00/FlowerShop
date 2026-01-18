@@ -62,19 +62,15 @@ public class HomePageController {
 
     @FXML
     private void handleTrackOrders(ActionEvent event) {
-        if (isLoggedIn()) {
+        if (requireLogin("track your orders")) {
             NavigationService.getInstance().navigate("myorders");
-        } else {
-            NavigationService.getInstance().navigate("Login");
         }
     }
 
     @FXML
     private void handleStartCustom(ActionEvent event) {
-        if (isLoggedIn()) {
+        if (requireLogin("start a custom order")) {
             NavigationService.getInstance().navigate("cart");
-        } else {
-            NavigationService.getInstance().navigate("Login");
         }
     }
 
@@ -86,5 +82,14 @@ public class HomePageController {
 
     private boolean isLoggedIn() {
         return SimpleClient.getUser() != null;
+    }
+
+    private boolean requireLogin(String actionLabel) {
+        if (isLoggedIn()) {
+            return true;
+        }
+        NavigationService.getInstance().setStatus("Please log in to " + actionLabel + ".");
+        NavigationService.getInstance().navigate("Login");
+        return false;
     }
 }
