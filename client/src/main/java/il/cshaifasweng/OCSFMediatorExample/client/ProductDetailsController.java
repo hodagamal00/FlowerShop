@@ -16,9 +16,6 @@ import java.io.IOException;
 
 public class ProductDetailsController {
 
-    @FXML private Button backToCatalogBtn;
-    @FXML private Button viewCartBtn;
-    @FXML private Button closeBtn;
     @FXML private ImageView productImage;
     @FXML private Text productNameText;
     @FXML private Label idLabel;
@@ -254,17 +251,11 @@ public class ProductDetailsController {
     }
 
     private Stage getCurrentStage() {
-        if (closeBtn != null && closeBtn.getScene() != null) {
-            return (Stage) closeBtn.getScene().getWindow();
-        }
-        if (viewCartBtn != null && viewCartBtn.getScene() != null) {
-            return (Stage) viewCartBtn.getScene().getWindow();
-        }
-        if (backToCatalogBtn != null && backToCatalogBtn.getScene() != null) {
-            return (Stage) backToCatalogBtn.getScene().getWindow();
-        }
         if (priceText != null && priceText.getScene() != null) {
             return (Stage) priceText.getScene().getWindow();
+        }
+        if (productNameText != null && productNameText.getScene() != null) {
+            return (Stage) productNameText.getScene().getWindow();
         }
         return null;
     }
