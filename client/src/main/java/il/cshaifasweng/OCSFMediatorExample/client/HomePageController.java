@@ -13,6 +13,8 @@ import javafx.scene.control.Button;
 public class HomePageController {
 
     @FXML private Button browseCatalogButton;
+    @FXML private Button loginButton;
+    @FXML private Button createAccountButton;
     @FXML private Button trackOrdersButton;
     @FXML private Button openCatalogButton;
     @FXML private Button startCustomButton;
@@ -24,6 +26,8 @@ public class HomePageController {
         // Wire buttons defensively so the landing page always navigates, even
         // if the onAction attributes are removed during scene editor tweaks.
         attachHandler(browseCatalogButton, this::handleBrowseCatalog);
+        attachHandler(loginButton, this::handleLogin);
+        attachHandler(createAccountButton, this::handleCreateAccount);
         attachHandler(openCatalogButton, this::handleOpenCatalog);
         attachHandler(viewAllButton, this::handleViewAll);
         attachHandler(trackOrdersButton, this::handleTrackOrders);
@@ -34,6 +38,16 @@ public class HomePageController {
     @FXML
     private void handleBrowseCatalog(ActionEvent event) {
         NavigationService.getInstance().navigate("Catalog");
+    }
+
+    @FXML
+    private void handleLogin(ActionEvent event) {
+        NavigationService.getInstance().navigate("Login");
+    }
+
+    @FXML
+    private void handleCreateAccount(ActionEvent event) {
+        NavigationService.getInstance().navigate("register");
     }
 
     @FXML
