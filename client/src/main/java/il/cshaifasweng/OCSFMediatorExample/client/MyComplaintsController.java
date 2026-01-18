@@ -22,22 +22,16 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Calendar;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 public class MyComplaintsController {
 
 
     Account currentUser;
-    @FXML // ResourceBundle that was given to the FXMLLoader
-    private ResourceBundle resources;
-
-    @FXML // URL location of the FXML file that was given to the FXMLLoader
-    private URL location;
-
     @FXML // fx:id="answerBool"
     private TextField answerBool; // Value injected by FXMLLoader
 
@@ -67,6 +61,18 @@ public class MyComplaintsController {
 
     @FXML // fx:id="replyWorker"
     private TextField replyWorker; // Value injected by FXMLLoader
+
+    @FXML
+    private TextField createdAt;
+
+    @FXML
+    private TextField respondedAt;
+
+    @FXML
+    private TextField slaStatus;
+
+    @FXML
+    private TextField compensationDecision;
 
 
     private Integer nextComplaintId;
@@ -197,6 +203,10 @@ public class MyComplaintsController {
         assert submitComplaint != null : "fx:id=\"submitComplaint\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert refundMoney != null : "fx:id=\"refundMoney\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert replyWorker != null : "fx:id=\"replyWorker\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert createdAt != null : "fx:id=\"createdAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert respondedAt != null : "fx:id=\"respondedAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert slaStatus != null : "fx:id=\"slaStatus\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert compensationDecision != null : "fx:id=\"compensationDecision\" was not injected: check your FXML file 'mycomplaints.fxml'.";
 
         loadButton.setDisable(true);
         backToCatalog.setDisable(true);
@@ -354,6 +364,25 @@ public class MyComplaintsController {
         }
         replyWorker.setText(Integer.toString(selectedComplaint.getAnswerworkerID()));
         complaintText.setText(selectedComplaint.getComplaintText());
+        createdAt.setText(formatDate(selectedComplaint.getCreatedAt()));
+        respondedAt.setText(formatDate(selectedComplaint.getRespondedAt()));
+        slaStatus.setText(defaultIfBlank(selectedComplaint.getSlaStatus()));
+        compensationDecision.setText(defaultIfBlank(selectedComplaint.getCompensationDecision()));
+    }
+
+    private String formatDate(Date date) {
+        if (date == null) {
+            return "—";
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        return formatter.format(date);
+    }
+
+    private String defaultIfBlank(String value) {
+        if (value == null || value.isBlank()) {
+            return "—";
+        }
+        return value;
     }
 
     private void showAlert(String message) {

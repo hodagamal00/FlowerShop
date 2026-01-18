@@ -25,7 +25,7 @@
         <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="card modal-header">
             <Text text="Product Details" styleClass="card-header" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="closeBtn" text="Close" styleClass="btn-outline" onAction="#closeModal" />
+            <Button text="Close" styleClass="btn-outline" onAction="#closeModal" />
         </HBox>
     </top>
     <center>

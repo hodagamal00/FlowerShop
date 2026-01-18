@@ -76,22 +76,22 @@
                <HBox spacing="15.0">
                   <VBox spacing="8.0" prefWidth="250.0">
                      <Text text="Created At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                     <TextField editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                     <TextField fx:id="createdAt" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
                   </VBox>
                   <VBox spacing="8.0" prefWidth="250.0">
                      <Text text="Responded At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                     <TextField editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                     <TextField fx:id="respondedAt" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
                   </VBox>
                </HBox>
 
                <HBox spacing="15.0">
                   <VBox spacing="8.0" prefWidth="250.0">
                      <Text text="SLA Status:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                     <TextField editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: #c0392b;" />
+                     <TextField fx:id="slaStatus" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: #c0392b;" />
                   </VBox>
                   <VBox spacing="8.0" prefWidth="250.0">
                      <Text text="Compensation Decision:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                     <TextField editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                     <TextField fx:id="compensationDecision" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
                   </VBox>
                </HBox>
                <VBox spacing="8.0">

@@ -32,8 +32,8 @@
                                 <Font name="System Bold" size="28.0" />
                             </font>
                         </Label>
-                        <Button fx:id="backToCatalogBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goBackToCatalog" text="← Back to Catalog" layoutX="280.0" layoutY="20.0" prefWidth="150.0" />
-                        <Button fx:id="viewCartBtn" styleClass="btn-primary" mnemonicParsing="false" onAction="#viewCart" text="View Cart" layoutX="1350.0" layoutY="20.0" prefWidth="120.0" />
+                        <Button styleClass="nav-button" mnemonicParsing="false" onAction="#goBackToCatalog" text="← Back to Catalog" layoutX="280.0" layoutY="20.0" prefWidth="150.0" />
+                        <Button styleClass="btn-primary" mnemonicParsing="false" onAction="#viewCart" text="View Cart" layoutX="1350.0" layoutY="20.0" prefWidth="120.0" />
                     </children>
                 </AnchorPane>
 
