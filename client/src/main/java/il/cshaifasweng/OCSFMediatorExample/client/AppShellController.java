@@ -36,7 +36,7 @@ public class AppShellController {
     @FXML private Button loginButton;
     @FXML private VBox profileContainer;
     @FXML private Button profileButton;
-    @FXML private Label profileNameLabel;
+    @FXML private Label accountNameLabel;
     @FXML private Button cartButton;
     @FXML private Label statusLabel;
     @FXML private StackPane contentPane;
@@ -72,8 +72,8 @@ public class AppShellController {
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
-        if (profileNameLabel != null) {
-            profileNameLabel.setVisible(false);
+        if (accountNameLabel != null) {
+            accountNameLabel.setVisible(false);
         }
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
@@ -139,9 +139,9 @@ public class AppShellController {
             loginButton.setVisible(!loggedIn);
             profileButton.setVisible(loggedIn);
         }
-        if (!loggedIn && profileNameLabel != null) {
-            profileNameLabel.setVisible(false);
-            profileNameLabel.setText("");
+        if (!loggedIn && accountNameLabel != null) {
+            accountNameLabel.setVisible(false);
+            accountNameLabel.setText("");
         }
     }
 
@@ -164,9 +164,9 @@ public class AppShellController {
      */
     public void showAccountName(String fullName) {
         setLoggedIn(true);
-        if (profileNameLabel != null) {
-            profileNameLabel.setText(fullName != null ? fullName : "");
-            profileNameLabel.setVisible(fullName != null && !fullName.isBlank());
+        if (accountNameLabel != null) {
+            accountNameLabel.setText(fullName != null ? fullName : "");
+            accountNameLabel.setVisible(fullName != null && !fullName.isBlank());
         }
     }
 
@@ -183,7 +183,7 @@ public class AppShellController {
     }
 
     private void updateLoginState(Account account) {
-        if (loginButton == null || profileButton == null || profileContainer == null || profileNameLabel == null) {
+        if (loginButton == null || profileButton == null || profileContainer == null || accountNameLabel == null) {
             return;
         }
 
@@ -203,7 +203,7 @@ public class AppShellController {
                 }
             }
 
-            profileNameLabel.setText(loggedIn ? displayName : "");
+            accountNameLabel.setText(loggedIn ? displayName : "");
 
             loginButton.setVisible(!loggedIn);
             loginButton.setManaged(!loggedIn);
