@@ -12,8 +12,6 @@ import javafx.scene.image.ImageView;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class SecondaryController {
 
@@ -30,9 +28,6 @@ public class SecondaryController {
     @FXML private TextArea setDetails;
     @FXML private TextField setName;
     @FXML private TextField setPrice;
-
-    @FXML private ResourceBundle resources;
-    @FXML private URL location;
 
     private boolean canEditProducts;
 
