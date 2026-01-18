@@ -107,6 +107,13 @@
                                             </StackPane>
 
                                             <Label fx:id="flower_name1" text="Sunflower" styleClass="product-name" />
+                                            <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
+                                                <children>
+                                                    <Label fx:id="flower_sku1" text="SKU: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_category1" text="Type: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_color1" text="Color: -" styleClass="product-meta" />
+                                                </children>
+                                            </VBox>
                                             <Button styleClass="btn-primary" fx:id="flower1_addCart"
                                                     mnemonicParsing="false" onAction="#addToCartFlower1"
                                                     text="Add to Cart" prefWidth="220.0" />
@@ -135,6 +142,13 @@
                                             </StackPane>
 
                                             <Label fx:id="flower_name2" text="Daisy" styleClass="product-name" />
+                                            <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
+                                                <children>
+                                                    <Label fx:id="flower_sku2" text="SKU: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_category2" text="Type: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_color2" text="Color: -" styleClass="product-meta" />
+                                                </children>
+                                            </VBox>
                                             <Button styleClass="btn-primary" fx:id="flower2_addCart"
                                                     mnemonicParsing="false" onAction="#addToCartFlower2"
                                                     text="Add to Cart" prefWidth="220.0" />
@@ -163,6 +177,13 @@
                                             </StackPane>
 
                                             <Label fx:id="flower_name3" text="Lily" styleClass="product-name" />
+                                            <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
+                                                <children>
+                                                    <Label fx:id="flower_sku3" text="SKU: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_category3" text="Type: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_color3" text="Color: -" styleClass="product-meta" />
+                                                </children>
+                                            </VBox>
                                             <Button styleClass="btn-primary" fx:id="flower3_addCart"
                                                     mnemonicParsing="false" onAction="#addToCartFlower3"
                                                     text="Add to Cart" prefWidth="220.0" />
@@ -191,6 +212,13 @@
                                             </StackPane>
 
                                             <Label fx:id="flower_name4" text="Tulip" styleClass="product-name" />
+                                            <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
+                                                <children>
+                                                    <Label fx:id="flower_sku4" text="SKU: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_category4" text="Type: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_color4" text="Color: -" styleClass="product-meta" />
+                                                </children>
+                                            </VBox>
                                             <Button styleClass="btn-primary" fx:id="flower4_addCart"
                                                     mnemonicParsing="false" onAction="#addToCartFlower4"
                                                     text="Add to Cart" prefWidth="220.0" />
@@ -219,6 +247,13 @@
                                             </StackPane>
 
                                             <Label fx:id="flower_name5" text="Rose" styleClass="product-name" />
+                                            <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
+                                                <children>
+                                                    <Label fx:id="flower_sku5" text="SKU: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_category5" text="Type: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_color5" text="Color: -" styleClass="product-meta" />
+                                                </children>
+                                            </VBox>
                                             <Button styleClass="btn-primary" fx:id="flower5_addCart"
                                                     mnemonicParsing="false" onAction="#addToCartFlower5"
                                                     text="Add to Cart" prefWidth="220.0" />
@@ -247,6 +282,13 @@
                                             </StackPane>
 
                                             <Label fx:id="flower_name6" text="Orchid" styleClass="product-name" />
+                                            <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
+                                                <children>
+                                                    <Label fx:id="flower_sku6" text="SKU: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_category6" text="Type: -" styleClass="product-meta" />
+                                                    <Label fx:id="flower_color6" text="Color: -" styleClass="product-meta" />
+                                                </children>
+                                            </VBox>
                                             <Button styleClass="btn-primary" fx:id="flower6_addCart"
                                                     mnemonicParsing="false" onAction="#addToCartFlower6"
                                                     text="Add to Cart" prefWidth="220.0" />
