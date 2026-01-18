@@ -153,7 +153,7 @@ public class OrderConfirmationController {
     void viewOrderDetails() {
         // Navigate to order details page
         if (confirmedOrder != null) {
-            OrderDetailsController.setOrder(confirmedOrder);
+            OrderDetailsController.setOrder(confirmedOrder, null);
         }
         
         try {
