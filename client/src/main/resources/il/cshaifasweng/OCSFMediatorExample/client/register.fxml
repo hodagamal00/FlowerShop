@@ -124,7 +124,7 @@
                     </VBox>
 
                     <!-- Hidden Labels -->
-                    <Label fx:id="email_regex_error1" visible="false" />
+                    <Label visible="false" />
                 </VBox>
             </children>
         </AnchorPane>
