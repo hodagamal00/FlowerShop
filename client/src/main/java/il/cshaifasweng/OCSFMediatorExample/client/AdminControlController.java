@@ -1,10 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.event.ActionEvent;
@@ -18,12 +16,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 public class AdminControlController {
-
-    @FXML // ResourceBundle that was given to the FXMLLoader
-    private ResourceBundle resources;
-
-    @FXML // URL location of the FXML file that was given to the FXMLLoader
-    private URL location;
 
     @FXML // fx:id="accID"
     private TextField accID; // Value injected by FXMLLoader
