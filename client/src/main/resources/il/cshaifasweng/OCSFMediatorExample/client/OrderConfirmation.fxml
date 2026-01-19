@@ -127,6 +127,85 @@
                                                     </font>
                                                 </Label>
                                             </HBox>
+
+                                            <!-- Payment Status -->
+                                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                                <Label text="Payment Status:" prefWidth="180.0">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="paymentStatusLabel" text="Payment recorded at placement">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </HBox>
+                                        </VBox>
+
+                                        <Separator prefWidth="700.0" />
+
+                                        <!-- Order Summary -->
+                                        <VBox spacing="15.0">
+                                            <Text text="Order Summary" fill="#4a148c">
+                                                <font>
+                                                    <Font name="System Bold" size="24.0" />
+                                                </font>
+                                            </Text>
+
+                                            <VBox fx:id="orderItemsContainer" spacing="8.0" />
+
+                                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                                <Label text="Items Subtotal:" prefWidth="180.0">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="subtotalLabel" text="$0.00">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </HBox>
+
+                                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                                <Label text="Delivery Fee:" prefWidth="180.0">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="deliveryFeeSummaryLabel" text="$0.00">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </HBox>
+
+                                            <HBox fx:id="discountRow" spacing="15.0" alignment="CENTER_LEFT" visible="false" managed="false">
+                                                <Label text="Discount:" prefWidth="180.0">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Label fx:id="discountLabel" text="-$0.00">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                            </HBox>
+
+                                            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                                                <Label text="Total:" prefWidth="180.0">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Text fx:id="orderTotalSummaryText" text="$0.00" fill="#4a148c">
+                                                    <font>
+                                                        <Font name="System Bold" size="18.0" />
+                                                    </font>
+                                                </Text>
+                                            </HBox>
                                         </VBox>
 
                                         <Separator prefWidth="700.0" />
