@@ -37,6 +37,7 @@ public class HomePageController {
 
     @FXML
     private void handleBrowseCatalog(ActionEvent event) {
+        CatalogFlag.setFlagg(0);
         NavigationService.getInstance().navigate("Catalog");
     }
 
@@ -70,7 +71,7 @@ public class HomePageController {
     @FXML
     private void handleStartCustom(ActionEvent event) {
         if (requireLogin("start a custom order")) {
-            NavigationService.getInstance().navigate("cart");
+            NavigationService.getInstance().navigate("Catalog");
         }
     }
 
