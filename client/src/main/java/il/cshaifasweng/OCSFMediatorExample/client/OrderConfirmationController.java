@@ -67,13 +67,14 @@ public class OrderConfirmationController {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
         orderDateLabel.setText(dateFormat.format(new Date()));
         
-        totalAmountText.setText(String.format("$%.2f", order.getPrice()));
+        totalAmountText.setText(String.format("%d₪", Math.round(order.getPrice())));
         
         // Payment method (get last 4 digits of credit card from account)
         if (SimpleClient.getAccount() != null) {
             long cardNumber = SimpleClient.getAccount().getCreditCardNumber();
             String lastFour = String.valueOf(cardNumber).substring(String.valueOf(cardNumber).length() - 4);
-            paymentMethodLabel.setText("Credit Card (****" + lastFour + ")");
+            String methodLabel = order.getPaymentMethod() != null ? order.getPaymentMethod() : "Credit Card";
+            paymentMethodLabel.setText(methodLabel + " (****" + lastFour + ")");
         }
 
         // Configure delivery/pickup display
@@ -85,7 +86,9 @@ public class OrderConfirmationController {
             pickupInfoContainer.setManaged(false);
             
             // Set delivery details
-            if (SimpleClient.getAccount() != null) {
+            if (order.getDeliveredAddress() != null && !order.getDeliveredAddress().isBlank()) {
+                deliveryAddressLabel.setText(order.getDeliveredAddress());
+            } else if (SimpleClient.getAccount() != null) {
                 deliveryAddressLabel.setText(SimpleClient.getAccount().getAddress());
             }
             
@@ -99,7 +102,7 @@ public class OrderConfirmationController {
                 estimatedDeliveryLabel.setText(deliveryFormat.format(estimatedDate));
             }
             
-            deliveryFeeLabel.setText("$9.99"); // Fixed delivery fee
+            deliveryFeeLabel.setText(String.format("%d₪", Math.round(order.getDeliveryFee())));
         } else {
             deliveryTypeTitle.setText("Pickup Information");
             deliveryAddressContainer.setVisible(false);
