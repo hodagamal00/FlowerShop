@@ -603,8 +603,9 @@ public class CatalogController {
 		basePrice += addedPrice;
 
 		// إضافة المنتج
-		CartItemsList.getItems().add(displayProducts.get(index).getName());
-		userCart.add(displayProducts.get(index));
+		Product selectedProduct = displayProducts.get(index);
+		CartItemsList.getItems().add(selectedProduct.getName());
+		CartService.getInstance().addProduct(selectedProduct, 1);
 
 		// تحديث السعر قبل الخصم
 		cartTextPrice.setText(String.valueOf(basePrice));
@@ -723,6 +724,7 @@ public class CatalogController {
 		if (!ensureLoggedInForCart()) {
 			return;
 		}
+		syncCartFromService();
 		boolean mode;
 		if(cartViewBinary == 0)
 		{
@@ -805,7 +807,7 @@ public class CatalogController {
 		navigateInShell("checkout");
 		System.out.println("arrived to checkout 2");
 		PassAccountEventCheckout recievedAcc = new PassAccountEventCheckout(currentLoggedAccount);
-		recievedAcc.productsToCheckout = userCart;
+		recievedAcc.productsToCheckout = CartService.getInstance().getItemsCopy();
 
 		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
@@ -1748,6 +1750,7 @@ public class CatalogController {
 		String containerId = ((VBox) event.getSource()).getId();
 		Product selected = getProductForContainer(containerId);
 		if (selected != null) {
+			setCurrent_button(selected);
 			openProductDetailsModal(selected);
 		}
 	}
@@ -1873,7 +1876,6 @@ public class CatalogController {
 	int cartPrice = 0;
 	Account currentLoggedAccount;
 	boolean availableProducts = false;
-	List<Product> userCart = new ArrayList<>();
 
 	@FXML
 	void initialize() throws MalformedURLException {
@@ -2602,6 +2604,22 @@ public class CatalogController {
 		return 0;
 	}
 
+	private void syncCartFromService() {
+		if (CartItemsList == null) {
+			return;
+		}
+		CartItemsList.getItems().clear();
+		int basePrice = 0;
+		for (Product product : CartService.getInstance().getItems()) {
+			if (product == null) {
+				continue;
+			}
+			CartItemsList.getItems().add(product.getName());
+			basePrice += (int) Math.round(product.getPrice());
+		}
+		updateCartSummary(basePrice);
+	}
+
 	private void addProductToCart(Product product) {
 		if (product == null) {
 			return;
@@ -2610,7 +2628,7 @@ public class CatalogController {
 		if (CartItemsList != null) {
 			CartItemsList.getItems().add(product.getName());
 		}
-		userCart.add(product);
+		CartService.getInstance().addProduct(product, 1);
 
 		int basePrice = parseCartTotal();
 		basePrice += (int) Math.round(product.getPrice());
@@ -2743,6 +2761,16 @@ public class CatalogController {
 	 */
 	@FXML
 	void openProductDetails(ActionEvent event) throws IOException {
+		Product selected = getCurrent_button();
+		if (selected == null) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Product Details");
+			alert.setHeaderText("No product selected");
+			alert.setContentText("Please select a product from the catalog first.");
+			alert.showAndWait();
+			return;
+		}
+		ProductDetailsController.setPendingProduct(selected);
 		navigateInShell("ProductDetails");
 	}
 
