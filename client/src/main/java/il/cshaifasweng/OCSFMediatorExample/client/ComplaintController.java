@@ -54,6 +54,8 @@ public class  ComplaintController{
     @FXML
     private TextField complaintIdField;
 
+    @FXML
+    private Label submissionStatusLabel;
 
     @FXML
     private TextField topictxt;
@@ -73,9 +75,8 @@ public class  ComplaintController{
          * If no account is available, simply close the form without sending anything.
          */
         if (currentUser == null) {
-            // No logged-in user; nothing to send
-            Stage stage = (Stage) submitcomp.getScene().getWindow();
-            stage.close();
+            // No logged-in user; block submission
+            showStatus("Please log in to submit a complaint.", true);
             return;
         }
         // Build a new Complaint object.  We set default values for fields not captured in the form
@@ -128,9 +129,8 @@ public class  ComplaintController{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // Close the window after submission
-        Stage stage = (Stage) submitcomp.getScene().getWindow();
-        stage.close();
+        showStatus("Complaint submitted. Response within 24 hours.", false);
+        submitcomp.setDisable(true);
     }
 
     @FXML
@@ -138,6 +138,12 @@ public class  ComplaintController{
     {
         // Register this controller to receive EventBus events
         EventBus.getDefault().register(this);
+        if (submissionStatusLabel != null) {
+            submissionStatusLabel.setVisible(false);
+        }
+        if (submitcomp != null) {
+            submitcomp.setDisable(true);
+        }
         requestNextComplaintId();
 
     }
@@ -153,6 +159,9 @@ public class  ComplaintController{
     public void handlePassAccountEvent(PassAccountEventComplaints passAcc) {
         // Assign the received account to currentUser
         this.currentUser = passAcc.getRecievedAccount();
+        if (submitcomp != null) {
+            submitcomp.setDisable(currentUser == null);
+        }
     }
     @Subscribe
     public void handleNextComplaintId(NextComplaintIdEvent event) {
@@ -168,6 +177,17 @@ public class  ComplaintController{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void showStatus(String message, boolean isError) {
+        if (submissionStatusLabel == null) {
+            return;
+        }
+        submissionStatusLabel.setText(message);
+        submissionStatusLabel.setVisible(true);
+        submissionStatusLabel.setStyle(isError
+                ? "-fx-text-fill: #c0392b; -fx-font-style: italic;"
+                : "-fx-text-fill: #27ae60; -fx-font-style: italic;");
     }
 
 
