@@ -243,14 +243,30 @@ public class ProductDetailsController {
         String imagePath = product.getImage();
         if (imagePath != null && !imagePath.isEmpty()) {
             try {
-                image = new Image(getClass().getResourceAsStream(imagePath));
+                java.net.URL resourceUrl = getClass().getResource(imagePath);
+                if (resourceUrl == null && !imagePath.startsWith("/")) {
+                    resourceUrl = getClass().getResource("/" + imagePath);
+                }
+                if (resourceUrl != null) {
+                    image = new Image(resourceUrl.toExternalForm());
+                } else if (imagePath.startsWith("http://")
+                        || imagePath.startsWith("https://")
+                        || imagePath.startsWith("file:")) {
+                    image = new Image(imagePath);
+                }
             } catch (Exception e) {
                 System.out.println("Could not load product image: " + imagePath);
             }
         }
         if (image == null) {
             try {
-                image = new Image(getClass().getResourceAsStream("placeholder.png"));
+                java.net.URL placeholderUrl = getClass().getResource("placeholder.png");
+                if (placeholderUrl == null) {
+                    placeholderUrl = getClass().getResource("/placeholder.png");
+                }
+                if (placeholderUrl != null) {
+                    image = new Image(placeholderUrl.toExternalForm());
+                }
             } catch (Exception e) {
                 System.out.println("Placeholder image not found.");
             }
