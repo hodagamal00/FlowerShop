@@ -1750,6 +1750,7 @@ public class CatalogController {
 		String containerId = ((VBox) event.getSource()).getId();
 		Product selected = getProductForContainer(containerId);
 		if (selected != null) {
+			syncProductImageFromCatalog(selected, getImageViewForContainer(containerId));
 			setCurrent_button(selected);
 			openProductDetailsModal(selected);
 		}
@@ -2770,8 +2771,64 @@ public class CatalogController {
 			alert.showAndWait();
 			return;
 		}
+		syncProductImageFromCatalog(selected, getImageViewForProduct(selected));
 		ProductDetailsController.setPendingProduct(selected);
 		navigateInShell("ProductDetails");
+	}
+
+	private ImageView getImageViewForContainer(String containerId) {
+		switch (containerId) {
+			case "container1":
+				return flower_button1;
+			case "container2":
+				return flower_button2;
+			case "container3":
+				return flower_button3;
+			case "container4":
+				return flower_button4;
+			case "container5":
+				return flower_button5;
+			case "container6":
+				return flower_button6;
+			default:
+				return null;
+		}
+	}
+
+	private ImageView getImageViewForProduct(Product product) {
+		if (product == null || product.getButton() == null) {
+			return null;
+		}
+		String buttonId = product.getButton();
+		if (buttonId.equals(flower_button1.getId())) {
+			return flower_button1;
+		}
+		if (buttonId.equals(flower_button2.getId())) {
+			return flower_button2;
+		}
+		if (buttonId.equals(flower_button3.getId())) {
+			return flower_button3;
+		}
+		if (buttonId.equals(flower_button4.getId())) {
+			return flower_button4;
+		}
+		if (buttonId.equals(flower_button5.getId())) {
+			return flower_button5;
+		}
+		if (buttonId.equals(flower_button6.getId())) {
+			return flower_button6;
+		}
+		return null;
+	}
+
+	private void syncProductImageFromCatalog(Product product, ImageView imageView) {
+		if (product == null || imageView == null || imageView.getImage() == null) {
+			return;
+		}
+		String imageUrl = imageView.getImage().getUrl();
+		if (imageUrl != null && !imageUrl.isBlank()) {
+			product.setImage(imageUrl);
+		}
 	}
 
 	/**

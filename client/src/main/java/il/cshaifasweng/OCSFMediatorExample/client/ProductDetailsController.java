@@ -251,7 +251,9 @@ public class ProductDetailsController {
                     image = new Image(resourceUrl.toExternalForm());
                 } else if (imagePath.startsWith("http://")
                         || imagePath.startsWith("https://")
-                        || imagePath.startsWith("file:")) {
+                        || imagePath.startsWith("file:")
+                        || imagePath.startsWith("jar:")
+                        || imagePath.startsWith("jrt:")) {
                     image = new Image(imagePath);
                 }
             } catch (Exception e) {
