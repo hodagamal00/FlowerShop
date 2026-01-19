@@ -1,18 +1,21 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductDetailsController {
 
@@ -40,6 +43,7 @@ public class ProductDetailsController {
     @FXML private Button viewCartBtn;
     @FXML private Button closeBtn;
 
+    private static Product pendingProduct;
     private Product currentProduct;
     private Product selectedProduct;
 
@@ -48,6 +52,12 @@ public class ProductDetailsController {
         if (quantitySpinner != null) {
             SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
             quantitySpinner.setValueFactory(valueFactory);
+        }
+        if (selectedProduct == null && pendingProduct != null) {
+            setProduct(pendingProduct);
+            pendingProduct = null;
+        } else if (selectedProduct == null) {
+            showMissingProductState();
         }
     }
 
@@ -62,6 +72,10 @@ public class ProductDetailsController {
         }
     }
 
+    public static void setPendingProduct(Product product) {
+        pendingProduct = product;
+    }
+
     /**
      * Load and display product details
      */
@@ -74,12 +88,20 @@ public class ProductDetailsController {
         skuLabel.setText(product.getSku() != null ? product.getSku() : "N/A");
         categoryLabel.setText(product.getCategory() != null ? product.getCategory() : "General");
         colorLabel.setText(product.getColor() != null ? product.getColor() : "Mixed");
-        descriptionText.setText(product.getDetails() != null ? product.getDetails() : "No description available");
+        String details = product.getDetails();
+        descriptionText.setText(details != null && !details.isBlank() ? details : "No description available");
 
         // Load product image (or fallback to placeholder)
         setProductImage(product);
 
         // Handle pricing
+        priceRangeLabel.setVisible(false);
+        priceRangeLabel.setManaged(false);
+        originalPriceText.setVisible(false);
+        discountBadge.setVisible(false);
+        customOptionsContainer.setVisible(false);
+        customOptionsContainer.setManaged(false);
+
         if (product.isCustomProduct()) {
             // Show price range for custom products
             priceRangeLabel.setVisible(true);
@@ -120,10 +142,7 @@ public class ProductDetailsController {
             return;
         }
 
-        // Check if user is logged in
-        if (SimpleClient.getAccount() == null) {
-            errorMessage.setText("Please login to add items to cart");
-            errorMessage.setVisible(true);
+        if (!ensureLoggedIn("add items to cart")) {
             return;
         }
 
@@ -152,75 +171,63 @@ public class ProductDetailsController {
 
         // Get quantity
         int quantity = quantitySpinner.getValue();
+        CartService.getInstance().addProduct(currentProduct, quantity);
 
-        // Add to cart logic here
-        // TODO: Implement cart addition via SimpleClient
-        // For now, just show success message
-        
         successMessage.setText(String.format("✓ Added %d item(s) to cart successfully!", quantity));
         successMessage.setVisible(true);
 
-        // Auto-hide success message after 3 seconds
-        new Thread(() -> {
-            try {
-                Thread.sleep(3000);
-                javafx.application.Platform.runLater(() -> successMessage.setVisible(false));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(event -> successMessage.setVisible(false));
+        pause.play();
     }
 
     @FXML
     void buyNow() {
-        // Add to cart first
-        addToCart();
-        
-        // If successful, navigate to checkout
-        if (successMessage.isVisible()) {
-            try {
-                Thread.sleep(500); // Brief pause to show success message
-                viewCart(); // Go to cart/checkout
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        errorMessage.setVisible(false);
+        successMessage.setVisible(false);
+
+        if (currentProduct == null) {
+            errorMessage.setText("Product details are not available.");
+            errorMessage.setVisible(true);
+            return;
         }
+
+        if (!ensureLoggedIn("buy items")) {
+            return;
+        }
+
+        int quantity = quantitySpinner.getValue();
+        List<Product> checkoutItems = new ArrayList<>();
+        for (int i = 0; i < quantity; i++) {
+            checkoutItems.add(currentProduct);
+        }
+
+        Account account = SimpleClient.getAccount();
+        PassAccountEventCheckout checkoutEvent = new PassAccountEventCheckout(account);
+        checkoutEvent.productsToCheckout = checkoutItems;
+
+        NavigationService.getInstance().navigate("checkout");
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        EventBus.getDefault().post(checkoutEvent);
+                    }
+                }, 500
+        );
     }
 
     @FXML
     void viewCart() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
-            Parent root = loader.load();
-            Stage stage = getCurrentStage();
-            if (stage == null) {
-                return;
-            }
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading cart page: " + e.getMessage());
+        if (!ensureLoggedIn("view the cart")) {
+            return;
         }
+        NavigationService.getInstance().navigate("cart");
     }
 
     @FXML
     void goBackToCatalog() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-            Parent root = loader.load();
-            Stage stage = getCurrentStage();
-            if (stage == null) {
-                return;
-            }
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading catalog page: " + e.getMessage());
-        }
+        NavigationService.getInstance().navigate("Catalog");
     }
 
     @FXML
@@ -261,5 +268,33 @@ public class ProductDetailsController {
             return (Stage) productNameText.getScene().getWindow();
         }
         return null;
+    }
+
+    private boolean ensureLoggedIn(String actionLabel) {
+        if (SimpleClient.getAccount() != null) {
+            return true;
+        }
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Login Required");
+        alert.setHeaderText("Please log in to continue.");
+        alert.setContentText("Guests can browse products, but you need an account to " + actionLabel + ".");
+        alert.showAndWait();
+        NavigationService.getInstance().navigate("Login");
+        return false;
+    }
+
+    private void showMissingProductState() {
+        if (productNameText != null) {
+            productNameText.setText("Product details unavailable");
+        }
+        if (descriptionText != null) {
+            descriptionText.setText("Please return to the catalog and select a product.");
+        }
+        if (addToCartBtn != null) {
+            addToCartBtn.setDisable(true);
+        }
+        if (buyNowBtn != null) {
+            buyNowBtn.setDisable(true);
+        }
     }
 }
