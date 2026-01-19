@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -100,6 +101,9 @@ public class MyOrdersController {
     @FXML // fx:id="cancelButton"
     private Button cancelButton; // Value injected by FXMLLoader
 
+    @FXML // fx:id="refundDecisionLabel"
+    private Label refundDecisionLabel; // Value injected by FXMLLoader
+
 
     @FXML // fx:id="wait"
     private Label wait; // Value injected by FXMLLoader
@@ -121,6 +125,16 @@ public class MyOrdersController {
     @FXML
     void cancelOrder(ActionEvent event)
     {
+        if (SelectedOrder == null) {
+            return;
+        }
+        CancellationDecision decision = calculateCancellationDecision(SelectedOrder);
+        refundDecisionLabel.setText(decision.message);
+        refundDecisionLabel.setVisible(true);
+        if (!decision.cancelAllowed) {
+            cancelButton.setDisable(true);
+            return;
+        }
         LocalDateTime now = LocalDateTime.now();
         double refundPercent = SelectedOrder.calculateRefund(
                 now.getDayOfMonth(),
@@ -307,6 +321,7 @@ public class MyOrdersController {
                 }
             }
             SelectedOrder = retrievedOrder;
+            updateCancellationDecision(retrievedOrder);
             String currentProduct = "";
             String MyProducts = retrievedOrder.getProducts();
             orderProducts.getItems().clear();
@@ -401,12 +416,14 @@ public class MyOrdersController {
         assert totalPrice != null : "fx:id=\"totalPrice\" was not injected: check your FXML file 'myorders.fxml'.";
         assert viewOrder != null : "fx:id=\"viewOrder\" was not injected: check your FXML file 'myorders.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'myorders.fxml'.";
+        assert refundDecisionLabel != null : "fx:id=\"refundDecisionLabel\" was not injected: check your FXML file 'myorders.fxml'.";
 
 
         wait.setVisible(true);
         complaintText.setVisible(false);
         sendComplaint.setVisible(false);
         cancelButton.setVisible(false);
+        refundDecisionLabel.setVisible(false);
 
         viewOrder.setText("Load Orders");
         String orderDetails = "";
@@ -430,6 +447,7 @@ public class MyOrdersController {
         complaintText.setVisible(false);  // Value injected by FXMLLoader
         openComplaint.setVisible(false);  // Value injected by FXMLLoader
         orderProducts.setVisible(false);
+        refundDecisionLabel.setVisible(false);
 
         viewOrder.setDisable(true);
         backToCatalog.setDisable(true);
@@ -487,6 +505,46 @@ public class MyOrdersController {
             return Integer.parseInt(parts[0].trim());
         } catch (NumberFormatException ex) {
             return -1;
+        }
+    }
+
+    private void updateCancellationDecision(Order order) {
+        CancellationDecision decision = calculateCancellationDecision(order);
+        refundDecisionLabel.setText(decision.message);
+        refundDecisionLabel.setVisible(true);
+        cancelButton.setDisable(!decision.cancelAllowed);
+        cancelButton.setVisible(true);
+    }
+
+    private CancellationDecision calculateCancellationDecision(Order order) {
+        LocalDateTime deliveryTime = order.getDelivery_time();
+        if (deliveryTime == null) {
+            return new CancellationDecision(false, "Cancellation unavailable: missing delivery time.");
+        }
+        if (order.isDelivered()) {
+            return new CancellationDecision(false, "Order already delivered. Cancellation unavailable.");
+        }
+        if (order.isCancelled()) {
+            return new CancellationDecision(false, "Order already cancelled. Cancellation unavailable.");
+        }
+        Duration untilDelivery = Duration.between(LocalDateTime.now(), deliveryTime);
+        long minutesUntil = untilDelivery.toMinutes();
+        if (minutesUntil < 60) {
+            return new CancellationDecision(false, "Less than 1 hour before delivery: no refund available.");
+        }
+        if (minutesUntil < 180) {
+            return new CancellationDecision(true, "Cancellation available: 50% refund/credit.");
+        }
+        return new CancellationDecision(true, "Cancellation available: 100% refund/credit.");
+    }
+
+    private static class CancellationDecision {
+        private final boolean cancelAllowed;
+        private final String message;
+
+        private CancellationDecision(boolean cancelAllowed, String message) {
+            this.cancelAllowed = cancelAllowed;
+            this.message = message;
         }
     }
 
