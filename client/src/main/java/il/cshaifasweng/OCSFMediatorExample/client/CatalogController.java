@@ -603,8 +603,9 @@ public class CatalogController {
 		basePrice += addedPrice;
 
 		// إضافة المنتج
-		CartItemsList.getItems().add(displayProducts.get(index).getName());
-		userCart.add(displayProducts.get(index));
+		Product selectedProduct = displayProducts.get(index);
+		CartItemsList.getItems().add(selectedProduct.getName());
+		CartService.getInstance().addProduct(selectedProduct, 1);
 
 		// تحديث السعر قبل الخصم
 		cartTextPrice.setText(String.valueOf(basePrice));
@@ -720,6 +721,10 @@ public class CatalogController {
 	@FXML
 	void viewUserCart(ActionEvent event)
 	{
+		if (!ensureLoggedInForCart()) {
+			return;
+		}
+		syncCartFromService();
 		boolean mode;
 		if(cartViewBinary == 0)
 		{
@@ -802,7 +807,7 @@ public class CatalogController {
 		navigateInShell("checkout");
 		System.out.println("arrived to checkout 2");
 		PassAccountEventCheckout recievedAcc = new PassAccountEventCheckout(currentLoggedAccount);
-		recievedAcc.productsToCheckout = userCart;
+		recievedAcc.productsToCheckout = CartService.getInstance().getItemsCopy();
 
 		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
@@ -978,6 +983,9 @@ public class CatalogController {
 
 	@FXML
 	Product createCustomitem(ActionEvent event) {
+		if (!ensureLoggedInForCart()) {
+			return null;
+		}
 
 		FinishCustomItem.setText("Add Custom Item To Cart");
 		CancelCustomItem.setText("Cancel Custom Item Designer");
@@ -1071,8 +1079,10 @@ public class CatalogController {
 	@FXML
 	void addCartCustomitem(ActionEvent event)
 	{
+		if (!ensureLoggedInForCart()) {
+			return;
+		}
 		customError.setVisible(false);
-		String customPriceString = "";
 		boolean fail = false;
 		if(chooseCustomType.getSelectionModel().getSelectedIndex() == -1)
 		{
@@ -1086,16 +1096,12 @@ public class CatalogController {
 			customError.setVisible(true);
 			fail = true;
 		}
-		customPriceString = customPrice.getText();
-		for(int i = 0 ; i < customPriceString.length() ; i++)
-		{
-			if(customPriceString.charAt(i) < '0' || customPriceString.charAt(i) > '9')
-			{
-				fail = true;
-				customError.setText("Please enter a valid price");
-				customError.setVisible(true);
-
-			}
+		String customPriceString = customPrice.getText();
+		PriceRange desiredRange = parsePriceRange(customPriceString);
+		if (desiredRange == null) {
+			fail = true;
+			customError.setText("Please enter a valid price range (e.g., 50-120)");
+			customError.setVisible(true);
 		}
 
 		if(fail == false)
@@ -1103,17 +1109,11 @@ public class CatalogController {
 			String color = chooseCustomColor.getSelectionModel().getSelectedItem();
 			String Type = chooseCustomType.getSelectionModel().getSelectedItem();
 			// Parse the custom price text into a double before constructing the Product.
-			double priceValue;
-			try {
-				priceValue = Double.parseDouble(customPrice.getText());
-			} catch (NumberFormatException ex) {
-				// Fallback to 0 if parsing fails; you might show an error to the user.
-				priceValue = 0.0;
-			}
+			double priceValue = desiredRange.getSuggestedPrice();
 			// Use the selected type and color strings rather than the ComboBox objects themselves.
 			String selectedType = chooseCustomType.getSelectionModel().getSelectedItem();
 			String selectedColor = chooseCustomColor.getSelectionModel().getSelectedItem();
-			Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor, priceValue);
+			Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor + " (Price Range " + desiredRange.getDisplayText() + ")", priceValue);
 
 			addProductToCart(product);
 
@@ -1750,6 +1750,7 @@ public class CatalogController {
 		String containerId = ((VBox) event.getSource()).getId();
 		Product selected = getProductForContainer(containerId);
 		if (selected != null) {
+			setCurrent_button(selected);
 			openProductDetailsModal(selected);
 		}
 	}
@@ -1875,7 +1876,6 @@ public class CatalogController {
 	int cartPrice = 0;
 	Account currentLoggedAccount;
 	boolean availableProducts = false;
-	List<Product> userCart = new ArrayList<>();
 
 	@FXML
 	void initialize() throws MalformedURLException {
@@ -2604,6 +2604,22 @@ public class CatalogController {
 		return 0;
 	}
 
+	private void syncCartFromService() {
+		if (CartItemsList == null) {
+			return;
+		}
+		CartItemsList.getItems().clear();
+		int basePrice = 0;
+		for (Product product : CartService.getInstance().getItems()) {
+			if (product == null) {
+				continue;
+			}
+			CartItemsList.getItems().add(product.getName());
+			basePrice += (int) Math.round(product.getPrice());
+		}
+		updateCartSummary(basePrice);
+	}
+
 	private void addProductToCart(Product product) {
 		if (product == null) {
 			return;
@@ -2612,7 +2628,7 @@ public class CatalogController {
 		if (CartItemsList != null) {
 			CartItemsList.getItems().add(product.getName());
 		}
-		userCart.add(product);
+		CartService.getInstance().addProduct(product, 1);
 
 		int basePrice = parseCartTotal();
 		basePrice += (int) Math.round(product.getPrice());
@@ -2660,6 +2676,58 @@ public class CatalogController {
 		Account account = SimpleClient.getUser();
 		return account != null && account.isSubscription();
 	}
+
+	private PriceRange parsePriceRange(String rawValue) {
+		if (rawValue == null) {
+			return null;
+		}
+		String sanitized = rawValue.trim();
+		if (sanitized.isEmpty()) {
+			return null;
+		}
+		String normalized = sanitized.replaceAll("\\s+", "");
+		String[] parts = normalized.split("-");
+		try {
+			if (parts.length == 1) {
+				double value = Double.parseDouble(parts[0]);
+				return new PriceRange(value, value);
+			}
+			if (parts.length == 2) {
+				double min = Double.parseDouble(parts[0]);
+				double max = Double.parseDouble(parts[1]);
+				if (min > max) {
+					double swap = min;
+					min = max;
+					max = swap;
+				}
+				return new PriceRange(min, max);
+			}
+		} catch (NumberFormatException ignored) {
+			return null;
+		}
+		return null;
+	}
+
+	private static class PriceRange {
+		private final double min;
+		private final double max;
+
+		private PriceRange(double min, double max) {
+			this.min = Math.max(0, min);
+			this.max = Math.max(0, max);
+		}
+
+		private double getSuggestedPrice() {
+			return (min + max) / 2;
+		}
+
+		private String getDisplayText() {
+			if (min == max) {
+				return String.format(Locale.US, "%.0f", min);
+			}
+			return String.format(Locale.US, "%.0f-%.0f", min, max);
+		}
+	}
 	/**
 	 * Enable manager features (privilege >= 3)
 	 * Allows: Admin dashboard, user management, reports
@@ -2693,6 +2761,16 @@ public class CatalogController {
 	 */
 	@FXML
 	void openProductDetails(ActionEvent event) throws IOException {
+		Product selected = getCurrent_button();
+		if (selected == null) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Product Details");
+			alert.setHeaderText("No product selected");
+			alert.setContentText("Please select a product from the catalog first.");
+			alert.showAndWait();
+			return;
+		}
+		ProductDetailsController.setPendingProduct(selected);
 		navigateInShell("ProductDetails");
 	}
 
