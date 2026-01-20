@@ -252,7 +252,8 @@ public class MyOrdersController {
         if(refund > 0)
             returned = true;
 
-        Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refund/100*SelectedOrder.getTotalPrice(),currentDay,currentMonth,currentYear,"Automated Reply");
+        int refundValue = (int) Math.round(SelectedOrder.getTotalPrice() * (refund / 100.0));
+        Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refundValue,currentDay,currentMonth,currentYear,"Automated Reply");
         UpdateMessage new_msg=new UpdateMessage("complaint","add");
         new_msg.setComplaint(cancelComplaint);
         try {
