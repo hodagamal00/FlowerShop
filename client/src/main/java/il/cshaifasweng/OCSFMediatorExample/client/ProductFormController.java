@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 public class ProductFormController {
 
@@ -440,6 +441,8 @@ public class ProductFormController {
      * Validates the form fields
      */
     private boolean validateForm() {
+        applyDefaultIdentifiers();
+
         // Check required fields
         if (nameField.getText().trim().isEmpty()) {
             showStatus("Error: Product name is required", true);
@@ -544,6 +547,30 @@ public class ProductFormController {
         }
 
         return true;
+    }
+
+    private void applyDefaultIdentifiers() {
+        if (buttonField != null && buttonField.getText().trim().isEmpty()) {
+            String name = nameField != null ? nameField.getText().trim() : "";
+            buttonField.setText(name);
+        }
+
+        if (skuField != null && skuField.getText().trim().isEmpty()) {
+            String baseName = nameField != null ? nameField.getText().trim() : "";
+            skuField.setText(generateSku(baseName));
+        }
+    }
+
+    private String generateSku(String name) {
+        String sanitized = name == null ? "" : name.replaceAll("[^A-Za-z0-9]", "").toUpperCase();
+        if (sanitized.length() > 6) {
+            sanitized = sanitized.substring(0, 6);
+        }
+        String suffix = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        if (sanitized.isEmpty()) {
+            return "SKU-" + suffix;
+        }
+        return sanitized + "-" + suffix;
     }
 
     /**
