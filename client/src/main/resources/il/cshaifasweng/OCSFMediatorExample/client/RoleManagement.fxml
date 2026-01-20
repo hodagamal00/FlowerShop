@@ -18,7 +18,7 @@
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RoleManagementController"
-        stylesheets="@mycsss.css"
+        stylesheets="@styles.css"
         fitToWidth="true"
         pannable="true"
         styleClass="app-scroll-container">
@@ -71,7 +71,7 @@
 
                   <!-- Page Header -->
                   <VBox spacing="10.0">
-                     <Label text="User Roles & Privileges" styleClass="page-title">
+                     <Label text="User Roles &amp; Privileges" styleClass="page-title">
                         <font>
                            <Font name="System Bold" size="32.0" />
                         </font>

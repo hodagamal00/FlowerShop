@@ -12,6 +12,8 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
+import il.cshaifasweng.OCSFMediatorExample.client.App;
 
 /**
  * Controller for the Error page
@@ -173,7 +175,6 @@ public class ErrorController {
     /**
      * Handle go back button - returns to previous page or catalog
      */
-    @FXML
     private void handleGoBack(ActionEvent event) {
         navigateToPage(event, lastPage);
     }
@@ -199,38 +200,47 @@ public class ErrorController {
      */
     private void navigateToPage(ActionEvent event, String page) {
         try {
-            Parent root = null;
-            
-            switch (page.toLowerCase()) {
-                case "catalog":
-                    root = FXMLLoader.load(getClass().getResource("primary.fxml"));
-                    break;
-                case "orders":
-                    root = FXMLLoader.load(getClass().getResource("orders.fxml"));
-                    break;
-                case "complaints":
-                    root = FXMLLoader.load(getClass().getResource("complaints.fxml"));
-                    break;
-                case "account":
-                    root = FXMLLoader.load(getClass().getResource("account.fxml"));
-                    break;
-                default:
-                    root = FXMLLoader.load(getClass().getResource("primary.fxml"));
-                    break;
-            }
-            
-            if (root != null) {
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                Scene scene = new Scene(root);
+            String view = resolveViewName(page);
+            FXMLLoader shellLoader = new FXMLLoader(App.class.getResource("AppShell.fxml"));
+            Parent shellRoot = shellLoader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = stage.getScene();
+
+            if (scene == null) {
+                scene = new Scene(shellRoot, 1520, 800);
                 stage.setScene(scene);
-                stage.show();
+            } else {
+                scene.setRoot(shellRoot);
             }
-            
+
+            stage.setMaximized(true);
+            NavigationService.getInstance().navigate(view);
+
         } catch (IOException e) {
             System.err.println("Error navigating to page: " + page);
             e.printStackTrace();
             // If navigation fails, show error in console
             showErrorAlert("Navigation Error", "Failed to navigate to " + page);
+        }
+    }
+
+    private String resolveViewName(String page) {
+        if (page == null) {
+            return "Catalog";
+        }
+
+        switch (page.toLowerCase()) {
+            case "catalog":
+                return "Catalog";
+            case "orders":
+                return "myorders";
+            case "complaints":
+                return "mycomplaints";
+            case "account":
+                return "Profile";
+            default:
+                return page;
         }
     }
 

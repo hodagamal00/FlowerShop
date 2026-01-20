@@ -47,33 +47,35 @@ public class OrderDetailsController {
     @FXML private Label errorMessage;
 
     private static Order selectedOrder;
+    private static String selectedStatus;
     private Order currentOrder;
 
     @FXML
     void initialize() {
         if (selectedOrder != null) {
-            loadOrderDetails(selectedOrder);
+            loadOrderDetails(selectedOrder, selectedStatus);
         }
     }
 
     /**
      * Static method to set the order to display
      */
-    public static void setOrder(Order order) {
+    public static void setOrder(Order order, String status) {
         selectedOrder = order;
+        selectedStatus = status;
     }
 
     /**
      * Load and display order details
      */
-    private void loadOrderDetails(Order order) {
+    private void loadOrderDetails(Order order, String overrideStatus) {
         this.currentOrder = order;
 
         // Order header
         orderIdText.setText(String.valueOf(order.getId()));
         
         // Status badge
-        String status = order.getStatus() != null ? order.getStatus() : "Pending";
+        String status = resolveStatus(order, overrideStatus);
         statusBadge.setText(status);
         updateStatusBadgeStyle(status);
 
@@ -124,6 +126,14 @@ public class OrderDetailsController {
         if ("Cancelled".equals(status) || "Delivered".equals(status) || "Completed".equals(status)) {
             cancelOrderBtn.setDisable(true);
         }
+    }
+
+    private String resolveStatus(Order order, String overrideStatus) {
+        if (overrideStatus != null && !overrideStatus.isBlank()) {
+            return overrideStatus;
+        }
+        String status = order.getStatus();
+        return status != null ? status : "Pending";
     }
 
     /**

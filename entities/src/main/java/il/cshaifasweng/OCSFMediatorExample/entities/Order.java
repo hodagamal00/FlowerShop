@@ -2,7 +2,8 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -27,6 +28,10 @@ public class Order implements Serializable {
     private boolean gift;
     @Column(name = "Delivered")
     private boolean delivered;
+    @Column(name = "Delivery_Fee")
+    private double deliveryFee;
+    @Column(name = "Payment_Method")
+    private String paymentMethod;
     @Column(name = "CreditNumber")
     private long creditCardNumber;
     @Column(name = "Prepare_Day")
@@ -85,7 +90,7 @@ public class Order implements Serializable {
 
     public Order(){}
 
-    public Order(int orderID, boolean pickUp, int shopID, String greeting, int totalPrice, String deliveredAddress, int accountID, boolean gift, boolean delivered, int prepareDay, int prepareMonth, int prepareYear, int orderDay, int orderMonth, int orderYear, long creditCardNumber, int creditCardExpMonth, int creditCardExpYear, int creditCardCVV, String recepName, long recepPhone, String recepAddress,String Products,int orderHour,int orderMintue,int prepareHour,int prepareMin) {
+    public Order(int orderID, boolean pickUp, int shopID, String greeting, int totalPrice, String deliveredAddress, int accountID, boolean gift, boolean delivered, int prepareDay, int prepareMonth, int prepareYear, int orderDay, int orderMonth, int orderYear, long creditCardNumber, int creditCardExpMonth, int creditCardExpYear, int creditCardCVV, String recepName, long recepPhone, String recepAddress,String Products,int orderHour,int orderMintue,int prepareHour,int prepareMin,double deliveryFee,String paymentMethod) {
         this.orderID = orderID;
         this.pickUp = pickUp;
         this.shopID = shopID;
@@ -95,6 +100,8 @@ public class Order implements Serializable {
         this.accountID = accountID;
         this.gift = gift;
         this.delivered = delivered;
+        this.deliveryFee = deliveryFee;
+        this.paymentMethod = paymentMethod;
         this.creditCardNumber = creditCardNumber;
         this.prepareDay = prepareDay;
         this.prepareMonth = prepareMonth;
@@ -128,6 +135,8 @@ public class Order implements Serializable {
                 ", accountID=" + accountID +
                 ", gift=" + gift +
                 ", delivered=" + delivered +
+                ", deliveryFee=" + deliveryFee +
+                ", paymentMethod='" + paymentMethod + '\'' +
                 ", creditCardNumber=" + creditCardNumber +
                 ", prepareDay=" + prepareDay +
                 ", prepareMonth=" + prepareMonth +
@@ -281,6 +290,22 @@ public class Order implements Serializable {
     public boolean isDelivered() {
         return delivered;
     }
+    public double getDeliveryFee() {
+        return deliveryFee;
+    }
+
+    public void setDeliveryFee(double deliveryFee) {
+        this.deliveryFee = deliveryFee;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
 
     public long getCreditCardNumber() {
         return creditCardNumber;
@@ -524,14 +549,9 @@ public class Order implements Serializable {
      * @return Refund percentage (0.0, 0.5, or 1.0)
      */
     public double calculateRefund(int cancelDay, int cancelMonth, int cancelYear, int cancelHour, int cancelMinute) {
-        // Create simple time representations (in minutes from start of year)
-        // This is a simplified calculation - in production, use proper date/time libraries
-        long deliveryTimeInMinutes = (prepareDay * 24 * 60) + (prepareHour * 60) + prepareMin + 
-                                      (prepareMonth * 30 * 24 * 60) + (prepareYear * 365 * 24 * 60);
-        long cancelTimeInMinutes = (cancelDay * 24 * 60) + (cancelHour * 60) + cancelMinute + 
-                                   (cancelMonth * 30 * 24 * 60) + (cancelYear * 365 * 24 * 60);
-        
-        long hoursUntilDelivery = (deliveryTimeInMinutes - cancelTimeInMinutes) / 60;
+        LocalDateTime deliveryTime = LocalDateTime.of(prepareYear, prepareMonth, prepareDay, prepareHour, prepareMin);
+        LocalDateTime cancelTime = LocalDateTime.of(cancelYear, cancelMonth, cancelDay, cancelHour, cancelMinute);
+        long hoursUntilDelivery = Duration.between(cancelTime, deliveryTime).toHours();
         
         if (hoursUntilDelivery >= 3) {
             this.refundStatus = "FULL";

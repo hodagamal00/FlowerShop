@@ -19,6 +19,7 @@ public class NavigationService {
 
     private static NavigationService instance;
     private AppShellController appShellController;
+    private String pendingView;
 
     private NavigationService() {
         // private to enforce singleton pattern
@@ -43,6 +44,15 @@ public class NavigationService {
      */
     public void setAppShellController(AppShellController controller) {
         this.appShellController = controller;
+
+        // If a navigation attempt happened before the shell controller was
+        // registered, replay it now so the initial view (e.g., the Home page)
+        // is visible instead of leaving the content area empty.
+        if (pendingView != null) {
+            String viewToNavigate = pendingView;
+            pendingView = null;
+            navigate(viewToNavigate);
+        }
     }
 
     /**
@@ -53,17 +63,38 @@ public class NavigationService {
      */
     public void navigate(String fxml) {
         if (appShellController == null) {
-            // Controller not yet registered; do nothing
+            // Controller not yet registered; fall back to the legacy scene
+            // replacement to keep navigation working in standalone stages.
+            try {
+                App.setRoot(resolveViewName(fxml));
+            } catch (IOException e) {
+                // If we cannot swap roots yet, remember the request so it can be
+                // executed once the shell is ready.
+                pendingView = fxml;
+            }
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+            String resolvedView = resolveViewName(fxml);
+            FXMLLoader loader = new FXMLLoader(App.class.getResource(resolvedView + ".fxml"));
             Parent view = loader.load();
             Node content = ensureScrollable(view);
             appShellController.setContent(content);
+            appShellController.handleNavigationChange(resolvedView);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String resolveViewName(String fxml) {
+        if (fxml == null) {
+            return "Catalog";
+        }
+        String normalized = fxml.trim();
+        if (normalized.equalsIgnoreCase("primary") || normalized.equalsIgnoreCase("catalog")) {
+            return "Catalog";
+        }
+        return normalized;
     }
     /**
      * Ensures that the supplied view is scrollable by wrapping it in a
@@ -79,6 +110,7 @@ public class NavigationService {
             configureScrollPane(existing, false);
             return existing;
         }
+
 
         ScrollPane wrapper = new ScrollPane(view);
         configureScrollPane(wrapper, true);

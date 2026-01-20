@@ -14,7 +14,7 @@
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegisterController"
-        stylesheets="@mycsss.css"
+        stylesheets="@styles.css"
         fitToWidth="true"
         pannable="true"
         styleClass="app-scroll-container">
@@ -124,7 +124,7 @@
                     </VBox>
 
                     <!-- Hidden Labels -->
-                    <Label fx:id="email_regex_error1" visible="false" />
+                    <Label visible="false" />
                 </VBox>
             </children>
         </AnchorPane>

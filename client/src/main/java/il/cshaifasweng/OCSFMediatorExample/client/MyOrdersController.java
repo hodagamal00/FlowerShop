@@ -1,12 +1,13 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Date;
+
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.event.ActionEvent;
@@ -18,12 +19,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import javax.persistence.Column;
 
 public class MyOrdersController {
 
@@ -84,65 +82,11 @@ public class MyOrdersController {
     @FXML // fx:id="orderList"
     private ListView<String> orderList; // Value injected by FXMLLoader
 
-    @FXML // fx:id="refresh"
-    private Button refresh; // Value injected by FXMLLoader
-
     @FXML // fx:id="sendComplaint"
     private Button sendComplaint; // Value injected by FXMLLoader
 
     @FXML // fx:id="shopID"
     private TextField shopID; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text1"
-    private Text text1; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text10"
-    private Text text10; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text11"
-    private Text text11; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text12"
-    private Text text12; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text13"
-    private Text text13; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text14"
-    private Text text14; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text15"
-    private Text text15; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text16"
-    private Text text16; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text2"
-    private Text text2; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text3"
-    private Text text3; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text4"
-    private Text text4; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text5"
-    private Text text5; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text6"
-    private Text text6; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text7"
-    private Text text7; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text8"
-    private Text text8; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text9"
-    private Text text9; // Value injected by FXMLLoader
-
-    @FXML // fx:id="text99"
-    private Text text99; // Value injected by FXMLLoader
 
     @FXML // fx:id="totalPrice"
     private TextField totalPrice; // Value injected by FXMLLoader
@@ -156,6 +100,9 @@ public class MyOrdersController {
 
     @FXML // fx:id="cancelButton"
     private Button cancelButton; // Value injected by FXMLLoader
+
+    @FXML // fx:id="refundDecisionLabel"
+    private Label refundDecisionLabel; // Value injected by FXMLLoader
 
 
     @FXML // fx:id="wait"
@@ -178,81 +125,33 @@ public class MyOrdersController {
     @FXML
     void cancelOrder(ActionEvent event)
     {
-        boolean in24Hour = false;
-        int refund = 0;
-        Calendar calle = Calendar.getInstance();
-        int currentYear = calle.get(Calendar.YEAR);
-        int currentMonth = calle.get(Calendar.MONTH);
-        currentMonth++;
-        int currentHour = calle.get(Calendar.HOUR_OF_DAY);
-        int currentMintue = calle.get(Calendar.MINUTE);
-        int currentDay = calle.get(Calendar.DAY_OF_MONTH);
-
-        int orderYear = SelectedOrder.getPrepareYear();
-        int orderMonth = SelectedOrder.getPrepareMonth();
-        int orderDay = SelectedOrder.getPrepareDay();
-
-        int orderHour = SelectedOrder.getOrderHour();
-        int orderMinute = SelectedOrder.getOrderMintue();
-
-        int diffYear = currentYear - orderYear;
-        int diffMonth = currentMonth - orderMonth;
-        int diffDay = currentDay - orderDay;
-        int diffHour = currentHour - orderHour;
-        int diffMinute = currentMintue - orderMinute;
-
-        if(diffMonth < 0) {
-            diffYear--;
-            diffMonth = 12 + diffMonth;
+        if (SelectedOrder == null) {
+            return;
         }
-        if(diffDay < 0) {
-            diffMonth--;
-            diffDay = 30 + diffDay;
+        CancellationDecision decision = calculateCancellationDecision(SelectedOrder);
+        refundDecisionLabel.setText(decision.message);
+        refundDecisionLabel.setVisible(true);
+        if (!decision.cancelAllowed) {
+            cancelButton.setDisable(true);
+            return;
         }
-        if(diffHour < 0) {
-            diffDay--;
-            diffHour = 24 + diffHour;
-        }
-        if(diffMinute < 0) {
-            diffHour--;
-            diffMinute = 60 + diffMinute;
-        }
-        if(diffYear == 0)
-        {
-            if(diffMonth == 0)
-            {
-                if(diffDay == 0)
-                {
-                    if(diffHour > 3)
-                    {
-                        refund = 100;
-                    }
-                    else if(diffHour < 1)
-                        refund = 0;
-                    else
-                        refund = 50;
-                }
-                else
-                {
-                    refund = 100;
-                }
+        LocalDateTime now = LocalDateTime.now();
+        double refundPercent = SelectedOrder.calculateRefund(
+                now.getDayOfMonth(),
+                now.getMonthValue(),
+                now.getYear(),
+                now.getHour(),
+                now.getMinute()
+        );
+        boolean returned = refundPercent > 0;
+        int refundPercentDisplay = (int) Math.round(refundPercent * 100);
+        double refundAmount = refundPercent * SelectedOrder.getTotalPrice();
 
-            }
-            else
-            {
-                refund = 100;
-            }
-
-        }
-        else
-        {
-            refund = 100;
-        }
-        boolean returned = false;
-        if(refund > 0)
-            returned = true;
-
-        Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refund/100*SelectedOrder.getTotalPrice(),currentDay,currentMonth,currentYear,"Automated Reply");
+        Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refundAmount,now.getDayOfMonth(),now.getMonthValue(),now.getYear(),"Automated Reply");
+        cancelComplaint.setCreatedAt(new Date());
+        cancelComplaint.setRespondedAt(new Date());
+        cancelComplaint.setSlaStatus("RESOLVED_ON_TIME");
+        cancelComplaint.setCompensationDecision(refundPercent > 0 ? "Automatic refund " + refundPercentDisplay + "%" : "No compensation" );
         UpdateMessage new_msg=new UpdateMessage("complaint","add");
         new_msg.setComplaint(cancelComplaint);
         try {
@@ -271,9 +170,9 @@ public class MyOrdersController {
     int complaint_num = 0;
     @FXML
     void GoToCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");
@@ -331,6 +230,9 @@ public class MyOrdersController {
         newComplaint.setMonth(currentMonth);
         newComplaint.setYear(currentYear);
         newComplaint.setReplyText("");
+        newComplaint.setCreatedAt(new Date());
+        newComplaint.setSlaStatus("IN_PROGRESS");
+        newComplaint.setCompensationDecision("Pending review");
         sendComplaint.setVisible(false);
         complaintText.setVisible(false);
         UpdateMessage new_msg=new UpdateMessage("complaint","add");
@@ -406,8 +308,11 @@ public class MyOrdersController {
         {
             cancelButton.setVisible(true);
 
-            int selected = orderList.getSelectionModel().getSelectedItem().charAt(0) - 48;
+            int selected = parseSelectedOrderId();
             System.out.println("Selected is " + selected);
+            if (selected == -1) {
+                return;
+            }
             //int theID = Integer.parseInt(enterID.getText());
             for (int i = 0; i < allOrders.size(); i++) {
                 if (allOrders.get(i).getOrderID() == selected) {
@@ -416,6 +321,7 @@ public class MyOrdersController {
                 }
             }
             SelectedOrder = retrievedOrder;
+            updateCancellationDecision(retrievedOrder);
             String currentProduct = "";
             String MyProducts = retrievedOrder.getProducts();
             orderProducts.getItems().clear();
@@ -433,39 +339,39 @@ public class MyOrdersController {
                 else
                     currentProduct = "";
             }
-                openComplaint.setVisible(true);
-                orderID.setText(String.valueOf(retrievedOrder.getOrderID()));
-                accountID.setText(String.valueOf(currentUser.getAccountID()));
-                creditNumber.setText(String.valueOf(retrievedOrder.getCreditCardNumber()));
-                String creditXpire = "" + retrievedOrder.getCreditCardExpMonth() + "/" + retrievedOrder.getCreditCardExpYear();
-                creditExpire.setText(creditXpire);
-                creditCVV.setText(String.valueOf(retrievedOrder.getCreditCardCVV()));
-                totalPrice.setText(String.valueOf(retrievedOrder.getTotalPrice()));
-                shopID.setText(String.valueOf(retrievedOrder.getShopID()));
-                if (retrievedOrder.isGift() == true)
-                    gift.setText("true");
-                else
-                    gift.setText("false");
-                String orderDate = "" + retrievedOrder.getOrderDay() + "/" + retrievedOrder.getOrderMonth() + "/" + retrievedOrder.getOrderYear();
-                dateOrder.setText(orderDate);
-                String prepareDate = "" + retrievedOrder.getPrepareDay() + "/" + retrievedOrder.getPrepareMonth() + "/" + retrievedOrder.getPrepareYear();
-                datePrepare.setText(prepareDate);
-                if (retrievedOrder.isPickUp() == true)
-                    deliverService.setText("Pick Up");
-                else
-                    deliverService.setText("Delivery");
-                if (retrievedOrder.isDelivered() == true)
-                    deliverService.setText("Delivered/Picked Up");
-                else
-                    deliverService.setText("Not Delivered/Picked Up");
-                RecepName.setText(retrievedOrder.getRecepName());
-                RecepAddress.setText(retrievedOrder.getRecepAddress());
-                RecepNumber.setText(String.valueOf(retrievedOrder.getRecepPhone()));
-                if (retrievedOrder.getGreeting() != "")
-                    greetingText.setText(retrievedOrder.getGreeting());
-                else
-                    greetingText.setText("No Greeting");
-                currentOrderShopID = retrievedOrder.getShopID();
+            openComplaint.setVisible(true);
+            orderID.setText(String.valueOf(retrievedOrder.getOrderID()));
+            accountID.setText(String.valueOf(currentUser.getAccountID()));
+            creditNumber.setText(String.valueOf(retrievedOrder.getCreditCardNumber()));
+            String creditXpire = "" + retrievedOrder.getCreditCardExpMonth() + "/" + retrievedOrder.getCreditCardExpYear();
+            creditExpire.setText(creditXpire);
+            creditCVV.setText(String.valueOf(retrievedOrder.getCreditCardCVV()));
+            totalPrice.setText(String.valueOf(retrievedOrder.getTotalPrice()));
+            shopID.setText(String.valueOf(retrievedOrder.getShopID()));
+            if (retrievedOrder.isGift() == true)
+                gift.setText("true");
+            else
+                gift.setText("false");
+            String orderDate = "" + retrievedOrder.getOrderDay() + "/" + retrievedOrder.getOrderMonth() + "/" + retrievedOrder.getOrderYear();
+            dateOrder.setText(orderDate);
+            String prepareDate = "" + retrievedOrder.getPrepareDay() + "/" + retrievedOrder.getPrepareMonth() + "/" + retrievedOrder.getPrepareYear();
+            datePrepare.setText(prepareDate);
+            if (retrievedOrder.isPickUp() == true)
+                deliverService.setText("Pick Up");
+            else
+                deliverService.setText("Delivery");
+            if (retrievedOrder.isDelivered() == true)
+                deliverStatus.setText("Delivered/Picked Up");
+            else
+                deliverStatus.setText("Not Delivered/Picked Up");
+            RecepName.setText(retrievedOrder.getRecepName());
+            RecepAddress.setText(retrievedOrder.getRecepAddress());
+            RecepNumber.setText(String.valueOf(retrievedOrder.getRecepPhone()));
+            if (retrievedOrder.getGreeting() != null && !retrievedOrder.getGreeting().isEmpty())
+                greetingText.setText(retrievedOrder.getGreeting());
+            else
+                greetingText.setText("No Greeting");
+            currentOrderShopID = retrievedOrder.getShopID();
         }
     }
     int currentOrderShopID;
@@ -477,9 +383,15 @@ public class MyOrdersController {
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
         System.out.println("before sending getAllOrders message !");
-        getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
-        SimpleClient.getClient().sendToServer(getOrdersMsg);
-        System.out.println("after sending getAllOrders message !");
+        boolean requestedOrders = false;
+        try {
+            getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
+            SimpleClient.getClient().sendToServer(getOrdersMsg);
+            requestedOrders = true;
+            System.out.println("after sending getAllOrders message !");
+        } catch (Exception ex) {
+            System.out.println("Failed to request orders: " + ex.getMessage());
+        }
 
         assert RecepAddress != null : "fx:id=\"RecepAddress\" was not injected: check your FXML file 'myorders.fxml'.";
         assert RecepName != null : "fx:id=\"RecepName\" was not injected: check your FXML file 'myorders.fxml'.";
@@ -499,35 +411,19 @@ public class MyOrdersController {
         assert openComplaint != null : "fx:id=\"openComplaint\" was not injected: check your FXML file 'myorders.fxml'.";
         assert orderID != null : "fx:id=\"orderID\" was not injected: check your FXML file 'myorders.fxml'.";
         assert orderList != null : "fx:id=\"orderList\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert refresh != null : "fx:id=\"refresh\" was not injected: check your FXML file 'myorders.fxml'.";
         assert sendComplaint != null : "fx:id=\"sendComplaint\" was not injected: check your FXML file 'myorders.fxml'.";
         assert shopID != null : "fx:id=\"shopID\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text1 != null : "fx:id=\"text1\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text10 != null : "fx:id=\"text10\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text11 != null : "fx:id=\"text11\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text12 != null : "fx:id=\"text12\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text13 != null : "fx:id=\"text13\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text14 != null : "fx:id=\"text14\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text15 != null : "fx:id=\"text15\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text16 != null : "fx:id=\"text16\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text2 != null : "fx:id=\"text2\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text3 != null : "fx:id=\"text3\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text4 != null : "fx:id=\"text4\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text5 != null : "fx:id=\"text5\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text6 != null : "fx:id=\"text6\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text7 != null : "fx:id=\"text7\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text8 != null : "fx:id=\"text8\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text9 != null : "fx:id=\"text9\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert text99 != null : "fx:id=\"text99\" was not injected: check your FXML file 'myorders.fxml'.";
         assert totalPrice != null : "fx:id=\"totalPrice\" was not injected: check your FXML file 'myorders.fxml'.";
         assert viewOrder != null : "fx:id=\"viewOrder\" was not injected: check your FXML file 'myorders.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'myorders.fxml'.";
+        assert refundDecisionLabel != null : "fx:id=\"refundDecisionLabel\" was not injected: check your FXML file 'myorders.fxml'.";
 
 
         wait.setVisible(true);
         complaintText.setVisible(false);
         sendComplaint.setVisible(false);
         cancelButton.setVisible(false);
+        refundDecisionLabel.setVisible(false);
 
         viewOrder.setText("Load Orders");
         String orderDetails = "";
@@ -551,9 +447,18 @@ public class MyOrdersController {
         complaintText.setVisible(false);  // Value injected by FXMLLoader
         openComplaint.setVisible(false);  // Value injected by FXMLLoader
         orderProducts.setVisible(false);
+        refundDecisionLabel.setVisible(false);
 
         viewOrder.setDisable(true);
         backToCatalog.setDisable(true);
+
+        if (!requestedOrders) {
+            wait.setText("Offline / Not connected to server.");
+            wait.setVisible(true);
+            viewOrder.setDisable(true);
+            backToCatalog.setDisable(false);
+            return;
+        }
 
 
         new java.util.Timer().schedule(
@@ -585,6 +490,62 @@ public class MyOrdersController {
         System.out.println("arrived to subscriebr of passOrders !");
         List<Order> recievedOrders = passOrders.getRecievedOrders();
         allOrders = recievedOrders;
+    }
+
+    private int parseSelectedOrderId() {
+        String selectedItem = orderList.getSelectionModel().getSelectedItem();
+        if (selectedItem == null || selectedItem.isBlank()) {
+            return -1;
+        }
+        String[] parts = selectedItem.split(" - ", 2);
+        if (parts.length == 0) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(parts[0].trim());
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
+
+    private void updateCancellationDecision(Order order) {
+        CancellationDecision decision = calculateCancellationDecision(order);
+        refundDecisionLabel.setText(decision.message);
+        refundDecisionLabel.setVisible(true);
+        cancelButton.setDisable(!decision.cancelAllowed);
+        cancelButton.setVisible(true);
+    }
+
+    private CancellationDecision calculateCancellationDecision(Order order) {
+        LocalDateTime deliveryTime = order.getDelivery_time();
+        if (deliveryTime == null) {
+            return new CancellationDecision(false, "Cancellation unavailable: missing delivery time.");
+        }
+        if (order.isDelivered()) {
+            return new CancellationDecision(false, "Order already delivered. Cancellation unavailable.");
+        }
+        if (order.isCancelled()) {
+            return new CancellationDecision(false, "Order already cancelled. Cancellation unavailable.");
+        }
+        Duration untilDelivery = Duration.between(LocalDateTime.now(), deliveryTime);
+        long minutesUntil = untilDelivery.toMinutes();
+        if (minutesUntil < 60) {
+            return new CancellationDecision(false, "Less than 1 hour before delivery: no refund available.");
+        }
+        if (minutesUntil < 180) {
+            return new CancellationDecision(true, "Cancellation available: 50% refund/credit.");
+        }
+        return new CancellationDecision(true, "Cancellation available: 100% refund/credit.");
+    }
+
+    private static class CancellationDecision {
+        private final boolean cancelAllowed;
+        private final String message;
+
+        private CancellationDecision(boolean cancelAllowed, String message) {
+            this.cancelAllowed = cancelAllowed;
+            this.message = message;
+        }
     }
 
 

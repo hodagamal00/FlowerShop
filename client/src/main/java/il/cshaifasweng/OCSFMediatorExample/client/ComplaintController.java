@@ -14,10 +14,12 @@ import java.util.*;
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
 import il.cshaifasweng.OCSFMediatorExample.entities.Message;
+import il.cshaifasweng.OCSFMediatorExample.entities.NextComplaintIdMessage;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import il.cshaifasweng.OCSFMediatorExample.client.SimpleClient;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
@@ -50,6 +52,12 @@ public class  ComplaintController{
     private Button submitcomp;
 
     @FXML
+    private TextField complaintIdField;
+
+    @FXML
+    private Label submissionStatusLabel;
+
+    @FXML
     private TextField topictxt;
 
     @FXML
@@ -67,18 +75,22 @@ public class  ComplaintController{
          * If no account is available, simply close the form without sending anything.
          */
         if (currentUser == null) {
-            // No logged-in user; nothing to send
-            Stage stage = (Stage) submitcomp.getScene().getWindow();
-            stage.close();
+            // No logged-in user; block submission
+            showStatus("Please log in to submit a complaint.", true);
             return;
         }
         // Build a new Complaint object.  We set default values for fields not captured in the form
-        // such as order ID (0 by default) and shop ID (0).  The complaint ID will be assigned by the server.
+        // such as order ID (0 by default) and shop ID (0).  If we already reserved an ID when the
+        // form opened, reuse it so that the number shown to the user matches the stored complaint.
         java.util.Calendar cal = java.util.Calendar.getInstance();
         int day = cal.get(java.util.Calendar.DAY_OF_MONTH);
         int month = cal.get(java.util.Calendar.MONTH) + 1; // Calendar months are 0-based
         int year = cal.get(java.util.Calendar.YEAR);
         Complaint newComplaint = new Complaint();
+        if (reservedComplaintId != null) {
+            newComplaint.setComplaintID(reservedComplaintId);
+        }
+
         newComplaint.setCustomerID(currentUser.getAccountID());
         newComplaint.setOrderID(0);
         newComplaint.setAccepted(false);
@@ -95,6 +107,9 @@ public class  ComplaintController{
         newComplaint.setMonth(month);
         newComplaint.setYear(year);
         newComplaint.setReplyText("");
+        newComplaint.setCreatedAt(new Date());
+        newComplaint.setSlaStatus("IN_PROGRESS");
+        newComplaint.setCompensationDecision("Pending review");
         // Prepare update message to add the complaint
         UpdateMessage msg = new UpdateMessage("complaint", "add");
         msg.setComplaint(newComplaint);
@@ -114,9 +129,8 @@ public class  ComplaintController{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // Close the window after submission
-        Stage stage = (Stage) submitcomp.getScene().getWindow();
-        stage.close();
+        showStatus("Complaint submitted. Response within 24 hours.", false);
+        submitcomp.setDisable(true);
     }
 
     @FXML
@@ -124,6 +138,14 @@ public class  ComplaintController{
     {
         // Register this controller to receive EventBus events
         EventBus.getDefault().register(this);
+        if (submissionStatusLabel != null) {
+            submissionStatusLabel.setVisible(false);
+        }
+        if (submitcomp != null) {
+            submitcomp.setDisable(true);
+        }
+        requestNextComplaintId();
+
     }
 
     /**
@@ -131,13 +153,42 @@ public class  ComplaintController{
      * a PassAccountEventComplaints event when the complaint form is opened.
      */
     private Account currentUser;
+    private Integer reservedComplaintId;
 
     @Subscribe
     public void handlePassAccountEvent(PassAccountEventComplaints passAcc) {
         // Assign the received account to currentUser
         this.currentUser = passAcc.getRecievedAccount();
+        if (submitcomp != null) {
+            submitcomp.setDisable(currentUser == null);
+        }
+    }
+    @Subscribe
+    public void handleNextComplaintId(NextComplaintIdEvent event) {
+        reservedComplaintId = event.getComplaintId();
+        if (complaintIdField != null) {
+            complaintIdField.setText(Integer.toString(reservedComplaintId));
+        }
     }
 
+    private void requestNextComplaintId() {
+        try {
+            SimpleClient.getClient().sendToServer(new NextComplaintIdMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showStatus(String message, boolean isError) {
+        if (submissionStatusLabel == null) {
+            return;
+        }
+        submissionStatusLabel.setText(message);
+        submissionStatusLabel.setVisible(true);
+        submissionStatusLabel.setStyle(isError
+                ? "-fx-text-fill: #c0392b; -fx-font-style: italic;"
+                : "-fx-text-fill: #27ae60; -fx-font-style: italic;");
+    }
 
 
 }

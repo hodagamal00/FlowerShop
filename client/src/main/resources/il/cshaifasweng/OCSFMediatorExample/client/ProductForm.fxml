@@ -1,161 +1,272 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<?import javafx.scene.control.ScrollPane?>
 <ScrollPane
+        fx:id="formScrollPane"
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ProductFormController"
-        stylesheets="@mycsss.css"
+        stylesheets="@styles.css"
         fitToWidth="true"
         pannable="true"
+        hbarPolicy="NEVER"
+        vbarPolicy="ALWAYS"
         styleClass="app-scroll-container">
+
     <content>
-        <AnchorPane maxHeight="720.0" maxWidth="600.0" minHeight="720.0" minWidth="600.0" prefHeight="720.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+        <!-- مهم: إزالة maxHeight/minHeight حتى يصير طولها ديناميكي -->
+        <AnchorPane prefWidth="600.0">
+
             <children>
+
                 <!-- Header -->
-                <AnchorPane styleClass="navbar" layoutY="0.0" maxHeight="60.0" minHeight="60.0" prefHeight="60.0" prefWidth="600.0">
+                <AnchorPane styleClass="navbar"
+                            layoutY="0.0"
+                            prefHeight="60.0" prefWidth="600.0">
                     <children>
-                        <Label fx:id="formTitleLabel" text="Add New Product" textFill="WHITE" layoutX="30.0" layoutY="15.0">
+                        <Label fx:id="formTitleLabel"
+                               text="Add New Product"
+                               textFill="WHITE"
+                               layoutX="30.0" layoutY="15.0">
                             <font>
-                                <Font name="System Bold" size="24.0" />
+                                <Font name="System Bold" size="24.0"/>
                             </font>
                         </Label>
+
+                        <!-- Scroll down button -->
+                        <Button fx:id="scrollDownBtn"
+                                layoutX="430.0" layoutY="12.0"
+                                mnemonicParsing="false"
+                                onAction="#scrollToBottom"
+                                prefHeight="36.0" prefWidth="140.0"
+                                styleClass="btn-secondary"
+                                text="⇩ Scroll Down">
+                            <font>
+                                <Font name="System Bold" size="13.0"/>
+                            </font>
+                        </Button>
                     </children>
                 </AnchorPane>
 
                 <!-- Form Content -->
-                <VBox spacing="18.0" layoutX="30.0" layoutY="80.0" prefWidth="540.0">
+                <VBox spacing="18.0"
+                      layoutX="30.0" layoutY="80.0"
+                      prefWidth="540.0">
+
                     <!-- Product Image Section -->
-                    <VBox spacing="12.0" styleClass="card" style="-fx-padding: 20; -fx-background-color: white;">
+                    <VBox spacing="12.0"
+                          styleClass="card"
+                          style="-fx-padding: 20; -fx-background-color: white;">
                         <Text text="Product Image" fill="#4a148c">
                             <font>
-                                <Font name="System Bold" size="16.0" />
+                                <Font name="System Bold" size="16.0"/>
                             </font>
                         </Text>
 
                         <HBox spacing="20.0" alignment="CENTER_LEFT">
-                            <ImageView fx:id="productImageView" fitWidth="150.0" fitHeight="150.0" preserveRatio="true" styleClass="image-preview" style="-fx-border-color: #ce93d8; -fx-border-width: 2; -fx-border-radius: 8;" />
+                            <ImageView fx:id="productImageView"
+                                       fitWidth="150.0" fitHeight="150.0"
+                                       preserveRatio="true"
+                                       styleClass="image-preview"
+                                       style="-fx-border-color: #ce93d8;
+                                              -fx-border-width: 2;
+                                              -fx-border-radius: 8;"/>
 
                             <VBox spacing="10.0">
-                                <Button fx:id="chooseImageBtn" styleClass="btn-primary" text="📷 Choose Image" onAction="#chooseImage" prefWidth="180.0" prefHeight="40.0">
+                                <Button fx:id="chooseImageBtn"
+                                        styleClass="btn-primary"
+                                        text="📷 Choose Image"
+                                        onAction="#chooseImage"
+                                        prefWidth="180.0" prefHeight="40.0">
                                     <font>
-                                        <Font name="System Bold" size="13.0" />
+                                        <Font name="System Bold" size="13.0"/>
                                     </font>
                                 </Button>
-                                <Button fx:id="removeImageBtn" styleClass="btn-secondary" text="Remove Image" onAction="#removeImage" prefWidth="180.0" prefHeight="35.0" />
-                                <Label fx:id="imagePathLabel" text="No image selected" style="-fx-text-fill: #7b1fa2; -fx-font-size: 11px;" wrapText="true" prefWidth="180.0" />
+
+                                <Button fx:id="removeImageBtn"
+                                        styleClass="btn-secondary"
+                                        text="Remove Image"
+                                        onAction="#removeImage"
+                                        prefWidth="180.0" prefHeight="35.0"/>
+
+                                <Label fx:id="imagePathLabel"
+                                       text="No image selected"
+                                       style="-fx-text-fill: #7b1fa2; -fx-font-size: 11px;"
+                                       wrapText="true" prefWidth="180.0"/>
                             </VBox>
                         </HBox>
-
-                        <Label text="Supported formats: JPG, PNG, GIF (max 5MB)" style="-fx-text-fill: #9c27b0; -fx-font-size: 11px;" />
                     </VBox>
 
-                    <!-- Basic Information -->
-                    <VBox spacing="12.0" styleClass="card" style="-fx-padding: 20; -fx-background-color: white;">
-                        <Text text="Basic Information" fill="#4a148c">
+                    <!-- Product Details Section -->
+                    <VBox spacing="12.0"
+                          styleClass="card"
+                          style="-fx-padding: 20; -fx-background-color: white;">
+                        <Text text="Product Details" fill="#4a148c">
                             <font>
-                                <Font name="System Bold" size="16.0" />
+                                <Font name="System Bold" size="16.0"/>
                             </font>
                         </Text>
 
-                        <Label text="Product Name *" style="-fx-font-weight: bold;" />
-                        <TextField fx:id="nameField" promptText="Enter product name" prefHeight="38.0" />
-
-                        <Label text="SKU (Stock Keeping Unit) *" style="-fx-font-weight: bold;" />
-                        <TextField fx:id="skuField" promptText="e.g., ROSE-RED-001" prefHeight="38.0" />
+                        <VBox spacing="10.0">
+                            <Label text="Product Name" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="nameField"
+                                       promptText="Enter product name"
+                                       prefHeight="38.0"/>
+                        </VBox>
 
                         <HBox spacing="15.0">
                             <VBox spacing="8.0" prefWidth="250.0">
-                                <Label text="Category *" style="-fx-font-weight: bold;" />
-                                <ComboBox fx:id="categoryCombo" promptText="Select category" prefWidth="250.0" prefHeight="38.0" />
+                                <Label text="SKU" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="skuField"
+                                           promptText="e.g., LIL-12345"
+                                           prefHeight="38.0"/>
                             </VBox>
+
                             <VBox spacing="8.0" prefWidth="250.0">
-                                <Label text="Color *" style="-fx-font-weight: bold;" />
-                                <ComboBox fx:id="colorCombo" promptText="Select color" prefWidth="250.0" prefHeight="38.0" />
+                                <Label text="Price ($)" style="-fx-font-weight: bold;"/>
+                                <TextField fx:id="priceField"
+                                           promptText="0.00"
+                                           prefHeight="38.0"/>
                             </VBox>
                         </HBox>
 
-                        <Label text="Price ($) *" style="-fx-font-weight: bold;" />
-                        <TextField fx:id="priceField" promptText="0.00" prefHeight="38.0" />
+                        <HBox spacing="15.0">
+                            <VBox spacing="8.0" prefWidth="250.0">
+                                <Label text="Category" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="categoryCombo"
+                                          promptText="Select category"
+                                          prefHeight="38.0" prefWidth="250.0"/>
+                            </VBox>
 
-                        <Label text="Description" style="-fx-font-weight: bold;" />
-                        <TextArea fx:id="detailsArea" promptText="Enter product description..." prefHeight="80.0" wrapText="true" />
+                            <VBox spacing="8.0" prefWidth="250.0">
+                                <Label text="Color" style="-fx-font-weight: bold;"/>
+                                <ComboBox fx:id="colorCombo"
+                                          promptText="Select color"
+                                          prefHeight="38.0" prefWidth="250.0"/>
+                            </VBox>
+                        </HBox>
+
+                        <VBox spacing="8.0">
+                            <Label text="Details" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="detailsArea"
+                                      promptText="Describe the product"
+                                      prefRowCount="4"
+                                      wrapText="true"/>
+                        </VBox>
                     </VBox>
 
-                    <!-- Promotion Settings -->
-                    <VBox spacing="12.0" styleClass="card" style="-fx-padding: 20; -fx-background-color: white;">
-                        <Text text="Promotion Settings" fill="#4a148c">
+                    <!-- Promotion Section -->
+                    <VBox spacing="10.0"
+                          styleClass="card"
+                          style="-fx-padding: 20; -fx-background-color: white;">
+                        <Text text="Promotion" fill="#4a148c">
                             <font>
-                                <Font name="System Bold" size="16.0" />
+                                <Font name="System Bold" size="16.0"/>
                             </font>
                         </Text>
 
-                        <CheckBox fx:id="promotionCheckBox" text="This product is on promotion" onAction="#togglePromotionFields" />
+                        <CheckBox fx:id="promotionCheckBox"
+                                  text="Apply discount to this product"
+                                  onAction="#togglePromotionFields"/>
 
-                        <HBox spacing="15.0">
-                            <VBox spacing="8.0" prefWidth="250.0">
-                                <Label fx:id="discountLabel" text="Discount (%)" style="-fx-font-weight: bold;" disable="true" />
-                                <TextField fx:id="discountField" promptText="0" prefHeight="38.0" disable="true" />
-                            </VBox>
+                        <HBox spacing="12.0" alignment="CENTER_LEFT">
+                            <Label fx:id="discountLabel"
+                                   text="Discount (%)"
+                                   style="-fx-font-weight: bold;"
+                                   disable="true"/>
+                            <TextField fx:id="discountField"
+                                       promptText="0"
+                                       prefHeight="36.0"
+                                       prefWidth="100.0"
+                                       disable="true"/>
                         </HBox>
                     </VBox>
 
-                    <!-- Custom Product Settings -->
-                    <VBox spacing="12.0" styleClass="card" style="-fx-padding: 20; -fx-background-color: white;">
+                    <!-- Custom Product Options -->
+                    <VBox spacing="12.0"
+                          styleClass="card"
+                          style="-fx-padding: 20; -fx-background-color: white;">
                         <Text text="Custom Product Options" fill="#4a148c">
                             <font>
-                                <Font name="System Bold" size="16.0" />
+                                <Font name="System Bold" size="16.0"/>
                             </font>
                         </Text>
 
-                        <CheckBox fx:id="customProductCheckBox" text="This is a custom product (e.g., Bridal Bouquet)" onAction="#toggleCustomFields" />
+                        <CheckBox fx:id="customProductCheckBox"
+                                  text="This is a custom product (e.g., Bridal Bouquet)"
+                                  onAction="#toggleCustomFields"/>
 
-                        <VBox fx:id="customFieldsContainer" spacing="10.0" disable="true">
-                            <Label text="Custom Type" style="-fx-font-weight: bold;" />
-                            <ComboBox fx:id="customTypeCombo" promptText="Select type" prefWidth="520.0" prefHeight="38.0" />
+                        <VBox fx:id="customFieldsContainer"
+                              spacing="10.0"
+                              disable="true">
+                            <Label text="Custom Type" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="customTypeCombo"
+                                      promptText="Select type"
+                                      prefWidth="520.0" prefHeight="38.0"/>
 
                             <HBox spacing="15.0">
                                 <VBox spacing="8.0" prefWidth="250.0">
-                                    <Label text="Min Price ($)" style="-fx-font-weight: bold;" />
-                                    <TextField fx:id="minPriceField" promptText="0.00" prefHeight="38.0" />
+                                    <Label text="Min Price ($)" style="-fx-font-weight: bold;"/>
+                                    <TextField fx:id="minPriceField"
+                                               promptText="0.00"
+                                               prefHeight="38.0"/>
                                 </VBox>
+
                                 <VBox spacing="8.0" prefWidth="250.0">
-                                    <Label text="Max Price ($)" style="-fx-font-weight: bold;" />
-                                    <TextField fx:id="maxPriceField" promptText="0.00" prefHeight="38.0" />
+                                    <Label text="Max Price ($)" style="-fx-font-weight: bold;"/>
+                                    <TextField fx:id="maxPriceField"
+                                               promptText="0.00"
+                                               prefHeight="38.0"/>
                                 </VBox>
                             </HBox>
                         </VBox>
                     </VBox>
 
                     <!-- Action Buttons -->
-                    <HBox spacing="15.0" alignment="CENTER" style="-fx-padding: 20 0 30 0;">
-                        <Button fx:id="saveBtn" styleClass="btn-primary" text="💾 Save Product" onAction="#saveProduct" prefWidth="180.0" prefHeight="45.0">
-                            <font>
-                                <Font name="System Bold" size="14.0" />
-                            </font>
-                        </Button>
-                        <Button fx:id="cancelBtn" styleClass="btn-secondary" text="Cancel" onAction="#cancel" prefWidth="140.0" prefHeight="45.0">
-                            <font>
-                                <Font size="14.0" />
-                            </font>
-                        </Button>
+                    <HBox spacing="15.0" alignment="CENTER"
+                          style="-fx-padding: 20 0 10 0;">
+                        <Button fx:id="saveBtn"
+                                styleClass="btn-primary"
+                                text="💾 Save Product"
+                                onAction="#saveProduct"
+                                prefWidth="160.0" prefHeight="45.0"/>
+
+                        <Button fx:id="approveBtn"
+                                styleClass="btn-success"
+                                text="✅ Approve"
+                                onAction="#approveChanges"
+                                prefWidth="140.0" prefHeight="45.0"/>
+
+                        <Button fx:id="cancelBtn"
+                                styleClass="btn-secondary"
+                                text="Cancel"
+                                onAction="#cancel"
+                                prefWidth="140.0" prefHeight="45.0"/>
                     </HBox>
 
                     <!-- Status Messages -->
-                    <Label fx:id="statusLabel" text="" textFill="#e57373" visible="false" style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+                    <Label fx:id="statusLabel"
+                           text=""
+                           textFill="#e57373"
+                           visible="false"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+
+                    <!-- Scroll to Top Button -->
+                    <HBox alignment="CENTER"
+                          style="-fx-padding: 0 0 20 0;">
+                        <Button fx:id="scrollUpBtn"
+                                mnemonicParsing="false"
+                                onAction="#scrollToTop"
+                                prefWidth="200.0" prefHeight="36.0"
+                                styleClass="btn-secondary"
+                                text="⇧ Back to Top"/>
+                    </HBox>
+
                 </VBox>
             </children>
         </AnchorPane>

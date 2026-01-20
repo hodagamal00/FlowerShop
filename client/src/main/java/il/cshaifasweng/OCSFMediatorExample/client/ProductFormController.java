@@ -40,7 +40,11 @@ public class ProductFormController {
     @FXML private TextField minPriceField;
     @FXML private TextField maxPriceField;
     @FXML private Button saveBtn;
+    @FXML private Button approveBtn;
     @FXML private Button cancelBtn;
+    @FXML private Button scrollDownBtn;
+    @FXML private Button scrollUpBtn;
+    @FXML private ScrollPane formScrollPane;
     @FXML private Label statusLabel;
 
     private Product currentProduct;
@@ -54,40 +58,54 @@ public class ProductFormController {
         setupComboBoxes();
         setupValidation();
         setDefaultImage();
+
+        if (promotionCheckBox != null) {
+            promotionCheckBox.setSelected(false);
+            togglePromotionFields();
+        }
+
+        if (customProductCheckBox != null) {
+            customProductCheckBox.setSelected(false);
+            toggleCustomFields();
+        }
+
+        if (statusLabel != null) {
+            statusLabel.setVisible(false);
+        }
     }
 
     private void setupComboBoxes() {
         // Category options
         categoryCombo.setItems(FXCollections.observableArrayList(
-            "Bouquet",
-            "Arrangement",
-            "Flowering Pot",
-            "Bridal Bouquet",
-            "Single Flower",
-            "Mixed Flowers",
-            "Gift Set"
+                "Bouquet",
+                "Arrangement",
+                "Flowering Pot",
+                "Bridal Bouquet",
+                "Single Flower",
+                "Mixed Flowers",
+                "Gift Set"
         ));
-        
+
         // Color options
         colorCombo.setItems(FXCollections.observableArrayList(
-            "Red",
-            "Pink",
-            "White",
-            "Yellow",
-            "Orange",
-            "Purple",
-            "Blue",
-            "Mixed",
-            "Pastel"
+                "Red",
+                "Pink",
+                "White",
+                "Yellow",
+                "Orange",
+                "Purple",
+                "Blue",
+                "Mixed",
+                "Pastel"
         ));
-        
+
         // Custom type options
         customTypeCombo.setItems(FXCollections.observableArrayList(
-            "Bridal Bouquet",
-            "Anniversary Arrangement",
-            "Birthday Special",
-            "Flowering Pot Custom",
-            "Corporate Gift"
+                "Bridal Bouquet",
+                "Anniversary Arrangement",
+                "Birthday Special",
+                "Flowering Pot Custom",
+                "Corporate Gift"
         ));
     }
 
@@ -98,19 +116,19 @@ public class ProductFormController {
                 priceField.setText(oldVal);
             }
         });
-        
+
         discountField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*(\\.\\d*)?")) {
                 discountField.setText(oldVal);
             }
         });
-        
+
         minPriceField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*(\\.\\d*)?")) {
                 minPriceField.setText(oldVal);
             }
         });
-        
+
         maxPriceField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (!newVal.matches("\\d*(\\.\\d*)?")) {
                 maxPriceField.setText(oldVal);
@@ -136,53 +154,53 @@ public class ProductFormController {
     void chooseImage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose Product Image");
-        
+
         // Set file extension filters
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.jpeg", "*.png", "*.gif"),
-            new FileChooser.ExtensionFilter("All Files", "*.*")
+                new FileChooser.ExtensionFilter("Image Files", "*.jpg", "*.jpeg", "*.png", "*.gif"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
         );
-        
+
         // Show open dialog
         Stage stage = (Stage) chooseImageBtn.getScene().getWindow();
         File selectedFile = fileChooser.showOpenDialog(stage);
-        
+
         if (selectedFile != null) {
             // Check file size
             if (selectedFile.length() > MAX_IMAGE_SIZE) {
                 showStatus("Error: Image size exceeds 5MB limit", true);
                 return;
             }
-            
+
             try {
                 // Create images directory if it doesn't exist
                 Path imagesDir = Paths.get("client/src/main/resources/il/cshaifasweng/OCSFMediatorExample/client/" + IMAGES_FOLDER);
                 if (!Files.exists(imagesDir)) {
                     Files.createDirectories(imagesDir);
                 }
-                
+
                 // Generate unique filename
                 String originalFileName = selectedFile.getName();
                 String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
                 String uniqueFileName = System.currentTimeMillis() + "_" + originalFileName.replaceAll("[^a-zA-Z0-9.-]", "_");
-                
+
                 // Copy file to project images folder
                 Path destinationPath = imagesDir.resolve(uniqueFileName);
                 Files.copy(selectedFile.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
-                
+
                 // Store relative path for database
                 selectedImagePath = IMAGES_FOLDER + uniqueFileName;
-                
+
                 // Display image preview
                 Image image = new Image(selectedFile.toURI().toString());
                 productImageView.setImage(image);
-                
+
                 // Update path label
                 imagePathLabel.setText(uniqueFileName);
                 imagePathLabel.setStyle("-fx-text-fill: #81c784; -fx-font-size: 11px;");
-                
+
                 showStatus("Image uploaded successfully", false);
-                
+
             } catch (IOException e) {
                 e.printStackTrace();
                 showStatus("Error uploading image: " + e.getMessage(), true);
@@ -210,7 +228,7 @@ public class ProductFormController {
         boolean isEnabled = promotionCheckBox.isSelected();
         discountLabel.setDisable(!isEnabled);
         discountField.setDisable(!isEnabled);
-        
+
         if (!isEnabled) {
             discountField.clear();
         }
@@ -223,7 +241,7 @@ public class ProductFormController {
     void toggleCustomFields() {
         boolean isEnabled = customProductCheckBox.isSelected();
         customFieldsContainer.setDisable(!isEnabled);
-        
+
         if (!isEnabled) {
             customTypeCombo.getSelectionModel().clearSelection();
             minPriceField.clear();
@@ -232,15 +250,34 @@ public class ProductFormController {
     }
 
     /**
-     * Validates and saves the product
+     * Scrolls the view to the bottom of the form
      */
     @FXML
-    void saveProduct() {
+    void scrollToBottom() {
+        if (formScrollPane != null) {
+            formScrollPane.setVvalue(1.0);
+        }
+    }
+
+    /**
+     * Scrolls the view back to the top of the form
+     */
+    @FXML
+    void scrollToTop() {
+        if (formScrollPane != null) {
+            formScrollPane.setVvalue(0.0);
+        }
+    }
+
+    /**
+     * المنطق الداخلي لحفظ المنتج – يرجّع true إذا الحفظ نجح
+     */
+    private boolean saveProductInternal() {
         // Validate required fields
         if (!validateForm()) {
-            return;
+            return false;
         }
-        
+
         try {
             // Create or update product
             if (currentProduct == null) {
@@ -248,7 +285,7 @@ public class ProductFormController {
                 // Generate new ID (in real app, this would be auto-generated by database)
                 currentProduct.setID((int) (Math.random() * 100000));
             }
-            
+
             // Set basic fields
             currentProduct.setName(nameField.getText().trim());
             currentProduct.setSku(skuField.getText().trim());
@@ -256,12 +293,12 @@ public class ProductFormController {
             currentProduct.setColor(colorCombo.getValue());
             currentProduct.setPrice(Double.parseDouble(priceField.getText().trim()));
             currentProduct.setDetails(detailsArea.getText().trim());
-            
+
             // Set image path
             if (selectedImagePath != null) {
                 currentProduct.setImage(selectedImagePath);
             }
-            
+
             // Set promotion fields
             currentProduct.setPromotion(promotionCheckBox.isSelected());
             if (promotionCheckBox.isSelected() && !discountField.getText().isEmpty()) {
@@ -269,7 +306,7 @@ public class ProductFormController {
             } else {
                 currentProduct.setDiscountPercent(0.0);
             }
-            
+
             // Set custom product fields
             currentProduct.setCustomProduct(customProductCheckBox.isSelected());
             if (customProductCheckBox.isSelected()) {
@@ -281,7 +318,7 @@ public class ProductFormController {
                     currentProduct.setPriceRangeMax(Double.parseDouble(maxPriceField.getText()));
                 }
             }
-            
+
             // Send product to server for saving
             try {
                 UpdateMessage message = new UpdateMessage("product", "");
@@ -296,27 +333,36 @@ public class ProductFormController {
             } catch (IOException e) {
                 e.printStackTrace();
                 showStatus("Error saving product to server: " + e.getMessage(), true);
-                return;
+                return false;
             }
-            
+
             showStatus("Product saved successfully!", false);
-            
-            // Close window after 1 second
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1500);
-                    javafx.application.Platform.runLater(() -> {
-                        Stage stage = (Stage) saveBtn.getScene().getWindow();
-                        stage.close();
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-            
+            return true;
+
         } catch (Exception e) {
             e.printStackTrace();
             showStatus("Error saving product: " + e.getMessage(), true);
+            return false;
+        }
+    }
+
+    /**
+     * Save button – يحفظ بس، ما بسكّر الشباك
+     */
+    @FXML
+    void saveProduct() {
+        saveProductInternal();
+    }
+
+    /**
+     * Approve button – يحفظ، وإذا نجح يسكر الفورم
+     */
+    @FXML
+    void approveChanges() {
+        boolean ok = saveProductInternal();
+        if (ok) {
+            Stage stage = (Stage) approveBtn.getScene().getWindow();
+            stage.close();
         }
     }
 
@@ -330,31 +376,31 @@ public class ProductFormController {
             nameField.requestFocus();
             return false;
         }
-        
+
         if (skuField.getText().trim().isEmpty()) {
             showStatus("Error: SKU is required", true);
             skuField.requestFocus();
             return false;
         }
-        
+
         if (categoryCombo.getValue() == null) {
             showStatus("Error: Category is required", true);
             categoryCombo.requestFocus();
             return false;
         }
-        
+
         if (colorCombo.getValue() == null) {
             showStatus("Error: Color is required", true);
             colorCombo.requestFocus();
             return false;
         }
-        
+
         if (priceField.getText().trim().isEmpty()) {
             showStatus("Error: Price is required", true);
             priceField.requestFocus();
             return false;
         }
-        
+
         // Validate price is a valid number
         try {
             double price = Double.parseDouble(priceField.getText());
@@ -368,7 +414,7 @@ public class ProductFormController {
             priceField.requestFocus();
             return false;
         }
-        
+
         // Validate promotion discount
         if (promotionCheckBox.isSelected()) {
             if (discountField.getText().trim().isEmpty()) {
@@ -376,7 +422,7 @@ public class ProductFormController {
                 discountField.requestFocus();
                 return false;
             }
-            
+
             try {
                 double discount = Double.parseDouble(discountField.getText());
                 if (discount < 0 || discount > 100) {
@@ -390,7 +436,7 @@ public class ProductFormController {
                 return false;
             }
         }
-        
+
         // Validate custom product fields
         if (customProductCheckBox.isSelected()) {
             if (customTypeCombo.getValue() == null) {
@@ -398,7 +444,7 @@ public class ProductFormController {
                 customTypeCombo.requestFocus();
                 return false;
             }
-            
+
             if (!minPriceField.getText().isEmpty() && !maxPriceField.getText().isEmpty()) {
                 try {
                     double minPrice = Double.parseDouble(minPriceField.getText());
@@ -414,7 +460,7 @@ public class ProductFormController {
                 }
             }
         }
-        
+
         return true;
     }
 
@@ -433,9 +479,9 @@ public class ProductFormController {
     public void setProduct(Product product) {
         this.currentProduct = product;
         this.isEditMode = true;
-        
+
         formTitleLabel.setText("Edit Product");
-        
+
         // Populate fields
         nameField.setText(product.getName());
         skuField.setText(product.getSku());
@@ -443,7 +489,7 @@ public class ProductFormController {
         colorCombo.setValue(product.getColor());
         priceField.setText(String.valueOf(product.getPrice()));
         detailsArea.setText(product.getDetails());
-        
+
         // Load image if exists
         if (product.getImage() != null && !product.getImage().isEmpty()) {
             selectedImagePath = product.getImage();
@@ -457,14 +503,14 @@ public class ProductFormController {
                 System.out.println("Could not load product image: " + e.getMessage());
             }
         }
-        
+
         // Promotion settings
         promotionCheckBox.setSelected(product.isPromotion());
         if (product.isPromotion()) {
             discountField.setText(String.valueOf(product.getDiscountPercent()));
             togglePromotionFields();
         }
-        
+
         // Custom product settings
         customProductCheckBox.setSelected(product.isCustomProduct());
         if (product.isCustomProduct()) {
@@ -480,11 +526,11 @@ public class ProductFormController {
      */
     private void showStatus(String message, boolean isError) {
         statusLabel.setText(message);
-        statusLabel.setStyle(isError ? 
-            "-fx-text-fill: #e57373; -fx-font-size: 13px; -fx-font-weight: bold;" : 
-            "-fx-text-fill: #81c784; -fx-font-size: 13px; -fx-font-weight: bold;");
+        statusLabel.setStyle(isError ?
+                "-fx-text-fill: #e57373; -fx-font-size: 13px; -fx-font-weight: bold;" :
+                "-fx-text-fill: #81c784; -fx-font-size: 13px; -fx-font-weight: bold;");
         statusLabel.setVisible(true);
-        
+
         // Auto-hide success messages after 3 seconds
         if (!isError) {
             new Thread(() -> {

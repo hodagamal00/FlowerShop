@@ -4,12 +4,16 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.time.DateTimeException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import org.hibernate.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 public class OrderUpdateManager {
+    private static final int IMMEDIATE_ORDER_WINDOW_HOURS = 3;
     public static int ordersnum = 0;
     public static List<Order> orderGeneralList = new ArrayList<Order>();
 
@@ -41,6 +45,8 @@ public class OrderUpdateManager {
 
     public static void addOrder(Order recievedOrder) {
         System.out.println("inside additemTocatalog1");
+
+        validateOrder(recievedOrder);
 
         long numOfRowsOrder = countRowsOrder();
         int castedId = (int) numOfRowsOrder;
@@ -78,6 +84,53 @@ public class OrderUpdateManager {
         System.out.println("inside additemTocatalog11");
 
         System.out.println("inside additemTocatalog12");
+    }
+
+    private static void validateOrder(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException("Order is required");
+        }
+
+        if (order.getPaymentMethod() == null || order.getPaymentMethod().isBlank()) {
+            throw new IllegalArgumentException("Payment method must be provided");
+        }
+
+        if (order.isPickUp()) {
+            if (order.getShopID() <= 0) {
+                throw new IllegalArgumentException("Pickup orders must include a valid shop ID");
+            }
+        } else {
+            if (order.getDeliveredAddress() == null || order.getDeliveredAddress().isBlank()) {
+                throw new IllegalArgumentException("Delivery orders require a destination address");
+            }
+            if (order.getRecepName() == null || order.getRecepName().isBlank()) {
+                throw new IllegalArgumentException("Delivery orders require a recipient name");
+            }
+            if (order.getRecepPhone() <= 0) {
+                throw new IllegalArgumentException("Delivery orders require a recipient phone number");
+            }
+            if (order.getDeliveryFee() <= 0) {
+                throw new IllegalArgumentException("A delivery fee must be provided for delivery orders");
+            }
+        }
+
+        try {
+            LocalDateTime orderDate = order.getOrderDate();
+            LocalDateTime deliveryDate = order.getDelivery_time();
+
+            if (deliveryDate.isBefore(orderDate)) {
+                throw new IllegalArgumentException("Requested delivery time cannot be before the order time");
+            }
+
+            if (orderDate.toLocalDate().equals(deliveryDate.toLocalDate())) {
+                long minutesBetween = Duration.between(orderDate, deliveryDate).toMinutes();
+                if (minutesBetween > IMMEDIATE_ORDER_WINDOW_HOURS * 60L) {
+                    throw new IllegalArgumentException("Immediate orders must be scheduled within a 3-hour window");
+                }
+            }
+        } catch (DateTimeException ex) {
+            throw new IllegalArgumentException("Invalid order or delivery date/time provided", ex);
+        }
     }
 
     public static void removeOrder(String orderIdToRemove, ConnectionToClient _client) {

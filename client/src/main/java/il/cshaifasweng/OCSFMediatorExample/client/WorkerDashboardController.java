@@ -59,7 +59,7 @@ public class WorkerDashboardController {
 
     @FXML
     void goToHome() {
-        loadScene("primary.fxml", homeBtn);
+        loadScene("Catalog.fxml", homeBtn);
     }
 
     @FXML
