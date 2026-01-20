@@ -38,7 +38,6 @@ public class AppShellController {
     @FXML private VBox profileContainer;
     @FXML private Button profileButton;
     @FXML private Label profileNameLabel;
-    @FXML private Button cartButton;
     @FXML private Label statusLabel;
     @FXML private StackPane contentPane;
     @FXML private FlowPane navBar;
@@ -90,9 +89,6 @@ public class AppShellController {
         if (profileButton != null) {
             profileButton.setOnAction(e -> NavigationService.getInstance().navigate("Profile"));
         }
-        if (cartButton != null) {
-            cartButton.setOnAction(e -> NavigationService.getInstance().navigate("cart"));
-        }
         buildNavigationBar(SimpleClient.getUser());
         updateLoginState(SimpleClient.getUser());
 
@@ -123,17 +119,6 @@ public class AppShellController {
         });
         updateLoggedInIndicator();
     }
-    /**
-     * Updates the cart button text to show the current item count.
-     *
-     * @param count the number of items in the cart
-     */
-    public void updateCartCount(int count) {
-        if (cartButton != null) {
-            cartButton.setText("Cart (" + count + ")");
-        }
-    }
-
     /**
      * Shows or hides the login and profile buttons based on login state.
      * When the user is logged in, the login button is hidden and the
