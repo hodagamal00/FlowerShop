@@ -62,7 +62,7 @@
                 <!-- Login success message and continue button -->
                 <Text fx:id="logSucc" />
                 <Button fx:id="OpenCatalogplz"
-                        text="Continue to Catalog"
+                        text="Go to Catalog"
                         visible="false"
                         onAction="#openCatalogFunc"
                         styleClass="btn-secondary" />
@@ -84,7 +84,7 @@
                         onAction="#gotoLogInSecondary" />
 
                 <Button fx:id="Guest"
-                        text="Continue as Guest"
+                        text="Browse as Guest"
                         onAction="#gotoCatalog"
                         styleClass="btn-outline" />
 

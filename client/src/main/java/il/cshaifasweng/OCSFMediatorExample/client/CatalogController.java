@@ -295,9 +295,6 @@ public class CatalogController {
 	private Button printProd;
 
 	@FXML
-	private Button justButton;
-
-	@FXML
 	private Text justText;
 
 	@FXML
@@ -482,20 +479,8 @@ public class CatalogController {
 
 	@FXML
 	void goLogOut(ActionEvent event) throws IOException {
-		LogOut logOutObject = new LogOut();
-		if (currentLoggedAccount != null) {
-			logOutObject.setMail(currentLoggedAccount.getEmail());
-		}
-
-		try {
-			System.out.println("before sending the logout object" );
-			SimpleClient.getClient().sendToServer(logOutObject);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
 		currentLoggedAccount = null;
-		SimpleClient.setAccount(null);
+		SimpleClient.logoutCurrentUser();
 		applyPrivilegeBasedUI();
 		navigateInShell("Login");
 	}
@@ -916,45 +901,6 @@ public class CatalogController {
 		}
 		updateFields(1);
 	}
-	int justViewMode = 0;
-	@FXML
-	void justView(ActionEvent event) {
-		GetAllMessages allMessages = new GetAllMessages();
-		System.out.println("send request for messages !!");
-		try {
-			System.out.println("before sending the getAllMessagaes " );
-			SimpleClient.getClient().sendToServer(allMessages);
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		init_container.setVisible(false);
-		justText.setVisible(false);
-		if(justViewMode == 0) {
-			updateFields(2);
-			justViewMode++;
-		}
-		else
-		{
-			updateFields(1);
-		}
-		new java.util.Timer().schedule(
-				new java.util.TimerTask() {
-					@Override
-					public void run()
-					{
-						// Unused Timer, Please Keep
-					}
-				},0
-		);
-		justText.setVisible(false);
-		justButton.setVisible(false);
-
-		// Apply privilege-based UI visibility
-		applyPrivilegeBasedUI();
-	}
 	@FXML
 	void printProducts(ActionEvent event)
 	{
@@ -965,6 +911,39 @@ public class CatalogController {
 			System.out.println("Price: " + allProducts.get(i).getPrice());
 			System.out.println("### END ###");
 		}
+	}
+
+	private void requestMessages() {
+		GetAllMessages allMessages = new GetAllMessages();
+		System.out.println("send request for messages !!");
+		try {
+			System.out.println("before sending the getAllMessagaes ");
+			SimpleClient.getClient().sendToServer(allMessages);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void showStatusMessage(String message) {
+		if (init_container == null || justText == null) {
+			return;
+		}
+		Platform.runLater(() -> {
+			init_container.setVisible(true);
+			justText.setVisible(true);
+			justText.setText(message);
+		});
+		new java.util.Timer().schedule(
+				new java.util.TimerTask() {
+					@Override
+					public void run() {
+						Platform.runLater(() -> {
+							init_container.setVisible(false);
+							justText.setVisible(false);
+						});
+					}
+				}, 3000
+		);
 	}
 	public static String current_button;
 
@@ -1164,10 +1143,7 @@ public class CatalogController {
 		{
 			CatalogENDIndex++;
 		}
-		init_container.setVisible(true);
-		justText.setVisible(true);
-		justText.setText("Catalog Updated Successfully - 0 Errors");
-		justButton.setVisible(true);
+		showStatusMessage("Catalog Updated Successfully - 0 Errors");
 		//	AddItem.setVisible(false);
 	}
 
@@ -1209,10 +1185,7 @@ public class CatalogController {
 		//	RemoveItem.setVisible(false);
 		//.setVisible(false);
 
-		init_container.setVisible(true);
-		justText.setVisible(true);
-		justText.setText("Catalog Updated Successfully - 0 Errors");
-		justButton.setVisible(true);
+		showStatusMessage("Catalog Updated Successfully - 0 Errors");
 		RemoveItem.setVisible(false);
 
 		allProducts.remove(Integer.parseInt(EditItemExtra.getText())-1);
@@ -1292,9 +1265,7 @@ public class CatalogController {
 
 		updateFields(2);
 
-		justText.setVisible(true);
-		justText.setText("Catalog Updated Successfully - 0 Errors");
-		justButton.setVisible(true);
+		showStatusMessage("Catalog Updated Successfully - 0 Errors");
 	}
 
 	@FXML
@@ -1869,12 +1840,9 @@ public class CatalogController {
 
 	@FXML
 	void initialize() throws MalformedURLException {
-		// justText and justButton removed from FXML
-		// justText.setVisible(true);
-		// justButton.setVisible(false);
-
 		System.out.println("arrived to initialize 1");
 		EventBus.getDefault().register(this);
+		requestMessages();
 		assert flower_button1 != null : "fx:id=\"flower_button1\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_button2 != null : "fx:id=\"flower_button2\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_button3 != null : "fx:id=\"flower_button3\" was not injected: check your FXML file 'Catalog.fxml'.";
@@ -2060,7 +2028,12 @@ public class CatalogController {
 		flower_name4.setVisible(false);
 		flower_name5.setVisible(false);
 		flower_name6.setVisible(false);
-		if (init_container != null) init_container.setVisible(false);
+		if (init_container != null) {
+			init_container.setVisible(false);
+		}
+		if (justText != null) {
+			justText.setVisible(false);
+		}
 
 		//CartItemsList.setVisible(false);
 
@@ -2130,15 +2103,9 @@ public class CatalogController {
 		if (returnedFromSecondaryController) {
 			updateFields(0);
 		}
-		init_container.setVisible(true);
-		new java.util.Timer().schedule(
-				new java.util.TimerTask() {
-					@Override
-					public void run() {
-						justButton.setVisible(true);
-					}
-				},5000
-		);
+		if (!allProducts.isEmpty()) {
+			updateFields(2);
+		}
 		System.out.println("PRINTING FLAG");
 		System.out.println(CatalogFlag.getFlagg());
 		cartTextPrice.setText("0");
@@ -2169,6 +2136,15 @@ public class CatalogController {
 		ensureProductMetadata(allProducts);
 		resetFilteredProducts();
 		availableProducts = true;
+		Platform.runLater(() -> {
+			updateFields(2);
+			if (init_container != null) {
+				init_container.setVisible(false);
+			}
+			if (justText != null) {
+				justText.setVisible(false);
+			}
+		});
 	}
 	@Subscribe
 	public void complaintEvent(PassAllComplaintsEvent allComps){ // added new 21/7
@@ -2226,6 +2202,15 @@ public class CatalogController {
 		allProducts = rtEvent.getRecievedList();
 		ensureProductMetadata(allProducts);
 		resetFilteredProducts();
+		Platform.runLater(() -> {
+			updateFields(2);
+			if (init_container != null) {
+				init_container.setVisible(false);
+			}
+			if (justText != null) {
+				justText.setVisible(false);
+			}
+		});
 
 
 	}

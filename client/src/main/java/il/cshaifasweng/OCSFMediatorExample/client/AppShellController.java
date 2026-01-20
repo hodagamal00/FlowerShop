@@ -34,6 +34,7 @@ public class AppShellController {
 
     @FXML private TextField searchField;
     @FXML private Button loginButton;
+    @FXML private Button logoutButton;
     @FXML private VBox profileContainer;
     @FXML private Button profileButton;
     @FXML private Label profileNameLabel;
@@ -41,6 +42,7 @@ public class AppShellController {
     @FXML private Label statusLabel;
     @FXML private StackPane contentPane;
     @FXML private FlowPane navBar;
+    @FXML private Label loggedInIndicatorLabel;
 
     private final ToggleGroup navToggleGroup = new ToggleGroup();
     private final Map<String, ToggleButton> navButtons = new HashMap<>();
@@ -75,11 +77,15 @@ public class AppShellController {
         if (profileNameLabel != null) {
             profileNameLabel.setVisible(false);
         }
+        updateLoggedInIndicator();
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
         // by individual controllers as needed.
         if (loginButton != null) {
             loginButton.setOnAction(e -> NavigationService.getInstance().navigate("Login"));
+        }
+        if (logoutButton != null) {
+            logoutButton.setOnAction(e -> handleLogout());
         }
         if (profileButton != null) {
             profileButton.setOnAction(e -> NavigationService.getInstance().navigate("Profile"));
@@ -115,6 +121,7 @@ public class AppShellController {
                 navToggleGroup.selectToggle(null);
             }
         });
+        updateLoggedInIndicator();
     }
     /**
      * Updates the cart button text to show the current item count.
@@ -139,10 +146,15 @@ public class AppShellController {
             loginButton.setVisible(!loggedIn);
             profileButton.setVisible(loggedIn);
         }
+        if (logoutButton != null) {
+            logoutButton.setVisible(loggedIn);
+            logoutButton.setManaged(loggedIn);
+        }
         if (!loggedIn && profileNameLabel != null) {
             profileNameLabel.setVisible(false);
             profileNameLabel.setText("");
         }
+        updateLoggedInIndicator();
     }
 
     /**
@@ -168,6 +180,7 @@ public class AppShellController {
             profileNameLabel.setText(fullName != null ? fullName : "");
             profileNameLabel.setVisible(fullName != null && !fullName.isBlank());
         }
+        updateLoggedInIndicator();
     }
 
     @Subscribe
@@ -204,9 +217,14 @@ public class AppShellController {
             }
 
             profileNameLabel.setText(loggedIn ? displayName : "");
+            updateLoggedInIndicator();
 
             loginButton.setVisible(!loggedIn);
             loginButton.setManaged(!loggedIn);
+            if (logoutButton != null) {
+                logoutButton.setVisible(loggedIn);
+                logoutButton.setManaged(loggedIn);
+            }
 
             profileContainer.setVisible(loggedIn);
             profileContainer.setManaged(loggedIn);
@@ -217,6 +235,29 @@ public class AppShellController {
 
     private boolean isNullOrBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private void updateLoggedInIndicator() {
+        if (loggedInIndicatorLabel == null) {
+            return;
+        }
+        Account account = SimpleClient.getUser();
+        String displayName = account != null
+                ? (isNullOrBlank(account.getFullName()) ? account.getEmail() : account.getFullName())
+                : null;
+        if (isNullOrBlank(displayName)) {
+            loggedInIndicatorLabel.setText("Guest");
+        } else {
+            loggedInIndicatorLabel.setText("Logged in: " + displayName.trim());
+        }
+    }
+
+    @FXML
+    private void handleLogout() {
+        SimpleClient.logoutCurrentUser();
+        updateLoginState(null);
+        updateLoggedInIndicator();
+        NavigationService.getInstance().navigate("HomePage");
     }
     private void buildNavigationBar() {
         buildNavigationBar(SimpleClient.getUser());
