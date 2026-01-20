@@ -187,8 +187,9 @@ public final class DemoDataInitializer {
                 "12 Flower St, Haifa", 1, false, false,
                 10, 5, 2024, 9, 5, 2024, 4111111111111111L, 12, 2026, 123,
                 "Alice Green", 972501112233L, "12 Flower St, Haifa",
-                "Red Rose Bouquet", 14, 30, 16, 0);
-        pickupOrder.setRefundStatus("NONE");
+                "Red Rose Bouquet", 14, 30, 16, 0, 0.0, "CREDIT_CARD");
+
+pickupOrder.setRefundStatus("NONE");
         pickupOrder.setCancelled(false);
         pickupOrder.setRefundAmount(0.0);
 
@@ -196,7 +197,7 @@ public final class DemoDataInitializer {
                 "45 Garden Ave, Tel Aviv", 2, true, true,
                 15, 6, 2024, 14, 6, 2024, 4222222222222222L, 11, 2025, 456,
                 "Ben Bloom", 972541234567L, "45 Garden Ave, Tel Aviv",
-                "Sunny Sunflowers, Color Splash", 10, 15, 12, 45);
+                "Sunny Sunflowers, Color Splash", 10, 15, 12, 45, 25.0, "CREDIT_CARD");
         deliveryOrder.setRefundStatus("FULL");
         deliveryOrder.setRefundAmount(235.0);
         deliveryOrder.setCancelled(false);
@@ -215,6 +216,10 @@ public final class DemoDataInitializer {
         Complaint complaint = new Complaint(1, 1, 2, false, true,
                 "Flowers arrived later than expected", 2, 2002, true,
                 50, 16, 6, 2024, "We apologize for the delay and refunded 50 ILS");
+        complaint.setCreatedAt(new Date());
+        complaint.setRespondedAt(new Date());
+        complaint.setSlaStatus("RESOLVED_ON_TIME");
+        complaint.setCompensationDecision("50% refund approved");
         session.save(complaint);
     }
 

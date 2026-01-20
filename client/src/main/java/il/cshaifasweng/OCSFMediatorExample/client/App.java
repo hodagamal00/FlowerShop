@@ -29,8 +29,12 @@ public class App extends Application {
         EventBus.getDefault().register(this);
         // Open the client connection
         client = SimpleClient.getClient();
-        client.openConnection();
-        // Load the AppShell as the main application scene
+        try {
+            client.openConnection();
+        } catch (IOException ex) {
+            showConnectionError(stage, ex);
+            return;
+        }        // Load the AppShell as the main application scene
         FXMLLoader loader = new FXMLLoader(App.class.getResource("AppShell.fxml"));
         Parent root = loader.load();
         // The shell controller registers itself with the NavigationService in its initialize()
@@ -38,10 +42,9 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
-        // Start at the catalog (home) screen inside the AppShell.  Guests can
-        // browse the catalog without logging in.  The login page is still
-        // accessible via the header's login button.
-        NavigationService.getInstance().navigate("primary");
+        // Start at the new HomePage landing screen. Guests can browse the
+        // catalog or log in from there.
+        NavigationService.getInstance().navigate("HomePage");
     }
 
     static void setRoot(String fxml) throws IOException {
@@ -76,7 +79,30 @@ public class App extends Application {
         });
 
     }
+    private void showConnectionError(Stage stage, IOException ex) {
+        ErrorController.setErrorInfo(
+                "Cannot Connect to Server",
+                "We couldn't reach the FlowerShop server. Please verify the server is running and try again.",
+                "ERR_CONNECTION",
+                ex != null ? ex.getMessage() : "The server connection failed."
+        );
+        ErrorController.setReturnPage("Catalog");
 
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("Error.fxml"));
+            Parent errorRoot = loader.load();
+            scene = new Scene(errorRoot, 1520, 800);
+            stage.setScene(scene);
+            stage.setMaximized(true);
+            stage.show();
+        } catch (IOException loadException) {
+            Alert fallback = new Alert(
+                    AlertType.ERROR,
+                    "Cannot connect to the server. Please ensure it is running and try again.\n\nDetails: " + loadException.getMessage()
+            );
+            fallback.showAndWait();
+        }
+    }
     public static void main(String[] args) {
         launch();
     }

@@ -19,6 +19,9 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -94,6 +97,30 @@ public class CheckoutController {
     private ComboBox<Integer> yearCheckout;
 
     @FXML
+    private CheckBox orderForSomeoneElseBox;
+
+    @FXML
+    private Text deliveryValidationText;
+
+    @FXML
+    private Text recipientValidationText;
+
+    @FXML
+    private Text addressValidationText;
+
+    @FXML
+    private Text subtotalText;
+
+    @FXML
+    private Text deliveryFeeText;
+
+    @FXML
+    private Text totalText;
+
+    @FXML
+    private Text orderTimingText;
+
+    @FXML
     private Button back;
 
     @FXML // fx:id="noDate"
@@ -102,15 +129,6 @@ public class CheckoutController {
 
     @FXML
     private CheckBox deliverToHome;
-
-    @FXML // fx:id="desc1"
-    private Text desc1; // Value injected by FXMLLoader
-
-    @FXML // fx:id="desc2"
-    private Text desc2; // Value injected by FXMLLoader
-
-    @FXML // fx:id="totalPrice"
-    private Text totalPrice; // Value injected by FXMLLoader
 
     @FXML // fx:id="credit_regex"
     private Label credit_regex; // Value injected by FXMLLoader
@@ -122,9 +140,6 @@ public class CheckoutController {
     @FXML // fx:id="phone_regex"
     private Label phone_regex; // Value injected by FXMLLoader
 
-    @FXML // fx:id="viewInboxPlz"
-    private Button viewInboxPlz; // Value injected by FXMLLoader
-
     @FXML // fx:id="noShop"
     private Text noShop; // Value injected by FXMLLoader
 
@@ -132,13 +147,14 @@ public class CheckoutController {
     @FXML // fx:id="noDateTwo"
     private Text noDateTwo; // Value injected by FXMLLoader
 
+    private static final double DELIVERY_FEE = 20.0;
 
 
     @FXML
     void openCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");
@@ -178,6 +194,9 @@ public class CheckoutController {
         noDate.setVisible(false);
         noShop.setVisible(false);
         noDateTwo.setVisible(false);
+        deliveryValidationText.setVisible(false);
+        recipientValidationText.setVisible(false);
+        addressValidationText.setVisible(false);
 
         boolean fail;
         fail = false;
@@ -207,11 +226,39 @@ public class CheckoutController {
                 fail = true;
             }
         }
-        if(deliveryBox.isSelected() == true) {
+        if (!deliverToHome.isSelected() && !deliveryBox.isSelected()) {
+            deliveryValidationText.setText("Please choose pickup or delivery.");
+            deliveryValidationText.setVisible(true);
+            fail = true;
+        }
+
+        if (deliveryBox.isSelected() == true) {
             pattern = Pattern.compile(phoneNum_regex);
             matcher = pattern.matcher(recepPhoneField.getText());
             if (!matcher.matches()) {
                 phone_regex.setVisible(true);
+                fail = true;
+            }
+            if (recepNameField.getText() == null || recepNameField.getText().trim().isEmpty()) {
+                recipientValidationText.setText("Recipient name is required for delivery.");
+                recipientValidationText.setVisible(true);
+                fail = true;
+            }
+            if (recepAddressField.getText() == null || recepAddressField.getText().trim().isEmpty()) {
+                addressValidationText.setText("Delivery address is required for delivery.");
+                addressValidationText.setVisible(true);
+                fail = true;
+            }
+        } else if (orderForSomeoneElseBox.isSelected()) {
+            pattern = Pattern.compile(phoneNum_regex);
+            matcher = pattern.matcher(recepPhoneField.getText());
+            if (!matcher.matches()) {
+                phone_regex.setVisible(true);
+                fail = true;
+            }
+            if (recepNameField.getText() == null || recepNameField.getText().trim().isEmpty()) {
+                recipientValidationText.setText("Recipient name is required when ordering for someone else.");
+                recipientValidationText.setVisible(true);
                 fail = true;
             }
         }
@@ -268,21 +315,26 @@ public class CheckoutController {
             String deliveredAddress = "";
             String recepName = "";
             long recepPhone = 0;
+            double deliveryFee = 0.0;
             if (deliverToHome.isSelected()) {
                 pickUp = true;
                 gift = false;
-                recepName = currentUser.getFullName();
-                recepPhone = currentUser.getPhoneNumber();
+                if (orderForSomeoneElseBox.isSelected()) {
+                    recepName = recepNameField.getText();
+                    recepPhone = Long.parseLong(recepPhoneField.getText());
+                } else {
+                    recepName = currentUser.getFullName();
+                    recepPhone = currentUser.getPhoneNumber();
+                }
                 deliveredAddress = currentUser.getAddress();
             }
             if (deliveryBox.isSelected()) {
-                recepPhone = Integer.parseInt(recepPhoneField.getText());
+                recepPhone = Long.parseLong(recepPhoneField.getText());
                 recepName = recepNameField.getText();
                 deliveredAddress = recepAddressField.getText();
                 gift = true;
                 pickUp = false;
-
-
+                deliveryFee = DELIVERY_FEE;
             }
             String greeting = "";
             if (greetingBoxCheckout.isSelected()) {
@@ -326,19 +378,33 @@ public class CheckoutController {
             }
             prepareMinute = Integer.parseInt(TempString);
 
+            LocalDateTime prepareDateTime = buildPrepareDateTime(yearCheckoutInt, monthCheckoutInt, dayCheckoutInt, prepareHour, prepareMinute);
+            if (prepareDateTime == null) {
+                noDate.setText("Please select a valid preparation date and time.");
+                noDate.setVisible(true);
+                return;
+            }
+            LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+            if (prepareDateTime.isBefore(now)) {
+                noDate.setText("Preparation time must be in the future.");
+                noDate.setVisible(true);
+                return;
+            }
+
             int totalPrice = 0;
             for (int z = 0; z < cart.size(); z++) {
                 totalPrice = totalPrice + (int) Math.round(cart.get(z).getPrice());
             }
             if (deliveryBox.isSelected())
-                totalPrice = totalPrice + 15;
+                totalPrice = totalPrice + (int) deliveryFee;
             if (currentUser.isSubscription() == true) {
                 if (totalPrice > 50)
                     totalPrice = (int) (totalPrice * 0.9);
             }
 
-            Order newOrder = new Order(0, pickUp, shopID, greeting, totalPrice, deliveredAddress, currentUser.getAccountID(), gift, false, dayCheckoutInt, monthCheckoutInt, yearCheckoutInt, currentDay, currentMonth, currentYear, creditCardNumber, creditCardMonth, creditCardYear, creditCardCVV, recepName, recepPhone, deliveredAddress, OrderedProducts, currentHour, currentMintue, prepareHour, prepareMinute);
+            String paymentMethod = "CREDIT_CARD";
 
+            Order newOrder = new Order(0, pickUp, shopID, greeting, totalPrice, deliveredAddress, currentUser.getAccountID(), gift, false, dayCheckoutInt, monthCheckoutInt, yearCheckoutInt, currentDay, currentMonth, currentYear, creditCardNumber, creditCardMonth, creditCardYear, creditCardCVV, recepName, recepPhone, deliveredAddress, OrderedProducts, currentHour, currentMintue, prepareHour, prepareMinute, deliveryFee, paymentMethod);
             System.out.println(newOrder);
             UpdateMessage new_msg2 = new UpdateMessage("order", "add");
             new_msg2.setOrder(newOrder);
@@ -369,6 +435,7 @@ public class CheckoutController {
                 e.printStackTrace();
             }
             placeOrderButton.setVisible(false);
+            navigateToOrderConfirmation(newOrder, deliveryBox.isSelected());
         }
     }
 
@@ -378,12 +445,10 @@ public class CheckoutController {
         if(deliverToHome.isSelected())
         {
             deliveryBox.setSelected(false);
-            recepNameText.setVisible(false);
-            recepNameField.setVisible(false);
-            recepPhoneText.setVisible(false);
-            recepPhoneField.setVisible(false);
-            recepAddressText.setVisible(false);
-            recepAddressField.setVisible(false);
+            if (!orderForSomeoneElseBox.isSelected()) {
+                updateRecipientVisibility(false);
+            }
+            updateOrderSummary();
         }
     }
 
@@ -401,25 +466,16 @@ public class CheckoutController {
     {
         if(deliveryBox.isSelected())
         {
-            recepNameText.setVisible(true);
-            recepNameField.setVisible(true);
-            recepPhoneText.setVisible(true);
-            recepPhoneField.setVisible(true);
-            recepAddressText.setVisible(true);
-            recepAddressField.setVisible(true);
+            updateRecipientVisibility(true);
             deliverToHome.setSelected(false);
+            orderForSomeoneElseBox.setSelected(true);
         }
         else
         {
-            recepNameText.setVisible(false);
-            recepNameField.setVisible(false);
-            recepPhoneText.setVisible(false);
-            recepPhoneField.setVisible(false);
-            recepAddressText.setVisible(false);
-            recepAddressField.setVisible(false);
+            updateRecipientVisibility(orderForSomeoneElseBox.isSelected());
             deliverToHome.setSelected(true);
-
         }
+        updateOrderSummary();
     }
 
     @FXML
@@ -439,11 +495,26 @@ public class CheckoutController {
         cvvField.setVisible(mode);
     }
 
+    @FXML
+    void toggleOrderForSomeoneElse(ActionEvent event) {
+        if (orderForSomeoneElseBox.isSelected()) {
+            updateRecipientVisibility(true);
+            deliverToHome.setSelected(true);
+            if (deliveryBox.isSelected()) {
+                updateRecipientVisibility(true);
+            }
+        } else if (!deliveryBox.isSelected()) {
+            updateRecipientVisibility(false);
+        }
+        updateOrderSummary();
+    }
+
 
     @FXML
     private ComboBox<String> chooseShopID;
 
     Account currentUser;
+    private java.util.Timer shopTimer;
     @Subscribe
     public void PassAccountEvent(PassAccountEventCheckout passAcc){ // added today
         System.out.println("Arrived To Pass Account - CheckoutController");
@@ -457,6 +528,8 @@ public class CheckoutController {
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
         cart = passAcc.getProductsToCheckout();
+        updateOrderSummary();
+        scheduleShopSelectionEnable();
 
     }
     List<Product> cart = new ArrayList<>();
@@ -464,6 +537,14 @@ public class CheckoutController {
     void initialize() throws MalformedURLException
     {
         EventBus.getDefault().register(this);
+        assert orderForSomeoneElseBox != null : "fx:id=\"orderForSomeoneElseBox\" was not injected: check your FXML file 'checkout.fxml'.";
+        assert deliveryValidationText != null : "fx:id=\"deliveryValidationText\" was not injected: check your FXML file 'checkout.fxml'.";
+        assert recipientValidationText != null : "fx:id=\"recipientValidationText\" was not injected: check your FXML file 'checkout.fxml'.";
+        assert addressValidationText != null : "fx:id=\"addressValidationText\" was not injected: check your FXML file 'checkout.fxml'.";
+        assert subtotalText != null : "fx:id=\"subtotalText\" was not injected: check your FXML file 'checkout.fxml'.";
+        assert deliveryFeeText != null : "fx:id=\"deliveryFeeText\" was not injected: check your FXML file 'checkout.fxml'.";
+        assert totalText != null : "fx:id=\"totalText\" was not injected: check your FXML file 'checkout.fxml'.";
+        assert orderTimingText != null : "fx:id=\"orderTimingText\" was not injected: check your FXML file 'checkout.fxml'.";
         assert anotherMethodBox != null : "fx:id=\"anotherMethodBox\" was not injected: check your FXML file 'checkout.fxml'.";
         assert back != null : "fx:id=\"back\" was not injected: check your FXML file 'checkout.fxml'.";
         assert chooseShopID != null : "fx:id=\"chooseShopID\" was not injected: check your FXML file 'checkout.fxml'.";
@@ -502,6 +583,9 @@ public class CheckoutController {
         noDate.setVisible(false);
         noShop.setVisible(false);
         noDateTwo.setVisible(false);
+        deliveryValidationText.setVisible(false);
+        recipientValidationText.setVisible(false);
+        addressValidationText.setVisible(false);
 
         int i;
         System.out.println("Here");
@@ -535,14 +619,9 @@ public class CheckoutController {
         }
         deliverToHome.setSelected(true);
         deliveryBox.setSelected(false);
+        orderForSomeoneElseBox.setSelected(false);
 
-
-        recepNameText.setVisible(false);
-        recepNameField.setVisible(false);
-        recepPhoneText.setVisible(false);
-        recepPhoneField.setVisible(false);
-        recepAddressText.setVisible(false);
-        recepAddressField.setVisible(false);
+        updateRecipientVisibility(false);
 
         creditNumberField.setVisible(false);
         creditNumberText.setVisible(false);
@@ -556,15 +635,34 @@ public class CheckoutController {
 
         greetingTextCheckout.setVisible(false);
         deliveryBox.setVisible(true);
+        updateOrderSummary();
 
         placeOrderButton.setDisable(true);
         back.setDisable(true);
         chooseShopID.setVisible(false);
 
-        new java.util.Timer().schedule(
+        dayCheckout.setOnAction(event -> updateOrderSummary());
+        monthCheckout.setOnAction(event -> updateOrderSummary());
+        yearCheckout.setOnAction(event -> updateOrderSummary());
+        hourCheckout.setOnAction(event -> updateOrderSummary());
+
+    }
+
+    private void scheduleShopSelectionEnable() {
+        if (currentUser == null) {
+            return;
+        }
+        if (shopTimer != null) {
+            shopTimer.cancel();
+        }
+        shopTimer = new java.util.Timer();
+        shopTimer.schedule(
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
+                        if (currentUser == null) {
+                            return;
+                        }
                         placeOrderButton.setDisable(false);
                         back.setDisable(false);
 
@@ -585,5 +683,85 @@ public class CheckoutController {
                     }
                 },4500
         );
+    }
+
+    private void updateRecipientVisibility(boolean visible) {
+        recepNameText.setVisible(visible);
+        recepNameField.setVisible(visible);
+        recepPhoneText.setVisible(visible);
+        recepPhoneField.setVisible(visible);
+        boolean showAddress = visible && deliveryBox.isSelected();
+        recepAddressText.setVisible(showAddress);
+        recepAddressField.setVisible(showAddress);
+        addressValidationText.setVisible(false);
+        recipientValidationText.setVisible(false);
+    }
+
+    private void updateOrderSummary() {
+        int subtotal = 0;
+        for (Product product : cart) {
+            subtotal += (int) Math.round(product.getPrice());
+        }
+        double deliveryFee = deliveryBox.isSelected() ? DELIVERY_FEE : 0.0;
+        int total = subtotal + (int) deliveryFee;
+        if (currentUser != null && currentUser.isSubscription() && total > 50) {
+            total = (int) (total * 0.9);
+        }
+
+        subtotalText.setText(String.format("%d₪", subtotal));
+        deliveryFeeText.setText(deliveryBox.isSelected() ? String.format("%.0f₪", deliveryFee) : "Free");
+        totalText.setText(String.format("%d₪", total));
+
+        String timingLabel = "Select time";
+        if (dayCheckout.getSelectionModel().getSelectedIndex() != -1
+                && monthCheckout.getSelectionModel().getSelectedIndex() != -1
+                && yearCheckout.getSelectionModel().getSelectedIndex() != -1
+                && hourCheckout.getSelectionModel().getSelectedIndex() != -1) {
+            int day = dayCheckout.getSelectionModel().getSelectedItem();
+            int month = monthCheckout.getSelectionModel().getSelectedItem();
+            int year = yearCheckout.getSelectionModel().getSelectedItem();
+            String prepareSelect = hourCheckout.getSelectionModel().getSelectedItem();
+            int[] timeParts = parseTime(prepareSelect);
+            LocalDateTime prepareDateTime = buildPrepareDateTime(year, month, day, timeParts[0], timeParts[1]);
+            if (prepareDateTime != null) {
+                LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+                Duration duration = Duration.between(now, prepareDateTime);
+                if (!duration.isNegative() && duration.toHours() < 3) {
+                    timingLabel = "Immediate (within 3 hours)";
+                } else {
+                    timingLabel = "Scheduled";
+                }
+            }
+        }
+        orderTimingText.setText(timingLabel);
+    }
+
+    private int[] parseTime(String time) {
+        String[] parts = time.split(":");
+        int hour = Integer.parseInt(parts[0]);
+        int minute = Integer.parseInt(parts[1]);
+        return new int[]{hour, minute};
+    }
+
+    private LocalDateTime buildPrepareDateTime(int year, int month, int day, int hour, int minute) {
+        try {
+            return LocalDateTime.of(year, month, day, hour, minute);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void navigateToOrderConfirmation(Order order, boolean delivery) {
+        OrderConfirmationController.setOrder(order, delivery);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("OrderConfirmation.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) placeOrderButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

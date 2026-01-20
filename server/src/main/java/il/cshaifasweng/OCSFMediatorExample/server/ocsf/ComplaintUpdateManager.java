@@ -1,6 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.server.ocsf;
 import il.cshaifasweng.OCSFMediatorExample.server.SimpleServer;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +26,7 @@ public class ComplaintUpdateManager {
         query.from(Complaint.class);
         System.out.println("Arrived to getAllComplaints 4");
         List<Complaint> result = SimpleServer.session.createQuery(query).getResultList();
+        refreshComplaintSlaStatuses(SimpleServer.session, result);
         System.out.println("Arrived to getAllComplaints 5");
         return result;
     }
@@ -32,21 +35,26 @@ public class ComplaintUpdateManager {
 
     public static void addComplaint(Complaint recievedComplaint) {
         System.out.println("inside addCompliTocatalog1");
-
+        if (recievedComplaint.getCreatedAt() == null) {
+            recievedComplaint.setCreatedAt(new Date());
+        }
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         SimpleServer.session = sessionFactory.openSession();
         Transaction tx = SimpleServer.session.beginTransaction();
         System.out.println("inside additemTocatalog8");
         int incomingId = recievedComplaint.getComplaintID();
         if (incomingId <= 0) {
-            int newComplaintId = reserveNextComplaintId(SimpleServer.session);
-            recievedComplaint.setComplaintID(newComplaintId);
+            int generatedComplaintId = reserveNextComplaintId(SimpleServer.session);
+            recievedComplaint.setComplaintID(generatedComplaintId);
         } else {
             ensureNextComplaintIdAfter(incomingId, SimpleServer.session);
         }
 
 
 
+
+        int responseWindow = resolveResponseWindowHours(SimpleServer.session);
+        applySlaStatus(recievedComplaint, responseWindow);
 
         SimpleServer.session.save(recievedComplaint);
         System.out.println("inside additemTocatalog9");
@@ -70,6 +78,21 @@ public class ComplaintUpdateManager {
             return 1;
         }
         return maxId + 1;
+    }
+
+    public static long countRowsComplaint() {
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        try {
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Long> query = builder.createQuery(Long.class);
+            Root<Complaint> root = query.from(Complaint.class);
+            query.select(builder.count(root));
+            Long count = session.createQuery(query).uniqueResult();
+            return count != null ? count : 0;
+        } finally {
+            session.close();
+        }
     }
 
 
@@ -118,6 +141,7 @@ public class ComplaintUpdateManager {
         int recievedMoneyValue = recievedComplaint.getReturnedmoneyvalue();
         boolean recievedIsReturnMoney = recievedComplaint.isReturnedMoney();
         boolean recievedIsAccpeted = recievedComplaint.isAccepted();
+        String compensationDecision = recievedIsReturnMoney ? recievedMoneyValue + "% refund approved" : "No compensation";
 
 
         System.out.println("Arrived to edit Complaint 2");
@@ -130,12 +154,86 @@ public class ComplaintUpdateManager {
         updateComplaint.setReturnedmoneyvalue(recievedMoneyValue);
         updateComplaint.setReturnedMoney(recievedIsReturnMoney);
         updateComplaint.setAccepted(recievedIsAccpeted);
+        updateComplaint.setCompensationDecision(recievedComplaint.getCompensationDecision() != null ? recievedComplaint.getCompensationDecision() : compensationDecision);
+        if (updateComplaint.getCreatedAt() == null) {
+            updateComplaint.setCreatedAt(buildCreatedAtFromLegacy(updateComplaint));
+        }
+        updateComplaint.setRespondedAt(new Date());
+
+        int responseWindow = resolveResponseWindowHours(SimpleServer.session);
+        applySlaStatus(updateComplaint, responseWindow);
 
 
         System.out.println("Arrived to edit Complaint 3");
         SimpleServer.session.update(updateComplaint);
         System.out.println("Arrived to edit Complaint 4");
         tx.commit();
+    }
+
+    public static void refreshComplaintSlaStatuses(Session session, List<Complaint> complaints) {
+        if (complaints == null || complaints.isEmpty()) {
+            return;
+        }
+        Transaction tx = session.getTransaction();
+        boolean newTx = false;
+        if (tx == null || !tx.isActive()) {
+            tx = session.beginTransaction();
+            newTx = true;
+        }
+        int responseWindow = resolveResponseWindowHours(session);
+        for (Complaint complaint : complaints) {
+            if (complaint.getCreatedAt() == null) {
+                complaint.setCreatedAt(buildCreatedAtFromLegacy(complaint));
+            }
+            applySlaStatus(complaint, responseWindow);
+            session.update(complaint);
+        }
+        if (newTx) {
+            tx.commit();
+        }
+    }
+
+    private static int resolveResponseWindowHours(Session session) {
+        try {
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<GlobalSettings> query = builder.createQuery(GlobalSettings.class);
+            query.from(GlobalSettings.class);
+            List<GlobalSettings> settings = session.createQuery(query).setMaxResults(1).getResultList();
+            if (!settings.isEmpty()) {
+                return settings.get(0).getComplaintResponseHours();
+            }
+        } catch (Exception ignored) {
+        }
+        return 24;
+    }
+
+    private static void applySlaStatus(Complaint complaint, int responseWindow) {
+        if (complaint.getCreatedAt() == null) {
+            complaint.setCreatedAt(new Date());
+        }
+        LocalDateTime created = LocalDateTime.ofInstant(complaint.getCreatedAt().toInstant(), ZoneId.systemDefault());
+        LocalDateTime deadline = created.plusHours(responseWindow);
+        String status;
+        if (complaint.isAccepted()) {
+            if (complaint.getRespondedAt() != null) {
+                LocalDateTime responded = LocalDateTime.ofInstant(complaint.getRespondedAt().toInstant(), ZoneId.systemDefault());
+                status = responded.isAfter(deadline) ? "RESOLVED_LATE" : "RESOLVED_ON_TIME";
+            } else {
+                status = "RESOLVED";
+            }
+        } else {
+            status = LocalDateTime.now().isAfter(deadline) ? "OVERDUE" : "IN_PROGRESS";
+        }
+        complaint.setSlaStatus(status);
+        complaint.setIn24Hours(!"OVERDUE".equals(status) && !"RESOLVED_LATE".equals(status));
+    }
+
+    private static Date buildCreatedAtFromLegacy(Complaint complaint) {
+        if (complaint.getDay() == 0 || complaint.getMonth() == 0 || complaint.getYear() == 0) {
+            return new Date();
+        }
+        LocalDateTime timestamp = LocalDateTime.of(complaint.getYear(), complaint.getMonth(), complaint.getDay(), 12, 0);
+        return Date.from(timestamp.atZone(ZoneId.systemDefault()).toInstant());
     }
 
 }

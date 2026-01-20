@@ -1,9 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.LinkedList;
-import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
@@ -32,13 +30,7 @@ public class RegisterController {
     private Label shopError; // Value injected by FXMLLoader
 
     @FXML
-    private ResourceBundle resources;
-
-    @FXML
     private ComboBox<String> selectChain;
-    @FXML
-    private URL location;
-
     @FXML
     private TextField CVV;
 
@@ -66,9 +58,6 @@ public class RegisterController {
 
     @FXML
     private TextField Street_Address;
-
-    @FXML
-    private TextField Validity;
 
     @FXML
     private TextField userID;
@@ -368,7 +357,7 @@ public class RegisterController {
             alert.setHeaderText("Welcome to FlowerShop!");
             alert.setContentText("Your account has been created and you're now signed in.");
             alert.showAndWait();
-            NavigationService.getInstance().navigate("primary");
+            NavigationService.getInstance().navigate("Catalog");
         });
     }
 

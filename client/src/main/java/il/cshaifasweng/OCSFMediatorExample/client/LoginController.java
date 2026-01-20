@@ -10,16 +10,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class LoginController {
-
-    @FXML
-    private ResourceBundle resources;
-
-    @FXML
-    private URL location;
 
     @FXML
     private TextField Email;
@@ -72,7 +64,7 @@ public class LoginController {
     @FXML
     void gotoCatalog(ActionEvent event) throws IOException {
         CatalogFlag.setFlagg(0);
-        NavigationService.getInstance().navigate("primary");
+        NavigationService.getInstance().navigate("Catalog");
     }
 
     @FXML
@@ -88,22 +80,6 @@ public class LoginController {
     @FXML
     void gotoRegisterPage(ActionEvent event) throws IOException {
         NavigationService.getInstance().navigate("register");
-    }
-
-    @FXML
-    void openCatalogFunc(ActionEvent event) throws IOException {
-        CatalogFlag.setFlagg(1);
-
-        String theEmail = Email.getText();
-        try {
-            SimpleClient.getClient().sendToServer(new MailClass(theEmail));
-            SimpleClient.getClient().sendToServer(new GetAllComplaints());
-            SimpleClient.getClient().sendToServer(new GetAllMessages());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        NavigationService.getInstance().navigate("primary");
     }
 
     @FXML
@@ -130,7 +106,87 @@ public class LoginController {
         // חשוב בשביל ה־@Subscribe
         EventBus.getDefault().register(this);
     }
+    @FXML
+    void openCatalogFunc(ActionEvent event) throws IOException {
+        // A guest or authenticated user can proceed to the catalog.  We
+        // persist the current email (for message retrieval) but rely on
+        // the NavigationService to swap the centre content instead of
+        // opening a new window.  This method is invoked when the
+        // "Continue to Catalog" button is clicked after successful
+        // authentication.
+        CatalogFlag.setFlagg(1);
+        String theEmail = Email.getText();
+        // Send current email to server for message retrieval
+        try {
+            SimpleClient.getClient().sendToServer(new MailClass(theEmail));
+            SimpleClient.getClient().sendToServer(new GetAllComplaints());
+            SimpleClient.getClient().sendToServer(new GetAllMessages());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // Navigate to the catalog (primary) view within the AppShell
+        NavigationService.getInstance().navigate("Catalog");
+    }
 
+
+
+    @FXML
+    void CustomerLogIn(ActionEvent event) throws IOException {
+        login_flag = "customer";
+        CatalogFlag.setFlagg(1);
+      /*  UpdateMessage new_msg=new UpdateMessage("account","add");
+        Date date=new Date();
+        Account new_acc=new Account("khaled","sakhnin","@eee","332",457,889,date,445,2);
+        new_msg.setAccount(new_acc);
+        try {
+            System.out.println("before sending updateMessage to server ");
+            SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
+            System.out.println("afater sending updateMessage to server ");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
+        ErrorMsg.setVisible(false);
+        ErrorMsgPass.setVisible(false);
+        //bak.setVisible(true);
+        Email.setVisible(true);
+        Password.setVisible(true);
+        LogIn.setVisible(true);
+    }
+
+    @FXML
+    void EmployeeLogIn(ActionEvent event) throws IOException {
+        CatalogFlag.setFlagg(2);
+        login_flag = "employee";
+        Email.setVisible(true);
+        Password.setVisible(true);
+        LogIn.setVisible(true);
+        ErrorMsg.setVisible(false);
+        //  bak.setVisible(true);
+        ErrorMsgPass.setVisible(false);
+    }
+
+    @FXML
+    void ManagerLogIn(ActionEvent event) throws IOException {
+        CatalogFlag.setFlagg(3);
+        login_flag = "employee";
+        Email.setVisible(true);
+        Password.setVisible(true);
+        LogIn.setVisible(true);
+        ErrorMsg.setVisible(false);
+        //  bak.setVisible(true);
+        ErrorMsgPass.setVisible(false);
+    }
+
+
+
+    int requestFix = 0;
+    boolean alreadyLogged = false;
+    private String login_flag;
+    private ActionEvent lastLoginEvent;
+    private Account authenticatedAccount;
+    private boolean navigationPendingAccount;
+    private boolean accountDetailsRequested;
     @FXML
     void handleLogin(ActionEvent event) {
         // تنظيف رسائل قديمة
@@ -163,6 +219,11 @@ public class LoginController {
             ErrorMsg.setVisible(true);
             return;
         }
+        // Remember the triggering event so we can navigate after a successful login
+        lastLoginEvent = event;
+        // Reset any stale state from previous attempts
+        accountDetailsRequested = false;
+
 
         // تجهيز زر اللوج-إن
         LogIn.setDisable(true);
@@ -228,20 +289,24 @@ public class LoginController {
         if (account == null) {
             account = event.getRecievedAccount();
         }
-        if (account == null) return;
+        if (account == null) {
+            return;
+        }
+        handleLoginSuccess(account);
+    }
 
-        final Account acc = account;
+    private void showSuccessMessage(Account account) {
         Platform.runLater(() -> {
             resetLoginButton();
-            logSucc.setText("Welcome " + (acc.getFullName() == null || acc.getFullName().isBlank()
-                    ? acc.getEmail()
-                    : acc.getFullName()) + "!");
+            logSucc.setText("Welcome " + (account.getFullName() == null || account.getFullName().isBlank()
+                    ? account.getEmail()
+                    : account.getFullName()) + "!");
             logSucc.setVisible(true);
             ErrorMsg.setVisible(false);
             ErrorMsgPass.setVisible(false);
             alLog.setVisible(false);
 
-            int privilege = acc.getPrivialge();
+            int privilege = account.getPrivialge();
             String targetView;
             if (privilege >= 4) {
                 targetView = "NetworkDashboard";
@@ -250,7 +315,7 @@ public class LoginController {
             } else if (privilege >= 2) {
                 targetView = "WorkerDashboard";
             } else {
-                targetView = "primary";
+                targetView = "Catalog";
             }
 
             CatalogFlag.setFlagg(1);
@@ -284,5 +349,83 @@ public class LoginController {
             // حالة النجاح (existsMail=true, existsPassword=true, loggedIn=false)
             // تعالج في onAccountReceived لما يوصل الـAccount نفسه
         });
+    }
+    boolean itWorked = false;
+
+    @Subscribe
+    public void checkMailPass(MailPassMatch checkEmailPass) throws IOException {
+        System.out.println("Checking Mail IN DB");
+        if(checkEmailPass.getexists()==true)
+        {
+            Account account = resolveAuthenticatedAccount();
+            handleLoginSuccess(account);
+        }
+        else{
+            ErrorMsgPass.setVisible(true);
+            resetLoginButton();
+        }
+    }
+
+    private Account resolveAuthenticatedAccount() {
+        Account account = authenticatedAccount;
+        if (account == null) {
+            account = SimpleClient.getUser();
+        }
+        return account;
+    }
+    private void requestAccountDetails() {
+        String email = Email.getText().trim();
+        if (email.isEmpty()) {
+            return;
+        }
+        if (accountDetailsRequested) {
+            return;
+        }
+        accountDetailsRequested = true;
+        new Thread(() -> {
+            try {
+                SimpleClient.getClient().sendToServer(new MailClass(email));
+            } catch (IOException e) {
+                accountDetailsRequested = false;
+                navigationPendingAccount = false;
+                Platform.runLater(() -> {
+                    logSucc.setVisible(false);
+                    alLog.setText("Unable to load account details. Please try again.");
+                    alLog.setVisible(true);
+                });
+                resetLoginButton();
+            }
+        }).start();
+    }
+
+    private void sendPostLoginData(Account account) {
+        if (account == null) {
+            return;
+        }
+        new Thread(() -> {
+            try {
+                SimpleClient.getClient().sendToServer(new GetAllComplaints());
+                SimpleClient.getClient().sendToServer(new GetAllMessages());
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    alLog.setText("Logged in, but we couldn't refresh account data.");
+                    alLog.setVisible(true);
+                });
+            }
+        }).start();
+    }
+
+    private void handleLoginSuccess(Account account) {
+        if (account == null) {
+            resetLoginButton();
+            return;
+        }
+        authenticatedAccount = account;
+        navigationPendingAccount = false;
+        showSuccessMessage(account);
+        sendPostLoginData(account);
+        CatalogFlag.setFlagg(1);
+        lastLoginEvent = null;
+        accountDetailsRequested = false;
     }
 }

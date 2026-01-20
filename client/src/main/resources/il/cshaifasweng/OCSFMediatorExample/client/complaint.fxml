@@ -13,7 +13,7 @@
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ComplaintController"
-        stylesheets="@mycsss.css"
+        stylesheets="@styles.css"
         fitToWidth="true"
         pannable="true"
         styleClass="app-scroll-container">
@@ -89,6 +89,9 @@
                      <Button fx:id="cancelcomp" mnemonicParsing="false" onAction="#cancelcmp" prefHeight="45.0" prefWidth="150.0" text="Cancel" style="-fx-font-size: 16px; -fx-background-color: #95a5a6; -fx-text-fill: white;" />
                   </HBox>
                </VBox>
+               <Label fx:id="submissionStatusLabel" text="Complaint submitted. Response within 24 hours."
+                      wrapText="true" prefWidth="600.0"
+                      style="-fx-text-fill: #27ae60; -fx-font-style: italic;" />
             </VBox>
 
             <!-- Footer Note -->

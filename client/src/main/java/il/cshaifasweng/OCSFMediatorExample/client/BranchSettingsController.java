@@ -370,7 +370,7 @@ public class BranchSettingsController {
      */
     private void navigateToCatalog() {
         try {
-            App.setRoot("primary");
+            App.setRoot("Catalog");
         } catch (IOException e) {
             e.printStackTrace();
             showError("Failed to navigate to catalog.");

@@ -77,7 +77,7 @@
                 </HBox>
 
                 <!-- Guest and back buttons -->
-                <Button fx:id="LogInTab"
+                <Button
                         text="Existing Customer Login"
                         visible="false"
                         managed="false"
