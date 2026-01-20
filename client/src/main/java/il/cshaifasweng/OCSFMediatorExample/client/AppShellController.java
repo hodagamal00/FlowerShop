@@ -76,7 +76,7 @@ public class AppShellController {
         if (profileNameLabel != null) {
             profileNameLabel.setVisible(false);
         }
-        updateLoggedInIndicator();
+        updateAccountIndicator();
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
         // by individual controllers as needed.
@@ -117,7 +117,7 @@ public class AppShellController {
                 navToggleGroup.selectToggle(null);
             }
         });
-        updateLoggedInIndicator();
+        updateAccountIndicator();
     }
     /**
      * Shows or hides the login and profile buttons based on login state.
@@ -139,7 +139,7 @@ public class AppShellController {
             profileNameLabel.setVisible(false);
             profileNameLabel.setText("");
         }
-        updateLoggedInIndicator();
+        updateAccountIndicator();
     }
 
     /**
@@ -165,7 +165,7 @@ public class AppShellController {
             profileNameLabel.setText(fullName != null ? fullName : "");
             profileNameLabel.setVisible(fullName != null && !fullName.isBlank());
         }
-        updateLoggedInIndicator();
+        updateAccountIndicator();
     }
 
     @Subscribe
@@ -202,7 +202,7 @@ public class AppShellController {
             }
 
             profileNameLabel.setText(loggedIn ? displayName : "");
-            updateLoggedInIndicator();
+            updateAccountIndicator();
 
             loginButton.setVisible(!loggedIn);
             loginButton.setManaged(!loggedIn);
@@ -222,26 +222,46 @@ public class AppShellController {
         return value == null || value.isBlank();
     }
 
-    private void updateLoggedInIndicator() {
+    private void updateAccountIndicator() {
         if (loggedInIndicatorLabel == null) {
             return;
         }
         Account account = SimpleClient.getUser();
-        String displayName = account != null
-                ? (isNullOrBlank(account.getFullName()) ? account.getEmail() : account.getFullName())
-                : null;
-        if (isNullOrBlank(displayName)) {
-            loggedInIndicatorLabel.setText("Guest");
-        } else {
-            loggedInIndicatorLabel.setText("Logged in: " + displayName.trim());
+        String indicatorText = buildAccountIndicatorText(account);
+        loggedInIndicatorLabel.setText(indicatorText);
+        loggedInIndicatorLabel.setVisible(true);
+        loggedInIndicatorLabel.setManaged(true);
+    }
+
+    private String buildAccountIndicatorText(Account account) {
+        if (account == null) {
+            return "Guest";
         }
+        String displayName = isNullOrBlank(account.getFullName()) ? account.getEmail() : account.getFullName();
+        if (isNullOrBlank(displayName)) {
+            return "Guest";
+        }
+        String role = formatRole(account.getPrivilegeLevel());
+        return role.isEmpty()
+                ? "Logged in: " + displayName.trim()
+                : "Logged in: " + displayName.trim() + " (" + role + ")";
+    }
+
+    private String formatRole(int privilegeLevel) {
+        return switch (privilegeLevel) {
+            case 1 -> "Customer";
+            case 2 -> "Worker";
+            case 3 -> "Manager";
+            case 4 -> "Chain Manager";
+            default -> "";
+        };
     }
 
     @FXML
     private void handleLogout() {
         SimpleClient.logoutCurrentUser();
         updateLoginState(null);
-        updateLoggedInIndicator();
+        updateAccountIndicator();
         NavigationService.getInstance().navigate("HomePage");
     }
     private void buildNavigationBar() {
