@@ -179,6 +179,11 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 
+		if (msg instanceof AddProductRequest) {
+			handleAddProductRequest((AddProductRequest) msg, client);
+			return;
+		}
+
 		if (msg instanceof NextComplaintIdMessage) {
 			NextComplaintIdMessage request = (NextComplaintIdMessage) msg;
 			int nextId = ComplaintUpdateManager.previewNextComplaintId();
@@ -387,6 +392,7 @@ public class SimpleServer extends AbstractServer {
 					tx1.commit();
 					session.close();
 
+					client.setInfo("account", matchedAccount);
 					client.sendToClient(matchedAccount);
 					client.sendToClient("found mail and password");
 				}
@@ -451,6 +457,7 @@ public class SimpleServer extends AbstractServer {
 					tx1.commit();
 					SimpleServer.session.close();
 					System.out.println("arrived to Logout in server 7");
+					client.setInfo("account", null);
 				}
 			}
 		}
@@ -546,6 +553,110 @@ public class SimpleServer extends AbstractServer {
 		List<Message> result = session.createQuery(query).getResultList();
 		System.out.println("Arrived to getAllMessages 5");
 		return result;
+	}
+
+	private void handleAddProductRequest(AddProductRequest request, ConnectionToClient client) throws IOException {
+		Account account = (Account) client.getInfo("account");
+		if (account == null || account.getPrivilegeLevel() < 2) {
+			client.sendToClient(new AddProductResponse(false, "Unauthorized: only workers or managers can add products.", null));
+			return;
+		}
+
+		Product product = request.getProduct();
+		String validationError = validateProduct(product);
+		if (validationError != null) {
+			client.sendToClient(new AddProductResponse(false, validationError, null));
+			return;
+		}
+
+		SessionFactory sessionFactory = getSessionFactory();
+		session = sessionFactory.openSession();
+		Transaction tx = session.beginTransaction();
+
+		try {
+			if (isSkuAlreadyRegistered(product.getSku(), session)) {
+				tx.rollback();
+				client.sendToClient(new AddProductResponse(false, "Duplicate SKU: " + product.getSku(), null));
+				return;
+			}
+
+			long numOfRows = countRows();
+			int newProductId = (int) numOfRows + 1;
+			product.setID(newProductId);
+
+			session.save(product);
+			session.flush();
+			tx.commit();
+			client.sendToClient(new AddProductResponse(true, null, product));
+		} catch (Exception exception) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			client.sendToClient(new AddProductResponse(false, "Failed to add product due to a server error.", null));
+		} finally {
+			session.close();
+		}
+	}
+
+	private boolean isSkuAlreadyRegistered(String sku, Session session) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Long> query = builder.createQuery(Long.class);
+		Root<Product> root = query.from(Product.class);
+		query.select(builder.count(root));
+		query.where(builder.equal(builder.lower(root.get("sku")), sku.toLowerCase()));
+		Long count = session.createQuery(query).getSingleResult();
+		return count != null && count > 0;
+	}
+
+	private String validateProduct(Product product) {
+		if (product == null) {
+			return "Product data is missing.";
+		}
+		if (isBlank(product.getName())) {
+			return "Product name is required.";
+		}
+		if (isBlank(product.getButton())) {
+			return "Button label is required.";
+		}
+		if (isBlank(product.getSku())) {
+			return "SKU is required.";
+		}
+		if (isBlank(product.getCategory())) {
+			return "Category is required.";
+		}
+		if (isBlank(product.getColor())) {
+			return "Color is required.";
+		}
+		if (isBlank(product.getDetails())) {
+			return "Product details are required.";
+		}
+		if (product.getPrice() <= 0) {
+			return "Price must be greater than 0.";
+		}
+		if (product.isPromotion()) {
+			double discount = product.getDiscountPercent();
+			if (discount < 0 || discount > 100) {
+				return "Discount must be between 0 and 100.";
+			}
+		}
+		if (product.isCustomProduct()) {
+			if (isBlank(product.getCustomType())) {
+				return "Custom type is required for custom products.";
+			}
+			double minPrice = product.getPriceRangeMin();
+			double maxPrice = product.getPriceRangeMax();
+			if (minPrice < 0 || maxPrice < 0) {
+				return "Custom price range must be positive.";
+			}
+			if (minPrice > 0 && maxPrice > 0 && minPrice >= maxPrice) {
+				return "Custom minimum price must be less than maximum price.";
+			}
+		}
+		return null;
+	}
+
+	private boolean isBlank(String value) {
+		return value == null || value.trim().isEmpty();
 	}
 
 	private static List<Complaint> getAllComplaints() {

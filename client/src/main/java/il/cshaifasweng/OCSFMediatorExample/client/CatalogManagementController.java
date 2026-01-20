@@ -1,5 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import il.cshaifasweng.OCSFMediatorExample.entities.AddProductResponse;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -59,6 +61,7 @@ public class CatalogManagementController {
 
     private final ObservableList<Product> productsList = FXCollections.observableArrayList();
     private final ObservableList<Product> filteredProducts = FXCollections.observableArrayList();
+    private boolean canAddProducts = false;
 
     @FXML
     void initialize() {
@@ -68,6 +71,7 @@ public class CatalogManagementController {
         // Setup table columns and load initial data
         setupTableColumns();
         setupFilterControls();
+        applyPrivilegeVisibility(SimpleClient.getAccount());
         loadProducts();
     }
 
@@ -175,43 +179,11 @@ public class CatalogManagementController {
     }
 
     private void loadProducts() {
-        // TODO: Load products from server
-        // Message message = new Message("#GET_ALL_PRODUCTS");
-        // SimpleClient.getClient().sendToServer(message);
-
-        // For now, use mock data for demonstration
-        productsList.clear();
-
-        // Sample products with image paths
-        // Provide price as a double instead of string to match Product constructor
-        Product p1 = new Product(1, "btn1", "Red Roses Bouquet", "Beautiful red roses", 49.99);
-        p1.setSku("ROSE-RED-001");
-        p1.setCategory("Bouquet");
-        p1.setColor("Red");
-        p1.setCustomType("Roses");
-        p1.setImage("product_images/red_roses.jpg");
-        p1.setPromotion(true);
-        p1.setDiscountPercent(15.0);
-        productsList.add(p1);
-
-        Product p2 = new Product(2, "btn2", "Pink Tulips", "Fresh spring tulips", 39.99);
-        p2.setSku("TULIP-PINK-001");
-        p2.setCategory("Bouquet");
-        p2.setColor("Pink");
-        p2.setCustomType("Tulips");
-        p2.setImage("product_images/pink_tulips.jpg");
-        productsList.add(p2);
-
-        Product p3 = new Product(3, "btn3", "White Lilies Arrangement", "Elegant white lilies", 59.99);
-        p3.setSku("LILY-WHITE-001");
-        p3.setCategory("Arrangement");
-        p3.setColor("White");
-        p3.setCustomType("Lilies");
-        p3.setImage("product_images/white_lilies.jpg");
-        productsList.add(p3);
-
-        refreshFilterOptions();
-        applyFilters();
+        try {
+            SimpleClient.getClient().sendToServer("first entry");
+        } catch (IOException e) {
+            showError("Unable to load products: " + e.getMessage());
+        }
     }
 
     /**
@@ -230,11 +202,48 @@ public class CatalogManagementController {
         }
     }
 
+    @Subscribe
+    public void onRetrieveDatabaseEvent(RetrieveDataBaseEvent event) {
+        if (event.getRecievedList() != null) {
+            productsList.clear();
+            productsList.addAll(event.getRecievedList());
+            refreshFilterOptions();
+            applyFilters();
+        }
+    }
+
+    @Subscribe
+    public void onAddProductResponse(AddProductResponse response) {
+        if (response == null) {
+            return;
+        }
+        if (response.isSuccess()) {
+            Product createdProduct = response.getCreatedProduct();
+            if (createdProduct != null) {
+                productsList.add(createdProduct);
+                refreshFilterOptions();
+                applyFilters();
+            }
+            showSuccess("Product added successfully.");
+        } else {
+            showError(response.getError() != null ? response.getError() : "Unable to add product.");
+        }
+    }
+
+    @Subscribe
+    public void onPassAccountEvent(PassAccountEvent event) {
+        applyPrivilegeVisibility(SimpleClient.getAccount());
+    }
+
     /**
      * Opens the product form dialog for adding new product
      */
     @FXML
     void addProduct() {
+        if (!canAddProducts) {
+            showError("Only workers or managers can add products.");
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("ProductForm.fxml"));
             Parent root = loader.load();
@@ -328,7 +337,12 @@ public class CatalogManagementController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Product");
         alert.setHeaderText("Are you sure you want to delete this product?");
-        alert.setContentText("Product: " + product.getName() + " (SKU: " + product.getSku() + ")\nThis action cannot be undone.");
+        StringBuilder content = new StringBuilder("Product: ").append(product.getName());
+        if (shouldShowSku()) {
+            content.append(" (SKU: ").append(product.getSku()).append(")");
+        }
+        content.append("\nThis action cannot be undone.");
+        alert.setContentText(content.toString());
 
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
@@ -343,6 +357,11 @@ public class CatalogManagementController {
                 showSuccess("Product deleted successfully");
             }
         });
+    }
+
+    private boolean shouldShowSku() {
+        Account account = SimpleClient.getAccount();
+        return account != null && account.getPrivilegeLevel() == 1;
     }
 
     @FXML
@@ -462,6 +481,20 @@ public class CatalogManagementController {
         errorMessage.setText(message);
         errorMessage.setVisible(true);
         successMessage.setVisible(false);
+    }
+
+    private void applyPrivilegeVisibility(Account account) {
+        int privilege = account != null ? account.getPrivilegeLevel() : 0;
+        canAddProducts = privilege >= 2;
+        boolean showSku = privilege == 1;
+        if (addProductBtn != null) {
+            addProductBtn.setVisible(canAddProducts);
+            addProductBtn.setManaged(canAddProducts);
+            addProductBtn.setDisable(!canAddProducts);
+        }
+        if (skuCol != null) {
+            skuCol.setVisible(showSku);
+        }
     }
     private void refreshFilterOptions() {
         populateFilterOptions(categoryFilter, productsList.stream()

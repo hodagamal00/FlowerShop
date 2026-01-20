@@ -529,6 +529,7 @@ public class CheckoutController {
         currentUser = recvAccount;
         cart = passAcc.getProductsToCheckout();
         updateOrderSummary();
+        applyGreetingVisibility();
         scheduleShopSelectionEnable();
 
     }
@@ -637,6 +638,8 @@ public class CheckoutController {
         deliveryBox.setVisible(true);
         updateOrderSummary();
 
+        applyGreetingVisibility();
+
         placeOrderButton.setDisable(true);
         back.setDisable(true);
         chooseShopID.setVisible(false);
@@ -646,6 +649,26 @@ public class CheckoutController {
         yearCheckout.setOnAction(event -> updateOrderSummary());
         hourCheckout.setOnAction(event -> updateOrderSummary());
 
+    }
+
+    private void applyGreetingVisibility() {
+        Account account = currentUser != null ? currentUser : SimpleClient.getUser();
+        boolean showGreeting = account != null && account.getPrivilegeLevel() == 1;
+
+        if (greetingBoxCheckout != null) {
+            greetingBoxCheckout.setVisible(showGreeting);
+            greetingBoxCheckout.setManaged(showGreeting);
+            if (!showGreeting) {
+                greetingBoxCheckout.setSelected(false);
+            }
+        }
+        if (greetingTextCheckout != null) {
+            greetingTextCheckout.setVisible(false);
+            greetingTextCheckout.setManaged(showGreeting);
+            if (!showGreeting) {
+                greetingTextCheckout.clear();
+            }
+        }
     }
 
     private void scheduleShopSelectionEnable() {
