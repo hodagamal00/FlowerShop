@@ -417,6 +417,8 @@
 
             <VBox spacing="10.0" styleClass="catalog-panel">
                 <Text text="Admin Catalog" styleClass="panel-title" />
+                <Button fx:id="catalogManagementBtn" mnemonicParsing="false"
+                        onAction="#openCatalogManagement" prefWidth="180.0" text="Add Product" />
                 <ComboBox id="btttn" fx:id="adminEditCatalog" onAction="#chooseAdminEditCatalog"
                           prefWidth="180.0" promptText="Select Product" />
                 <TextField fx:id="EditItemType" prefWidth="180.0" promptText="Item Type" />

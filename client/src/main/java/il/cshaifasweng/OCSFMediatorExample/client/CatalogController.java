@@ -383,6 +383,9 @@ public class CatalogController {
 	@FXML // fx:id="deliveryButton"
 	private Button deliveryButton; // Value injected by FXMLLoader
 
+	@FXML // fx:id="catalogManagementBtn"
+	private Button catalogManagementBtn; // Value injected by FXMLLoader
+
 	@FXML // fx:id="messageField"
 	private TextField messageField; // Value injected by FXMLLoader
 
@@ -1000,6 +1003,7 @@ public class CatalogController {
 
 		CreateCustomItem.setVisible(false);
 		adminEditCatalog.setVisible(false);
+		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
 		//	remID.setVisible(false);
 
 		EditItemExtra.setVisible(false);
@@ -1929,6 +1933,7 @@ public class CatalogController {
 		assert flower_price_after5 != null : "fx:id=\"flower_price_after5\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_after6 != null : "fx:id=\"flower_price_after6\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert catalogManagementBtn != null : "fx:id=\"catalogManagementBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
 
@@ -1938,6 +1943,7 @@ public class CatalogController {
 		if (viewMyComplaints != null) viewMyComplaints.setVisible(false);
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
+		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
 		if (infoo != null) infoo.setVisible(false);
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
@@ -2516,6 +2522,7 @@ public class CatalogController {
 		// Worker features
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
+		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
 
 		// Manager features
 		if (infoo != null) infoo.setVisible(false);
@@ -2560,6 +2567,7 @@ public class CatalogController {
 		// Worker panel access
 		if (deliveryButton != null) deliveryButton.setVisible(true);
 		if (openComplaints != null) openComplaints.setVisible(true);
+		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(true);
 
 		System.out.println("  \u2713 Worker features enabled");
 	}
