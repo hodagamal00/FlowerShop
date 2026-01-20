@@ -494,7 +494,6 @@ public class CatalogManagementController {
         }
         if (skuCol != null) {
             skuCol.setVisible(showSku);
-            skuCol.setManaged(showSku);
         }
     }
     private void refreshFilterOptions() {
