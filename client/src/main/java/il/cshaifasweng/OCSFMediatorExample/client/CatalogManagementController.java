@@ -3,6 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.AddProductResponse;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
+import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import javafx.collections.FXCollections;
@@ -347,14 +348,14 @@ public class CatalogManagementController {
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 // TODO: Send delete request to server
-                // Message message = new Message("#DELETE_PRODUCT");
-                // message.setData(product.getID());
-                // SimpleClient.getClient().sendToServer(message);
-                
-                // For now, remove from local list
-                productsList.remove(product);
-                applyFilters();
-                showSuccess("Product deleted successfully");
+                UpdateMessage message = new UpdateMessage("product", "remove");
+                message.setDelteId(String.valueOf(product.getID()));
+                try {
+                    SimpleClient.getClient().sendToServer(message);
+                    showSuccess("Product deletion requested.");
+                } catch (IOException e) {
+                    showError("Unable to delete product: " + e.getMessage());
+                }
             }
         });
     }
