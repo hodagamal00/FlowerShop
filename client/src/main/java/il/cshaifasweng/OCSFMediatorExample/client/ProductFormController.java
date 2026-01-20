@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.AddProductRequest;
 import il.cshaifasweng.OCSFMediatorExample.entities.AddProductResponse;
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import org.greenrobot.eventbus.EventBus;
@@ -36,6 +37,9 @@ public class ProductFormController {
     @FXML private ComboBox<String> colorCombo;
     @FXML private TextField priceField;
     @FXML private TextArea detailsArea;
+    @FXML private VBox buttonLabelContainer;
+    @FXML private VBox skuFieldContainer;
+    @FXML private VBox greetingCardContainer;
     @FXML private CheckBox promotionCheckBox;
     @FXML private Label discountLabel;
     @FXML private TextField discountField;
@@ -45,6 +49,7 @@ public class ProductFormController {
     @FXML private TextField minPriceField;
     @FXML private TextField maxPriceField;
     @FXML private TextArea greetingCardArea;
+    @FXML private VBox customProductContainer;
     @FXML private Button saveBtn;
     @FXML private Button approveBtn;
     @FXML private Button cancelBtn;
@@ -81,6 +86,8 @@ public class ProductFormController {
         if (statusLabel != null) {
             statusLabel.setVisible(false);
         }
+
+        applyCustomerOnlyFields();
 
         if (formScrollPane != null) {
             formScrollPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -152,6 +159,39 @@ public class ProductFormController {
                 maxPriceField.setText(oldVal);
             }
         });
+    }
+
+    private void applyCustomerOnlyFields() {
+        Account account = SimpleClient.getUser();
+        boolean showCustomerOnly = account != null && account.getPrivilegeLevel() == 1;
+
+        setSectionVisible(buttonLabelContainer, showCustomerOnly);
+        setSectionVisible(skuFieldContainer, showCustomerOnly);
+        setSectionVisible(greetingCardContainer, showCustomerOnly);
+        setSectionVisible(customProductContainer, showCustomerOnly);
+
+        if (!showCustomerOnly) {
+            if (buttonField != null) {
+                buttonField.clear();
+            }
+            if (skuField != null) {
+                skuField.clear();
+            }
+            if (greetingCardArea != null) {
+                greetingCardArea.clear();
+            }
+            if (customProductCheckBox != null) {
+                customProductCheckBox.setSelected(false);
+                toggleCustomFields();
+            }
+        }
+    }
+
+    private void setSectionVisible(VBox container, boolean visible) {
+        if (container != null) {
+            container.setVisible(visible);
+            container.setManaged(visible);
+        }
     }
 
     private void setDefaultImage() {
