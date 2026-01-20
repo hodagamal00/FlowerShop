@@ -253,7 +253,10 @@ public class LoginController {
             }
 
             try {
-                CheckMail loginRequest = new CheckMail(email, password);
+                if (login_flag == null || login_flag.isBlank()) {
+                    login_flag = "customer";
+                }
+                CheckMail loginRequest = new CheckMail(email, login_flag, password);
                 client.sendToServer(loginRequest);
                 System.out.println("LoginController: sent CheckMail to server");
             } catch (IOException e) {
@@ -348,6 +351,16 @@ public class LoginController {
             } else if (checkML.isLoggedIn()) {
                 alLog.setText("User already logged in from another session.");
                 alLog.setVisible(true);
+            } else {
+                // Credentials are valid; ensure we have account details to continue.
+                Account account = resolveAuthenticatedAccount();
+                if (account != null) {
+                    handleLoginSuccess(account);
+                } else {
+                    alLog.setText("Logging in...");
+                    alLog.setVisible(true);
+                    requestAccountDetails();
+                }
             }
             // حالة النجاح (existsMail=true, existsPassword=true, loggedIn=false)
             // تعالج في onAccountReceived لما يوصل الـAccount نفسه
