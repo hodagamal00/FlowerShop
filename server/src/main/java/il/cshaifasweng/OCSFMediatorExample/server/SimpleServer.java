@@ -209,16 +209,18 @@ public class SimpleServer extends AbstractServer {
 						System.out.println("arrived to here inside add");
 						Product recievedProd = recievedMessage.getProduct();
 						addItemToCatalog(recievedProd);
-						client.sendToClient(getAllProducts());
+						sendToAllClients(getAllProducts());
 						System.out.println("send the updated list to the client !");
 					} else if (updateClassFunction.equals("remove")) {
 						String idToRemove = recievedMessage.getDelteId();
 						removeItemFromCatalog(idToRemove, client);
+						session = sessionFactory.openSession();
+						sendToAllClients(getAllProducts());
 					} else if (updateClassFunction.equals("edit")) {
 						System.out.println("Arrived edit case in the switch !");
 						Product recievedProd = recievedMessage.getProduct();
 						editCatalogProduct(recievedProd);
-						client.sendToClient(getAllProducts());
+						sendToAllClients(getAllProducts());
 					}
 					session.close();
 					break;
@@ -588,6 +590,7 @@ public class SimpleServer extends AbstractServer {
 			session.flush();
 			tx.commit();
 			client.sendToClient(new AddProductResponse(true, null, product));
+			sendToAllClients(getAllProducts());
 		} catch (Exception exception) {
 			if (tx != null) {
 				tx.rollback();
