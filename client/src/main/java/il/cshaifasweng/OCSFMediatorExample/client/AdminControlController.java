@@ -134,8 +134,8 @@ public class AdminControlController {
             return;
         }
 
-        String type = selectedUser.getType();
-        if ("Customers".equals(type)) {
+        String updateClass = selectedUser.getUpdateClass();
+        if ("account".equals(updateClass)) {
             Optional<Account> updatedAccount = buildAccountFromForm();
             if (updatedAccount.isEmpty()) {
                 return;
@@ -143,7 +143,7 @@ public class AdminControlController {
             UpdateMessage updateAcc = new UpdateMessage("account", "edit");
             updateAcc.setAccount(updatedAccount.get());
             sendUpdate(updateAcc);
-        } else if ("Workers".equals(type)) {
+        } else if ("worker".equals(updateClass)) {
             Optional<Worker> updatedWorker = buildWorkerFromForm();
             if (updatedWorker.isEmpty()) {
                 return;
@@ -151,7 +151,7 @@ public class AdminControlController {
             UpdateMessage updateWorker = new UpdateMessage("worker", "edit");
             updateWorker.setWorker(updatedWorker.get());
             sendUpdate(updateWorker);
-        } else if ("Managers".equals(type)) {
+        } else if ("manager".equals(updateClass)) {
             Optional<Manager> updatedManager = buildManagerFromForm();
             if (updatedManager.isEmpty()) {
                 return;
@@ -172,13 +172,7 @@ public class AdminControlController {
             return;
         }
         selectedUser = selection;
-        if ("Customers".equals(selection.getType())) {
-            loadCustomer(selection.getAccount());
-        } else if ("Workers".equals(selection.getType())) {
-            loadWorker(selection.getWorker());
-        } else if ("Managers".equals(selection.getType())) {
-            loadManager(selection.getManager());
-        }
+        loadSelectedUserDetails(selection);
     }
 
     @FXML
@@ -397,17 +391,24 @@ public class AdminControlController {
                 .map(manager -> normalizeEmail(manager.getEmail()))
                 .filter(email -> !email.isBlank())
                 .toList();
+        java.util.Map<String, UserRow> rowsByKey = new java.util.LinkedHashMap<>();
         for (Account account : all_accounts) {
-            if (isCustomerAccount(account, workerEmails, managerEmails)) {
-                allUsers.add(UserRow.fromAccount(account));
+            if (!isCustomerAccount(account, workerEmails, managerEmails)) {
+                continue;
             }
+            String key = resolveRowKey(account.getEmail(), String.valueOf(account.getAccountID()));
+            UserRow row = UserRow.fromAccountWithCategory(account, resolveCategoryFromPrivilege(account.getPrivialge()));
+            rowsByKey.put(key, row);
         }
         for (Worker worker : all_workers) {
-            allUsers.add(UserRow.fromWorker(worker));
+            String key = resolveRowKey(worker.getEmail(), String.valueOf(worker.getPersonID()));
+            rowsByKey.put(key, UserRow.fromWorker(worker));
         }
         for (Manager manager : all_managers) {
-            allUsers.add(UserRow.fromManager(manager));
+            String key = resolveRowKey(manager.getEmail(), String.valueOf(manager.getPersonID()));
+            rowsByKey.put(key, UserRow.fromManager(manager));
         }
+        allUsers.addAll(rowsByKey.values());
         applyFilters();
     }
 
@@ -417,7 +418,7 @@ public class AdminControlController {
         String roleFilter = profileType.getSelectionModel().getSelectedItem();
 
         for (UserRow row : allUsers) {
-            if (roleFilter != null && !"All".equals(roleFilter) && !roleFilter.equals(row.getType())) {
+            if (roleFilter != null && !"All".equals(roleFilter) && !roleFilter.equals(row.getCategory())) {
                 continue;
             }
             if (!searchText.isBlank() && !row.matches(searchText)) {
@@ -441,6 +442,24 @@ public class AdminControlController {
 
     private String normalizeEmail(String email) {
         return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String resolveCategoryFromPrivilege(int privilege) {
+        if (privilege >= 3) {
+            return "Managers";
+        }
+        if (privilege >= 2) {
+            return "Workers";
+        }
+        return "Customers";
+    }
+
+    private String resolveRowKey(String email, String fallbackId) {
+        String normalized = normalizeEmail(email);
+        if (!normalized.isBlank()) {
+            return "email:" + normalized;
+        }
+        return "id:" + fallbackId;
     }
 
     private void loadCustomer(Account selectedAcc) {
@@ -604,11 +623,11 @@ public class AdminControlController {
     }
 
     private void loadSelectedUserDetails(UserRow selection) {
-        if ("Customers".equals(selection.getType())) {
+        if ("account".equals(selection.getUpdateClass())) {
             loadCustomer(selection.getAccount());
-        } else if ("Workers".equals(selection.getType())) {
+        } else if ("worker".equals(selection.getUpdateClass())) {
             loadWorker(selection.getWorker());
-        } else if ("Managers".equals(selection.getType())) {
+        } else if ("manager".equals(selection.getUpdateClass())) {
             loadManager(selection.getManager());
         }
     }
@@ -727,25 +746,28 @@ public class AdminControlController {
         private final String role;
         private final String status;
         private final int privilege;
-        private final String type;
+        private final String category;
+        private final String updateClass;
         private Account account;
         private Worker worker;
         private Manager manager;
 
-        private UserRow(String userId, String name, String email, String role, String status, int privilege, String type) {
+        private UserRow(String userId, String name, String email, String role, String status, int privilege, String category, String updateClass) {
             this.userId = userId;
             this.name = name == null ? "" : name;
             this.email = email == null ? "" : email;
             this.role = role;
             this.status = status;
             this.privilege = privilege;
-            this.type = type;
+            this.category = category;
+            this.updateClass = updateClass;
         }
 
-        public static UserRow fromAccount(Account account) {
+        public static UserRow fromAccountWithCategory(Account account, String category) {
+            String role = "Customers".equals(category) ? "Customer" : category.substring(0, category.length() - 1);
             UserRow row = new UserRow(String.valueOf(account.getAccountID()), account.getFullName(),
-                    account.getEmail(), "Customer", account.isFrozen() ? "Frozen" : "Active",
-                    account.getPrivialge(), "Customers");
+                    account.getEmail(), role, account.isFrozen() ? "Frozen" : "Active",
+                    account.getPrivialge(), category, "account");
             row.setAccount(account);
             return row;
         }
@@ -753,7 +775,7 @@ public class AdminControlController {
         public static UserRow fromWorker(Worker worker) {
             UserRow row = new UserRow(String.valueOf(worker.getPersonID()), worker.getFullName(),
                     worker.getEmail(), "Worker", worker.isFrozen() ? "Frozen" : "Active",
-                    worker.getPrivialge(), "Workers");
+                    worker.getPrivialge(), "Workers", "worker");
             row.setWorker(worker);
             return row;
         }
@@ -761,7 +783,7 @@ public class AdminControlController {
         public static UserRow fromManager(Manager manager) {
             UserRow row = new UserRow(String.valueOf(manager.getPersonID()), manager.getFullName(),
                     manager.getEmail(), "Manager", manager.isFrozen() ? "Frozen" : "Active",
-                    manager.getPrivialge(), "Managers");
+                    manager.getPrivialge(), "Managers", "manager");
             row.setManager(manager);
             return row;
         }
@@ -779,7 +801,8 @@ public class AdminControlController {
         public String getRole() { return role; }
         public String getStatus() { return status; }
         public int getPrivilege() { return privilege; }
-        public String getType() { return type; }
+        public String getCategory() { return category; }
+        public String getUpdateClass() { return updateClass; }
         public Account getAccount() { return account; }
         public Worker getWorker() { return worker; }
         public Manager getManager() { return manager; }
