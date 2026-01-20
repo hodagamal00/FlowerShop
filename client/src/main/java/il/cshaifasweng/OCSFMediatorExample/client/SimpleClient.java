@@ -142,6 +142,12 @@ public class SimpleClient extends AbstractClient {
 			Manager recAcc = (Manager) msg;
 			System.out.println("the server sent me the account , NICE 2 !!");
 
+			if (recAcc.getPrivilegeLevel() < 3) {
+				int desiredPrivilege = recAcc.getShopID() == 0 ? 4 : 3;
+				recAcc.setPrivialge(desiredPrivilege);
+				System.out.println("Normalized manager privilege to " + desiredPrivilege);
+			}
+
 			setCurrentUser(recAcc);
 
 			PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
@@ -154,6 +160,11 @@ public class SimpleClient extends AbstractClient {
 			System.out.println("the server sent me the account (Worker) , NICE !!");
 			Worker recWorker = (Worker) msg;
 			System.out.println("the server sent me the account , NICE 2 !!");
+
+			if (recWorker.getPrivilegeLevel() < 2) {
+				recWorker.setPrivialge(2);
+				System.out.println("Normalized worker privilege to 2");
+			}
 
 			setCurrentUser(recWorker);
 
