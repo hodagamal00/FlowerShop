@@ -2066,7 +2066,7 @@ public class CatalogController {
 		// Populate filter combo boxes after data initialisation.  We only have six
 		// products at present; categories and colours are pulled from the Product
 		// objects.  Price ranges are hard coded for illustrative purposes.
-		initializeData();
+		ensureCatalogDataLoaded();
 		// Collect distinct categories and colours from available products
 		java.util.Set<String> categories = new java.util.HashSet<>();
 		java.util.Set<String> colours = new java.util.HashSet<>();
@@ -2127,6 +2127,17 @@ public class CatalogController {
 		} catch (IOException e) {
 			System.out.println("Offline mode");
 		}
+	}
+
+	private void ensureCatalogDataLoaded() {
+		if (!allProducts.isEmpty()) {
+			ensureProductMetadata(allProducts);
+			resetFilteredProducts();
+			availableProducts = true;
+			Platform.runLater(() -> updateFields(2));
+			return;
+		}
+		initializeData();
 	}
 
 	@Subscribe
