@@ -391,9 +391,7 @@
 
                 <VBox fx:id="init_container" alignment="CENTER" spacing="20.0" styleClass="catalog-init card">
                     <children>
-                        <Text fx:id="justText" text="Welcome to FlowerShop!" textAlignment="CENTER" styleClass="muted" />
-                        <Button fx:id="justButton" mnemonicParsing="false" onAction="#justView"
-                                prefHeight="40.0" prefWidth="200.0" text="Continue" />
+                        <Text fx:id="justText" text="" textAlignment="CENTER" styleClass="muted" />
                     </children>
                 </VBox>
             </children>

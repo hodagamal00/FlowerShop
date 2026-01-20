@@ -42,9 +42,8 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
-        // Start at the new HomePage landing screen. Guests can browse the
-        // catalog or log in from there.
-        NavigationService.getInstance().navigate("HomePage");
+        // Start directly on the catalog so products are visible immediately.
+        NavigationService.getInstance().navigate("Catalog");
     }
 
     static void setRoot(String fxml) throws IOException {
