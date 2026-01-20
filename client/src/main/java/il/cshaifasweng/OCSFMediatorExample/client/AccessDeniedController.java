@@ -266,9 +266,11 @@ public class AccessDeniedController {
      */
     @FXML
     private void handleOrders(ActionEvent event) {
-        if (currentPrivilegeLevel >= 1) {
-            navigateToPage(event, "orders");
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
         }
+        navigateToPage(event, "orders");
     }
 
     /**
@@ -276,9 +278,11 @@ public class AccessDeniedController {
      */
     @FXML
     private void handleComplaints(ActionEvent event) {
-        if (currentPrivilegeLevel >= 1) {
-            navigateToPage(event, "complaints");
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
         }
+        navigateToPage(event, "complaints");
     }
 
     /**
@@ -286,9 +290,11 @@ public class AccessDeniedController {
      */
     @FXML
     private void handleAccount(ActionEvent event) {
-        if (currentPrivilegeLevel >= 1) {
-            navigateToPage(event, "account");
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
         }
+        navigateToPage(event, "account");
     }
 
     /**
