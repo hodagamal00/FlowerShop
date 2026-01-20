@@ -61,9 +61,6 @@ public class AdminControlController {
     @FXML // fx:id="loadProfile"
     private Button loadProfile; // Value injected by FXMLLoader
 
-    @FXML // fx:id="logged"
-    private TextField logged; // Value injected by FXMLLoader
-
     @FXML // fx:id="name"
     private TextField name; // Value injected by FXMLLoader
 
@@ -237,7 +234,6 @@ public class AdminControlController {
         assert email != null : "fx:id=\"email\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert frozenToggle != null : "fx:id=\"frozenToggle\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert loadProfile != null : "fx:id=\"loadProfile\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert logged != null : "fx:id=\"logged\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert name != null : "fx:id=\"name\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert password != null : "fx:id=\"password\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert phone != null : "fx:id=\"phone\" was not injected: check your FXML file 'admincontrol.fxml'.";
@@ -267,7 +263,6 @@ public class AdminControlController {
 
         setupTable();
 
-        logged.setEditable(false);
         sub.setEditable(false);
 
         try {
@@ -384,12 +379,20 @@ public class AdminControlController {
         userPrivilegeCol.setCellValueFactory(new PropertyValueFactory<>("privilege"));
         userStatusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
         usersTable.setItems(filteredUsers);
+        usersTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                selectedUser = newSelection;
+                loadSelectedUserDetails(newSelection);
+            }
+        });
     }
 
     private void refreshUsersTable() {
         allUsers.clear();
         for (Account account : all_accounts) {
-            allUsers.add(UserRow.fromAccount(account));
+            if (account.getPrivialge() < 2) {
+                allUsers.add(UserRow.fromAccount(account));
+            }
         }
         for (Worker worker : all_workers) {
             allUsers.add(UserRow.fromWorker(worker));
@@ -428,7 +431,6 @@ public class AdminControlController {
         address.setText(selectedAcc.getAddress());
         email.setText(selectedAcc.getEmail());
         password.setText(selectedAcc.getPassword());
-        logged.setText(String.valueOf(selectedAcc.getLoggedIn()));
         phone.setText(Long.toString(selectedAcc.getPhoneNumber()));
         creditnum.setText(Long.toString(selectedAcc.getCreditCardNumber()));
         creditexpmonth.setText(Integer.toString(selectedAcc.getCreditMonthExpire()));
@@ -457,7 +459,6 @@ public class AdminControlController {
         email.setText(selectedWork.getEmail());
         name.setText(selectedWork.getFullName());
         password.setText(selectedWork.getPassword());
-        logged.setText(String.valueOf(selectedWork.getLoggedIn()));
         customerID.setText(String.valueOf(selectedWork.getPersonID()));
         privilageField.setText(Integer.toString(selectedWork.getPrivialge()));
         frozenToggle.setSelected(selectedWork.isFrozen());
@@ -481,7 +482,6 @@ public class AdminControlController {
         email.setText(selectedMan.getEmail());
         name.setText(selectedMan.getFullName());
         password.setText(selectedMan.getPassword());
-        logged.setText(String.valueOf(selectedMan.getLoggedIn()));
         privilageField.setText(Integer.toString(selectedMan.getPrivialge()));
         frozenToggle.setSelected(selectedMan.isFrozen());
         address.clear();
@@ -506,7 +506,6 @@ public class AdminControlController {
         cvv.setDisable(!enabled);
         sub.setDisable(true);
         shop.setDisable(!enabled);
-        logged.setDisable(true);
     }
 
     private Optional<Account> buildAccountFromForm() {
@@ -527,7 +526,9 @@ public class AdminControlController {
                 || expMonthValue == null || expYearValue == null || cvvValue == null || privilegeValue == null) {
             return Optional.empty();
         }
-        boolean loggedValue = Boolean.parseBoolean(logged.getText().trim());
+        boolean loggedValue = selectedUser != null && selectedUser.getAccount() != null
+                ? Boolean.TRUE.equals(selectedUser.getAccount().getLoggedIn())
+                : false;
         Account account = new Account(accountId, name.getText(), userId, address.getText(),
                 email.getText(), password.getText(), phoneValue, creditNumberValue, expMonthValue,
                 expYearValue, cvvValue, loggedValue, parseShopId(shop.getText(), thisShop), thisSub);
@@ -551,7 +552,9 @@ public class AdminControlController {
         worker.setPersonID(workerId);
         worker.setPrivialge(privilegeValue);
         worker.setFrozen(frozenToggle.isSelected());
-        worker.setLoggedIn(Boolean.parseBoolean(logged.getText().trim()));
+        if (selectedUser != null && selectedUser.getWorker() != null) {
+            worker.setLoggedIn(selectedUser.getWorker().getLoggedIn());
+        }
         return Optional.of(worker);
     }
 
@@ -570,9 +573,21 @@ public class AdminControlController {
         manager.setPersonID(managerId);
         manager.setPrivialge(privilegeValue);
         manager.setFrozen(frozenToggle.isSelected());
-        manager.setLoggedIn(Boolean.parseBoolean(logged.getText().trim()));
+        if (selectedUser != null && selectedUser.getManager() != null) {
+            manager.setLoggedIn(selectedUser.getManager().getLoggedIn());
+        }
         manager.setShopID(parseShopId(shop.getText(), thisShop));
         return Optional.of(manager);
+    }
+
+    private void loadSelectedUserDetails(UserRow selection) {
+        if ("Customers".equals(selection.getType())) {
+            loadCustomer(selection.getAccount());
+        } else if ("Workers".equals(selection.getType())) {
+            loadWorker(selection.getWorker());
+        } else if ("Managers".equals(selection.getType())) {
+            loadManager(selection.getManager());
+        }
     }
 
     private String validateRequiredFields() {
