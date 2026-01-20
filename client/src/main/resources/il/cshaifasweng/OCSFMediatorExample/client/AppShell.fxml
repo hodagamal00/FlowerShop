@@ -37,6 +37,7 @@
                         <Label fx:id="profileNameLabel" styleClass="profile-label" />
                         <Button fx:id="profileButton" text="Profile" styleClass="btn-secondary" />
                     </VBox>
+                    <Button fx:id="logoutButton" text="Logout" styleClass="btn-secondary" onAction="#handleLogout" visible="false" managed="false" />
                     <Button fx:id="loginButton" text="Login" styleClass="btn-primary" />
                     <Button fx:id="cartButton" text="Cart (0)" styleClass="btn-secondary" />
                 </HBox>
