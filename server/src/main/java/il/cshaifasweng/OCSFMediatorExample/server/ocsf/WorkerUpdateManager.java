@@ -176,6 +176,8 @@ public class WorkerUpdateManager {
         String recievedWorkerEmail = workerEdit.getEmail();
         String recievedWorkerPassword = workerEdit.getPassword();
         Boolean recievedWorkerIsLoggedIn = workerEdit.getLoggedIn();
+        boolean recievedWorkerFrozen = workerEdit.isFrozen();
+        int recievedWorkerPrivilege = workerEdit.getPrivialge();
 
         System.out.println("Arrived to edit worker 2");
         Worker updateWorker  = SimpleServer.session.load(Worker.class, recievedWorkerID);
@@ -188,6 +190,8 @@ public class WorkerUpdateManager {
         updateWorker.setEmail(recievedWorkerEmail);
         updateWorker.setPassword(recievedWorkerPassword);
         updateWorker.setLoggedIn(recievedWorkerIsLoggedIn);
+        updateWorker.setFrozen(recievedWorkerFrozen);
+        updateWorker.setPrivialge(recievedWorkerPrivilege);
 
         System.out.println("Arrived to edit catalog product 3");
         System.out.println(updateWorker.getPersonID());
