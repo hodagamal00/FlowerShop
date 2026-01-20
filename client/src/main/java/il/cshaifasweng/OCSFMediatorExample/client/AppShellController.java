@@ -41,6 +41,7 @@ public class AppShellController {
     @FXML private Label statusLabel;
     @FXML private StackPane contentPane;
     @FXML private FlowPane navBar;
+    @FXML private Label accountIndicatorLabel;
 
     private final ToggleGroup navToggleGroup = new ToggleGroup();
     private final Map<String, ToggleButton> navButtons = new HashMap<>();
@@ -74,6 +75,9 @@ public class AppShellController {
         }
         if (profileNameLabel != null) {
             profileNameLabel.setVisible(false);
+        }
+        if (accountIndicatorLabel != null) {
+            accountIndicatorLabel.setText("Guest");
         }
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
@@ -143,6 +147,9 @@ public class AppShellController {
             profileNameLabel.setVisible(false);
             profileNameLabel.setText("");
         }
+        if (!loggedIn && accountIndicatorLabel != null) {
+            accountIndicatorLabel.setText("Guest");
+        }
     }
 
     /**
@@ -167,6 +174,9 @@ public class AppShellController {
         if (profileNameLabel != null) {
             profileNameLabel.setText(fullName != null ? fullName : "");
             profileNameLabel.setVisible(fullName != null && !fullName.isBlank());
+        }
+        if (accountIndicatorLabel != null) {
+            accountIndicatorLabel.setText(formatAccountIndicator(fullName));
         }
     }
 
@@ -204,6 +214,9 @@ public class AppShellController {
             }
 
             profileNameLabel.setText(loggedIn ? displayName : "");
+            if (accountIndicatorLabel != null) {
+                accountIndicatorLabel.setText(loggedIn ? formatAccountIndicator(displayName) : "Guest");
+            }
 
             loginButton.setVisible(!loggedIn);
             loginButton.setManaged(!loggedIn);
@@ -217,6 +230,13 @@ public class AppShellController {
 
     private boolean isNullOrBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private String formatAccountIndicator(String displayName) {
+        if (isNullOrBlank(displayName)) {
+            return "Guest";
+        }
+        return "● " + displayName.trim();
     }
     private void buildNavigationBar() {
         buildNavigationBar(SimpleClient.getUser());
