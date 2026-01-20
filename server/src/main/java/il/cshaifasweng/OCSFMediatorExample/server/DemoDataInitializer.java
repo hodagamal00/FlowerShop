@@ -169,7 +169,7 @@ public final class DemoDataInitializer {
 
         Manager noam = new Manager("Noam Garden", "noam@flowershop.com", "noamPass", 21);
         noam.setPersonID(3002);
-        noam.setPrivialge(0);
+        noam.setPrivialge(4);
         noam.setShopID(0); // Chain manager
         noam.setBelongShop(0);
         noam.setLoggedIn(false);
