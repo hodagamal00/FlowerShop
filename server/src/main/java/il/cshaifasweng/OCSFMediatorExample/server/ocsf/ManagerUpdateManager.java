@@ -173,6 +173,9 @@ public class ManagerUpdateManager {
         String recievedManagerEmail = managerEdit.getEmail();
         String recievedManagerPassword = managerEdit.getPassword();
         Boolean recievedManagerIsLoggedIn = managerEdit.getLoggedIn();
+        boolean recievedManagerFrozen = managerEdit.isFrozen();
+        int recievedManagerPrivilege = managerEdit.getPrivialge();
+        int recievedManagerShopId = managerEdit.getShopID();
 
         System.out.println("Arrived to edit Manager 2");
         Manager updateManager  = SimpleServer.session.load(Manager.class, recievedManagerID);
@@ -185,6 +188,9 @@ public class ManagerUpdateManager {
         updateManager.setEmail(recievedManagerEmail);
         updateManager.setPassword(recievedManagerPassword);
         updateManager.setLoggedIn(recievedManagerIsLoggedIn);
+        updateManager.setFrozen(recievedManagerFrozen);
+        updateManager.setPrivialge(recievedManagerPrivilege);
+        updateManager.setShopID(recievedManagerShopId);
 
         System.out.println("Arrived to edit catalog product 3");
         System.out.println(updateManager.getPersonID());

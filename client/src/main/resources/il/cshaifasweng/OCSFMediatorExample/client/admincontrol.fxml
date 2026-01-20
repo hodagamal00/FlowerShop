@@ -18,6 +18,8 @@
          <children>
             <Label text="Admin Control Panel" styleClass="page-title"/>
             <HBox spacing="8.0" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="changeDetailsButton" text="Change Details"
+                    styleClass="pill" visible="false"/>
             <Button fx:id="backButton" onAction="#openCatalog" text="← Back to Catalog"
                     styleClass="secondary pill"/>
          </children>
@@ -43,7 +45,25 @@
                         <ComboBox fx:id="profileType" promptText="Select Account Type"
                                   onAction="#selectType"/>
 
-                        <ListView fx:id="accountsList" prefHeight="520.0"/>
+                        <HBox spacing="8.0" alignment="CENTER_LEFT">
+                           <children>
+                              <TextField fx:id="searchField" promptText="Search by ID, name, or email"
+                                         HBox.hgrow="ALWAYS"/>
+                              <Button fx:id="searchButton" text="Search" onAction="#handleSearch"
+                                      styleClass="secondary pill"/>
+                           </children>
+                        </HBox>
+
+                        <TableView fx:id="usersTable" prefHeight="520.0">
+                           <columns>
+                              <TableColumn fx:id="userIdCol" text="User ID" prefWidth="80.0"/>
+                              <TableColumn fx:id="userNameCol" text="Name" prefWidth="140.0"/>
+                              <TableColumn fx:id="userEmailCol" text="Email" prefWidth="160.0"/>
+                              <TableColumn fx:id="userRoleCol" text="Role" prefWidth="110.0"/>
+                              <TableColumn fx:id="userPrivilegeCol" text="Privilege" prefWidth="80.0"/>
+                              <TableColumn fx:id="userStatusCol" text="Status" prefWidth="90.0"/>
+                           </columns>
+                        </TableView>
 
                         <Button fx:id="loadProfile" text="Load Selected Account"
                                 onAction="#loadSelectProfile" styleClass="pill"/>
@@ -160,6 +180,12 @@
                                     </HBox>
                                     <HBox spacing="8.0" alignment="CENTER_LEFT">
                                        <children>
+                                          <Text text="Frozen:"/>
+                                          <CheckBox fx:id="frozenToggle" text="Freeze account"/>
+                                       </children>
+                                    </HBox>
+                                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                                       <children>
                                           <Text text="Shop ID:"/>
                                           <TextField fx:id="shop" promptText="Shop id"/>
                                        </children>
@@ -188,10 +214,14 @@
                            <children>
                               <Button fx:id="Save" text="Save Changes" onAction="#SaveChanges"
                                       styleClass="pill"/>
-                              <Button fx:id="freeze" text="Freeze Account"
-                                      styleClass="secondary pill"/>
+                              <Button fx:id="refreshButton" text="Refresh List"
+                                      onAction="#handleRefresh" styleClass="secondary pill"/>
                            </children>
                         </HBox>
+
+                        <Label fx:id="statusMessage" text="Status message" visible="false" styleClass="text-secondary">
+                           <font><Font size="14.0"/></font>
+                        </Label>
 
                         <!-- Loading indicator -->
                         <Label fx:id="wait" text="Please wait…" visible="false" styleClass="text-secondary">

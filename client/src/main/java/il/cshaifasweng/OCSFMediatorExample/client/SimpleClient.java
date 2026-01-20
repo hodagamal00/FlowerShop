@@ -51,6 +51,12 @@ public class SimpleClient extends AbstractClient {
 			return;
 		}
 
+		if (msg instanceof UserUpdateResponse) {
+			UserUpdateResponse response = (UserUpdateResponse) msg;
+			EventBus.getDefault().post(response);
+			return;
+		}
+
 		// =========================
 		// STRING MESSAGES
 		// =========================
@@ -87,6 +93,14 @@ public class SimpleClient extends AbstractClient {
 				MailChecker mailCheckEvent = new MailChecker(true);
 				mailCheckEvent.setPasswordExists(true);
 				mailCheckEvent.setLoggedIn(true);
+				EventBus.getDefault().post(mailCheckEvent);
+			}
+
+			if (recievedStr.equals("account frozen")) {
+				MailChecker mailCheckEvent = new MailChecker(true);
+				mailCheckEvent.setPasswordExists(true);
+				mailCheckEvent.setLoggedIn(false);
+				mailCheckEvent.setFrozen(true);
 				EventBus.getDefault().post(mailCheckEvent);
 			}
 
