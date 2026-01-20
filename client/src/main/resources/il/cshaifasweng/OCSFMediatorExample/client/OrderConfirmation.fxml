@@ -312,7 +312,7 @@
                                                     <Font name="System Bold" size="14.0" />
                                                 </font>
                                             </Button>
-                                            <Button fx:id="continueshoppingBtn" styleClass="btn-secondary" mnemonicParsing="false" onAction="#goToHome" text="Continue Shopping" prefWidth="200.0" prefHeight="45.0">
+                                            <Button fx:id="continueshoppingBtn" styleClass="btn-secondary" mnemonicParsing="false" onAction="#goToHome" text="Shop More" prefWidth="200.0" prefHeight="45.0">
                                                 <font>
                                                     <Font name="System Bold" size="14.0" />
                                                 </font>
