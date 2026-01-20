@@ -32,7 +32,7 @@
                 <TextField fx:id="searchField" promptText="Search bouquets or gifts" maxWidth="320.0" prefWidth="260.0" styleClass="text-field" />
                 <FlowPane fx:id="navBar" hgap="8.0" vgap="10.0" orientation="HORIZONTAL" styleClass="nav-bar top-nav" HBox.hgrow="ALWAYS" />
                 <HBox spacing="10.0" alignment="CENTER_RIGHT">
-                    <Label fx:id="accountIndicatorLabel" text="Guest" styleClass="account-indicator" />
+                    <Label fx:id="loggedInIndicatorLabel" text="Guest" styleClass="account-indicator" />
                     <VBox fx:id="profileContainer" alignment="CENTER_RIGHT" spacing="4.0" visible="false" managed="false">
                         <Label fx:id="profileNameLabel" styleClass="profile-label" />
                         <Button fx:id="profileButton" text="Profile" styleClass="btn-secondary" />
