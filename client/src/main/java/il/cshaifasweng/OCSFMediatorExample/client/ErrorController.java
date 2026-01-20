@@ -167,8 +167,7 @@ public class ErrorController {
      */
     @FXML
     private void handleLogout(ActionEvent event) {
-        // Perform logout
-        // SimpleClient.getClient().logout();
+        SimpleClient.logoutCurrentUser();
         navigateToPage(event, "catalog");
     }
 
