@@ -1,81 +1,71 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
-import  il.cshaifasweng.OCSFMediatorExample.entities.Product;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.PrimitiveIterator;
-import java.util.ResourceBundle;
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class SecondaryController {
 
+    @FXML private Button apply_changes;
+    @FXML private Button edit_product;
+    @FXML private Button back_button;
 
-    @FXML // fx:id="apply_changes"
-    private Button apply_changes; // Value injected by FXMLLoader
+    @FXML private DialogPane flower_details;
+    @FXML private DialogPane flower_name;
+    @FXML private DialogPane flower_price;
 
-    @FXML
-    private ResourceBundle resources;
+    @FXML private ImageView flower_image;
 
-    @FXML
-    private URL location;
+    @FXML private TextArea setDetails;
+    @FXML private TextField setName;
+    @FXML private TextField setPrice;
 
-    @FXML
-    private Button edit_product;
+    @FXML private ResourceBundle resources;
+    @FXML private URL location;
 
-    @FXML
-    private DialogPane flower_details;
+    private boolean canEditProducts;
 
-    @FXML
-    private DialogPane flower_name;
+    /** Holds the selected product */
+    private Product currentProduct;
 
-    @FXML
-    private DialogPane flower_price;
-
-    @FXML
-    private ImageView flower_image;
-
-    @FXML
-    private Button back_button;
-
-    @FXML
-    private TextArea setDetails;
-
-    @FXML
-    private TextField setName;
-
-    @FXML
-    private TextField setPrice;
-
-
-    private Button btn;
-
-    @FXML
-    void edit_product(ActionEvent event)
-    {
-        apply_changes.setVisible(true);
-        Product currtProduct  = il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.getCurrent_button();
-
-        flower_details.setVisible(false);
-        flower_name.setVisible(false);
-        flower_price.setVisible(false);
-
-        setDetails.setVisible(true);
-        setName.setVisible(true);
-        setPrice.setVisible(true);
-
-        setPrice.setText(String.valueOf(currtProduct.getPrice()));
-        setDetails.setText(currtProduct.getDetails());
-        setName.setText(currtProduct.getName());
-
-
+    private boolean hasProductEditPermission() {
+        Account currentUser = SimpleClient.getUser();
+        return currentUser != null && currentUser.getPrivilegeLevel() >= 2;
     }
+
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+    /** Load selected product */
+    private Product requireSelectedProduct(String actionContext) {
+        Product p = PrimaryController.getCurrent_button();
+        if (p == null) {
+            showAlert(Alert.AlertType.ERROR,
+                    "Product Unavailable",
+                    "No Product Selected",
+                    "Cannot " + actionContext + " because no product is selected.");
+        }
+        return p;
+    }
+
+    //----------------------------------------------------------------//
+    // EVENT HANDLERS
+    //----------------------------------------------------------------//
 
     @FXML
     void returnWindow(ActionEvent event) throws IOException {
@@ -84,87 +74,111 @@ public class SecondaryController {
     }
 
     @FXML
-    void updateProduct(ActionEvent event)
-    {
-        Product currtProduct  = il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.getCurrent_button();
+    void edit_product(ActionEvent event) {
+        canEditProducts = hasProductEditPermission();
+        if (!canEditProducts) {
+            showAlert(Alert.AlertType.WARNING, "Insufficient Permissions",
+                    "Editing Restricted",
+                    "Only employees and managers can modify product details.");
+            return;
+        }
 
+        currentProduct = requireSelectedProduct("edit product details");
+        if (currentProduct == null) return;
 
-        // setPrice expects a double; parse the text field into a double
+        // Show editable fields
+        setDetails.setVisible(true);
+        setName.setVisible(true);
+        setPrice.setVisible(true);
+        apply_changes.setVisible(true);
+
+        // Load existing details
+        setDetails.setText(currentProduct.getDetails());
+        setName.setText(currentProduct.getName());
+        setPrice.setText(String.valueOf(currentProduct.getPrice()));
+    }
+
+    @FXML
+    void updateProduct(ActionEvent event) {
+
+        if (!hasProductEditPermission()) {
+            showAlert(Alert.AlertType.WARNING, "Insufficient Permissions",
+                    "Editing Restricted",
+                    "Only employees and managers can modify product details.");
+            return;
+        }
+
+        if (currentProduct == null) {
+            showAlert(Alert.AlertType.ERROR, "Product Unavailable",
+                    "No Product Selected",
+                    "Cannot update product details because no product is selected.");
+            return;
+        }
+
         try {
             double newPrice = Double.parseDouble(setPrice.getText());
-            currtProduct.setPrice(newPrice);
+            currentProduct.setPrice(newPrice);
         } catch (NumberFormatException ex) {
-            // If parsing fails, leave the price unchanged or handle accordingly
-            // You might want to show an error to the user here
-            ex.printStackTrace();
+            showAlert(Alert.AlertType.ERROR,
+                    "Invalid Price",
+                    "Price must be numeric",
+                    "The price was not updated.");
+            return;
         }
-        currtProduct.setDetails(setDetails.getText());
-        currtProduct.setName(setName.getText());
 
+        currentProduct.setDetails(setDetails.getText());
+        currentProduct.setName(setName.getText());
 
-        flower_details.setVisible(true);
-        flower_name.setVisible(true);
-        flower_price.setVisible(true);
+        // Update UI
+        flower_details.setContentText(currentProduct.getDetails());
+        flower_name.setContentText(currentProduct.getName());
+        flower_price.setContentText(String.valueOf(currentProduct.getPrice()));
 
-        flower_details.setContentText(currtProduct.getDetails());
-        flower_name.setContentText(currtProduct.getName());
-        // getPrice() returns a double; convert to String for display
-        flower_price.setContentText(String.valueOf(currtProduct.getPrice()));
-
+        apply_changes.setVisible(false);
         setDetails.setVisible(false);
         setName.setVisible(false);
         setPrice.setVisible(false);
 
-        apply_changes.setVisible(false);
-
         try {
-            SimpleClient.getClient().sendToServer(currtProduct); // sends the updated product to the server class
+            SimpleClient.getClient().sendToServer(currentProduct);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR,
+                    "Update Failed",
+                    "Server Error",
+                    "Could not send update to server.");
         }
-
     }
+
+    //----------------------------------------------------------------//
+    // INITIALIZATION
+    //----------------------------------------------------------------//
 
     @FXML
     void initialize() throws MalformedURLException {
 
-        assert edit_product != null : "fx:id=\"edit_product\" was not injected: check your FXML file 'secondary.fxml'.";
-        assert flower_details != null : "fx:id=\"flower_details1\" was not injected: check your FXML file 'secondary.fxml'.";
-        assert flower_name != null : "fx:id=\"flower_name1\" was not injected: check your FXML file 'secondary.fxml'.";
-        assert flower_price != null : "fx:id=\"flower_price1\" was not injected: check your FXML file 'secondary.fxml'.";
-        assert flower_image != null : "fx:id=\"flower_image1\" was not injected: check your FXML file 'secondary.fxml'.";
+        canEditProducts = hasProductEditPermission();
 
-        // disable editing fields
         setDetails.setVisible(false);
         setName.setVisible(false);
         setPrice.setVisible(false);
+        apply_changes.setVisible(false);
 
-        // disable all fields
-        flower_details.setVisible(false);
-        flower_name.setVisible(false);
-        flower_price.setVisible(false);
+        currentProduct = PrimaryController.getCurrent_button();
 
-        // set all fields details using product object
-        Product currentProduct = il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.getCurrent_button();
+        if (currentProduct == null) {
+            showAlert(Alert.AlertType.ERROR,
+                    "Product Unavailable",
+                    "No Product Selected",
+                    "Cannot load product details.");
+            return;
+        }
+
         flower_details.setContentText(currentProduct.getDetails());
-        // Convert price to string before setting content text
         flower_price.setContentText(String.valueOf(currentProduct.getPrice()));
         flower_name.setContentText(currentProduct.getName());
 
-        // Load the product image from the resources folder based on the ID
         String img_path = "src/main/resources/images/flower" + currentProduct.getID() + ".png";
         File file = new File(img_path);
-        String localUrl = file.toURI().toURL().toExternalForm();
-        flower_image.setImage(new Image(localUrl,true));
-
-        // enable all fields
-        flower_details.setVisible(true);
-        flower_name.setVisible(true);
-        flower_price.setVisible(true);
-        flower_image.setVisible(true);
-
-        apply_changes.setVisible(false);
+        flower_image.setImage(new Image(file.toURI().toURL().toExternalForm(), true));
     }
-
 }

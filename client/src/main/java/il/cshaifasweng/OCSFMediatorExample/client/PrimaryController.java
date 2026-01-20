@@ -452,86 +452,105 @@ public class PrimaryController {
 	@FXML
 	void addToCartFlower1(ActionEvent event)
 	{
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		addProductToCartByIndex(0);
 	}
 
 	@FXML
 	void addToCartFlower2(ActionEvent event) {
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+1).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+1).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+1));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		addProductToCartByIndex(1);
 	}
 
 	@FXML
 	void addToCartFlower3(ActionEvent event) {
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+2).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+2).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+2));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		addProductToCartByIndex(2);
 	}
 
 	@FXML
 	void addToCartFlower4(ActionEvent event) {
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+3).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+3).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+3));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+		addProductToCartByIndex(3);
 	}
 
 	@FXML
 	void addToCartFlower5(ActionEvent event) {
+		addProductToCartByIndex(4);
+	}
+
+	@FXML
+	void addToCartFlower6(ActionEvent event){
+		addProductToCartByIndex(5);
+	}
+
+
+	private void addProductToCartByIndex(int offset) {
+		if (CatalogSTARTIndex + offset >= allProducts.size()) {
+			return;
+		}
 		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+4).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+4).getName());
+		Product product = allProducts.get(CatalogSTARTIndex + offset);
+		int addedPrice = (int) Math.round(product.getPrice());
+		CartItemsList.getItems().add(product.getName());
 		basePrice = basePrice + addedPrice;
 		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+4));
+		userCart.add(product);
 		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
 			cartTextDiscount.setText("" + basePrice*0.9);
 		else
 			cartTextDiscount.setText("" + basePrice);
 	}
 
-	@FXML
-	void addToCartFlower6(ActionEvent event) 	{
-		int basePrice = Integer.parseInt(cartTextPrice.getText());
-		int addedPrice = (int) Math.round(allProducts.get(CatalogSTARTIndex+5).getPrice());
-		CartItemsList.getItems().add(allProducts.get(CatalogSTARTIndex+5).getName());
-		basePrice = basePrice + addedPrice;
-		cartTextPrice.setText(String.valueOf(basePrice));
-		userCart.add(allProducts.get(CatalogSTARTIndex+5));
-		if(currentLoggedAccount.isSubscription() == true && basePrice > 50)
-			cartTextDiscount.setText("" + basePrice*0.9);
-		else
-			cartTextDiscount.setText("" + basePrice);
+	private void configureProductCardActions() {
+		Account account = SimpleClient.getUser();
+		int privilege = account != null ? account.getPrivilegeLevel() : 0;
+		boolean canEdit = privilege >= 2;
+
+		configureSingleProductAction(flower1_addCart, 0, canEdit);
+		configureSingleProductAction(flower2_addCart, 1, canEdit);
+		configureSingleProductAction(flower3_addCart, 2, canEdit);
+		configureSingleProductAction(flower4_addCart, 3, canEdit);
+		configureSingleProductAction(flower5_addCart, 4, canEdit);
+		configureSingleProductAction(flower6_addCart, 5, canEdit);
+	}
+
+	private void configureSingleProductAction(Button button, int offset, boolean canEdit) {
+		if (button == null || CatalogSTARTIndex + offset >= allProducts.size()) {
+			return;
+		}
+
+		Product product = allProducts.get(CatalogSTARTIndex + offset);
+
+		if (canEdit) {
+			button.setText("Edit");
+			button.setOnAction(event -> {
+				Alert chooser = new Alert(Alert.AlertType.CONFIRMATION);
+				chooser.setTitle("Choose Action");
+				chooser.setHeaderText("What would you like to do?");
+				chooser.setContentText("You can add this product to the cart or edit its details.");
+
+				ButtonType addToCart = new ButtonType("Add to Cart", ButtonBar.ButtonData.OK_DONE);
+				ButtonType editProduct = new ButtonType("Edit Product", ButtonBar.ButtonData.APPLY);
+				ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+				chooser.getButtonTypes().setAll(addToCart, editProduct, cancel);
+
+				Optional<ButtonType> result = chooser.showAndWait();
+
+				if (result.isPresent()) {
+					if (result.get() == addToCart) {
+						addProductToCartByIndex(offset);
+					} else if (result.get() == editProduct) {
+						setCurrent_button(product);
+						try {
+							App.setRoot("secondary");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			});
+		} else {
+			button.setText("Add to Cart");
+			button.setOnAction(event -> addProductToCartByIndex(offset));
+		}
 	}
 	@FXML
 	private TextField cartText;
@@ -1788,24 +1807,30 @@ public class PrimaryController {
 	}
 
 	static Product getCurrent_button() {
-			for (int i = 0; i < allProducts.size(); i++) {
-				// Compare the button references directly.  The original code attempted to
-				// call a non-existent method `equal(a,b)`.  In JavaFX each product has its
-				// own Button instance, so pointer comparison is sufficient to identify
-				// which product matches the current_button.
-				if (allProducts.get(i).getButton() == current_button) {
-					return allProducts.get(i);
-				}
+		for (int i = 0; i < allProducts.size(); i++) {
+			// Compare the button references directly.  The original code attempted to
+			// call a non-existent method `equal(a,b)`.  In JavaFX each product has its
+			// own Button instance, so pointer comparison is sufficient to identify
+			// which product matches the current_button.
+			if (allProducts.get(i).getButton() == current_button) {
+				return allProducts.get(i);
 			}
-			// As a fallback, return the first product if no match is found.  Ideally,
-			// this case should not occur since current_button should always refer to
-			// one of the product buttons.
-			return allProducts.isEmpty() ? null : allProducts.get(0);
+		}
+		// As a fallback, return the first product if no match is found.  Ideally,
+		// this case should not occur since current_button should always refer to
+		// one of the product buttons.
+		return allProducts.isEmpty() ? null : allProducts.get(0);
 	}
+
+	static void setCurrent_button(Product product) {
+		current_button = product != null ? product.getButton() : null;
+	}
+
 
 	static void setReturnedFromSecondaryController(boolean retFromSecond) {
 		returnedFromSecondaryController = retFromSecond;
 	}
+
 
 	static boolean getReturnedFromSecondaryController() {
 		return returnedFromSecondaryController;
@@ -1946,12 +1971,15 @@ public class PrimaryController {
         // If no account is logged in yet (e.g., user opens catalog as guest),
         // default to privilege 0 to avoid NullPointerExceptions.  This ensures
         // the catalog can still be browsed without requiring authentication.
-        if (currentLoggedAccount == null) {
+		Account account = SimpleClient.getUser();
+		if (account == null) {
             hideAllPrivilegedFeatures();
+			configureProductCardActions();
             System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
             return;
         }
-        int privilege = currentLoggedAccount.getPrivialge();
+		currentLoggedAccount = account;
+		int privilege = account.getPrivilegeLevel();
         System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
 		
 		// GUEST (0): Can only browse catalog - all interactive features hidden
@@ -1993,6 +2021,8 @@ public class PrimaryController {
 			enableChainManagerFeatures();
 			System.out.println("Chain Manager mode: Network-wide admin access enabled");
 		}
+
+		configureProductCardActions();
 	}
 	
 	/**

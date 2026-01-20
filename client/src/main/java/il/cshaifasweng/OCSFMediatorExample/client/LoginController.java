@@ -1,79 +1,59 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
-import il.cshaifasweng.OCSFMediatorExample.entities.*;
 
-// Removed unused AWT imports.  Keeping AWT alongside JavaFX can
-// introduce ambiguous references (e.g., both have a Button class).  This
-// controller relies on JavaFX for UI, so these imports are unnecessary.
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
-import javafx.scene.Node;
-
-import il.cshaifasweng.OCSFMediatorExample.entities.*;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+
 public class LoginController {
 
-    @FXML // ResourceBundle that was given to the FXMLLoader
+    @FXML
     private ResourceBundle resources;
 
-    @FXML // URL location of the FXML file that was given to the FXMLLoader
+    @FXML
     private URL location;
 
-    @FXML // fx:id="Email"
-    private TextField Email; // Value injected by FXMLLoader
+    @FXML
+    private TextField Email;
 
-    @FXML // fx:id="ErrorMsg"
-    private Label ErrorMsg; // Value injected by FXMLLoader
+    @FXML
+    private Label ErrorMsg;
 
-    @FXML // fx:id="ErrorMsgPass"
-    private Label ErrorMsgPass; // Value injected by FXMLLoader
+    @FXML
+    private Label ErrorMsgPass;
 
-    @FXML // fx:id="Guest"
-    private Button Guest; // Value injected by FXMLLoader
+    @FXML
+    private Button Guest;
 
-    @FXML // fx:id="LogIn"
-    private Button LogIn; // Value injected by FXMLLoader
+    @FXML
+    private Button LogIn;
 
-    @FXML // fx:id="Password"
-    private TextField Password; // Value injected by FXMLLoader
+    @FXML
+    private PasswordField Password;
 
-    @FXML // fx:id="RegisterTab"
-    private Button RegisterTab; // Value injected by FXMLLoader
+    @FXML
+    private Button RegisterTab;
 
+    @FXML
+    private Button OpenCatalogplz;
 
-    @FXML // fx:id="OpenCatalogplz"
-    private Button OpenCatalogplz; // Value injected by FXMLLoader
+    @FXML
+    private Text logSucc;
 
+    @FXML
+    private Button backLog;
 
-    @FXML // fx:id="logSucc"
-    private Text logSucc; // Value injected by FXMLLoader
+    @FXML
+    private Text alLog;
 
-    @FXML // fx:id="backLog"
-    private Button backLog; // Value injected by FXMLLoader
-
-
-    @FXML // fx:id="alLog"
-    private Text alLog; // Value injected by FXMLLoader
 
     @FXML
     void ReturnFromLogin(ActionEvent event) {
@@ -87,42 +67,44 @@ public class LoginController {
         backLog.setVisible(false);
         RegisterTab.setVisible(true);
         Guest.setVisible(true);
-        requestFix = 0;
-
-
     }
 
     @FXML
     void gotoCatalog(ActionEvent event) throws IOException {
-        // When using the AppShell, navigate to the catalog view by replacing
-        // the centre content instead of opening a new window.  The flag
-        // indicates that the catalog should be displayed for a guest (0) or
-        // authenticated user (handled elsewhere).
         CatalogFlag.setFlagg(0);
         NavigationService.getInstance().navigate("primary");
-
     }
 
     @FXML
-    void gotoLogInSecondary(ActionEvent event) throws IOException {
+    void gotoLogInSecondary(ActionEvent event) {
         RegisterTab.setVisible(false);
         Guest.setVisible(false);
         LogIn.setVisible(true);
         Email.setVisible(true);
         Password.setVisible(true);
         backLog.setVisible(true);
-        requestFix = 0;
     }
 
     @FXML
     void gotoRegisterPage(ActionEvent event) throws IOException {
-        // When using the AppShell, simply replace the centre content with
-        // the registration form instead of spawning a new stage.  The
-        // AppShell remains visible and only the centre content changes.
         NavigationService.getInstance().navigate("register");
-
     }
-    String login_flag = "";
+
+    @FXML
+    void openCatalogFunc(ActionEvent event) throws IOException {
+        CatalogFlag.setFlagg(1);
+
+        String theEmail = Email.getText();
+        try {
+            SimpleClient.getClient().sendToServer(new MailClass(theEmail));
+            SimpleClient.getClient().sendToServer(new GetAllComplaints());
+            SimpleClient.getClient().sendToServer(new GetAllMessages());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        NavigationService.getInstance().navigate("primary");
+    }
 
     @FXML
     void initialize() {
@@ -138,114 +120,20 @@ public class LoginController {
         assert backLog != null : "fx:id=\"backLog\" was not injected: check your FXML file 'Login.fxml'.";
         assert logSucc != null : "fx:id=\"logSucc\" was not injected: check your FXML file 'Login.fxml'.";
 
-        // By default, show the email/password fields and primary login button.  In the
-        // original implementation these controls were hidden until a secondary
-        // "Login" tab was clicked, which confused users because there were no
-        // visible input fields on the login page.  To make the login screen
-        // intuitive, we keep the credentials fields visible and hide only the
-        // optional status labels.  The OpenCatalogplz button will remain
-        // invisible until a successful login occurs.
-
         logSucc.setVisible(false);
         OpenCatalogplz.setVisible(false);
-        EventBus.getDefault().register(this);
-        // Show email and password input controls so the user can enter their
-        // credentials immediately.
-        Email.setVisible(true);
-        Password.setVisible(true);
-        LogIn.setVisible(true);
-        // Hide error labels until needed
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
-        // Hide the back button on first load; it becomes visible during login flows
         backLog.setVisible(false);
-        // Hide the generic alert label initially
         alLog.setVisible(false);
-    }
-    @FXML
-    void openCatalogFunc(ActionEvent event) throws IOException {
-        // A guest or authenticated user can proceed to the catalog.  We
-        // persist the current email (for message retrieval) but rely on
-        // the NavigationService to swap the centre content instead of
-        // opening a new window.  This method is invoked when the
-        // "Continue to Catalog" button is clicked after successful
-        // authentication.
-        CatalogFlag.setFlagg(1);
-        String theEmail = Email.getText();
-        // Send current email to server for message retrieval
-        try {
-            SimpleClient.getClient().sendToServer(new MailClass(theEmail));
-            SimpleClient.getClient().sendToServer(new GetAllComplaints());
-            SimpleClient.getClient().sendToServer(new GetAllMessages());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // Navigate to the catalog (primary) view within the AppShell
-        NavigationService.getInstance().navigate("primary");
+
+        // חשוב בשביל ה־@Subscribe
+        EventBus.getDefault().register(this);
     }
 
-
-
-    @FXML
-    void CustomerLogIn(ActionEvent event) throws IOException {
-        login_flag = "customer";
-        CatalogFlag.setFlagg(1);
-      /*  UpdateMessage new_msg=new UpdateMessage("account","add");
-        Date date=new Date();
-        Account new_acc=new Account("khaled","sakhnin","@eee","332",457,889,date,445,2);
-        new_msg.setAccount(new_acc);
-        try {
-            System.out.println("before sending updateMessage to server ");
-            SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
-            System.out.println("afater sending updateMessage to server ");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
-        ErrorMsg.setVisible(false);
-        ErrorMsgPass.setVisible(false);
-        //bak.setVisible(true);
-        Email.setVisible(true);
-        Password.setVisible(true);
-        LogIn.setVisible(true);
-    }
-
-    @FXML
-    void EmployeeLogIn(ActionEvent event) throws IOException {
-        CatalogFlag.setFlagg(2);
-        login_flag = "employee";
-        Email.setVisible(true);
-        Password.setVisible(true);
-        LogIn.setVisible(true);
-        ErrorMsg.setVisible(false);
-        //  bak.setVisible(true);
-        ErrorMsgPass.setVisible(false);
-    }
-
-    @FXML
-    void ManagerLogIn(ActionEvent event) throws IOException {
-        CatalogFlag.setFlagg(3);
-        login_flag = "employee";
-        Email.setVisible(true);
-        Password.setVisible(true);
-        LogIn.setVisible(true);
-        ErrorMsg.setVisible(false);
-        //  bak.setVisible(true);
-        ErrorMsgPass.setVisible(false);
-    }
-
-
-
-    int requestFix = 0;
-    boolean alreadyLogged = false;
-    private ActionEvent lastLoginEvent;
-    private Account authenticatedAccount;
-    private boolean navigationPendingAccount;
-    private boolean accountDetailsRequested;
     @FXML
     void handleLogin(ActionEvent event) {
-        lastLoginEvent = event;
-        // Clear previous error messages
+        // تنظيف رسائل قديمة
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
         alLog.setVisible(false);
@@ -255,7 +143,7 @@ public class LoginController {
         String email = Email.getText().trim();
         String password = Password.getText();
 
-        // Basic validation
+        // فحص أساسي
         if (email.isEmpty() || password.isEmpty()) {
             if (email.isEmpty()) {
                 ErrorMsg.setText("Please enter your email address");
@@ -268,40 +156,60 @@ public class LoginController {
             return;
         }
 
-        // Basic email format validation
+        // فحص فورمات الإيميل
         String emailRegex = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$";
         if (!email.matches(emailRegex)) {
             ErrorMsg.setText("Please enter a valid email address");
             ErrorMsg.setVisible(true);
             return;
         }
-        // Remember the triggering event so we can navigate after a successful login
-        lastLoginEvent = event;
-        // Reset any stale state from previous attempts
-        accountDetailsRequested = false;
 
-
-        // Disable login button during processing
+        // تجهيز زر اللوج-إن
         LogIn.setDisable(true);
         LogIn.setText("Logging in...");
 
-        try {
-            // Create CheckMail object and send to server
-            CheckMail loginRequest = new CheckMail(email, password);
-            SimpleClient.getClient().sendToServer(loginRequest);
-
-        } catch (IOException e) {
-            resetLoginButton();
-
-            ErrorMsg.setText("Unable to connect to server. Please check your internet connection.");
+        // إرسال الطلب للسيرفر
+        SimpleClient client = SimpleClient.getClient();
+        if (client == null) {
+            ErrorMsg.setText("Unable to access the server. Please try again later.");
             ErrorMsg.setVisible(true);
-        } catch (Exception e) {
             resetLoginButton();
-
-            ErrorMsg.setText("An error occurred. Please try again.");
-            ErrorMsg.setVisible(true);
-            e.printStackTrace();
+            return;
         }
+
+        new Thread(() -> {
+            if (!client.isConnected()) {
+                try {
+                    client.openConnection();
+                } catch (IOException e) {
+                    Platform.runLater(() -> {
+                        ErrorMsg.setText("Unable to connect to server. Please check your internet connection.");
+                        ErrorMsg.setVisible(true);
+                        resetLoginButton();
+                    });
+                    return;
+                }
+            }
+
+            try {
+                CheckMail loginRequest = new CheckMail(email, password);
+                client.sendToServer(loginRequest);
+                System.out.println("LoginController: sent CheckMail to server");
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    ErrorMsg.setText("Unable to connect to server. Please check your internet connection.");
+                    ErrorMsg.setVisible(true);
+                    resetLoginButton();
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    ErrorMsg.setText("An error occurred. Please try again.");
+                    ErrorMsg.setVisible(true);
+                    resetLoginButton();
+                });
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private void resetLoginButton() {
@@ -311,40 +219,29 @@ public class LoginController {
         });
     }
 
-    private void handleLoginSuccess(Account account) {
-        resetLoginButton();
+    // ===================== ردود السيرفر =====================
+
+    /** نجاح اللوج إن – السيرفر بعث Account / Manager / Worker → SimpleClient عمل PassAccountEvent */
+    @Subscribe
+    public void onAccountReceived(PassAccountEvent event) {
+        Account account = SimpleClient.getUser();
         if (account == null) {
-            navigationPendingAccount = true;
-            showSuccessMessage("Login successful! Loading your account details...");
-            requestAccountDetails();
-            return;
+            account = event.getRecievedAccount();
         }
+        if (account == null) return;
 
-        authenticatedAccount = account;
-        navigationPendingAccount = false;
-        String displayName = account.getFullName();
-        if (displayName == null || displayName.isBlank()) {
-            displayName = account.getEmail();
-        }
-        showSuccessMessage(String.format("Welcome %s! Redirecting to your dashboard...", displayName));
-        sendPostLoginData(account);
-        CatalogFlag.setFlagg(1);
-        navigateAfterLogin(account);
-        lastLoginEvent = null;
-        accountDetailsRequested = false;
-
-    }
-    private void showSuccessMessage(String message) {
+        final Account acc = account;
         Platform.runLater(() -> {
-            logSucc.setText(message);
+            resetLoginButton();
+            logSucc.setText("Welcome " + (acc.getFullName() == null || acc.getFullName().isBlank()
+                    ? acc.getEmail()
+                    : acc.getFullName()) + "!");
             logSucc.setVisible(true);
-            OpenCatalogplz.setVisible(false);
+            ErrorMsg.setVisible(false);
+            ErrorMsgPass.setVisible(false);
             alLog.setVisible(false);
-        });
-    }
-    private void navigateAfterLogin(Account account) {
-        Platform.runLater(() -> {
-            int privilege = account.getPrivialge();
+
+            int privilege = acc.getPrivialge();
             String targetView;
             if (privilege >= 4) {
                 targetView = "NetworkDashboard";
@@ -355,130 +252,37 @@ public class LoginController {
             } else {
                 targetView = "primary";
             }
+
+            CatalogFlag.setFlagg(1);
             NavigationService.getInstance().navigate(targetView);
         });
     }
 
+    /** فشل اللوج إن – السيرفر رجّع String → SimpleClient حوله لـ MailChecker */
     @Subscribe
-    public void checkMailInDB(MailChecker checkML) throws IOException
-    {
-        System.out.println("IM HERE :DDD");
-        if(checkML.getExistsMail() == false){ // case incorrect email
-            System.out.println("arrived to case incorrect email succesfully");
-            ErrorMsg.setVisible(true);
+    public void onMailCheck(MailChecker checkML) {
+
+        System.out.println("LoginController: got MailChecker event " +
+                "existsMail=" + checkML.getExistsMail() +
+                ", existsPass=" + checkML.getExistsPassword() +
+                ", loggedIn=" + checkML.isLoggedIn());
+
+        Platform.runLater(() -> {
+            // أول شيء نرجّع الزر لوضعه الطبيعي
             resetLoginButton();
 
-            /*MailPassMatch checkEmailPass = new MailPassMatch(Email.getText(),Password.getText(),login_flag);
-            try {
-                SimpleClient.getClient().sendToServer(checkEmailPass);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }*/
-        }
-        else if(checkML.getExistsPassword() == false)
-        { // case email found but the password is incorrect
-            System.out.println("arrived to case incorrect password  succesfully");
-            ErrorMsgPass.setVisible(true);
-            resetLoginButton();
-        }
-        else if(checkML.isLoggedIn() == false)
-        {
-            System.out.println("WE GOT HERE, GOOD EMAIL");
-            itWorked = true;
-            requestFix++;
-            Account account = resolveAuthenticatedAccount();
-            handleLoginSuccess(account);
-        }
-        else if(checkML.isLoggedIn() == true)
-        {
-            System.out.println("Already Logged In");
-            alreadyLogged = true;
-            resetLoginButton();
-            Platform.runLater(() -> {
+            if (!checkML.getExistsMail()) {
+                ErrorMsg.setText("We couldn't find an account with that email.");
+                ErrorMsg.setVisible(true);
+            } else if (!checkML.getExistsPassword()) {
+                ErrorMsgPass.setText("The password you entered is incorrect.");
+                ErrorMsgPass.setVisible(true);
+            } else if (checkML.isLoggedIn()) {
                 alLog.setText("User already logged in from another session.");
                 alLog.setVisible(true);
-            });
-        }
-
-    }
-    boolean itWorked = false;
-
-    @Subscribe
-    public void checkMailPass(MailPassMatch checkEmailPass) throws IOException {
-        System.out.println("Checking Mail IN DB");
-        if(checkEmailPass.getexists()==true)
-        {
-            Account account = resolveAuthenticatedAccount();
-            handleLoginSuccess(account);
-        }
-        else{
-            ErrorMsgPass.setVisible(true);
-            resetLoginButton();
-        }
-    }
-
-    @Subscribe
-    public void onAccountReceived(PassAccountEvent event) {
-        Account account = SimpleClient.getUser();
-        if (account == null) {
-            account = event.getRecievedAccount();
-        }
-        if (account == null) {
-            return;
-        }
-        authenticatedAccount = account;
-        if (navigationPendingAccount) {
-            handleLoginSuccess(account);
-        }
-    }
-
-    private Account resolveAuthenticatedAccount() {
-        Account account = authenticatedAccount;
-        if (account == null) {
-            account = SimpleClient.getUser();
-        }
-        return account;
-    }
-    private void requestAccountDetails() {
-        String email = Email.getText().trim();
-        if (email.isEmpty()) {
-            return;
-        }
-        if (accountDetailsRequested) {
-            return;
-        }
-        accountDetailsRequested = true;
-        new Thread(() -> {
-            try {
-                SimpleClient.getClient().sendToServer(new MailClass(email));
-            } catch (IOException e) {
-                accountDetailsRequested = false;
-                navigationPendingAccount = false;
-                Platform.runLater(() -> {
-                    logSucc.setVisible(false);
-                    alLog.setText("Unable to load account details. Please try again.");
-                    alLog.setVisible(true);
-                });
-                resetLoginButton();
             }
-        }).start();
-    }
-
-    private void sendPostLoginData(Account account) {
-        if (account == null) {
-            return;
-        }
-        new Thread(() -> {
-            try {
-                SimpleClient.getClient().sendToServer(new GetAllComplaints());
-                SimpleClient.getClient().sendToServer(new GetAllMessages());
-            } catch (IOException e) {
-                Platform.runLater(() -> {
-                    alLog.setText("Logged in, but we couldn't refresh account data.");
-                    alLog.setVisible(true);
-                });
-            }
-        }).start();
+            // حالة النجاح (existsMail=true, existsPassword=true, loggedIn=false)
+            // تعالج في onAccountReceived لما يوصل الـAccount نفسه
+        });
     }
 }
