@@ -476,20 +476,8 @@ public class CatalogController {
 
 	@FXML
 	void goLogOut(ActionEvent event) throws IOException {
-		LogOut logOutObject = new LogOut();
-		if (currentLoggedAccount != null) {
-			logOutObject.setMail(currentLoggedAccount.getEmail());
-		}
-
-		try {
-			System.out.println("before sending the logout object" );
-			SimpleClient.getClient().sendToServer(logOutObject);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
 		currentLoggedAccount = null;
-		SimpleClient.setAccount(null);
+		SimpleClient.logoutCurrentUser();
 		applyPrivilegeBasedUI();
 		navigateInShell("Login");
 	}

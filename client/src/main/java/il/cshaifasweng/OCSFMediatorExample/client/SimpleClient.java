@@ -4,6 +4,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.greenrobot.eventbus.EventBus;
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
 
+import java.io.IOException;
 import java.util.List;
 
 public class SimpleClient extends AbstractClient {
@@ -275,5 +276,24 @@ public class SimpleClient extends AbstractClient {
 	 */
 	static void setCurrentUser(Account user) {
 		currentUser = user;
+	}
+
+	/**
+	 * Logs out the current user and clears the local session.
+	 * This should only be invoked from explicit logout actions or
+	 * when the application is closing.
+	 */
+	public static void logoutCurrentUser() {
+		Account account = currentUser;
+		if (account != null) {
+			LogOut logOut = new LogOut();
+			logOut.setMail(account.getEmail());
+			try {
+				getClient().sendToServer(logOut);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		currentUser = null;
 	}
 }
