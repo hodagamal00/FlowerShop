@@ -389,8 +389,16 @@ public class AdminControlController {
 
     private void refreshUsersTable() {
         allUsers.clear();
+        List<String> workerEmails = all_workers.stream()
+                .map(worker -> normalizeEmail(worker.getEmail()))
+                .filter(email -> !email.isBlank())
+                .toList();
+        List<String> managerEmails = all_managers.stream()
+                .map(manager -> normalizeEmail(manager.getEmail()))
+                .filter(email -> !email.isBlank())
+                .toList();
         for (Account account : all_accounts) {
-            if (account.getPrivialge() < 2) {
+            if (isCustomerAccount(account, workerEmails, managerEmails)) {
                 allUsers.add(UserRow.fromAccount(account));
             }
         }
@@ -418,6 +426,21 @@ public class AdminControlController {
             filteredUsers.add(row);
         }
         loadProfile.setVisible(true);
+    }
+
+    private boolean isCustomerAccount(Account account, List<String> workerEmails, List<String> managerEmails) {
+        if (account == null) {
+            return false;
+        }
+        String email = normalizeEmail(account.getEmail());
+        if (!email.isBlank() && (workerEmails.contains(email) || managerEmails.contains(email))) {
+            return false;
+        }
+        return account.getPrivialge() < 2 || !email.isBlank();
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 
     private void loadCustomer(Account selectedAcc) {
