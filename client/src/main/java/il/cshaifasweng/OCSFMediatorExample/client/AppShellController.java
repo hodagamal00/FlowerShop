@@ -34,6 +34,7 @@ public class AppShellController {
 
     @FXML private TextField searchField;
     @FXML private Button loginButton;
+    @FXML private Button logoutButton;
     @FXML private VBox profileContainer;
     @FXML private Button profileButton;
     @FXML private Label profileNameLabel;
@@ -84,6 +85,9 @@ public class AppShellController {
         // by individual controllers as needed.
         if (loginButton != null) {
             loginButton.setOnAction(e -> NavigationService.getInstance().navigate("Login"));
+        }
+        if (logoutButton != null) {
+            logoutButton.setOnAction(e -> handleLogout());
         }
         if (profileButton != null) {
             profileButton.setOnAction(e -> NavigationService.getInstance().navigate("Profile"));
@@ -142,6 +146,10 @@ public class AppShellController {
         if (loginButton != null && profileButton != null) {
             loginButton.setVisible(!loggedIn);
             profileButton.setVisible(loggedIn);
+        }
+        if (logoutButton != null) {
+            logoutButton.setVisible(loggedIn);
+            logoutButton.setManaged(loggedIn);
         }
         if (!loggedIn && profileNameLabel != null) {
             profileNameLabel.setVisible(false);
@@ -220,6 +228,10 @@ public class AppShellController {
 
             loginButton.setVisible(!loggedIn);
             loginButton.setManaged(!loggedIn);
+            if (logoutButton != null) {
+                logoutButton.setVisible(loggedIn);
+                logoutButton.setManaged(loggedIn);
+            }
 
             profileContainer.setVisible(loggedIn);
             profileContainer.setManaged(loggedIn);
@@ -237,6 +249,13 @@ public class AppShellController {
             return "Guest";
         }
         return "● " + displayName.trim();
+    }
+
+    @FXML
+    private void handleLogout() {
+        SimpleClient.logoutCurrentUser();
+        updateLoginState(null);
+        NavigationService.getInstance().navigate("HomePage");
     }
     private void buildNavigationBar() {
         buildNavigationBar(SimpleClient.getUser());
