@@ -386,6 +386,9 @@ public class CatalogController {
 	@FXML // fx:id="catalogManagementBtn"
 	private Button catalogManagementBtn; // Value injected by FXMLLoader
 
+	@FXML // fx:id="catalogAddProductBtn"
+	private Button catalogAddProductBtn; // Value injected by FXMLLoader
+
 	@FXML // fx:id="messageField"
 	private TextField messageField; // Value injected by FXMLLoader
 
@@ -1934,6 +1937,7 @@ public class CatalogController {
 		assert flower_price_after6 != null : "fx:id=\"flower_price_after6\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert catalogManagementBtn != null : "fx:id=\"catalogManagementBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert catalogAddProductBtn != null : "fx:id=\"catalogAddProductBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
 
@@ -1944,6 +1948,7 @@ public class CatalogController {
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
 		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
+		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(false);
 		if (infoo != null) infoo.setVisible(false);
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
@@ -2523,6 +2528,7 @@ public class CatalogController {
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
 		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
+		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(false);
 
 		// Manager features
 		if (infoo != null) infoo.setVisible(false);
@@ -2568,6 +2574,7 @@ public class CatalogController {
 		if (deliveryButton != null) deliveryButton.setVisible(true);
 		if (openComplaints != null) openComplaints.setVisible(true);
 		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(true);
+		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(true);
 
 		System.out.println("  \u2713 Worker features enabled");
 	}
