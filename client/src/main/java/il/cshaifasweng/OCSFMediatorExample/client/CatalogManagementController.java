@@ -337,7 +337,12 @@ public class CatalogManagementController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Product");
         alert.setHeaderText("Are you sure you want to delete this product?");
-        alert.setContentText("Product: " + product.getName() + " (SKU: " + product.getSku() + ")\nThis action cannot be undone.");
+        StringBuilder content = new StringBuilder("Product: ").append(product.getName());
+        if (shouldShowSku()) {
+            content.append(" (SKU: ").append(product.getSku()).append(")");
+        }
+        content.append("\nThis action cannot be undone.");
+        alert.setContentText(content.toString());
 
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
@@ -352,6 +357,11 @@ public class CatalogManagementController {
                 showSuccess("Product deleted successfully");
             }
         });
+    }
+
+    private boolean shouldShowSku() {
+        Account account = SimpleClient.getAccount();
+        return account != null && account.getPrivilegeLevel() == 1;
     }
 
     @FXML
@@ -476,10 +486,15 @@ public class CatalogManagementController {
     private void applyPrivilegeVisibility(Account account) {
         int privilege = account != null ? account.getPrivilegeLevel() : 0;
         canAddProducts = privilege >= 2;
+        boolean showSku = privilege == 1;
         if (addProductBtn != null) {
             addProductBtn.setVisible(canAddProducts);
             addProductBtn.setManaged(canAddProducts);
             addProductBtn.setDisable(!canAddProducts);
+        }
+        if (skuCol != null) {
+            skuCol.setVisible(showSku);
+            skuCol.setManaged(showSku);
         }
     }
     private void refreshFilterOptions() {
