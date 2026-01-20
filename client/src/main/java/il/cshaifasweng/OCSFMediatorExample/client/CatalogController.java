@@ -2127,6 +2127,14 @@ public class CatalogController {
 		updateCartSummary(basePrice);
 	}
 
+	private void addProductToCartByIndex(int offset) {
+		int index = CatalogSTARTIndex + offset;
+		if (index < 0 || index >= allProducts.size()) {
+			return;
+		}
+		addProductToCart(allProducts.get(index));
+	}
+
 	private int parseCartTotal() {
 		if (cartTextPrice == null) {
 			return 0;

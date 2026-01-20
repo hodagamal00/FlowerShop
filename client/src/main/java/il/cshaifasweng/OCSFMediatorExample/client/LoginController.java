@@ -54,6 +54,7 @@ public class LoginController {
     @FXML
     private Text alLog;
 
+    private String loginFlag = "";
 
     @FXML
     void ReturnFromLogin(ActionEvent event) {
@@ -88,22 +89,6 @@ public class LoginController {
     @FXML
     void gotoRegisterPage(ActionEvent event) throws IOException {
         NavigationService.getInstance().navigate("register");
-    }
-
-    @FXML
-    void openCatalogFunc(ActionEvent event) throws IOException {
-        CatalogFlag.setFlagg(1);
-
-        String theEmail = Email.getText();
-        try {
-            SimpleClient.getClient().sendToServer(new MailClass(theEmail));
-            SimpleClient.getClient().sendToServer(new GetAllComplaints());
-            SimpleClient.getClient().sendToServer(new GetAllMessages());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        NavigationService.getInstance().navigate("primary");
     }
 
     @FXML
@@ -156,7 +141,7 @@ public class LoginController {
 
     @FXML
     void CustomerLogIn(ActionEvent event) throws IOException {
-        login_flag = "customer";
+        loginFlag = "customer";
         CatalogFlag.setFlagg(1);
       /*  UpdateMessage new_msg=new UpdateMessage("account","add");
         Date date=new Date();
@@ -181,7 +166,7 @@ public class LoginController {
     @FXML
     void EmployeeLogIn(ActionEvent event) throws IOException {
         CatalogFlag.setFlagg(2);
-        login_flag = "employee";
+        loginFlag = "employee";
         Email.setVisible(true);
         Password.setVisible(true);
         LogIn.setVisible(true);
@@ -193,7 +178,7 @@ public class LoginController {
     @FXML
     void ManagerLogIn(ActionEvent event) throws IOException {
         CatalogFlag.setFlagg(3);
-        login_flag = "employee";
+        loginFlag = "employee";
         Email.setVisible(true);
         Password.setVisible(true);
         LogIn.setVisible(true);
@@ -209,6 +194,7 @@ public class LoginController {
     private ActionEvent lastLoginEvent;
     private Account authenticatedAccount;
     private boolean navigationPendingAccount;
+    private boolean accountDetailsRequested = false;
 
     @FXML
     void handleLogin(ActionEvent event) {
@@ -276,7 +262,9 @@ public class LoginController {
             }
 
             try {
-                CheckMail loginRequest = new CheckMail(email, password);
+                CheckMail loginRequest = loginFlag == null || loginFlag.isBlank()
+                        ? new CheckMail(email, password)
+                        : new CheckMail(email, loginFlag, password);
                 client.sendToServer(loginRequest);
                 System.out.println("LoginController: sent CheckMail to server");
             } catch (IOException e) {
@@ -308,56 +296,48 @@ public class LoginController {
     /** نجاح اللوج إن – السيرفر بعث Account / Manager / Worker → SimpleClient عمل PassAccountEvent */
     @Subscribe
     public void onAccountReceived(PassAccountEvent event) {
-        Account account = SimpleClient.getUser();
+        Account account = event != null ? event.getRecievedAccount() : null;
+        if (account == null) {
+            account = SimpleClient.getUser();
+        }
         if (account == null) {
             navigationPendingAccount = true;
-            showSuccessMessage("Login successful! Loading your account details...");
+            showSuccessMessage("Login successful! Loading your account details...", null);
             requestAccountDetails();
             return;
-            account = event.getRecievedAccount();
         }
-        if (account == null) return;
+        handleLoginSuccess(account);
+    }
 
+    private void handleLoginSuccess(Account account) {
         authenticatedAccount = account;
         navigationPendingAccount = false;
-        String displayName = account.getFullName();
-        if (displayName == null || displayName.isBlank()) {
-            displayName = account.getEmail();
-        }
-        showSuccessMessage(String.format("Welcome %s! Redirecting to your dashboard...", displayName));
+        showSuccessMessage(null, account);
         sendPostLoginData(account);
         CatalogFlag.setFlagg(1);
         navigateAfterLogin(account);
         lastLoginEvent = null;
         accountDetailsRequested = false;
-
     }
-    private void showSuccessMessage(String message) {
-        final Account acc = account;
+
+    private void showSuccessMessage(String message, Account account) {
         Platform.runLater(() -> {
             resetLoginButton();
-            logSucc.setText("Welcome " + (acc.getFullName() == null || acc.getFullName().isBlank()
-                    ? acc.getEmail()
-                    : acc.getFullName()) + "!");
+            String displayText = message;
+            if (account != null) {
+                String displayName = account.getFullName();
+                if (displayName == null || displayName.isBlank()) {
+                    displayName = account.getEmail();
+                }
+                displayText = "Welcome " + displayName + "!";
+            }
+            if (displayText != null && !displayText.isBlank()) {
+                logSucc.setText(displayText);
+            }
             logSucc.setVisible(true);
             ErrorMsg.setVisible(false);
             ErrorMsgPass.setVisible(false);
             alLog.setVisible(false);
-
-            int privilege = acc.getPrivialge();
-            String targetView;
-            if (privilege >= 4) {
-                targetView = "NetworkDashboard";
-            } else if (privilege >= 3) {
-                targetView = "log_manager";
-            } else if (privilege >= 2) {
-                targetView = "WorkerDashboard";
-            } else {
-                targetView = "primary";
-            }
-
-            CatalogFlag.setFlagg(1);
-            NavigationService.getInstance().navigate(targetView);
         });
     }
 
@@ -396,26 +376,13 @@ public class LoginController {
         if(checkEmailPass.getexists()==true)
         {
             Account account = resolveAuthenticatedAccount();
-            handleLoginSuccess(account);
+            if (account != null) {
+                handleLoginSuccess(account);
+            }
         }
         else{
             ErrorMsgPass.setVisible(true);
             resetLoginButton();
-        }
-    }
-
-    @Subscribe
-    public void onAccountReceived(PassAccountEvent event) {
-        Account account = SimpleClient.getUser();
-        if (account == null) {
-            account = event.getRecievedAccount();
-        }
-        if (account == null) {
-            return;
-        }
-        authenticatedAccount = account;
-        if (navigationPendingAccount) {
-            handleLoginSuccess(account);
         }
     }
 
@@ -466,5 +433,25 @@ public class LoginController {
                 });
             }
         }).start();
+    }
+
+    private void navigateAfterLogin(Account account) {
+        if (account == null) {
+            NavigationService.getInstance().navigate("primary");
+            return;
+        }
+
+        int privilege = account.getPrivialge();
+        String targetView;
+        if (privilege >= 4) {
+            targetView = "NetworkDashboard";
+        } else if (privilege >= 3) {
+            targetView = "log_manager";
+        } else if (privilege >= 2) {
+            targetView = "WorkerDashboard";
+        } else {
+            targetView = "primary";
+        }
+        NavigationService.getInstance().navigate(targetView);
     }
 }
