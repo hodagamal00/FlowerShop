@@ -193,24 +193,30 @@ public class CatalogManagementController {
      */
     @Subscribe
     public void onUpdateGuiEvent(UpdateGuiEvent event) {
-        if (event.getProducts() != null) {
+        if (event.getProducts() == null) {
+            return;
+        }
+        javafx.application.Platform.runLater(() -> {
             // Update the product list with data from the server
             productsList.clear();
             productsList.addAll(event.getProducts());
             refreshFilterOptions();
             applyFilters();
             System.out.println("Product catalog updated from server: " + productsList.size() + " products loaded");
-        }
+        });
     }
 
     @Subscribe
     public void onRetrieveDatabaseEvent(RetrieveDataBaseEvent event) {
-        if (event.getRecievedList() != null) {
+        if (event.getRecievedList() == null) {
+            return;
+        }
+        javafx.application.Platform.runLater(() -> {
             productsList.clear();
             productsList.addAll(event.getRecievedList());
             refreshFilterOptions();
             applyFilters();
-        }
+        });
     }
 
     @Subscribe
