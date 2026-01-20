@@ -46,6 +46,12 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(updateEvent);
 		}
 
+		if (msg instanceof AddProductResponse) {
+			AddProductResponse response = (AddProductResponse) msg;
+			EventBus.getDefault().post(response);
+			return;
+		}
+
 		// =========================
 		// STRING MESSAGES
 		// =========================

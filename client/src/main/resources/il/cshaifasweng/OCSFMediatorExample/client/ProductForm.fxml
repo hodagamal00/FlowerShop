@@ -119,6 +119,13 @@
                                        prefHeight="38.0"/>
                         </VBox>
 
+                        <VBox spacing="10.0">
+                            <Label text="Button Label" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="buttonField"
+                                       promptText="Enter button label"
+                                       prefHeight="38.0"/>
+                        </VBox>
+
                         <HBox spacing="15.0">
                             <VBox spacing="8.0" prefWidth="250.0">
                                 <Label text="SKU" style="-fx-font-weight: bold;"/>
@@ -156,6 +163,14 @@
                             <TextArea fx:id="detailsArea"
                                       promptText="Describe the product"
                                       prefRowCount="4"
+                                      wrapText="true"/>
+                        </VBox>
+
+                        <VBox spacing="8.0">
+                            <Label text="Greeting Card" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="greetingCardArea"
+                                      promptText="Optional greeting card text"
+                                      prefRowCount="3"
                                       wrapText="true"/>
                         </VBox>
                     </VBox>
