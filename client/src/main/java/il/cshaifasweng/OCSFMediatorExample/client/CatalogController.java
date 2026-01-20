@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 
 // Removed unused AWT imports.  Including AWT packages alongside JavaFX
 // introduces ambiguous references for classes like Button and List.  This
@@ -2504,14 +2505,7 @@ public class CatalogController {
 		if (viewMyOrders != null) viewMyOrders.setVisible(false);
 		if (viewMyComplaints != null) viewMyComplaints.setVisible(false);
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
-		if (checkout != null) checkout.setVisible(false);
-		if (cartTextPrice != null) cartTextPrice.setVisible(false);
-		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
-		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(false);
-		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(false);
-		if (CartItemsList != null) CartItemsList.setVisible(false);
-		if (cartTopText != null) cartTopText.setVisible(false);
-		if (viewCart != null) viewCart.setVisible(false);
+		showCartPanelForGuest();
 		setAddToCartButtonsVisible(false);
 		if (CreateCustomItem != null) CreateCustomItem.setVisible(false);
 
@@ -2527,13 +2521,55 @@ public class CatalogController {
 		if (adminEditCatalog != null) adminEditCatalog.setVisible(false);
 	}
 
+	private void showCartPanelForGuest() {
+		if (cartTopText != null) {
+			cartTopText.setVisible(true);
+			cartTopText.setManaged(true);
+		}
+		if (CartItemsList != null) {
+			CartItemsList.setVisible(true);
+			CartItemsList.setManaged(true);
+			CartItemsList.setItems(FXCollections.observableArrayList());
+		}
+		if (cartTextDiscount != null) {
+			cartTextDiscount.setVisible(true);
+			cartTextDiscount.setManaged(true);
+			cartTextDiscount.setText("0");
+		}
+		if (cartTextPrice != null) {
+			cartTextPrice.setVisible(true);
+			cartTextPrice.setManaged(true);
+			cartTextPrice.setText("0");
+		}
+		if (cartTextPriceDiscount != null) {
+			cartTextPriceDiscount.setVisible(true);
+			cartTextPriceDiscount.setManaged(true);
+			cartTextPriceDiscount.setText("0");
+		}
+		if (cartTextPriceFinal != null) {
+			cartTextPriceFinal.setVisible(true);
+			cartTextPriceFinal.setManaged(true);
+			cartTextPriceFinal.setText("0");
+		}
+		if (viewCart != null) {
+			viewCart.setVisible(true);
+			viewCart.setManaged(true);
+		}
+		if (checkout != null) {
+			checkout.setDisable(true);
+		}
+	}
+
 	/**
 	 * Enable customer features (privilege >= 1)
 	 * Allows: Shopping cart, checkout, order management, complaints
 	 */
 	private void enableCustomerFeatures() {
 		// Shopping cart and checkout
-		if (checkout != null) checkout.setVisible(true);
+		if (checkout != null) {
+			checkout.setVisible(true);
+			checkout.setDisable(false);
+		}
 		if (cartTextPrice != null) cartTextPrice.setVisible(true);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(true);
 		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(true);
