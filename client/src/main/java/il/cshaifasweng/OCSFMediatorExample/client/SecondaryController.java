@@ -2,7 +2,6 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
-import  il.cshaifasweng.OCSFMediatorExample.entities.Product;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,15 +10,13 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class SecondaryController {
 
@@ -60,14 +57,14 @@ public class SecondaryController {
 
     /** Load selected product */
     private Product requireSelectedProduct(String actionContext) {
-        Product p = PrimaryController.getCurrent_button();
-        if (p == null) {
+        Product product = CatalogController.getCurrent_button();
+        if (product == null) {
             showAlert(Alert.AlertType.ERROR,
                     "Product Unavailable",
                     "No Product Selected",
                     "Cannot " + actionContext + " because no product is selected.");
         }
-        return p;
+        return product;
     }
 
     //----------------------------------------------------------------//
@@ -76,7 +73,7 @@ public class SecondaryController {
 
     @FXML
     void returnWindow(ActionEvent event) throws IOException {
-        PrimaryController.setReturnedFromSecondaryController(true);
+        CatalogController.setReturnedFromSecondaryController(true);
         App.setRoot("primary");
     }
 
@@ -90,31 +87,20 @@ public class SecondaryController {
             return;
         }
 
-    @FXML
-    void edit_product(ActionEvent event)
-    {
-        apply_changes.setVisible(true);
-        Product currtProduct  = CatalogController.getCurrent_button();
+        currentProduct = requireSelectedProduct("edit product details");
+        if (currentProduct == null) {
+            return;
+        }
 
         // Show editable fields
         setDetails.setVisible(true);
         setName.setVisible(true);
         setPrice.setVisible(true);
         apply_changes.setVisible(true);
-
-
     }
 
     @FXML
-    void returnWindow(ActionEvent event) throws IOException {
-        CatalogController.setReturnedFromSecondaryController(true);
-        App.setRoot("primary");
-    }
-
-    @FXML
-    void updateProduct(ActionEvent event)
-    {
-        Product currtProduct  = CatalogController.getCurrent_button();
+    void updateProduct(ActionEvent event) {
 
         if (!hasProductEditPermission()) {
             showAlert(Alert.AlertType.WARNING, "Insufficient Permissions",
@@ -178,10 +164,12 @@ public class SecondaryController {
         setPrice.setVisible(false);
         apply_changes.setVisible(false);
 
-        currentProduct = PrimaryController.getCurrent_button();
+        currentProduct = requireSelectedProduct("load product details");
+        if (currentProduct == null) {
+            return;
+        }
 
         // set all fields details using product object
-        Product currentProduct = CatalogController.getCurrent_button();
         flower_details.setContentText(currentProduct.getDetails());
         flower_price.setContentText(String.valueOf(currentProduct.getPrice()));
         flower_name.setContentText(currentProduct.getName());
