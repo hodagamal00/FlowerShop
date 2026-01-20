@@ -2,12 +2,15 @@
  * Sample Skeleton for 'replycomplaint.fxml' Controller Class
  */
 
+
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -59,6 +62,17 @@ public class ReplyComplaintController {
     @FXML // fx:id="orderID"
     private TextField orderID; // Value injected by FXMLLoader
 
+    @FXML
+    private TextField createdAtField;
+
+    @FXML
+    private TextField respondedAtField;
+
+    @FXML
+    private TextField slaStatusField;
+
+    @FXML
+    private TextField compensationDecisionField;
     @FXML // fx:id="refundCheck"
     private CheckBox refundCheck; // Value injected by FXMLLoader
 
@@ -89,11 +103,17 @@ public class ReplyComplaintController {
         selectedComplaint.setAccepted(true);
         selectedComplaint.setAnswerworkerID(currentUser.getAccountID());
         selectedComplaint.setReplyText(replyText.getText());
+        selectedComplaint.setRespondedAt(new Date());
+        selectedComplaint.setSlaStatus("RESOLVED_ON_TIME");
         if(refundCheck.isSelected())
         {
             willReturnMoney = true;
             TempPercent = Character.toString(refundPercent.getSelectionModel().getSelectedItem().charAt(0)) + Character.toString(refundPercent.getSelectionModel().getSelectedItem().charAt(1));
             PercentInt = Integer.parseInt(TempPercent);
+            selectedComplaint.setCompensationDecision(PercentInt + "% refund approved");
+        }
+        else {
+            selectedComplaint.setCompensationDecision("No compensation");
         }
         selectedComplaint.setReturnedMoney(willReturnMoney);
         selectedComplaint.setReturnedmoneyvalue(PercentInt);
@@ -204,6 +224,10 @@ public class ReplyComplaintController {
             orderID.setText(String.valueOf(selectedComplaint.getOrderID()));
             complaintDate.setText(selectedComplaint.getDate());
             complaintText.setText(selectedComplaint.getComplaintText());
+            createdAtField.setText(formatTimestamp(selectedComplaint.getCreatedAt()));
+            respondedAtField.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
+            slaStatusField.setText(selectedComplaint.getSlaStatus());
+            compensationDecisionField.setText(selectedComplaint.getCompensationDecision());
         }
 
     }
@@ -222,9 +246,9 @@ public class ReplyComplaintController {
                 },4000
         );
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");
@@ -252,6 +276,11 @@ public class ReplyComplaintController {
         assert sendButton != null : "fx:id=\"sendButton\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert other != null : "fx:id=\"other\" was not injected: check your FXML file 'replycomplaint.fxml'.";
+        assert createdAtField != null : "fx:id=\"createdAtField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
+        assert respondedAtField != null : "fx:id=\"respondedAtField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
+        assert slaStatusField != null : "fx:id=\"slaStatusField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
+        assert compensationDecisionField != null : "fx:id=\"compensationDecisionField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
+
 
         refundPercent.getItems().add("25%");
         refundPercent.getItems().add("50%");
@@ -311,6 +340,12 @@ public class ReplyComplaintController {
         System.out.println(recvAccount.getCreditCardNumber());
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
+    }
+    private String formatTimestamp(Date date) {
+        if (date == null) {
+            return "-";
+        }
+        return new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date);
     }
 
 }

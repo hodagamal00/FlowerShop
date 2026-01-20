@@ -113,6 +113,24 @@
     -fx-border-color: -fx-border;
     -fx-border-radius: 10;
 }
+.profile-icon-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 22px;
+    -fx-background-radius: 999;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+}
+
+.profile-icon-button:hover {
+    -fx-background-color: -fx-accent-light;
+}
+
+.profile-name-label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
 
 /* === INPUTS (TextField, PasswordField, ComboBox, DatePicker) ========== */
 .text-field, .password-field, .combo-box, .date-picker, .text-area {
@@ -210,6 +228,13 @@
 }
 
 /* Navigation links */
+nav-bar {
+    -fx-padding: 0 12 6 12;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1 0 0 0;
+    -fx-background-color: transparent;
+}
+
 .nav-link {
     -fx-text-fill: -fx-secondary;
     -fx-font-weight: 600;
@@ -220,6 +245,29 @@
 .nav-link:hover {
     -fx-background-color: -fx-accent-light;
     -fx-underline: false;
+}
+
+.toggle-button.nav-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-secondary;
+    -fx-border-color: transparent;
+    -fx-font-weight: 600;
+    -fx-padding: 6 14 6 14;
+    -fx-background-radius: 999;
+    -fx-cursor: hand;
+}
+
+.toggle-button.nav-link:hover {
+    -fx-background-color: -fx-accent-light;
+}
+
+.toggle-button.nav-link:selected {
+    -fx-background-color: -fx-primary-light;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.toggle-button.nav-link:focused {
+    -fx-effect: dropshadow(gaussian, rgba(241, 169, 251, 0.82), 10, 0, 0, 0);
 }
 
 /* Buttons – pill option */
@@ -237,4 +285,110 @@
 }
 .app-scroll-container > .viewport {
     -fx-background-color: transparent;
+}
+/* === HOMEPAGE: HERO, QUICK ACTIONS, POPULAR CARDS ===================== */
+.hero-card {
+    -fx-background-color: linear-gradient(to right, -fx-primary-lighter, -fx-accent-light);
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: -fx-border;
+    -fx-padding: 20 24 20 24;
+    -fx-effect: dropshadow(gaussian, rgba(171,71,188,0.18), 14, 0, 0, 6);
+}
+
+.header-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.muted-text {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
+}
+
+.card-header {
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.price-tag {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-primary-dark;
+}
+
+.card-grid {
+    -fx-padding: 4 0 4 0;
+}
+
+.quick-card {
+    -fx-background-color: -fx-surface;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: -fx-border;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
+}
+
+.popular-card {
+    -fx-background-color: -fx-surface;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: -fx-border;
+    -fx-padding: 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
+    -fx-min-width: 240;
+}
+
+.quick-card:hover, .popular-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(122,90,245,0.16), 16, 0, 0, 4);
+    -fx-translate-y: -1;
+}
+
+/* === BUTTON VARIANTS =================================================== */
+.btn-primary {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-padding: 9 16 9 16;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.btn-primary:hover { -fx-background-color: -fx-secondary; }
+
+.btn-secondary {
+    -fx-background-color: -fx-accent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: 700;
+    -fx-padding: 8 14 8 14;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.btn-secondary:hover { -fx-background-color: -fx-primary-light; }
+
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-primary;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 2;
+    -fx-font-weight: 700;
+    -fx-padding: 8 14 8 14;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.btn-outline:hover {
+    -fx-background-color: -fx-accent-light;
+    -fx-border-color: -fx-primary;
 }

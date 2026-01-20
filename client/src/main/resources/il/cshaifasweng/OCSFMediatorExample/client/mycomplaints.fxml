@@ -72,7 +72,27 @@
                      <TextField fx:id="replyWorker" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
                   </VBox>
                </HBox>
+<HBox spacing="15.0">
+                  <VBox spacing="8.0" prefWidth="250.0">
+                     <Text text="Created At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                     <TextField fx:id="createdAt" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                  </VBox>
+                  <VBox spacing="8.0" prefWidth="250.0">
+                     <Text text="Responded At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                     <TextField fx:id="respondedAt" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                  </VBox>
+               </HBox>
 
+               <HBox spacing="15.0">
+                  <VBox spacing="8.0" prefWidth="250.0">
+                     <Text text="SLA Status:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                     <TextField fx:id="slaStatus" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: #c0392b;" />
+                  </VBox>
+                  <VBox spacing="8.0" prefWidth="250.0">
+                     <Text text="Compensation Decision:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                     <TextField fx:id="compensationDecision" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                  </VBox>
+               </HBox>
                <VBox spacing="8.0">
                   <Text strokeType="OUTSIDE" text="Refund Amount:"><font><Font size="14.0" /></font></Text>
                   <Text fill="#2c3e50" text="Complaint Status Information">

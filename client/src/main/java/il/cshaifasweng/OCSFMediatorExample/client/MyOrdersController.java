@@ -1,12 +1,11 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Date;
+
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.event.ActionEvent;
@@ -22,8 +21,6 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import javax.persistence.Column;
 
 public class MyOrdersController {
 
@@ -253,6 +250,10 @@ public class MyOrdersController {
             returned = true;
 
         Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refund/100*SelectedOrder.getTotalPrice(),currentDay,currentMonth,currentYear,"Automated Reply");
+        cancelComplaint.setCreatedAt(new Date());
+        cancelComplaint.setRespondedAt(new Date());
+        cancelComplaint.setSlaStatus("RESOLVED_ON_TIME");
+        cancelComplaint.setCompensationDecision(refund > 0 ? "Automatic refund " + refund + "%" : "No compensation" );
         UpdateMessage new_msg=new UpdateMessage("complaint","add");
         new_msg.setComplaint(cancelComplaint);
         try {
@@ -271,9 +272,9 @@ public class MyOrdersController {
     int complaint_num = 0;
     @FXML
     void GoToCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");
@@ -331,6 +332,9 @@ public class MyOrdersController {
         newComplaint.setMonth(currentMonth);
         newComplaint.setYear(currentYear);
         newComplaint.setReplyText("");
+        newComplaint.setCreatedAt(new Date());
+        newComplaint.setSlaStatus("IN_PROGRESS");
+        newComplaint.setCompensationDecision("Pending review");
         sendComplaint.setVisible(false);
         complaintText.setVisible(false);
         UpdateMessage new_msg=new UpdateMessage("complaint","add");

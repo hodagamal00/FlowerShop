@@ -11,6 +11,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -61,8 +63,16 @@ public class MyComplaintsController {
     private TextField orderID; // Value injected by FXMLLoader
 
     @FXML
-    private Button submitComplaint; // Value injected by FXMLLoader
+    private TextField createdAt;
 
+    @FXML
+    private TextField respondedAt;
+
+    @FXML
+    private TextField slaStatus;
+
+    @FXML
+    private TextField compensationDecision;
     @FXML // fx:id="refundMoney"
     private TextField refundMoney; // Value injected by FXMLLoader
 
@@ -77,9 +87,9 @@ public class MyComplaintsController {
 
     @FXML
     void openCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
         Parent roott = loader.load();
-        PrimaryController cc = loader.getController();
+        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
         stage.setTitle("Catalog");
@@ -107,71 +117,44 @@ public class MyComplaintsController {
 
     @FXML
     void loadComplaints(ActionEvent event) {
-        requestAllComplaints();
-        refreshComplaintList();
-    }
-
-    @FXML
-    void submitComplaint(ActionEvent event) {
-        if (currentUser == null) {
-            showAlert("You must be logged in to submit a complaint.");
-            return;
-        }
-
-        String complaintBody = complaintText.getText() == null ? "" : complaintText.getText().trim();
-        if (complaintBody.isEmpty()) {
-            showAlert("Please enter a complaint before submitting.");
-            return;
-        }
-
-        String orderText = orderID.getText() == null ? "" : orderID.getText().trim();
-        if (orderText.isEmpty()) {
-            showAlert("Please enter a related order ID.");
-            return;
-        }
-
-        int parsedOrderId = parseOrderId(orderText);
-        if (parsedOrderId < 0) {
-            showAlert("Please enter a valid numeric order ID.");
-            return;
-        }
-        Calendar cal = Calendar.getInstance();
-        Complaint newComplaint = new Complaint();
-        if (nextComplaintId != null) {
-            newComplaint.setComplaintID(nextComplaintId);
-        }
-
-        newComplaint.setCustomerID(currentUser.getAccountID());
-        newComplaint.setOrderID(parsedOrderId);
-        newComplaint.setAccepted(false);
-        newComplaint.setIn24Hours(false);
-        newComplaint.setComplaintText(complaintBody);
-        newComplaint.setShopID(0);
-        newComplaint.setAnswerworkerID(0);
-        newComplaint.setReturnedMoney(false);
-        newComplaint.setReturnedmoneyvalue(0);
-        newComplaint.setDay(cal.get(Calendar.DAY_OF_MONTH));
-        newComplaint.setMonth(cal.get(Calendar.MONTH) + 1);
-        newComplaint.setYear(cal.get(Calendar.YEAR));
-        newComplaint.setReplyText("");
-
-        UpdateMessage msg = new UpdateMessage("complaint", "add");
-        msg.setComplaint(newComplaint);
-        try {
-            SimpleClient.getClient().sendToServer(msg);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Message confirm = new Message();
-        confirm.setCustomerID(currentUser.getAccountID());
-        confirm.setMsgText("We have received your complaint and will respond within 24 hours.");
-        UpdateMessage messageUpdate = new UpdateMessage("message", "add");
-        messageUpdate.setMessage(confirm);
-        try {
-            SimpleClient.getClient().sendToServer(messageUpdate);
-        } catch (IOException e) {
-            e.printStackTrace();
+        String aString = "";
+        if (loadButton.getText().equals("Load Complaints")) {
+            for (int z = 0; z < allComplaints.size(); z++) {
+                if(currentUser.getAccountID() == allComplaints.get(z).getCustomerID()) {
+                    aString = "#" + allComplaints.get(z).getComplaintID() + " - " + allComplaints.get(z).getDay() + "/" + allComplaints.get(z).getMonth() + "/" + allComplaints.get(z).getYear();
+                    complaintList.getItems().add(aString);
+                    aString = "";
+                }
+            }
+            loadButton.setText("Load Selected Complaint");
+        } else {
+            String SelectedIDString = "";
+            int SelectedID;
+            String SelectedComplaint = complaintList.getSelectionModel().getSelectedItem();
+            Complaint selectedComplaint = new Complaint();
+            for (int i = 1; SelectedComplaint.charAt(i) != ' '; i++) {
+                SelectedIDString = SelectedIDString + Character.toString(SelectedComplaint.charAt(i));
+            }
+            SelectedID = Integer.parseInt(SelectedIDString);
+            for (int i = 0; i < complaintList.getItems().size(); i++) {
+                if (allComplaints.get(i).getComplaintID() == SelectedID) {
+                    selectedComplaint = allComplaints.get(i);
+                }
+            }
+            complaintID.setText(Integer.toString(selectedComplaint.getComplaintID()));
+            orderID.setText(Integer.toString(selectedComplaint.getOrderID()));
+            answerBool.setText(selectedComplaint.getSlaStatus());
+            if (selectedComplaint.getCompensationDecision() != null && !selectedComplaint.getCompensationDecision().isEmpty()) {
+                refundMoney.setText(selectedComplaint.getCompensationDecision());
+            } else {
+                refundMoney.setText(Integer.toString(selectedComplaint.getReturnedmoneyvalue()));
+            }
+            replyWorker.setText(Integer.toString(selectedComplaint.getAnswerworkerID()));
+            complaintText.setText(selectedComplaint.getComplaintText());
+            createdAt.setText(formatTimestamp(selectedComplaint.getCreatedAt()));
+            respondedAt.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
+            slaStatus.setText(selectedComplaint.getSlaStatus());
+            compensationDecision.setText(selectedComplaint.getCompensationDecision());
         }
 
         if (allComplaints == null) {
@@ -201,7 +184,10 @@ public class MyComplaintsController {
         assert refundMoney != null : "fx:id=\"refundMoney\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert replyWorker != null : "fx:id=\"replyWorker\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-
+        assert createdAt != null : "fx:id=\"createdAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert respondedAt != null : "fx:id=\"respondedAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert slaStatus != null : "fx:id=\"slaStatus\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert compensationDecision != null : "fx:id=\"compensationDecision\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         loadButton.setDisable(true);
         backToCatalog.setDisable(true);
         wait.setVisible(true);
@@ -253,72 +239,13 @@ public class MyComplaintsController {
         }
         refreshComplaintList();
     }
-
-    @Subscribe
-    public void handleNextComplaintId(NextComplaintIdEvent event) {
-        nextComplaintId = event.getComplaintId();
-        if (complaintList.getSelectionModel().getSelectedItem() == null && complaintID != null) {
-            complaintID.setText(Integer.toString(nextComplaintId));
+    private String formatTimestamp(Date date) {
+        if (date == null) {
+            return "-";
         }
+        return new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date);
     }
-
-    private void requestNextComplaintId() {
-        try {
-            SimpleClient.getClient().sendToServer(new NextComplaintIdMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void requestAllComplaints() {
-        try {
-            SimpleClient.getClient().sendToServer(new GetAllComplaints());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void refreshComplaintList() {
-        complaintList.getItems().clear();
-        if (allComplaints == null || currentUser == null) {
-            return;
-        }
-
-        allComplaints.stream()
-                .filter(c -> c.getCustomerID() == currentUser.getAccountID())
-                .sorted((a, b) -> Integer.compare(a.getComplaintID(), b.getComplaintID()))
-                .forEach(c -> complaintList.getItems().add(formatListEntry(c)));
-    }
-
-    private void selectComplaint(int complaintId) {
-        String entry = null;
-        for (String item : complaintList.getItems()) {
-            if (parseComplaintId(item) == complaintId) {
-                entry = item;
-                break;
-            }
-        }
-        if (entry != null) {
-            complaintList.getSelectionModel().select(entry);
-            Complaint selected = findComplaintByListEntry(entry);
-            if (selected != null) {
-                showComplaintDetails(selected);
-            }
-        }
-    }
-
-    private Complaint findComplaintByListEntry(String listEntry) {
-        int id = parseComplaintId(listEntry);
-        if (id == -1 || allComplaints == null) {
-            return null;
-        }
-        for (Complaint complaint : allComplaints) {
-            if (complaint.getComplaintID() == id) {
-                return complaint;
-            }
-        }
-        return null;
-    }
+}
 
     private int parseComplaintId(String listEntry) {
         if (listEntry == null || listEntry.length() < 2) {

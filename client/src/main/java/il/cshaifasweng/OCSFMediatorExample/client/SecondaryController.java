@@ -2,6 +2,13 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
+import  il.cshaifasweng.OCSFMediatorExample.entities.Product;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -83,8 +90,11 @@ public class SecondaryController {
             return;
         }
 
-        currentProduct = requireSelectedProduct("edit product details");
-        if (currentProduct == null) return;
+    @FXML
+    void edit_product(ActionEvent event)
+    {
+        apply_changes.setVisible(true);
+        Product currtProduct  = CatalogController.getCurrent_button();
 
         // Show editable fields
         setDetails.setVisible(true);
@@ -92,14 +102,19 @@ public class SecondaryController {
         setPrice.setVisible(true);
         apply_changes.setVisible(true);
 
-        // Load existing details
-        setDetails.setText(currentProduct.getDetails());
-        setName.setText(currentProduct.getName());
-        setPrice.setText(String.valueOf(currentProduct.getPrice()));
+
     }
 
     @FXML
-    void updateProduct(ActionEvent event) {
+    void returnWindow(ActionEvent event) throws IOException {
+        CatalogController.setReturnedFromSecondaryController(true);
+        App.setRoot("primary");
+    }
+
+    @FXML
+    void updateProduct(ActionEvent event)
+    {
+        Product currtProduct  = CatalogController.getCurrent_button();
 
         if (!hasProductEditPermission()) {
             showAlert(Alert.AlertType.WARNING, "Insufficient Permissions",
@@ -165,14 +180,8 @@ public class SecondaryController {
 
         currentProduct = PrimaryController.getCurrent_button();
 
-        if (currentProduct == null) {
-            showAlert(Alert.AlertType.ERROR,
-                    "Product Unavailable",
-                    "No Product Selected",
-                    "Cannot load product details.");
-            return;
-        }
-
+        // set all fields details using product object
+        Product currentProduct = CatalogController.getCurrent_button();
         flower_details.setContentText(currentProduct.getDetails());
         flower_price.setContentText(String.valueOf(currentProduct.getPrice()));
         flower_name.setContentText(currentProduct.getName());

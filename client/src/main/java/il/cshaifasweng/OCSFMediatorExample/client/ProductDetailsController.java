@@ -205,7 +205,7 @@ public class ProductDetailsController {
     @FXML
     void goBackToCatalog() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) backToCatalogBtn.getScene().getWindow();
             Scene scene = new Scene(root);

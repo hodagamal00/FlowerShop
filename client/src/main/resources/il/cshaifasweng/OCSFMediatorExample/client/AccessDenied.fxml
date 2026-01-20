@@ -5,7 +5,6 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -14,109 +13,137 @@
 
    <!-- Sticky Navbar -->
    <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="64.0" spacing="20.0"
+      <HBox alignment="CENTER_LEFT"
+            prefHeight="64.0"
+            spacing="20.0"
             styleClass="app-navbar elevated">
-         <children>
-            <Label text="FlowerShop" styleClass="page-title"/>
-            <HBox spacing="16.0" HBox.hgrow="ALWAYS">
-               <children>
-                  <Hyperlink fx:id="catalogLink" onAction="#handleCatalog" text="Catalog" styleClass="nav-link"/>
-                  <Hyperlink fx:id="ordersLink" onAction="#handleOrders" text="My Orders" styleClass="nav-link"/>
-                  <Hyperlink fx:id="complaintsLink" onAction="#handleComplaints" text="Complaints" styleClass="nav-link"/>
-                  <Hyperlink fx:id="accountLink" onAction="#handleAccount" text="Account" styleClass="nav-link"/>
-               </children>
-            </HBox>
-            <HBox spacing="10.0">
-               <children>
-                  <Label fx:id="usernameLabel" text="Guest" styleClass="muted"/>
-                  <Button fx:id="logoutBtn" onAction="#handleLogout" text="Logout" styleClass="secondary pill"/>
-               </children>
-            </HBox>
-         </children>
-         <padding><Insets left="20.0" right="20.0"/></padding>
+         <padding>
+            <Insets left="20.0" right="20.0"/>
+         </padding>
+
+         <Label text="FlowerShop" styleClass="page-title"/>
+
+         <HBox spacing="16.0" HBox.hgrow="ALWAYS">
+            <Hyperlink fx:id="catalogLink"     onAction="#handleCatalog"     text="Catalog"     styleClass="nav-link"/>
+            <Hyperlink fx:id="ordersLink"      onAction="#handleOrders"      text="My Orders"   styleClass="nav-link"/>
+            <Hyperlink fx:id="complaintsLink"  onAction="#handleComplaints"  text="Complaints"  styleClass="nav-link"/>
+            <Hyperlink fx:id="accountLink"     onAction="#handleAccount"     text="Account"     styleClass="nav-link"/>
+         </HBox>
+
+         <HBox spacing="10.0">
+            <Label fx:id="usernameLabel" text="Guest" styleClass="muted"/>
+            <Button fx:id="logoutBtn" onAction="#handleLogout" text="Logout" styleClass="secondary pill"/>
+         </HBox>
       </HBox>
    </top>
 
    <!-- Scrollable center -->
    <center>
-      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" pannable="true"
+      <ScrollPane fitToWidth="true"
+                  hbarPolicy="NEVER"
+                  vbarPolicy="AS_NEEDED"
+                  pannable="true"
                   styleClass="app-scroll-container">
+
          <content>
-            <!-- Center column -->
             <VBox alignment="TOP_CENTER" spacing="24.0">
-               <children>
-                  <!-- Access Denied Card -->
-                  <VBox alignment="CENTER" spacing="16.0" maxWidth="720.0"
-                        styleClass="card hover-lift">
-                     <children>
-                        <!-- Lock Icon -->
-                        <ImageView fitHeight="96.0" fitWidth="96.0" preserveRatio="true">
-                           <image><Image url="@/images/lock-icon.png"/></image>
-                        </ImageView>
+               <padding>
+                  <Insets top="24.0" bottom="24.0"/>
+               </padding>
 
-                        <!-- Title -->
-                        <Label text="Access Denied" styleClass="page-title">
-                           <font><Font name="System Bold" size="28.0"/></font>
-                        </Label>
+               <!-- Access Denied Card -->
+               <VBox alignment="CENTER"
+                     spacing="16.0"
+                     maxWidth="720.0"
+                     styleClass="card hover-lift">
+                  <padding>
+                     <Insets top="26.0" right="24.0" bottom="26.0" left="24.0"/>
+                  </padding>
 
-                        <!-- Message -->
-                        <Label fx:id="deniedMessageLabel" alignment="CENTER"
-                               text="You don't have permission to access this page."
-                               textAlignment="CENTER" wrapText="true" prefWidth="560.0"/>
+                  <!-- Lock Icon -->
+                  <ImageView fitHeight="96.0" fitWidth="96.0" preserveRatio="true">
+                     <image>
+                        <Image url="@/images/lock-icon.png"/>
+                     </image>
+                  </ImageView>
 
-                        <!-- Privilege info box -->
-                        <VBox alignment="CENTER" spacing="8.0"
-                              styleClass="card"
-                              maxWidth="560.0">
-                           <children>
-                              <Label text="Your Current Role:" styleClass="strong"/>
-                              <Label fx:id="currentRoleLabel" text="Guest (Level 0)" />
+                  <!-- Title -->
+                  <Label text="Access Denied"
+                         styleClass="page-title"
+                         style="-fx-font-size: 28px;"/>
 
-                              <Label text="Required Role:" styleClass="strong">
-                                 <VBox.margin><Insets top="10.0"/></VBox.margin>
-                              </Label>
-                              <Label fx:id="requiredRoleLabel" text="Manager (Level 3)" />
-                           </children>
-                           <padding>
-                              <Insets top="14.0" right="18.0" bottom="14.0" left="18.0"/>
-                           </padding>
-                        </VBox>
+                  <!-- Message -->
+                  <Label fx:id="deniedMessageLabel"
+                         text="You don't have permission to access this page."
+                         alignment="CENTER"
+                         textAlignment="CENTER"
+                         wrapText="true"
+                         prefWidth="560.0"
+                         styleClass="text-secondary"/>
 
-                        <!-- Help Text -->
-                        <VBox alignment="CENTER" spacing="6.0" maxWidth="560.0">
-                           <children>
-                              <Label text="What can I do?" styleClass="strong"/>
-                              <Label alignment="CENTER" text="• Contact your system administrator to request access"
-                                     textAlignment="CENTER" wrapText="true" />
-                              <Label alignment="CENTER" text="• Log in with an account that has the required privileges"
-                                     textAlignment="CENTER" wrapText="true" />
-                              <Label alignment="CENTER" text="• Return to the catalog to continue browsing"
-                                     textAlignment="CENTER" wrapText="true" />
-                           </children>
-                        </VBox>
+                  <!-- Privilege info box -->
+                  <VBox alignment="CENTER"
+                        spacing="8.0"
+                        maxWidth="560.0"
+                        styleClass="card">
+                     <padding>
+                        <Insets top="14.0" right="18.0" bottom="14.0" left="18.0"/>
+                     </padding>
 
-                        <!-- Actions -->
-                        <HBox alignment="CENTER" spacing="12.0">
-                           <children>
-                              <Button fx:id="backBtn" onAction="#handleGoBack" text="Go Back" prefWidth="160.0" styleClass="secondary pill"/>
-                              <Button fx:id="catalogBtn" onAction="#handleCatalog" text="Go to Catalog" prefWidth="160.0" styleClass="pill"/>
-                           </children>
-                        </HBox>
+                     <Label text="Your Current Role:" styleClass="strong"/>
+                     <Label fx:id="currentRoleLabel" text="Guest (Level 0)"/>
 
-                        <!-- Support -->
-                        <VBox alignment="CENTER" spacing="4.0">
-                           <children>
-                              <Label text="Need help with access? Contact support:" styleClass="text-secondary"/>
-                              <Label text="📧 admin@flowershop.com"/>
-                           </children>
-                        </VBox>
-                     </children>
-                     <padding><Insets top="26.0" right="24.0" bottom="26.0" left="24.0"/></padding>
+                     <Label text="Required Role:" styleClass="strong">
+                        <VBox.margin>
+                           <Insets top="10.0"/>
+                        </VBox.margin>
+                     </Label>
+                     <Label fx:id="requiredRoleLabel" text="Manager (Level 3)"/>
                   </VBox>
 
-                  <Region prefHeight="24.0"/>
-               </children>
-               <padding><Insets top="24.0" bottom="24.0"/></padding>
+                  <!-- Help Text -->
+                  <VBox alignment="CENTER" spacing="6.0" maxWidth="560.0">
+                     <Label text="What can I do?" styleClass="strong"/>
+
+                     <Label text="• Contact your system administrator to request access"
+                            alignment="CENTER" textAlignment="CENTER" wrapText="true"/>
+
+                     <Label text="• Log in with an account that has the required privileges"
+                            alignment="CENTER" textAlignment="CENTER" wrapText="true"/>
+
+                     <Label text="• Return to the catalog to continue browsing"
+                            alignment="CENTER" textAlignment="CENTER" wrapText="true"/>
+                  </VBox>
+
+                  <!-- Privilege breakdown -->
+                  <VBox alignment="CENTER" spacing="10.0" maxWidth="560.0">
+                     <Label text="Role permissions by level" styleClass="strong"/>
+                     <VBox fx:id="privilegeDetailsBox" spacing="10.0" prefWidth="520.0"/>
+                  </VBox>
+
+                  <!-- Actions -->
+                  <HBox alignment="CENTER" spacing="12.0">
+                     <Button fx:id="backBtn"
+                             onAction="#handleGoBack"
+                             text="Go Back"
+                             prefWidth="160.0"
+                             styleClass="secondary pill"/>
+
+                     <Button fx:id="catalogBtn"
+                             onAction="#handleCatalog"
+                             text="Go to Catalog"
+                             prefWidth="160.0"
+                             styleClass="pill"/>
+                  </HBox>
+
+                  <!-- Support -->
+                  <VBox alignment="CENTER" spacing="4.0">
+                     <Label text="Need help with access? Contact support:" styleClass="text-secondary"/>
+                     <Label text="📧 admin@flowershop.com"/>
+                  </VBox>
+               </VBox>
+
+               <Region prefHeight="24.0"/>
             </VBox>
          </content>
       </ScrollPane>
@@ -124,11 +151,16 @@
 
    <!-- Sticky Footer -->
    <bottom>
-      <HBox alignment="CENTER" prefHeight="44.0" spacing="16.0" styleClass="app-footer">
-         <children>
-            <Label text="© 2025 FlowerShop. All rights reserved."/>
-         </children>
-         <padding><Insets left="16.0" right="16.0"/></padding>
+      <HBox alignment="CENTER"
+            prefHeight="44.0"
+            spacing="16.0"
+            styleClass="app-footer">
+         <padding>
+            <Insets left="16.0" right="16.0"/>
+         </padding>
+
+         <Label text="© 2025 FlowerShop. All rights reserved."/>
       </HBox>
    </bottom>
+
 </BorderPane>
