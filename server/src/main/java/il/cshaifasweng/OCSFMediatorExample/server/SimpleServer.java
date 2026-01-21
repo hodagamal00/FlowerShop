@@ -364,8 +364,8 @@ public class SimpleServer extends AbstractServer {
 
 		System.out.println("Arrived At UpdateMessage 3");
 
-		// ================== هنا عدّلنا منطق CHECKMAIL ==================
-		if (msg instanceof CheckMail) {
+	// ================== هنا عدّلنا منطق CHECKMAIL ==================
+	if (msg instanceof CheckMail) {
 
 			SessionFactory sessionFactory = getSessionFactory();
 			session = sessionFactory.openSession();
@@ -374,16 +374,25 @@ public class SimpleServer extends AbstractServer {
 			CheckMail recievedMessage = (CheckMail) msg;
 			String recievedMailStr = recievedMessage.getEmail();
 			String recievedPasswordStr = recievedMessage.getPassword();
+			String person = recievedMessage.getPerson();
+			if (person == null || person.isBlank()) {
+				person = "customer";
+			}
 
-			List<Account> accountsList = getAllAccounts();
 			Account matchedAccount = null;
+			boolean isEmployeeLogin = person.equalsIgnoreCase("employee")
+					|| person.equalsIgnoreCase("worker")
+					|| person.equalsIgnoreCase("manager");
 
-			for (Account account : accountsList) {
-				System.out.println(account.getEmail());
-				if (account.getEmail().equals(recievedMailStr)) {
-					matchedAccount = account;
-					break;
+			if (isEmployeeLogin) {
+				Manager matchedManager = findAccountByEmail(Manager.class, recievedMailStr);
+				if (matchedManager != null) {
+					matchedAccount = matchedManager;
+				} else {
+					matchedAccount = findAccountByEmail(Worker.class, recievedMailStr);
 				}
+			} else {
+				matchedAccount = findAccountByEmail(Account.class, recievedMailStr);
 			}
 
 			if (matchedAccount == null) {
@@ -876,6 +885,21 @@ public class SimpleServer extends AbstractServer {
 		List<Account> resultlest = session.createQuery(query).getResultList();
 		System.out.println("Arrived to getAllAccounts 5");
 		return resultlest;
+	}
+
+	private <T extends Account> T findAccountByEmail(Class<T> type, String email) {
+		if (email == null) {
+			return null;
+		}
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<T> query = builder.createQuery(type);
+		Root<T> root = query.from(type);
+		query.select(root).where(builder.equal(root.get("email"), email));
+		List<T> results = session.createQuery(query).getResultList();
+		if (results.isEmpty()) {
+			return null;
+		}
+		return results.get(0);
 	}
 
 	private boolean isEmailAlreadyRegistered(String email) {
