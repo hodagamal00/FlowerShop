@@ -591,7 +591,7 @@ public class CatalogController {
 			basePrice = Integer.parseInt(cartTextPrice.getText());
 		}
 
-		int addedPrice = (int) Math.round(displayProducts.get(index).getPrice());
+		int addedPrice = (int) Math.round(PricingService.calculateDisplayPrice(displayProducts.get(index), currentLoggedAccount));
 		basePrice += addedPrice;
 
 		// إضافة المنتج
@@ -1423,9 +1423,11 @@ public class CatalogController {
 	}
 
 	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, Label promoBadge) {
-		double basePrice = product.getPrice();
-		double actualPrice = product.getActualPrice();
-		boolean hasPromotion = product.isPromotion() && product.getDiscountPercent() > 0 && actualPrice < basePrice;
+		PricingService.PricingResult pricing = PricingService.calculatePricing(product, resolveCurrentPrivilegeLevel());
+		double basePrice = pricing.getBasePrice();
+		double actualPrice = pricing.getFinalPrice();
+		boolean hasPromotion = pricing.isPromotionApplied();
+		boolean hasDiscount = actualPrice < basePrice;
 
 		String formattedBase = formatPrice(basePrice);
 		String formattedActual = formatPrice(actualPrice);
@@ -1436,8 +1438,8 @@ public class CatalogController {
 
 		promoBadge.setVisible(hasPromotion);
 		promoBadge.setManaged(hasPromotion);
-		priceBefore.setVisible(hasPromotion);
-		priceBefore.setManaged(hasPromotion);
+		priceBefore.setVisible(hasDiscount);
+		priceBefore.setManaged(hasDiscount);
 		priceAfter.setVisible(true);
 		priceAfter.setManaged(true);
 	}
@@ -2199,9 +2201,19 @@ public class CatalogController {
 			System.out.println(" Current Priv : " + currentLoggedAccount.getPrivialge());
 			SimpleClient.setAccount(currentLoggedAccount);
 			applyPrivilegeBasedUI();
+			refreshCatalogView();
 			navigateAfterLogin(currentLoggedAccount);
 		});
 
+	}
+
+	@Subscribe
+	public void handleCatalogRefresh(CatalogRefreshEvent event) {
+		Platform.runLater(() -> {
+			requestCatalogReload();
+			applyPrivilegeBasedUI();
+			refreshCatalogView();
+		});
 	}
 	@Subscribe
 	public void retRieveDatabase(RetrieveDataBaseEvent rtEvent) {
@@ -2398,7 +2410,7 @@ public class CatalogController {
 			}
 			// Price filter
 			if (!"All".equals(selectedPrice)) {
-				double price = p.getPrice();
+				double price = PricingService.calculateDisplayPrice(p, resolveCurrentPrivilegeLevel());
 				try {
 					String[] parts = selectedPrice.split("-");
 					double min = Double.parseDouble(parts[0]);
@@ -2419,6 +2431,24 @@ public class CatalogController {
 		CatalogSTARTIndex = 0;
 		CatalogENDIndex = Math.min(6, filteredProducts.size());
 		updateFields(1);
+	}
+
+	private void refreshCatalogView() {
+		if (filtersApplied) {
+			applyFilters();
+			return;
+		}
+		if (!allProducts.isEmpty()) {
+			updateFields(2);
+		}
+	}
+
+	private void requestCatalogReload() {
+		try {
+			SimpleClient.getClient().sendToServer("first entry");
+		} catch (IOException e) {
+			System.out.println("Offline mode");
+		}
 	}
 
 	private List<Product> getDisplayedProducts() {
@@ -2681,7 +2711,7 @@ public class CatalogController {
 				continue;
 			}
 			CartItemsList.getItems().add(product.getName());
-			basePrice += (int) Math.round(product.getPrice());
+			basePrice += (int) Math.round(PricingService.calculateDisplayPrice(product, currentLoggedAccount));
 		}
 		updateCartSummary(basePrice);
 	}
@@ -2697,7 +2727,7 @@ public class CatalogController {
 		CartService.getInstance().addProduct(product, 1);
 
 		int basePrice = parseCartTotal();
-		basePrice += (int) Math.round(product.getPrice());
+		basePrice += (int) Math.round(PricingService.calculateDisplayPrice(product, currentLoggedAccount));
 		updateCartSummary(basePrice);
 	}
 
