@@ -141,11 +141,11 @@ public class Product implements Serializable {
     }
 
     public double getDiscountPercent() {
-        return discountPercent;
+        return normalizeDiscountPercent(discountPercent);
     }
 
     public void setDiscountPercent(double discountPercent) {
-        this.discountPercent = discountPercent;
+        this.discountPercent = normalizeDiscountPercent(discountPercent);
     }
 
     public boolean isCustomProduct() {
@@ -192,8 +192,24 @@ public class Product implements Serializable {
     public double getActualPrice() {
         double basePrice = price;
         if (hasActivePromotion()) {
-            return basePrice * (1 - discountPercent / 100.0);
+            return roundCurrency(calculateDiscountedPrice(basePrice, discountPercent));
         }
-        return basePrice;
+        return roundCurrency(basePrice);
+    }
+
+    public static double normalizeDiscountPercent(double discountPercent) {
+        if (discountPercent > 0 && discountPercent <= 1) {
+            return discountPercent * 100.0;
+        }
+        return discountPercent;
+    }
+
+    public static double calculateDiscountedPrice(double basePrice, double discountPercent) {
+        double normalizedDiscount = normalizeDiscountPercent(discountPercent);
+        return basePrice * (1 - normalizedDiscount / 100.0);
+    }
+
+    public static double roundCurrency(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }
