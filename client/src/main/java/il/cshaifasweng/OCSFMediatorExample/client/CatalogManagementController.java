@@ -20,6 +20,7 @@ import javafx.scene.image.WritableImage;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,7 +126,7 @@ public class CatalogManagementController {
                     PricingService.PricingResult pricing = PricingService.calculatePricing(product, SimpleClient.getAccount());
                     double basePrice = pricing.getBasePrice();
                     double finalPrice = pricing.getFinalPrice();
-                    if (finalPrice < basePrice) {
+                    if (pricing.isPromotionApplied()) {
                         setText(String.format("$%.2f → $%.2f", basePrice, finalPrice));
                     } else {
                         setText(String.format("$%.2f", basePrice));
@@ -135,7 +136,8 @@ public class CatalogManagementController {
         });
 
         // Promotion column - show "Yes" or "No"
-        promotionCol.setCellValueFactory(new PropertyValueFactory<>("promotion"));
+        promotionCol.setCellValueFactory(cellData ->
+                new ReadOnlyBooleanWrapper(cellData.getValue() != null && cellData.getValue().hasActivePromotion()));
         promotionCol.setCellFactory(column -> new TableCell<Product, Boolean>() {
             @Override
             protected void updateItem(Boolean item, boolean empty) {

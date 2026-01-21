@@ -1427,7 +1427,6 @@ public class CatalogController {
 		double basePrice = pricing.getBasePrice();
 		double actualPrice = pricing.getFinalPrice();
 		boolean hasPromotion = pricing.isPromotionApplied();
-		boolean hasDiscount = actualPrice < basePrice;
 
 		String formattedBase = formatPrice(basePrice);
 		String formattedActual = formatPrice(actualPrice);
@@ -1438,10 +1437,10 @@ public class CatalogController {
 
 		promoBadge.setVisible(hasPromotion);
 		promoBadge.setManaged(hasPromotion);
-		priceBefore.setVisible(hasDiscount);
-		priceBefore.setManaged(hasDiscount);
-		priceAfter.setVisible(true);
-		priceAfter.setManaged(true);
+		priceBefore.setVisible(hasPromotion);
+		priceBefore.setManaged(hasPromotion);
+		priceAfter.setVisible(hasPromotion);
+		priceAfter.setManaged(hasPromotion);
 	}
 
 	public void updateFields(int mode)
