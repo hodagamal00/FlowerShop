@@ -341,24 +341,36 @@ public class SimpleServer extends AbstractServer {
 								client.sendToClient(new UserUpdateResponse(false, ex.getMessage()));
 								break;
 							}
-					} else if (updateClassFunction.equals("remove")) {
-						String idToRemove = recievedMessage.getDelteId();
-						OrderUpdateManager.removeOrder(idToRemove, client);
-					}
-					session.close();
-					break;
+						} else if (updateClassFunction.equals("remove")) {
+							if (!isCustomer(client)) {
+								client.sendToClient(new UserUpdateResponse(false, "Unauthorized: customer access required."));
+								break;
+							}
+							String idToRemove = recievedMessage.getDelteId();
+							OrderUpdateManager.removeOrder(idToRemove, client);
+						}
+						session.close();
+						break;
 
-				case "complaint":
-					System.out.println("Tried Adding Complaint");
-					if (updateClassFunction.equals("add")) {
-						System.out.println("arrived to here inside complaint add");
-						Complaint recievedComp = recievedMessage.getComplaint();
-						ComplaintUpdateManager.addComplaint(recievedComp);
-					} else if (updateClassFunction.equals("edit")) {
-						System.out.println("arrived to here inside complaint edit");
-						Complaint recievedComp = recievedMessage.getComplaint();
-						ComplaintUpdateManager.editComplaint(recievedComp);
-					}
+					case "complaint":
+						System.out.println("Tried Adding Complaint");
+						if (updateClassFunction.equals("add")) {
+							if (!isCustomer(client)) {
+								client.sendToClient(new UserUpdateResponse(false, "Unauthorized: customer access required."));
+								break;
+							}
+							System.out.println("arrived to here inside complaint add");
+							Complaint recievedComp = recievedMessage.getComplaint();
+							ComplaintUpdateManager.addComplaint(recievedComp);
+						} else if (updateClassFunction.equals("edit")) {
+							if (!(isWorker(client) || isManager(client))) {
+								client.sendToClient(new UserUpdateResponse(false, "Unauthorized: worker or manager access required."));
+								break;
+							}
+							System.out.println("arrived to here inside complaint edit");
+							Complaint recievedComp = recievedMessage.getComplaint();
+							ComplaintUpdateManager.editComplaint(recievedComp);
+						}
 					session.close();
 					break;
 
@@ -709,6 +721,16 @@ public class SimpleServer extends AbstractServer {
 	private boolean isManager(ConnectionToClient client) {
 		Account account = client != null ? (Account) client.getInfo("account") : null;
 		return account != null && account.getPrivilegeLevel() >= 3;
+	}
+
+	private boolean isWorker(ConnectionToClient client) {
+		Account account = client != null ? (Account) client.getInfo("account") : null;
+		return account != null && account.getPrivilegeLevel() == 2;
+	}
+
+	private boolean isCustomer(ConnectionToClient client) {
+		Account account = client != null ? (Account) client.getInfo("account") : null;
+		return account != null && account.getPrivilegeLevel() == 1;
 	}
 
 	private boolean isSystemManager(ConnectionToClient client) {
