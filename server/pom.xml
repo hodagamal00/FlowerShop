@@ -24,8 +24,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>${groupId}</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>entities</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
