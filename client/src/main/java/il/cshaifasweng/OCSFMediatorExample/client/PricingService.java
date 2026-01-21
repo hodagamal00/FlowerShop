@@ -24,13 +24,19 @@ public final class PricingService {
 
         double basePrice = product.getPrice();
         boolean hasPromotion = product.hasActivePromotion();
-        double promotionPrice = hasPromotion ? product.getActualPrice() : basePrice;
+        double promotionPrice = hasPromotion
+                ? Product.calculateDiscountedPrice(basePrice, product.getDiscountPercent())
+                : basePrice;
 
         double privilegeDiscountPercent = resolvePrivilegeDiscountPercent(privilege);
         boolean hasPrivilegeDiscount = privilegeDiscountPercent > 0;
-        double finalPrice = promotionPrice * (1 - privilegeDiscountPercent / 100.0);
+        double finalPrice = hasPrivilegeDiscount
+                ? Product.calculateDiscountedPrice(promotionPrice, privilegeDiscountPercent)
+                : promotionPrice;
+        double roundedFinalPrice = Product.roundCurrency(finalPrice);
+        double roundedPromotionPrice = Product.roundCurrency(promotionPrice);
 
-        return new PricingResult(basePrice, promotionPrice, finalPrice, hasPromotion, hasPrivilegeDiscount);
+        return new PricingResult(basePrice, roundedPromotionPrice, roundedFinalPrice, hasPromotion, hasPrivilegeDiscount);
     }
 
     public static double calculateDisplayPrice(Product product, Account account) {
