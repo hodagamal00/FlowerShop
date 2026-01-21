@@ -226,22 +226,22 @@ public class CatalogController {
 	private javafx.scene.control.Label flower_price6; // Value injected by FXMLLoader
 
 	@FXML
-	private Label flower_promo1;
+	private VBox flower_promo1;
 
 	@FXML
-	private Label flower_promo2;
+	private VBox flower_promo2;
 
 	@FXML
-	private Label flower_promo3;
+	private VBox flower_promo3;
 
 	@FXML
-	private Label flower_promo4;
+	private VBox flower_promo4;
 
 	@FXML
-	private Label flower_promo5;
+	private VBox flower_promo5;
 
 	@FXML
-	private Label flower_promo6;
+	private VBox flower_promo6;
 
 	@FXML
 	private Label flower_price_before1;
@@ -1416,17 +1416,24 @@ public class CatalogController {
 	}
 
 	private String formatPrice(double price) {
-		if (price == Math.floor(price)) {
-			return String.format(Locale.US, "%.0f₪", price);
-		}
 		return String.format(Locale.US, "%.2f₪", price);
 	}
 
-	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, Label promoBadge) {
-		PricingService.PricingResult pricing = PricingService.calculatePricing(product, resolveCurrentPrivilegeLevel());
-		double basePrice = pricing.getBasePrice();
-		double actualPrice = pricing.getFinalPrice();
-		boolean hasPromotion = pricing.isPromotionApplied();
+	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, VBox promoBadge) {
+		if (product == null) {
+			return;
+		}
+
+		double basePrice = Product.roundCurrency(product.getPrice());
+		double discountPercent = Product.normalizeDiscountPercent(product.getDiscountPercent());
+		boolean hasPromotion = product.hasActivePromotion();
+		double actualPrice = hasPromotion
+				? Product.roundCurrency(Product.calculateDiscountedPrice(basePrice, discountPercent))
+				: basePrice;
+
+		System.out.printf(Locale.US,
+				"Product %d | original=%.2f | discountPercent=%.2f | final=%.2f%n",
+				product.getID(), basePrice, discountPercent, actualPrice);
 
 		String formattedBase = formatPrice(basePrice);
 		String formattedActual = formatPrice(actualPrice);
@@ -1434,6 +1441,7 @@ public class CatalogController {
 		priceBadge.setText(formattedActual);
 		priceAfter.setText(formattedActual);
 		priceBefore.setText(formattedBase);
+		priceBefore.setStyle(hasPromotion ? "-fx-strikethrough: true;" : "");
 
 		promoBadge.setVisible(hasPromotion);
 		promoBadge.setManaged(hasPromotion);
