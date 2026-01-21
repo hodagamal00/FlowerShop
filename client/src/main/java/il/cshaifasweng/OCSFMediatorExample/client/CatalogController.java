@@ -244,22 +244,22 @@ public class CatalogController {
 	private VBox flower_promo6;
 
 	@FXML
-	private Label flower_price_before1;
+	private Text flower_price_before1;
 
 	@FXML
-	private Label flower_price_before2;
+	private Text flower_price_before2;
 
 	@FXML
-	private Label flower_price_before3;
+	private Text flower_price_before3;
 
 	@FXML
-	private Label flower_price_before4;
+	private Text flower_price_before4;
 
 	@FXML
-	private Label flower_price_before5;
+	private Text flower_price_before5;
 
 	@FXML
-	private Label flower_price_before6;
+	private Text flower_price_before6;
 
 	@FXML
 	private Label flower_price_after1;
@@ -1419,7 +1419,7 @@ public class CatalogController {
 		return String.format(Locale.US, "%.2f₪", price);
 	}
 
-	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, VBox promoBadge) {
+	private void updatePricingLabels(Product product, Label priceBadge, Text priceBefore, Label priceAfter, VBox promoBadge) {
 		if (product == null) {
 			return;
 		}
@@ -1441,7 +1441,7 @@ public class CatalogController {
 		priceBadge.setText(formattedActual);
 		priceAfter.setText(formattedActual);
 		priceBefore.setText(formattedBase);
-		priceBefore.setStyle(hasPromotion ? "-fx-strikethrough: true;" : "");
+		priceBefore.setStrikethrough(hasPromotion);
 
 		promoBadge.setVisible(hasPromotion);
 		promoBadge.setManaged(hasPromotion);
