@@ -24,10 +24,7 @@ public final class PricingService {
 
         double basePrice = product.getPrice();
         boolean hasPromotion = product.hasActivePromotion();
-        double promotionPrice = basePrice;
-        if (hasPromotion) {
-            promotionPrice = basePrice * (1 - product.getDiscountPercent() / 100.0);
-        }
+        double promotionPrice = hasPromotion ? product.getActualPrice() : basePrice;
 
         double privilegeDiscountPercent = resolvePrivilegeDiscountPercent(privilege);
         boolean hasPrivilegeDiscount = privilegeDiscountPercent > 0;

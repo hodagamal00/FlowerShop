@@ -137,7 +137,21 @@ public class Product implements Serializable {
     }
 
     public boolean hasActivePromotion() {
-        return isPromotion && discountPercent > 0;
+        return isPromotion && getNormalizedDiscountPercent() > 0;
+    }
+
+    public double getNormalizedDiscountPercent() {
+        double value = discountPercent;
+        if (value > 0 && value <= 1) {
+            value = value * 100.0;
+        }
+        if (value < 0) {
+            value = 0;
+        }
+        if (value > 100) {
+            value = 100;
+        }
+        return value;
     }
 
     public double getDiscountPercent() {
@@ -192,7 +206,9 @@ public class Product implements Serializable {
     public double getActualPrice() {
         double basePrice = price;
         if (hasActivePromotion()) {
-            return basePrice * (1 - discountPercent / 100.0);
+            double normalizedDiscount = getNormalizedDiscountPercent();
+            double discounted = basePrice * (1 - normalizedDiscount / 100.0);
+            return Math.round(discounted * 100.0) / 100.0;
         }
         return basePrice;
     }
