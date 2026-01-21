@@ -122,7 +122,7 @@ public class Account implements Serializable {
     }
 
     public boolean isFrozen() {
-        return frozen;
+        return getFrozen();
     }
 
     public boolean getFrozen() {

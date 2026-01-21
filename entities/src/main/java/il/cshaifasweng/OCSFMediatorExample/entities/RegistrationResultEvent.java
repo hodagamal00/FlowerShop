@@ -1,8 +1,10 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
+import java.io.Serializable;
 import java.util.EventObject;
 
-public class RegistrationResultEvent extends EventObject {
+public class RegistrationResultEvent extends EventObject implements Serializable {
+    private static final long serialVersionUID = 1L;
     private boolean success;
     private String message;
 
