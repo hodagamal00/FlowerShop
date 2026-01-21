@@ -5,20 +5,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -31,7 +28,6 @@ import javax.persistence.Column;
 
 public class MyOrdersController {
 
-    private boolean cancelInProgress = false;
 
 
     Account currentUser;
@@ -177,26 +173,95 @@ public class MyOrdersController {
     @FXML
     void cancelOrder(ActionEvent event)
     {
-        if (SelectedOrder == null || cancelInProgress) {
-            return;
+        boolean in24Hour = false;
+        int refund = 0;
+        Calendar calle = Calendar.getInstance();
+        int currentYear = calle.get(Calendar.YEAR);
+        int currentMonth = calle.get(Calendar.MONTH);
+        currentMonth++;
+        int currentHour = calle.get(Calendar.HOUR_OF_DAY);
+        int currentMintue = calle.get(Calendar.MINUTE);
+        int currentDay = calle.get(Calendar.DAY_OF_MONTH);
+
+        int orderYear = SelectedOrder.getPrepareYear();
+        int orderMonth = SelectedOrder.getPrepareMonth();
+        int orderDay = SelectedOrder.getPrepareDay();
+
+        int orderHour = SelectedOrder.getOrderHour();
+        int orderMinute = SelectedOrder.getOrderMintue();
+
+        int diffYear = currentYear - orderYear;
+        int diffMonth = currentMonth - orderMonth;
+        int diffDay = currentDay - orderDay;
+        int diffHour = currentHour - orderHour;
+        int diffMinute = currentMintue - orderMinute;
+
+        if(diffMonth < 0) {
+            diffYear--;
+            diffMonth = 12 + diffMonth;
         }
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Cancel Order");
-        alert.setHeaderText("Are you sure you want to cancel this order?");
-        alert.setContentText("This action cannot be undone.");
-        if (alert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
-            return;
+        if(diffDay < 0) {
+            diffMonth--;
+            diffDay = 30 + diffDay;
         }
-        CancelOrderRequest request = new CancelOrderRequest(SelectedOrder.getOrderID());
+        if(diffHour < 0) {
+            diffDay--;
+            diffHour = 24 + diffHour;
+        }
+        if(diffMinute < 0) {
+            diffHour--;
+            diffMinute = 60 + diffMinute;
+        }
+        if(diffYear == 0)
+        {
+            if(diffMonth == 0)
+            {
+                if(diffDay == 0)
+                {
+                    if(diffHour > 3)
+                    {
+                        refund = 100;
+                    }
+                    else if(diffHour < 1)
+                        refund = 0;
+                    else
+                        refund = 50;
+                }
+                else
+                {
+                    refund = 100;
+                }
+
+            }
+            else
+            {
+                refund = 100;
+            }
+
+        }
+        else
+        {
+            refund = 100;
+        }
+        boolean returned = false;
+        if(refund > 0)
+            returned = true;
+
+        int refundValue = (int) Math.round(SelectedOrder.getTotalPrice() * (refund / 100.0));
+        Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refundValue,currentDay,currentMonth,currentYear,"Automated Reply");
+        UpdateMessage new_msg=new UpdateMessage("complaint","add");
+        new_msg.setComplaint(cancelComplaint);
         try {
-            cancelInProgress = true;
-            cancelButton.setDisable(true);
-            SimpleClient.getClient().sendToServer(request);
+            System.out.println("before sending updateMessage to server ");
+            SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
+            System.out.println("afater sending updateMessage to server ");
         } catch (IOException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
-            cancelInProgress = false;
-            cancelButton.setDisable(false);
         }
+
+
+
     }
 
     int complaint_num = 0;
@@ -231,9 +296,16 @@ public class MyOrdersController {
 
     @FXML
     void goToMyComplaints(ActionEvent event) {
+        if (SelectedOrder == null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Please select an order before submitting a complaint.");
+            alert.showAndWait();
+            return;
+        }
         NavigationService.getInstance().navigate("mycomplaints");
 
-        PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentUser);
+        PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentUser, SelectedOrder.getOrderID());
         new java.util.Timer().schedule(
                 new java.util.TimerTask() {
                     @Override
@@ -487,38 +559,6 @@ public class MyOrdersController {
         System.out.println("arrived to subscriebr of passOrders !");
         List<Order> recievedOrders = passOrders.getRecievedOrders();
         allOrders = recievedOrders;
-    }
-
-    @Subscribe
-    public void handleCancelOrderResponse(CancelOrderResponse response) {
-        if (SelectedOrder == null || response.getOrderId() != SelectedOrder.getOrderID()) {
-            return;
-        }
-        Platform.runLater(() -> {
-            cancelInProgress = false;
-            cancelButton.setDisable(false);
-            if (response.isSuccess()) {
-                SelectedOrder.setCancelled(true);
-                SelectedOrder.setRefundAmount(response.getRefundAmount());
-                SelectedOrder.setRefundStatus(response.getRefundStatus());
-                cancelButton.setVisible(false);
-                if (deliverStatus != null) {
-                    deliverStatus.setText("Cancelled");
-                }
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Order Cancelled");
-                alert.setHeaderText("Cancellation Confirmed");
-                alert.setContentText(String.format("%s Refund: $%.2f (%.0f%%)",
-                        response.getMessage(), response.getRefundAmount(), response.getRefundPercent()));
-                alert.showAndWait();
-            } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Cancellation Failed");
-                alert.setHeaderText("Unable to cancel order");
-                alert.setContentText(response.getMessage());
-                alert.showAndWait();
-            }
-        });
     }
 
 

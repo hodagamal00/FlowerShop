@@ -55,23 +55,15 @@ public class MyComplaintsController {
     @FXML // fx:id="refundMoney"
     private TextField refundMoney; // Value injected by FXMLLoader
 
-    @FXML // fx:id="replyWorker"
-    private TextField replyWorker; // Value injected by FXMLLoader
-
-    @FXML
-    private TextField createdAt;
-
     @FXML
     private TextField respondedAt;
-
-    @FXML
-    private TextField slaStatus;
 
     @FXML
     private TextField compensationDecision;
 
 
     private Integer nextComplaintId;
+    private Integer selectedOrderId;
 
 
     @FXML
@@ -115,15 +107,8 @@ public class MyComplaintsController {
             return;
         }
 
-        String orderText = orderID.getText() == null ? "" : orderID.getText().trim();
-        if (orderText.isEmpty()) {
-            showAlert("Please enter a related order ID.");
-            return;
-        }
-
-        int parsedOrderId = parseOrderId(orderText);
-        if (parsedOrderId < 0) {
-            showAlert("Please enter a valid numeric order ID.");
+        if (selectedOrderId == null || selectedOrderId <= 0) {
+            showAlert("A related order must be selected before submitting a complaint.");
             return;
         }
         Calendar cal = Calendar.getInstance();
@@ -133,7 +118,7 @@ public class MyComplaintsController {
         }
 
         newComplaint.setCustomerID(currentUser.getAccountID());
-        newComplaint.setOrderID(parsedOrderId);
+        newComplaint.setOrderID(selectedOrderId);
         newComplaint.setAccepted(false);
         newComplaint.setIn24Hours(false);
         newComplaint.setComplaintText(complaintBody);
@@ -190,10 +175,7 @@ public class MyComplaintsController {
         assert orderID != null : "fx:id=\"orderID\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert submitComplaint != null : "fx:id=\"submitComplaint\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert refundMoney != null : "fx:id=\"refundMoney\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert replyWorker != null : "fx:id=\"replyWorker\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert createdAt != null : "fx:id=\"createdAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert respondedAt != null : "fx:id=\"respondedAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert slaStatus != null : "fx:id=\"slaStatus\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert compensationDecision != null : "fx:id=\"compensationDecision\" was not injected: check your FXML file 'mycomplaints.fxml'.";
 
         loadButton.setDisable(true);
@@ -232,6 +214,10 @@ public class MyComplaintsController {
         System.out.println(recvAccount.getCreditCardNumber());
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
+        selectedOrderId = passAcc.getOrderId();
+        if (selectedOrderId != null && complaintList.getSelectionModel().getSelectedItem() == null) {
+            orderID.setText(Integer.toString(selectedOrderId));
+        }
         requestAllComplaints();
         requestNextComplaintId();
     }
@@ -251,6 +237,9 @@ public class MyComplaintsController {
         nextComplaintId = event.getComplaintId();
         if (complaintList.getSelectionModel().getSelectedItem() == null && complaintID != null) {
             complaintID.setText(Integer.toString(nextComplaintId));
+            if (selectedOrderId != null) {
+                orderID.setText(Integer.toString(selectedOrderId));
+            }
         }
     }
 
@@ -350,12 +339,10 @@ public class MyComplaintsController {
             answerBool.setText("No");
             refundMoney.setText("0");
         }
-        replyWorker.setText(Integer.toString(selectedComplaint.getAnswerworkerID()));
         complaintText.setText(selectedComplaint.getComplaintText());
-        createdAt.setText(formatDate(selectedComplaint.getCreatedAt()));
         respondedAt.setText(formatDate(selectedComplaint.getRespondedAt()));
-        slaStatus.setText(defaultIfBlank(selectedComplaint.getSlaStatus()));
         compensationDecision.setText(defaultIfBlank(selectedComplaint.getCompensationDecision()));
+        selectedOrderId = selectedComplaint.getOrderID();
     }
 
     private String formatDate(Date date) {
@@ -380,14 +367,4 @@ public class MyComplaintsController {
         alert.showAndWait();
     }
 
-    private int parseOrderId(String text) {
-        if (text == null || text.trim().isEmpty()) {
-            return -1;
-        }
-        try {
-            return Integer.parseInt(text.trim());
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
 }
