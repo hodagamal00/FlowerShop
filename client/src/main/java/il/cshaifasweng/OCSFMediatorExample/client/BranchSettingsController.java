@@ -63,35 +63,13 @@ public class BranchSettingsController {
     @FXML
     public void initialize() {
         // Check privileges - Manager level required (3+)
-        if (!checkManagerPrivileges()) {
-            showAccessDenied();
+        if (!AccessGuard.requireMinPrivilege(3)) {
             return;
         }
         
         setupTimeComboBoxes();
         loadBranchSettings();
         setupClosedWeekendsListener();
-    }
-    
-    /**
-     * Check if user has manager privileges
-     */
-    private boolean checkManagerPrivileges() {
-        // TODO: Get current user privilege from session
-        // return SimpleClient.getCurrentUser().getPrivilege() >= 3;
-        return true;
-    }
-    
-    /**
-     * Show access denied message
-     */
-    private void showAccessDenied() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Access Denied");
-        alert.setHeaderText("Insufficient Privileges");
-        alert.setContentText("You need Manager privileges to access this page.");
-        alert.showAndWait();
-        handleBackToCatalog();
     }
     
     /**
