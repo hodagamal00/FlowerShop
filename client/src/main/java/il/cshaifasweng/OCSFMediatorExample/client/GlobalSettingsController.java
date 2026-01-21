@@ -46,27 +46,11 @@ public class GlobalSettingsController {
     
     @FXML
     public void initialize() {
-        if (!checkChainManagerPrivileges()) {
-            showAccessDenied();
+        if (!AccessGuard.requireMinPrivilege(4)) {
             return;
         }
         loadGlobalSettings();
     }
-    
-    private boolean checkChainManagerPrivileges() {
-        // TODO: return SimpleClient.getCurrentUser().getPrivilege() >= 4;
-        return true;
-    }
-    
-    private void showAccessDenied() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Access Denied");
-        alert.setHeaderText("Insufficient Privileges");
-        alert.setContentText("You need Chain Manager privileges to access this page.");
-        alert.showAndWait();
-        handleBackToDashboard();
-    }
-    
     private void loadGlobalSettings() {
         // TODO: Load from server
         companyNameField.setText("FlowerShop Network");

@@ -262,6 +262,9 @@ public class ReplyComplaintController {
     List<Complaint> retrievedComplaints = new ArrayList<>();
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() throws IOException {
+        if (!AccessGuard.requireMinPrivilege(2)) {
+            return;
+        }
         EventBus.getDefault().register(this);
         assert accountID != null : "fx:id=\"accountID\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert backButton != null : "fx:id=\"backButton\" was not injected: check your FXML file 'replycomplaint.fxml'.";
