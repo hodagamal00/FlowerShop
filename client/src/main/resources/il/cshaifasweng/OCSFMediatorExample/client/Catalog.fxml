@@ -118,8 +118,8 @@
                                             <Label fx:id="flower_name1" text="Sunflower" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Text fx:id="flower_price_before1" text="200₪" styleClass="price-before" />
-                                                    <Text fx:id="flower_price_after1" text="150₪" styleClass="price-after" />
+                                                    <Label fx:id="flower_price_before1" text="200₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after1" text="150₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -166,8 +166,8 @@
                                             <Label fx:id="flower_name2" text="Daisy" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Text fx:id="flower_price_before2" text="120₪" styleClass="price-before" />
-                                                    <Text fx:id="flower_price_after2" text="100₪" styleClass="price-after" />
+                                                    <Label fx:id="flower_price_before2" text="120₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after2" text="100₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -214,8 +214,8 @@
                                             <Label fx:id="flower_name3" text="Lily" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Text fx:id="flower_price_before3" text="100₪" styleClass="price-before" />
-                                                    <Text fx:id="flower_price_after3" text="80₪" styleClass="price-after" />
+                                                    <Label fx:id="flower_price_before3" text="100₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after3" text="80₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -262,8 +262,8 @@
                                             <Label fx:id="flower_name4" text="Tulip" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Text fx:id="flower_price_before4" text="70₪" styleClass="price-before" />
-                                                    <Text fx:id="flower_price_after4" text="60₪" styleClass="price-after" />
+                                                    <Label fx:id="flower_price_before4" text="70₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after4" text="60₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -310,8 +310,8 @@
                                             <Label fx:id="flower_name5" text="Rose" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Text fx:id="flower_price_before5" text="25₪" styleClass="price-before" />
-                                                    <Text fx:id="flower_price_after5" text="15₪" styleClass="price-after" />
+                                                    <Label fx:id="flower_price_before5" text="25₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after5" text="15₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -358,8 +358,8 @@
                                             <Label fx:id="flower_name6" text="Orchid" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Text fx:id="flower_price_before6" text="150₪" styleClass="price-before" />
-                                                    <Text fx:id="flower_price_after6" text="120₪" styleClass="price-after" />
+                                                    <Label fx:id="flower_price_before6" text="150₪" styleClass="price-before" />
+                                                    <Label fx:id="flower_price_after6" text="120₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
