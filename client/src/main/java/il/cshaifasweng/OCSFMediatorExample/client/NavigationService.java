@@ -88,7 +88,7 @@ public class NavigationService {
 
     private String resolveViewName(String fxml) {
         if (fxml == null) {
-            return "Catalog";
+            return "HomePage";
         }
         String normalized = fxml.trim();
         if (normalized.equalsIgnoreCase("primary") || normalized.equalsIgnoreCase("catalog")) {
