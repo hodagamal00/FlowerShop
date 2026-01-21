@@ -63,8 +63,7 @@ public class CrossBranchReportsController {
     @FXML
     public void initialize() {
         // Check privileges - Chain Manager level required (4)
-        if (!checkChainManagerPrivileges()) {
-            showAccessDenied();
+        if (!AccessGuard.requireMinPrivilege(4)) {
             return;
         }
         
@@ -73,27 +72,6 @@ public class CrossBranchReportsController {
         
         // Auto-generate initial report
         Platform.runLater(this::handleGenerateReport);
-    }
-    
-    /**
-     * Check if user has chain manager privileges
-     */
-    private boolean checkChainManagerPrivileges() {
-        // TODO: Get current user privilege from session
-        // return SimpleClient.getCurrentUser().getPrivilege() >= 4;
-        return true;
-    }
-    
-    /**
-     * Show access denied message
-     */
-    private void showAccessDenied() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Access Denied");
-        alert.setHeaderText("Insufficient Privileges");
-        alert.setContentText("You need Chain Manager privileges to access this page.");
-        alert.showAndWait();
-        handleBackToDashboard();
     }
     
     /**

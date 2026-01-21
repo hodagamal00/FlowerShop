@@ -44,26 +44,13 @@ public class NetworkPromotionsController {
 
     @FXML
     public void initialize() {
-        if (!checkChainManagerPrivileges()) {
-            showAccessDenied();
+        if (!AccessGuard.requireMinPrivilege(4)) {
             return;
         }
         setupApplyToCombo();
         setupTable();
         loadPromotions();
         updateStatistics();
-    }
-
-    private boolean checkChainManagerPrivileges() {
-        return true;
-    }
-
-    private void showAccessDenied() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Access Denied");
-        alert.setContentText("You need Chain Manager privileges to access this page.");
-        alert.showAndWait();
-        handleBackToDashboard();
     }
 
     private void setupApplyToCombo() {
