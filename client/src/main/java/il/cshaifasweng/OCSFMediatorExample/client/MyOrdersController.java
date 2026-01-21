@@ -178,85 +178,26 @@ public class MyOrdersController {
     @FXML
     void cancelOrder(ActionEvent event)
     {
-        boolean in24Hour = false;
-        int refund = 0;
-        Calendar calle = Calendar.getInstance();
-        int currentYear = calle.get(Calendar.YEAR);
-        int currentMonth = calle.get(Calendar.MONTH);
-        currentMonth++;
-        int currentHour = calle.get(Calendar.HOUR_OF_DAY);
-        int currentMintue = calle.get(Calendar.MINUTE);
-        int currentDay = calle.get(Calendar.DAY_OF_MONTH);
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
+        int currentHour = now.getHour();
+        int currentMinute = now.getMinute();
+        int currentDay = now.getDayOfMonth();
 
-        int orderYear = SelectedOrder.getPrepareYear();
-        int orderMonth = SelectedOrder.getPrepareMonth();
-        int orderDay = SelectedOrder.getPrepareDay();
+        double refundFactor = SelectedOrder.calculateRefund(
+            currentDay, currentMonth, currentYear, currentHour, currentMinute);
+        double refundAmount = SelectedOrder.getTotalPrice() * refundFactor;
+        double refundPercent = refundFactor * 100.0;
+        String refundPercentDisplay = String.format("%.0f%%", refundPercent);
+        boolean returned = refundAmount > 0;
 
-        int orderHour = SelectedOrder.getOrderHour();
-        int orderMinute = SelectedOrder.getOrderMintue();
-
-        int diffYear = currentYear - orderYear;
-        int diffMonth = currentMonth - orderMonth;
-        int diffDay = currentDay - orderDay;
-        int diffHour = currentHour - orderHour;
-        int diffMinute = currentMintue - orderMinute;
-
-        if(diffMonth < 0) {
-            diffYear--;
-            diffMonth = 12 + diffMonth;
-        }
-        if(diffDay < 0) {
-            diffMonth--;
-            diffDay = 30 + diffDay;
-        }
-        if(diffHour < 0) {
-            diffDay--;
-            diffHour = 24 + diffHour;
-        }
-        if(diffMinute < 0) {
-            diffHour--;
-            diffMinute = 60 + diffMinute;
-        }
-        if(diffYear == 0)
-        {
-            if(diffMonth == 0)
-            {
-                if(diffDay == 0)
-                {
-                    if(diffHour > 3)
-                    {
-                        refund = 100;
-                    }
-                    else if(diffHour < 1)
-                        refund = 0;
-                    else
-                        refund = 50;
-                }
-                else
-                {
-                    refund = 100;
-                }
-
-            }
-            else
-            {
-                refund = 100;
-            }
-
-        }
-        else
-        {
-            refund = 100;
-        }
-        boolean returned = false;
-        if(refund > 0)
-            returned = true;
-
-        int refundValue = (int) Math.round(SelectedOrder.getTotalPrice() * (refund / 100.0));
+        int refundValue = (int) Math.round(refundAmount);
         Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refundValue,currentDay,currentMonth,currentYear,"Automated Reply");
         UpdateMessage new_msg=new UpdateMessage("complaint","add");
         new_msg.setComplaint(cancelComplaint);
         try {
+            System.out.println("Calculated refund: " + refundPercentDisplay + " ($" + refundAmount + ")");
             System.out.println("before sending updateMessage to server ");
             SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
             System.out.println("afater sending updateMessage to server ");
