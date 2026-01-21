@@ -3,7 +3,6 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,12 +10,15 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -29,11 +31,7 @@ import javax.persistence.Column;
 
 public class MyOrdersController {
 
-    private LocalDateTime now;
-    private double refundAmount;
-    private double refundPercent;
-    private String refundPercentDisplay;
-    private boolean returned;
+    private boolean cancelInProgress = false;
 
 
     Account currentUser;
@@ -185,36 +183,26 @@ public class MyOrdersController {
     @FXML
     void cancelOrder(ActionEvent event)
     {
-        now = LocalDateTime.now();
-        int currentYear = now.getYear();
-        int currentMonth = now.getMonthValue();
-        int currentHour = now.getHour();
-        int currentMinute = now.getMinute();
-        int currentDay = now.getDayOfMonth();
-
-        double refundFactor = SelectedOrder.calculateRefund(
-            currentDay, currentMonth, currentYear, currentHour, currentMinute);
-        refundAmount = SelectedOrder.getTotalPrice() * refundFactor;
-        refundPercent = refundFactor * 100.0;
-        refundPercentDisplay = String.format("%.0f%%", refundPercent);
-        returned = refundAmount > 0;
-
-        int refundValue = (int) Math.round(refundAmount);
-        Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refundValue,currentDay,currentMonth,currentYear,"Automated Reply");
-        UpdateMessage new_msg=new UpdateMessage("complaint","add");
-        new_msg.setComplaint(cancelComplaint);
-        try {
-            System.out.println("Calculated refund: " + refundPercentDisplay + " ($" + refundAmount + ")");
-            System.out.println("before sending updateMessage to server ");
-            SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
-            System.out.println("afater sending updateMessage to server ");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        if (SelectedOrder == null || cancelInProgress) {
+            return;
         }
-
-
-
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Cancel Order");
+        alert.setHeaderText("Are you sure you want to cancel this order?");
+        alert.setContentText("This action cannot be undone.");
+        if (alert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
+        CancelOrderRequest request = new CancelOrderRequest(SelectedOrder.getOrderID());
+        try {
+            cancelInProgress = true;
+            cancelButton.setDisable(true);
+            SimpleClient.getClient().sendToServer(request);
+        } catch (IOException e) {
+            e.printStackTrace();
+            cancelInProgress = false;
+            cancelButton.setDisable(false);
+        }
     }
 
     int complaint_num = 0;
@@ -534,6 +522,38 @@ public class MyOrdersController {
         System.out.println("arrived to subscriebr of passOrders !");
         List<Order> recievedOrders = passOrders.getRecievedOrders();
         allOrders = recievedOrders;
+    }
+
+    @Subscribe
+    public void handleCancelOrderResponse(CancelOrderResponse response) {
+        if (SelectedOrder == null || response.getOrderId() != SelectedOrder.getOrderID()) {
+            return;
+        }
+        Platform.runLater(() -> {
+            cancelInProgress = false;
+            cancelButton.setDisable(false);
+            if (response.isSuccess()) {
+                SelectedOrder.setCancelled(true);
+                SelectedOrder.setRefundAmount(response.getRefundAmount());
+                SelectedOrder.setRefundStatus(response.getRefundStatus());
+                cancelButton.setVisible(false);
+                if (deliverStatus != null) {
+                    deliverStatus.setText("Cancelled");
+                }
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Order Cancelled");
+                alert.setHeaderText("Cancellation Confirmed");
+                alert.setContentText(String.format("%s Refund: $%.2f (%.0f%%)",
+                        response.getMessage(), response.getRefundAmount(), response.getRefundPercent()));
+                alert.showAndWait();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Cancellation Failed");
+                alert.setHeaderText("Unable to cancel order");
+                alert.setContentText(response.getMessage());
+                alert.showAndWait();
+            }
+        });
     }
 
 

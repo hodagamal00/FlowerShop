@@ -58,6 +58,12 @@ public class SimpleClient extends AbstractClient {
 			return;
 		}
 
+		if (msg instanceof CancelOrderResponse) {
+			CancelOrderResponse response = (CancelOrderResponse) msg;
+			EventBus.getDefault().post(response);
+			return;
+		}
+
 		// =========================
 		// STRING MESSAGES
 		// =========================
