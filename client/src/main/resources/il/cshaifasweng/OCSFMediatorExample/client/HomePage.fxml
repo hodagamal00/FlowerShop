@@ -32,6 +32,7 @@
                         <Text text="Modern bouquets, same-day delivery, and thoughtful gifts wrapped in a soft purple vibe." styleClass="muted-text" wrappingWidth="520" />
                         <HBox spacing="10.0">
                             <Button fx:id="browseCatalogButton" text="Browse Catalog" styleClass="btn-primary" onAction="#handleBrowseCatalog" />
+                            <Button fx:id="complaintsButton" text="Complaints" styleClass="btn-outline" onAction="#handleComplaints" />
                             <Button fx:id="loginButton" text="Login" styleClass="btn-outline" onAction="#handleLogin" />
                             <Button fx:id="createAccountButton" text="Create Account" styleClass="btn-outline" onAction="#handleCreateAccount" />
                             <Button fx:id="trackOrdersButton" text="Track My Orders" styleClass="btn-outline" onAction="#handleTrackOrders" />
