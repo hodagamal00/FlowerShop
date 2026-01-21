@@ -1086,6 +1086,16 @@ private static SessionFactory cachedSessionFactory;
 				updateProd.setName(productEdit.getName());
 				updateProd.setDetails(productEdit.getDetails());
 				updateProd.setImage(productEdit.getImage());
+				updateProd.setSku(productEdit.getSku());
+				updateProd.setCategory(productEdit.getCategory());
+				updateProd.setColor(productEdit.getColor());
+				updateProd.setPromotion(productEdit.isPromotion());
+				updateProd.setDiscountPercent(productEdit.getDiscountPercent());
+				updateProd.setCustomProduct(productEdit.isCustomProduct());
+				updateProd.setCustomType(productEdit.getCustomType());
+				updateProd.setPriceRangeMin(productEdit.getPriceRangeMin());
+				updateProd.setPriceRangeMax(productEdit.getPriceRangeMax());
+				updateProd.setGreetingCard(productEdit.getGreetingCard());
 
 				session.update(updateProd);
 				tx.commit();

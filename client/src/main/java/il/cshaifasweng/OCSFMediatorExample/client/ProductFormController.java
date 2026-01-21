@@ -64,6 +64,7 @@ public class ProductFormController {
     private boolean isEditMode = false;
     private boolean awaitingAddResponse = false;
     private boolean closeOnSuccess = false;
+    private boolean canEditPromotions = false;
     private static final String IMAGES_FOLDER = "product_images/";
     private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -89,6 +90,7 @@ public class ProductFormController {
         }
 
         applyCustomerOnlyFields();
+        applyPromotionPrivileges();
 
         if (formScrollPane != null) {
             formScrollPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -188,6 +190,23 @@ public class ProductFormController {
         }
     }
 
+    private void applyPromotionPrivileges() {
+        Account account = SimpleClient.getAccount();
+        canEditPromotions = account != null && account.getPrivilegeLevel() >= 3;
+        if (promotionCheckBox != null) {
+            promotionCheckBox.setDisable(!canEditPromotions);
+        }
+        if (discountLabel != null) {
+            discountLabel.setDisable(!canEditPromotions);
+        }
+        if (discountField != null) {
+            discountField.setDisable(!canEditPromotions || (promotionCheckBox != null && !promotionCheckBox.isSelected()));
+        }
+        if (!canEditPromotions && promotionCheckBox != null) {
+            promotionCheckBox.setSelected(currentProduct != null && currentProduct.isPromotion());
+        }
+    }
+
     private void setSectionVisible(VBox container, boolean visible) {
         if (container != null) {
             container.setVisible(visible);
@@ -284,6 +303,19 @@ public class ProductFormController {
      */
     @FXML
     void togglePromotionFields() {
+        if (!canEditPromotions) {
+            if (promotionCheckBox != null) {
+                promotionCheckBox.setSelected(currentProduct != null && currentProduct.isPromotion());
+            }
+            if (discountLabel != null) {
+                discountLabel.setDisable(true);
+            }
+            if (discountField != null) {
+                discountField.setDisable(true);
+            }
+            return;
+        }
+
         boolean isEnabled = promotionCheckBox.isSelected();
         discountLabel.setDisable(!isEnabled);
         discountField.setDisable(!isEnabled);
@@ -358,12 +390,14 @@ public class ProductFormController {
                 currentProduct.setImage(selectedImagePath);
             }
 
-            // Set promotion fields
-            currentProduct.setPromotion(promotionCheckBox.isSelected());
-            if (promotionCheckBox.isSelected() && !discountField.getText().isEmpty()) {
-                currentProduct.setDiscountPercent(Double.parseDouble(discountField.getText()));
-            } else {
-                currentProduct.setDiscountPercent(0.0);
+            // Set promotion fields (manager-only)
+            if (canEditPromotions) {
+                currentProduct.setPromotion(promotionCheckBox.isSelected());
+                if (promotionCheckBox.isSelected() && !discountField.getText().isEmpty()) {
+                    currentProduct.setDiscountPercent(Double.parseDouble(discountField.getText()));
+                } else {
+                    currentProduct.setDiscountPercent(0.0);
+                }
             }
 
             // Set custom product fields
@@ -630,6 +664,8 @@ public class ProductFormController {
             maxPriceField.setText(String.valueOf(product.getPriceRangeMax()));
             toggleCustomFields();
         }
+
+        applyPromotionPrivileges();
     }
 
     /**
