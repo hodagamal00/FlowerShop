@@ -192,6 +192,14 @@ public class SimpleServer extends AbstractServer {
 			return;
 		}
 
+		if (msg instanceof GetAllComplaints) {
+			GetAllComplaints response = new GetAllComplaints();
+			response.setComplaintsList(getAllComplaints());
+			System.out.println("Comp List Size = " + response.getComplaintsList().size());
+			client.sendToClient(response);
+			return;
+		}
+
 		if (msg instanceof UpdateMessage) {
 			System.out.println("Arrived At UpdateMessage 1");
 			SessionFactory sessionFactory = getSessionFactory();
