@@ -106,16 +106,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox fx:id="flower_promo1" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
-                                                        <children>
-                                                            <Label text="SALE" styleClass="sale-badge-text" />
-                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
-                                                        </children>
+                                                    <Label fx:id="flower_promo1" text="SALE" styleClass="sale-badge">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -158,16 +154,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox fx:id="flower_promo2" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
-                                                        <children>
-                                                            <Label text="SALE" styleClass="sale-badge-text" />
-                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
-                                                        </children>
+                                                    <Label fx:id="flower_promo2" text="SALE" styleClass="sale-badge">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -210,16 +202,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox fx:id="flower_promo3" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
-                                                        <children>
-                                                            <Label text="SALE" styleClass="sale-badge-text" />
-                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
-                                                        </children>
+                                                    <Label fx:id="flower_promo3" text="SALE" styleClass="sale-badge">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -262,16 +250,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox fx:id="flower_promo4" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
-                                                        <children>
-                                                            <Label text="SALE" styleClass="sale-badge-text" />
-                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
-                                                        </children>
+                                                    <Label fx:id="flower_promo4" text="SALE" styleClass="sale-badge">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -314,16 +298,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox fx:id="flower_promo5" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
-                                                        <children>
-                                                            <Label text="SALE" styleClass="sale-badge-text" />
-                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
-                                                        </children>
+                                                    <Label fx:id="flower_promo5" text="SALE" styleClass="sale-badge">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -366,16 +346,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox fx:id="flower_promo6" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
-                                                        <children>
-                                                            <Label text="SALE" styleClass="sale-badge-text" />
-                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
-                                                        </children>
+                                                    <Label fx:id="flower_promo6" text="SALE" styleClass="sale-badge">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 

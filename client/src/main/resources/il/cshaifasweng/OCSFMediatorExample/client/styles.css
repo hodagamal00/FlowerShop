@@ -342,22 +342,14 @@
 }
 
 .sale-badge {
-    -fx-padding: 6px 8px 4px 8px;
-    -fx-background-color: rgba(255, 255, 255, 0.9);
-    -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
-    -fx-border-color: rgba(0, 0, 0, 0.08);
-}
-
-.sale-badge-text {
-    -fx-font-size: 11px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #e53935;
     -fx-font-weight: bold;
-    -fx-text-fill: -fx-text-primary;
-}
-
-.sale-badge-ribbon {
-    -fx-background-color: #e53935;
-    -fx-background-radius: 3px;
+    -fx-font-size: 11px;
+    -fx-border-color: #000000;
+    -fx-border-width: 2px;
+    -fx-border-radius: 4px;
+    -fx-padding: 2px 8px 2px 8px;
 }
 
 .product-name {
