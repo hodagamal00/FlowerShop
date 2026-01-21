@@ -6,6 +6,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.GetAllComplaints;
 import il.cshaifasweng.OCSFMediatorExample.entities.Message;
 import il.cshaifasweng.OCSFMediatorExample.entities.NextComplaintIdMessage;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -30,9 +31,6 @@ public class MyComplaintsController {
     Account currentUser;
     @FXML // fx:id="answerBool"
     private TextField answerBool; // Value injected by FXMLLoader
-
-    @FXML // fx:id="backToCatalog"
-    private Button backToCatalog; // Value injected by FXMLLoader
 
     @FXML // fx:id="complaintID"
     private TextField complaintID; // Value injected by FXMLLoader
@@ -65,26 +63,6 @@ public class MyComplaintsController {
     private Integer nextComplaintId;
     private Integer selectedOrderId;
 
-
-    @FXML
-    void openCatalog(ActionEvent event) throws IOException {
-        NavigationService.getInstance().navigate("Catalog");
-
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },2000
-        );
-
-    }
 
     List<Complaint> allComplaints ;
 
@@ -167,7 +145,6 @@ public class MyComplaintsController {
     void initialize() {
         EventBus.getDefault().register(this);
         assert answerBool != null : "fx:id=\"answerBool\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert backToCatalog != null : "fx:id=\"backToCatalog\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintID != null : "fx:id=\"complaintID\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintList != null : "fx:id=\"complaintList\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintText != null : "fx:id=\"complaintText\" was not injected: check your FXML file 'mycomplaints.fxml'.";
@@ -179,7 +156,6 @@ public class MyComplaintsController {
         assert compensationDecision != null : "fx:id=\"compensationDecision\" was not injected: check your FXML file 'mycomplaints.fxml'.";
 
         loadButton.setDisable(true);
-        backToCatalog.setDisable(true);
         complaintList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 Complaint selected = findComplaintByListEntry(newValue);
@@ -195,7 +171,6 @@ public class MyComplaintsController {
                     @Override
                     public void run() {
                         loadButton.setDisable(false);
-                        backToCatalog.setDisable(false);
                     }
                 },4500
         );
@@ -218,6 +193,7 @@ public class MyComplaintsController {
         if (selectedOrderId != null && complaintList.getSelectionModel().getSelectedItem() == null) {
             orderID.setText(Integer.toString(selectedOrderId));
         }
+        refreshComplaintList();
         requestAllComplaints();
         requestNextComplaintId();
     }
@@ -260,15 +236,17 @@ public class MyComplaintsController {
     }
 
     private void refreshComplaintList() {
-        complaintList.getItems().clear();
-        if (allComplaints == null || currentUser == null) {
-            return;
-        }
+        Platform.runLater(() -> {
+            complaintList.getItems().clear();
+            if (allComplaints == null || currentUser == null) {
+                return;
+            }
 
-        allComplaints.stream()
-                .filter(c -> c.getCustomerID() == currentUser.getAccountID())
-                .sorted((a, b) -> Integer.compare(a.getComplaintID(), b.getComplaintID()))
-                .forEach(c -> complaintList.getItems().add(formatListEntry(c)));
+            allComplaints.stream()
+                    .filter(c -> c.getCustomerID() == currentUser.getAccountID())
+                    .sorted((a, b) -> Integer.compare(a.getComplaintID(), b.getComplaintID()))
+                    .forEach(c -> complaintList.getItems().add(formatListEntry(c)));
+        });
     }
 
     private void selectComplaint(int complaintId) {
