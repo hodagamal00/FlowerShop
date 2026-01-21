@@ -42,8 +42,8 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();
-        // Start directly on the catalog so products are visible immediately.
-        NavigationService.getInstance().navigate("Catalog");
+        // Start on the home page so the initial view is never blank.
+        NavigationService.getInstance().navigate("HomePage");
     }
 
     static void setRoot(String fxml) throws IOException {
