@@ -1,6 +1,9 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
+import il.cshaifasweng.OCSFMediatorExample.entities.CancelOrderRequest;
+import il.cshaifasweng.OCSFMediatorExample.entities.CancelOrderResponse;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,6 +13,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -49,9 +54,11 @@ public class OrderDetailsController {
     private static Order selectedOrder;
     private static String selectedStatus;
     private Order currentOrder;
+    private boolean cancelInProgress = false;
 
     @FXML
     void initialize() {
+        EventBus.getDefault().register(this);
         if (selectedOrder != null) {
             loadOrderDetails(selectedOrder, selectedStatus);
         }
@@ -189,6 +196,9 @@ public class OrderDetailsController {
 
     @FXML
     void cancelOrder() {
+        if (currentOrder == null || cancelInProgress) {
+            return;
+        }
         // Confirm cancellation
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Cancel Order");
@@ -204,14 +214,16 @@ public class OrderDetailsController {
         alert.setContentText(refundText);
         
         if (alert.showAndWait().get() == ButtonType.OK) {
-            // TODO: Send cancel request to server
-            // For now, just update local status
-            
-            statusBadge.setText("Cancelled");
-            updateStatusBadgeStyle("Cancelled");
+            cancelInProgress = true;
             cancelOrderBtn.setDisable(true);
-            
-            showSuccess("Order cancelled successfully. Refund will be processed.");
+            CancelOrderRequest request = new CancelOrderRequest(currentOrder.getOrderID());
+            try {
+                SimpleClient.getClient().sendToServer(request);
+            } catch (IOException e) {
+                cancelInProgress = false;
+                cancelOrderBtn.setDisable(false);
+                showError("Failed to submit cancellation request.");
+            }
         }
     }
 
@@ -255,5 +267,29 @@ public class OrderDetailsController {
         errorMessage.setText(message);
         errorMessage.setVisible(true);
         successMessage.setVisible(false);
+    }
+
+    @Subscribe
+    public void handleCancelOrderResponse(CancelOrderResponse response) {
+        if (currentOrder == null || response.getOrderId() != currentOrder.getOrderID()) {
+            return;
+        }
+        Platform.runLater(() -> {
+            cancelInProgress = false;
+            if (response.isSuccess()) {
+                currentOrder.setCancelled(true);
+                currentOrder.setRefundAmount(response.getRefundAmount());
+                currentOrder.setRefundStatus(response.getRefundStatus());
+                statusBadge.setText("Cancelled");
+                updateStatusBadgeStyle("Cancelled");
+                cancelOrderBtn.setDisable(true);
+                refundAmountText.setText(String.format("$%.2f (%.0f%%)",
+                        response.getRefundAmount(), response.getRefundPercent()));
+                showSuccess(response.getMessage());
+            } else {
+                cancelOrderBtn.setDisable(false);
+                showError(response.getMessage());
+            }
+        });
     }
 }

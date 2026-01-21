@@ -14,6 +14,9 @@ import java.util.Properties;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.time.DateTimeException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import org.hibernate.*;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -616,6 +619,29 @@ private static SessionFactory cachedSessionFactory;
 			}
 		}
 
+		if (msg instanceof CancelOrderRequest) {
+			SessionFactory sessionFactory = getSessionFactory();
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
+				CancelOrderRequest request = (CancelOrderRequest) msg;
+				CancelOrderResponse response = handleCancelOrder(request, client, localSession);
+				client.sendToClient(response);
+				tx1.commit();
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
+				}
+			}
+		}
+
 		if (msg instanceof GetAllComplaints) {
 			SessionFactory sessionFactory = getSessionFactory();
 			Session localSession = null;
@@ -894,6 +920,83 @@ private static SessionFactory cachedSessionFactory;
 
 	private boolean isBlank(String value) {
 		return value == null || value.trim().isEmpty();
+	}
+
+	private CancelOrderResponse handleCancelOrder(CancelOrderRequest request, ConnectionToClient client, Session session)
+			throws IOException {
+		Account account = getSessionAccount(client);
+		if (account == null || !Boolean.TRUE.equals(account.getLoggedIn())) {
+			return new CancelOrderResponse(false, "Unauthorized: login required.", request.getOrderId(),
+					0, 0, "NONE");
+		}
+		int orderId = request.getOrderId();
+		Order order = session.get(Order.class, orderId);
+		if (order == null) {
+			return new CancelOrderResponse(false, "Order not found.", orderId, 0, 0, "NONE");
+		}
+		boolean isSystemManager = account.getPrivilegeLevel() >= 4;
+		if (!isSystemManager && order.getAccountID() != account.getAccountID()) {
+			return new CancelOrderResponse(false, "Unauthorized: order ownership required.", orderId, 0, 0, "NONE");
+		}
+		if (order.isCancelled()) {
+			return new CancelOrderResponse(false, "Order already cancelled.", orderId,
+					order.getRefundAmount(), refundPercentFromStatus(order.getRefundStatus()),
+					order.getRefundStatus());
+		}
+		if (order.isDelivered()) {
+			return new CancelOrderResponse(false, "Order already delivered.", orderId, 0, 0, "NONE");
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime deliveryTime;
+		try {
+			deliveryTime = LocalDateTime.of(
+					order.getPrepareYear(),
+					order.getPrepareMonth(),
+					order.getPrepareDay(),
+					order.getPrepareHour(),
+					order.getPrepareMin()
+			);
+		} catch (DateTimeException ex) {
+			return new CancelOrderResponse(false, "Order delivery time is invalid.", orderId, 0, 0, "NONE");
+		}
+		long minutesUntilDelivery = Duration.between(now, deliveryTime).toMinutes();
+		double refundFactor;
+		String refundStatus;
+		if (minutesUntilDelivery >= 180) {
+			refundFactor = 1.0;
+			refundStatus = "FULL";
+		} else if (minutesUntilDelivery >= 60) {
+			refundFactor = 0.5;
+			refundStatus = "HALF";
+		} else {
+			refundFactor = 0.0;
+			refundStatus = "NONE";
+		}
+
+		double refundAmount = order.getTotalPrice() * refundFactor;
+		order.setCancelled(true);
+		order.setCancelDay(now.getDayOfMonth());
+		order.setCancelMonth(now.getMonthValue());
+		order.setCancelYear(now.getYear());
+		order.setCancelHour(now.getHour());
+		order.setCancelMinute(now.getMinute());
+		order.setRefundAmount(refundAmount);
+		order.setRefundStatus(refundStatus);
+		session.update(order);
+
+		return new CancelOrderResponse(true, "Order cancelled successfully.", orderId,
+				refundAmount, refundFactor * 100.0, refundStatus);
+	}
+
+	private double refundPercentFromStatus(String refundStatus) {
+		if ("FULL".equalsIgnoreCase(refundStatus)) {
+			return 100.0;
+		}
+		if ("HALF".equalsIgnoreCase(refundStatus)) {
+			return 50.0;
+		}
+		return 0.0;
 	}
 
 	private void normalizeOrderForServer(Order order, ConnectionToClient client) {
