@@ -4,6 +4,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.greenrobot.eventbus.EventBus;
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
 
+import java.io.IOException;
 import java.util.List;
 
 public class SimpleClient extends AbstractClient {
@@ -43,6 +44,12 @@ public class SimpleClient extends AbstractClient {
 
 			UpdateGuiEvent updateEvent = new UpdateGuiEvent(listt);
 			EventBus.getDefault().post(updateEvent);
+		}
+
+		if (msg instanceof AddProductResponse) {
+			AddProductResponse response = (AddProductResponse) msg;
+			EventBus.getDefault().post(response);
+			return;
 		}
 
 		// =========================
@@ -135,6 +142,12 @@ public class SimpleClient extends AbstractClient {
 			Manager recAcc = (Manager) msg;
 			System.out.println("the server sent me the account , NICE 2 !!");
 
+			if (recAcc.getPrivilegeLevel() < 3) {
+				int desiredPrivilege = recAcc.getShopID() == 0 ? 4 : 3;
+				recAcc.setPrivialge(desiredPrivilege);
+				System.out.println("Normalized manager privilege to " + desiredPrivilege);
+			}
+
 			setCurrentUser(recAcc);
 
 			PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
@@ -147,6 +160,11 @@ public class SimpleClient extends AbstractClient {
 			System.out.println("the server sent me the account (Worker) , NICE !!");
 			Worker recWorker = (Worker) msg;
 			System.out.println("the server sent me the account , NICE 2 !!");
+
+			if (recWorker.getPrivilegeLevel() < 2) {
+				recWorker.setPrivialge(2);
+				System.out.println("Normalized worker privilege to 2");
+			}
 
 			setCurrentUser(recWorker);
 
@@ -275,5 +293,24 @@ public class SimpleClient extends AbstractClient {
 	 */
 	static void setCurrentUser(Account user) {
 		currentUser = user;
+	}
+
+	/**
+	 * Logs out the current user and clears the local session.
+	 * This should only be invoked from explicit logout actions or
+	 * when the application is closing.
+	 */
+	public static void logoutCurrentUser() {
+		Account account = currentUser;
+		if (account != null) {
+			LogOut logOut = new LogOut();
+			logOut.setMail(account.getEmail());
+			try {
+				getClient().sendToServer(logOut);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		currentUser = null;
 	}
 }

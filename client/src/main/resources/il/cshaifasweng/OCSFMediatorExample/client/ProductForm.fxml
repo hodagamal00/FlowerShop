@@ -119,8 +119,15 @@
                                        prefHeight="38.0"/>
                         </VBox>
 
+                        <VBox fx:id="buttonLabelContainer" spacing="10.0">
+                            <Label text="Button Label" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="buttonField"
+                                       promptText="Enter button label"
+                                       prefHeight="38.0"/>
+                        </VBox>
+
                         <HBox spacing="15.0">
-                            <VBox spacing="8.0" prefWidth="250.0">
+                            <VBox fx:id="skuFieldContainer" spacing="8.0" prefWidth="250.0">
                                 <Label text="SKU" style="-fx-font-weight: bold;"/>
                                 <TextField fx:id="skuField"
                                            promptText="e.g., LIL-12345"
@@ -158,6 +165,14 @@
                                       prefRowCount="4"
                                       wrapText="true"/>
                         </VBox>
+
+                        <VBox fx:id="greetingCardContainer" spacing="8.0">
+                            <Label text="Greeting Card" style="-fx-font-weight: bold;"/>
+                            <TextArea fx:id="greetingCardArea"
+                                      promptText="Optional greeting card text"
+                                      prefRowCount="3"
+                                      wrapText="true"/>
+                        </VBox>
                     </VBox>
 
                     <!-- Promotion Section -->
@@ -188,7 +203,7 @@
                     </VBox>
 
                     <!-- Custom Product Options -->
-                    <VBox spacing="12.0"
+                    <VBox fx:id="customProductContainer" spacing="12.0"
                           styleClass="card"
                           style="-fx-padding: 20; -fx-background-color: white;">
                         <Text text="Custom Product Options" fill="#4a148c">

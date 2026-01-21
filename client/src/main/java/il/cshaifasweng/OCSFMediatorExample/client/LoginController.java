@@ -112,7 +112,7 @@ public class LoginController {
         // persist the current email (for message retrieval) but rely on
         // the NavigationService to swap the centre content instead of
         // opening a new window.  This method is invoked when the
-        // "Continue to Catalog" button is clicked after successful
+        // "Go to Catalog" button is clicked after successful
         // authentication.
         CatalogFlag.setFlagg(1);
         String theEmail = Email.getText();

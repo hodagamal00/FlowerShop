@@ -79,6 +79,8 @@
                                     <ComboBox fx:id="categoryFilter" styleClass="combo-box" promptText="Category" prefWidth="150.0" />
                                     <ComboBox fx:id="colorFilter" styleClass="combo-box" promptText="Color" prefWidth="130.0" />
                                     <ComboBox fx:id="priceFilter" styleClass="combo-box" promptText="Price Range" prefWidth="150.0" />
+                                    <Button fx:id="catalogAddProductBtn" styleClass="btn-primary" text="Update Product"
+                                            onAction="#openCatalogManagement" prefWidth="140.0" />
                                     <Button styleClass="btn-secondary" text="Clear Filters" onAction="#clearFilters" prefWidth="110.0" />
                                 </children>
                             </HBox>
@@ -391,9 +393,7 @@
 
                 <VBox fx:id="init_container" alignment="CENTER" spacing="20.0" styleClass="catalog-init card">
                     <children>
-                        <Text fx:id="justText" text="Welcome to FlowerShop!" textAlignment="CENTER" styleClass="muted" />
-                        <Button fx:id="justButton" mnemonicParsing="false" onAction="#justView"
-                                prefHeight="40.0" prefWidth="200.0" text="Continue" />
+                        <Text fx:id="justText" text="" textAlignment="CENTER" styleClass="muted" />
                     </children>
                 </VBox>
             </children>
@@ -417,6 +417,8 @@
 
             <VBox spacing="10.0" styleClass="catalog-panel">
                 <Text text="Admin Catalog" styleClass="panel-title" />
+                <Button fx:id="catalogManagementBtn" mnemonicParsing="false"
+                        onAction="#openCatalogManagement" prefWidth="180.0" text="Update Product" />
                 <ComboBox id="btttn" fx:id="adminEditCatalog" onAction="#chooseAdminEditCatalog"
                           prefWidth="180.0" promptText="Select Product" />
                 <TextField fx:id="EditItemType" prefWidth="180.0" promptText="Item Type" />

@@ -143,6 +143,10 @@ public class ErrorController {
      */
     @FXML
     private void handleOrders(ActionEvent event) {
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
         navigateToPage(event, "orders");
     }
 
@@ -151,6 +155,10 @@ public class ErrorController {
      */
     @FXML
     private void handleComplaints(ActionEvent event) {
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
         navigateToPage(event, "complaints");
     }
 
@@ -159,6 +167,10 @@ public class ErrorController {
      */
     @FXML
     private void handleAccount(ActionEvent event) {
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
         navigateToPage(event, "account");
     }
 
@@ -167,8 +179,7 @@ public class ErrorController {
      */
     @FXML
     private void handleLogout(ActionEvent event) {
-        // Perform logout
-        // SimpleClient.getClient().logout();
+        SimpleClient.logoutCurrentUser();
         navigateToPage(event, "catalog");
     }
 
