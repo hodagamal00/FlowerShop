@@ -103,6 +103,10 @@ public class AppShellController {
 
         contentPane.getChildren().setAll(node);
     }
+
+    public boolean isActive() {
+        return contentPane != null && contentPane.getScene() != null;
+    }
     public void handleNavigationChange(String viewName) {
         if (navBar == null) {
             return;
