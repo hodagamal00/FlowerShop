@@ -19,16 +19,26 @@ public class ComplaintUpdateManager {
 
     private static List<Complaint> getAllComplaints() {
         System.out.println("Arrived to getAllComplaints 1");
-        CriteriaBuilder builder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to getAllComplaints 2");
-        CriteriaQuery<Complaint> query = builder.createQuery(Complaint.class);
-        System.out.println("Arrived to getAllComplaints 3");
-        query.from(Complaint.class);
-        System.out.println("Arrived to getAllComplaints 4");
-        List<Complaint> result = SimpleServer.session.createQuery(query).getResultList();
-        refreshComplaintSlaStatuses(SimpleServer.session, result);
-        System.out.println("Arrived to getAllComplaints 5");
-        return result;
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                CriteriaBuilder builder = session.getCriteriaBuilder();
+                System.out.println("Arrived to getAllComplaints 2");
+                CriteriaQuery<Complaint> query = builder.createQuery(Complaint.class);
+                System.out.println("Arrived to getAllComplaints 3");
+                query.from(Complaint.class);
+                System.out.println("Arrived to getAllComplaints 4");
+                List<Complaint> result = session.createQuery(query).getResultList();
+                refreshComplaintSlaStatuses(session, result);
+                System.out.println("Arrived to getAllComplaints 5");
+                tx.commit();
+                return result;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
     }
 
 
@@ -39,31 +49,33 @@ public class ComplaintUpdateManager {
             recievedComplaint.setCreatedAt(new Date());
         }
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
-        System.out.println("inside additemTocatalog8");
-        int incomingId = recievedComplaint.getComplaintID();
-        if (incomingId <= 0) {
-            int generatedComplaintId = reserveNextComplaintId(SimpleServer.session);
-            recievedComplaint.setComplaintID(generatedComplaintId);
-        } else {
-            ensureNextComplaintIdAfter(incomingId, SimpleServer.session);
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                System.out.println("inside additemTocatalog8");
+                int incomingId = recievedComplaint.getComplaintID();
+                if (incomingId <= 0) {
+                    int generatedComplaintId = reserveNextComplaintId(session);
+                    recievedComplaint.setComplaintID(generatedComplaintId);
+                } else {
+                    ensureNextComplaintIdAfter(incomingId, session);
+                }
+
+                int responseWindow = resolveResponseWindowHours(session);
+                applySlaStatus(recievedComplaint, responseWindow);
+
+                session.save(recievedComplaint);
+                System.out.println("inside additemTocatalog9");
+                session.flush();
+                System.out.println("inside additemTocatalog10");
+                tx.commit();
+                System.out.println("inside additemTocatalog11");
+                System.out.println("inside additemTocatalog12");
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
         }
-
-
-
-
-        int responseWindow = resolveResponseWindowHours(SimpleServer.session);
-        applySlaStatus(recievedComplaint, responseWindow);
-
-        SimpleServer.session.save(recievedComplaint);
-        System.out.println("inside additemTocatalog9");
-        SimpleServer.session.flush();
-        System.out.println("inside additemTocatalog10");
-        tx.commit();
-        System.out.println("inside additemTocatalog11");
-
-        System.out.println("inside additemTocatalog12");
     }
 
 
@@ -84,12 +96,19 @@ public class ComplaintUpdateManager {
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         Session session = sessionFactory.openSession();
         try {
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Long> query = builder.createQuery(Long.class);
-            Root<Complaint> root = query.from(Complaint.class);
-            query.select(builder.count(root));
-            Long count = session.createQuery(query).uniqueResult();
-            return count != null ? count : 0;
+            Transaction tx = session.beginTransaction();
+            try {
+                CriteriaBuilder builder = session.getCriteriaBuilder();
+                CriteriaQuery<Long> query = builder.createQuery(Long.class);
+                Root<Complaint> root = query.from(Complaint.class);
+                query.select(builder.count(root));
+                Long count = session.createQuery(query).uniqueResult();
+                tx.commit();
+                return count != null ? count : 0;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
         } finally {
             session.close();
         }
@@ -120,7 +139,15 @@ public class ComplaintUpdateManager {
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         Session session = sessionFactory.openSession();
         try {
-            return reserveNextComplaintId(session);
+            Transaction tx = session.beginTransaction();
+            try {
+                int nextId = reserveNextComplaintId(session);
+                tx.commit();
+                return nextId;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
         } finally {
             session.close();
         }
@@ -129,45 +156,50 @@ public class ComplaintUpdateManager {
     public static void editComplaint(Complaint recievedComplaint){
         System.out.println("Arrived to edit Complaint");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                int receivedComplaintID = recievedComplaint.getComplaintID();
 
-        int receivedComplaintID = recievedComplaint.getComplaintID();
-
-        int recievedComplaintID = recievedComplaint.getComplaintID();
-        int recievedCustomerID = recievedComplaint.getCustomerID();
-        int recievedAnswerWorkerID = recievedComplaint.getAnswerworkerID();
-        String recievedReplyText = recievedComplaint.getReplyText();
-        int recievedMoneyValue = recievedComplaint.getReturnedmoneyvalue();
-        boolean recievedIsReturnMoney = recievedComplaint.isReturnedMoney();
-        boolean recievedIsAccpeted = recievedComplaint.isAccepted();
-        String compensationDecision = recievedIsReturnMoney ? recievedMoneyValue + "% refund approved" : "No compensation";
+                int recievedComplaintID = recievedComplaint.getComplaintID();
+                int recievedCustomerID = recievedComplaint.getCustomerID();
+                int recievedAnswerWorkerID = recievedComplaint.getAnswerworkerID();
+                String recievedReplyText = recievedComplaint.getReplyText();
+                int recievedMoneyValue = recievedComplaint.getReturnedmoneyvalue();
+                boolean recievedIsReturnMoney = recievedComplaint.isReturnedMoney();
+                boolean recievedIsAccpeted = recievedComplaint.isAccepted();
+                String compensationDecision = recievedIsReturnMoney ? recievedMoneyValue + "% refund approved" : "No compensation";
 
 
-        System.out.println("Arrived to edit Complaint 2");
-        Complaint updateComplaint  = SimpleServer.session.load(Complaint.class, recievedComplaintID);
+                System.out.println("Arrived to edit Complaint 2");
+                Complaint updateComplaint  = session.load(Complaint.class, recievedComplaintID);
 
-        updateComplaint.setComplaintID(recievedComplaintID);
-        updateComplaint.setCustomerID(recievedCustomerID);
-        updateComplaint.setAnswerworkerID(recievedAnswerWorkerID);
-        updateComplaint.setReplyText(recievedReplyText);
-        updateComplaint.setReturnedmoneyvalue(recievedMoneyValue);
-        updateComplaint.setReturnedMoney(recievedIsReturnMoney);
-        updateComplaint.setAccepted(recievedIsAccpeted);
-        updateComplaint.setCompensationDecision(recievedComplaint.getCompensationDecision() != null ? recievedComplaint.getCompensationDecision() : compensationDecision);
-        if (updateComplaint.getCreatedAt() == null) {
-            updateComplaint.setCreatedAt(buildCreatedAtFromLegacy(updateComplaint));
+                updateComplaint.setComplaintID(recievedComplaintID);
+                updateComplaint.setCustomerID(recievedCustomerID);
+                updateComplaint.setAnswerworkerID(recievedAnswerWorkerID);
+                updateComplaint.setReplyText(recievedReplyText);
+                updateComplaint.setReturnedmoneyvalue(recievedMoneyValue);
+                updateComplaint.setReturnedMoney(recievedIsReturnMoney);
+                updateComplaint.setAccepted(recievedIsAccpeted);
+                updateComplaint.setCompensationDecision(recievedComplaint.getCompensationDecision() != null ? recievedComplaint.getCompensationDecision() : compensationDecision);
+                if (updateComplaint.getCreatedAt() == null) {
+                    updateComplaint.setCreatedAt(buildCreatedAtFromLegacy(updateComplaint));
+                }
+                updateComplaint.setRespondedAt(new Date());
+
+                int responseWindow = resolveResponseWindowHours(session);
+                applySlaStatus(updateComplaint, responseWindow);
+
+
+                System.out.println("Arrived to edit Complaint 3");
+                session.update(updateComplaint);
+                System.out.println("Arrived to edit Complaint 4");
+                tx.commit();
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
         }
-        updateComplaint.setRespondedAt(new Date());
-
-        int responseWindow = resolveResponseWindowHours(SimpleServer.session);
-        applySlaStatus(updateComplaint, responseWindow);
-
-
-        System.out.println("Arrived to edit Complaint 3");
-        SimpleServer.session.update(updateComplaint);
-        System.out.println("Arrived to edit Complaint 4");
-        tx.commit();
     }
 
     public static void refreshComplaintSlaStatuses(Session session, List<Complaint> complaints) {

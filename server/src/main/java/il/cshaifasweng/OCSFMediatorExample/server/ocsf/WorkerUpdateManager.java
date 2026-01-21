@@ -35,28 +35,49 @@ public class WorkerUpdateManager {
     }
     private static List<Worker> getAllWorkers() {
         System.out.println("Arrived to getAllWorkers 1");
-        CriteriaBuilder builder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to getAllWorkers 2");
-        CriteriaQuery<Worker> query = builder.createQuery(Worker.class);
-        System.out.println("Arrived to getAllWorkers 3");
-        query.from(Worker.class);
-        System.out.println("Arrived to getAllWorkers 4");
-        List<Worker> result = SimpleServer.session.createQuery(query).getResultList();
-        System.out.println("Arrived to getAllWorkers 5");
-        return result;
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                CriteriaBuilder builder = session.getCriteriaBuilder();
+                System.out.println("Arrived to getAllWorkers 2");
+                CriteriaQuery<Worker> query = builder.createQuery(Worker.class);
+                System.out.println("Arrived to getAllWorkers 3");
+                query.from(Worker.class);
+                System.out.println("Arrived to getAllWorkers 4");
+                List<Worker> result = session.createQuery(query).getResultList();
+                System.out.println("Arrived to getAllWorkers 5");
+                tx.commit();
+                return result;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
     }
 
     static Long countRowsWorker() {
         System.out.println("Arrived to coutnrwos 1");
-        final CriteriaBuilder criteriaBuilder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to coutnrwos 2");
-        CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-        System.out.println("Arrived to coutnrwos 3");
-        Root<Worker> root = criteria.from(Worker.class);
-        System.out.println("Arrived to coutnrwos 4");
-        criteria.select(criteriaBuilder.count(root));
-        System.out.println("Arrived to coutnrwos 5");
-        return SimpleServer.session.createQuery(criteria).getSingleResult();
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                final CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+                System.out.println("Arrived to coutnrwos 2");
+                CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+                System.out.println("Arrived to coutnrwos 3");
+                Root<Worker> root = criteria.from(Worker.class);
+                System.out.println("Arrived to coutnrwos 4");
+                criteria.select(criteriaBuilder.count(root));
+                System.out.println("Arrived to coutnrwos 5");
+                Long count = session.createQuery(criteria).getSingleResult();
+                tx.commit();
+                return count;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
     }
 
     public static void addWorker(Worker recievedWorker) {
@@ -76,17 +97,23 @@ public class WorkerUpdateManager {
         Boolean recievedWorkerloggedIn = recievedWorker.getLoggedIn();
 
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
-        System.out.println("inside additemTocatalog8");
-        System.out.println("the new index is:" + newWorkerId);
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                System.out.println("inside additemTocatalog8");
+                System.out.println("the new index is:" + newWorkerId);
 
-        SimpleServer.session.save(recievedWorker);
-        System.out.println("inside additemTocatalog9");
-        SimpleServer.session.flush();
-        System.out.println("inside additemTocatalog10");
-        tx.commit();
-        System.out.println("inside additemTocatalog11");
+                session.save(recievedWorker);
+                System.out.println("inside additemTocatalog9");
+                session.flush();
+                System.out.println("inside additemTocatalog10");
+                tx.commit();
+                System.out.println("inside additemTocatalog11");
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
 
         System.out.println("inside additemTocatalog12");
     }
@@ -97,8 +124,6 @@ public class WorkerUpdateManager {
         System.out.println("arrived to removeWorker");
 
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
 
 
         workersnum--;
@@ -116,10 +141,7 @@ public class WorkerUpdateManager {
         System.out.println("arrived to removeWorker 2");
 
 
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx1 = SimpleServer.session.beginTransaction();
         long longID = countRowsWorker();
-        SimpleServer.session.close();
         //tx1.commit();
         System.out.println("arrived to removeWorker 3 and the longID is " + longID);
         int castedID = (int) longID;
@@ -129,14 +151,19 @@ public class WorkerUpdateManager {
             deleteWorker(l+1);
         }
 
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx2 = SimpleServer.session.beginTransaction();
-        for(int i=0;i<workerGeneralList.size();i++){
-            SimpleServer.session.save(workerGeneralList.get(i));
-            SimpleServer.session.flush();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx2 = session.beginTransaction();
+            try {
+                for(int i=0;i<workerGeneralList.size();i++){
+                    session.save(workerGeneralList.get(i));
+                    session.flush();
+                }
+                tx2.commit();
+            } catch (Exception ex) {
+                tx2.rollback();
+                throw ex;
+            }
         }
-        tx2.commit();
-        SimpleServer.session.close();
 
         //session.close(); // here we finished deleting a worker, everything else is for updating the id's
         System.out.println("arrived to removeItemFromCatalog 2.8");
@@ -146,59 +173,69 @@ public class WorkerUpdateManager {
     public static void deleteWorker(int deleteIndex) {
         System.out.println("arrived to deleteWorker 1");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
-        System.out.println("arrived to deleteWorker 2");
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                System.out.println("arrived to deleteWorker 2");
 
-        Object persistentInstance = SimpleServer.session.load(Worker.class, deleteIndex);
-        Worker perWorker = (Worker) persistentInstance;
-        System.out.println("arrived to deleteWorker 3");
-        if (persistentInstance != null) {
-            SimpleServer.session.delete(perWorker);
+                Object persistentInstance = session.get(Worker.class, deleteIndex);
+                Worker perWorker = (Worker) persistentInstance;
+                System.out.println("arrived to deleteWorker 3");
+                if (persistentInstance != null) {
+                    session.delete(perWorker);
+                }
+                System.out.println("arrived to deleteProd 4");
+
+                tx.commit();
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
         }
-        System.out.println("arrived to deleteProd 4");
-
-        tx.commit();
-        SimpleServer.session.close();
 
     }
 
     public static void editWorker(Worker workerEdit){
         System.out.println("Arrived to edit worker");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                // workerEdit.getPersonID() returns a long.  Cast to int to avoid
+                // lossy conversion errors when passing to methods that expect int.
+                int recievedWorkerID = (int) workerEdit.getPersonID();
+                String recievedWorkerName = workerEdit.getFullName();
+                String recievedWorkerEmail = workerEdit.getEmail();
+                String recievedWorkerPassword = workerEdit.getPassword();
+                Boolean recievedWorkerIsLoggedIn = workerEdit.getLoggedIn();
+                boolean recievedWorkerFrozen = workerEdit.getFrozen();
+                int recievedWorkerPrivilege = workerEdit.getPrivialge();
 
-        // workerEdit.getPersonID() returns a long.  Cast to int to avoid
-        // lossy conversion errors when passing to methods that expect int.
-        int recievedWorkerID = (int) workerEdit.getPersonID();
-        String recievedWorkerName = workerEdit.getFullName();
-        String recievedWorkerEmail = workerEdit.getEmail();
-        String recievedWorkerPassword = workerEdit.getPassword();
-        Boolean recievedWorkerIsLoggedIn = workerEdit.getLoggedIn();
-        boolean recievedWorkerFrozen = workerEdit.getFrozen();
-        int recievedWorkerPrivilege = workerEdit.getPrivialge();
+                System.out.println("Arrived to edit worker 2");
+                Worker updateWorker  = session.load(Worker.class, recievedWorkerID);
 
-        System.out.println("Arrived to edit worker 2");
-        Worker updateWorker  = SimpleServer.session.load(Worker.class, recievedWorkerID);
+                //System.out.println(updateWorker.getButton());
+                //Worker updateWorker = (Worker) persistentInstance1 ;
+                //updateWorker.setID(16);
+                updateWorker.setPersonID(recievedWorkerID);
+                updateWorker.setFullName(recievedWorkerName);
+                updateWorker.setEmail(recievedWorkerEmail);
+                updateWorker.setPassword(recievedWorkerPassword);
+                updateWorker.setLoggedIn(recievedWorkerIsLoggedIn);
+                updateWorker.setFrozen(recievedWorkerFrozen);
+                updateWorker.setPrivialge(recievedWorkerPrivilege);
 
-        //System.out.println(updateWorker.getButton());
-        //Worker updateWorker = (Worker) persistentInstance1 ;
-        //updateWorker.setID(16);
-        updateWorker.setPersonID(recievedWorkerID);
-        updateWorker.setFullName(recievedWorkerName);
-        updateWorker.setEmail(recievedWorkerEmail);
-        updateWorker.setPassword(recievedWorkerPassword);
-        updateWorker.setLoggedIn(recievedWorkerIsLoggedIn);
-        updateWorker.setFrozen(recievedWorkerFrozen);
-        updateWorker.setPrivialge(recievedWorkerPrivilege);
-
-        System.out.println("Arrived to edit catalog product 3");
-        System.out.println(updateWorker.getPersonID());
-        SimpleServer.session.update(updateWorker);
-        System.out.println("Arrived to edit cworkeratalog product 4");
-        tx.commit();
-        System.out.println("Arrived to edit worker5");
+                System.out.println("Arrived to edit catalog product 3");
+                System.out.println(updateWorker.getPersonID());
+                session.update(updateWorker);
+                System.out.println("Arrived to edit cworkeratalog product 4");
+                tx.commit();
+                System.out.println("Arrived to edit worker5");
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
 
 		/*try {
 

@@ -19,28 +19,49 @@ public class OrderUpdateManager {
 
     private static List<Order> getAllOrders() {
         System.out.println("Arrived to getAllOrders 1");
-        CriteriaBuilder builder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to getAllOrders 2");
-        CriteriaQuery<Order> query = builder.createQuery(Order.class);
-        System.out.println("Arrived to getAllOrders 3");
-        query.from(Order.class);
-        System.out.println("Arrived to getAllOrders 4");
-        List<Order> result = SimpleServer.session.createQuery(query).getResultList();
-        System.out.println("Arrived to getAllOrders 5");
-        return result;
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                CriteriaBuilder builder = session.getCriteriaBuilder();
+                System.out.println("Arrived to getAllOrders 2");
+                CriteriaQuery<Order> query = builder.createQuery(Order.class);
+                System.out.println("Arrived to getAllOrders 3");
+                query.from(Order.class);
+                System.out.println("Arrived to getAllOrders 4");
+                List<Order> result = session.createQuery(query).getResultList();
+                System.out.println("Arrived to getAllOrders 5");
+                tx.commit();
+                return result;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
     }
 
     static Long countRowsOrder() {
         System.out.println("Arrived to coutnrwos 1");
-        final CriteriaBuilder criteriaBuilder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to coutnrwos 2");
-        CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-        System.out.println("Arrived to coutnrwos 3");
-        Root<Order> root = criteria.from(Order.class);
-        System.out.println("Arrived to coutnrwos 4");
-        criteria.select(criteriaBuilder.count(root));
-        System.out.println("Arrived to coutnrwos 5");
-        return SimpleServer.session.createQuery(criteria).getSingleResult();
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                final CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+                System.out.println("Arrived to coutnrwos 2");
+                CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+                System.out.println("Arrived to coutnrwos 3");
+                Root<Order> root = criteria.from(Order.class);
+                System.out.println("Arrived to coutnrwos 4");
+                criteria.select(criteriaBuilder.count(root));
+                System.out.println("Arrived to coutnrwos 5");
+                Long count = session.createQuery(criteria).getSingleResult();
+                tx.commit();
+                return count;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
     }
 
     public static void addOrder(Order recievedOrder) {
@@ -71,17 +92,23 @@ public class OrderUpdateManager {
 */
 
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
-        System.out.println("inside additemTocatalog8");
-        System.out.println("the new index is:" + newOrderId);
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                System.out.println("inside additemTocatalog8");
+                System.out.println("the new index is:" + newOrderId);
 
-        SimpleServer.session.save(recievedOrder);
-        System.out.println("inside additemTocatalog9");
-        SimpleServer.session.flush();
-        System.out.println("inside additemTocatalog10");
-        tx.commit();
-        System.out.println("inside additemTocatalog11");
+                session.save(recievedOrder);
+                System.out.println("inside additemTocatalog9");
+                session.flush();
+                System.out.println("inside additemTocatalog10");
+                tx.commit();
+                System.out.println("inside additemTocatalog11");
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
 
         System.out.println("inside additemTocatalog12");
     }
@@ -139,8 +166,6 @@ public class OrderUpdateManager {
         System.out.println("arrived to removeOrder");
 
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
 
 
         ordersnum--;
@@ -156,10 +181,7 @@ public class OrderUpdateManager {
         System.out.println("arrived to removeOrder 2");
 
 
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx1 = SimpleServer.session.beginTransaction();
         long longID = countRowsOrder();
-        SimpleServer.session.close();
         //tx1.commit();
         System.out.println("arrived to removeOrder 3 and the longID is " + longID);
         int castedID = (int) longID;
@@ -169,14 +191,19 @@ public class OrderUpdateManager {
             deleteOrder(l+1);
         }
 
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx2 = SimpleServer.session.beginTransaction();
-        for(int i=0;i<orderGeneralList.size();i++){
-            SimpleServer.session.save(orderGeneralList.get(i));
-            SimpleServer.session.flush();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx2 = session.beginTransaction();
+            try {
+                for(int i=0;i<orderGeneralList.size();i++){
+                    session.save(orderGeneralList.get(i));
+                    session.flush();
+                }
+                tx2.commit();
+            } catch (Exception ex) {
+                tx2.rollback();
+                throw ex;
+            }
         }
-        tx2.commit();
-        SimpleServer.session.close();
 
         //session.close(); // here we finished deleting a Order, everything else is for updating the id's
         System.out.println("arrived to removeItemFromCatalog 2.8");
@@ -186,36 +213,46 @@ public class OrderUpdateManager {
     public static void deleteOrder(int deleteIndex) {
         System.out.println("arrived to deleteOrder 1");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
-        System.out.println("arrived to deleteOrder 2");
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                System.out.println("arrived to deleteOrder 2");
 
-        Object persistentInstance = SimpleServer.session.load(Order.class, deleteIndex);
-        Order perOrder = (Order) persistentInstance;
-        System.out.println("arrived to deleteOrder 3");
-        if (persistentInstance != null) {
-            SimpleServer.session.delete(perOrder);
+                Object persistentInstance = session.get(Order.class, deleteIndex);
+                Order perOrder = (Order) persistentInstance;
+                System.out.println("arrived to deleteOrder 3");
+                if (persistentInstance != null) {
+                    session.delete(perOrder);
+                }
+                System.out.println("arrived to deleteProd 4");
+
+                tx.commit();
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
         }
-        System.out.println("arrived to deleteProd 4");
-
-        tx.commit();
-        SimpleServer.session.close();
 
     }
     public static void deliveredOrder(int orderID){
         System.out.println("Arrived to delivered order");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                System.out.println("Arrived to delivered order 2");
+                Order updateOrder  = session.load(Order.class, orderID);
 
-        System.out.println("Arrived to delivered order 2");
-        Order updateOrder  = SimpleServer.session.load(Order.class, orderID);
+                updateOrder.setDelivered(true);
 
-        updateOrder.setDelivered(true);
-
-        System.out.println("Arrived to delivered order 3");
-        SimpleServer.session.update(updateOrder);
-        System.out.println("Arrived to delivered order 4");
-        tx.commit();
+                System.out.println("Arrived to delivered order 3");
+                session.update(updateOrder);
+                System.out.println("Arrived to delivered order 4");
+                tx.commit();
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
     }
 }
