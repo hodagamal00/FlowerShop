@@ -18,7 +18,7 @@ public class Worker extends Account {
     }
 
     public boolean isFrozen() {
-        return getFrozen();
+        return super.getFrozen();
     }
 
     public void setFrozen(boolean frozen) {
