@@ -362,7 +362,8 @@ public class CheckoutController {
             int yearCheckoutInt = yearCheckout.getSelectionModel().getSelectedItem();
             String OrderedProducts = "";
             for (int i = 0; i < cart.size(); i++) {
-                OrderedProducts = OrderedProducts + "%" + cart.get(i).getName() + " - " + String.valueOf(cart.get(i).getPrice()) + "%";
+                double itemPrice = PricingService.calculateDisplayPrice(cart.get(i), currentUser);
+                OrderedProducts = OrderedProducts + "%" + cart.get(i).getName() + " - " + String.valueOf(itemPrice) + "%";
             }
             int prepareHour = 0;
             int prepareMinute = 0;
@@ -393,7 +394,7 @@ public class CheckoutController {
 
             int totalPrice = 0;
             for (int z = 0; z < cart.size(); z++) {
-                totalPrice = totalPrice + (int) Math.round(cart.get(z).getPrice());
+                totalPrice = totalPrice + (int) Math.round(PricingService.calculateDisplayPrice(cart.get(z), currentUser));
             }
             if (deliveryBox.isSelected())
                 totalPrice = totalPrice + (int) deliveryFee;
@@ -723,7 +724,7 @@ public class CheckoutController {
     private void updateOrderSummary() {
         int subtotal = 0;
         for (Product product : cart) {
-            subtotal += (int) Math.round(product.getPrice());
+            subtotal += (int) Math.round(PricingService.calculateDisplayPrice(product, currentUser));
         }
         double deliveryFee = deliveryBox.isSelected() ? DELIVERY_FEE : 0.0;
         int total = subtotal + (int) deliveryFee;

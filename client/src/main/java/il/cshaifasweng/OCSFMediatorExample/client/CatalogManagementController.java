@@ -20,6 +20,7 @@ import javafx.scene.image.WritableImage;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.paint.Color;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,6 +64,7 @@ public class CatalogManagementController {
     private final ObservableList<Product> productsList = FXCollections.observableArrayList();
     private final ObservableList<Product> filteredProducts = FXCollections.observableArrayList();
     private boolean canAddProducts = false;
+    private boolean canEditPromotions = false;
 
     @FXML
     void initialize() {
@@ -116,13 +118,26 @@ public class CatalogManagementController {
                 if (empty || price == null) {
                     setText(null);
                 } else {
-                    setText(String.format("$%.2f", price));
+                    Product product = getTableRow() != null ? getTableRow().getItem() : null;
+                    if (product == null) {
+                        setText(String.format("$%.2f", price));
+                        return;
+                    }
+                    PricingService.PricingResult pricing = PricingService.calculatePricing(product, SimpleClient.getAccount());
+                    double basePrice = pricing.getBasePrice();
+                    double finalPrice = pricing.getFinalPrice();
+                    if (pricing.isPromotionApplied()) {
+                        setText(String.format("$%.2f → $%.2f", basePrice, finalPrice));
+                    } else {
+                        setText(String.format("$%.2f", basePrice));
+                    }
                 }
             }
         });
 
         // Promotion column - show "Yes" or "No"
-        promotionCol.setCellValueFactory(new PropertyValueFactory<>("promotion"));
+        promotionCol.setCellValueFactory(cellData ->
+                new ReadOnlyBooleanWrapper(cellData.getValue() != null && cellData.getValue().hasActivePromotion()));
         promotionCol.setCellFactory(column -> new TableCell<Product, Boolean>() {
             @Override
             protected void updateItem(Boolean item, boolean empty) {
@@ -373,6 +388,10 @@ public class CatalogManagementController {
 
     @FXML
     void togglePromotion() {
+        if (!canEditPromotions) {
+            showError("Only managers can edit promotions.");
+            return;
+        }
         Product selectedProduct = productsTable.getSelectionModel().getSelectedItem();
         if (selectedProduct == null) {
             showError("Please select a product to toggle promotion");
@@ -380,15 +399,20 @@ public class CatalogManagementController {
         }
         
         // Toggle promotion status
-        selectedProduct.setPromotion(!selectedProduct.isPromotion());
-        
-        // TODO: Update product on server
-        // Message message = new Message("#UPDATE_PRODUCT");
-        // message.setData(selectedProduct);
-        // SimpleClient.getClient().sendToServer(message);
-        
-        productsTable.refresh();
-        showSuccess("Promotion status toggled for " + selectedProduct.getName());
+        boolean enablePromotion = !selectedProduct.isPromotion();
+        selectedProduct.setPromotion(enablePromotion);
+        if (!enablePromotion) {
+            selectedProduct.setDiscountPercent(0.0);
+        }
+
+        UpdateMessage message = new UpdateMessage("product", "edit");
+        message.setProduct(selectedProduct);
+        try {
+            SimpleClient.getClient().sendToServer(message);
+            showSuccess("Promotion update requested for " + selectedProduct.getName());
+        } catch (IOException e) {
+            showError("Unable to update promotion: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -493,11 +517,17 @@ public class CatalogManagementController {
     private void applyPrivilegeVisibility(Account account) {
         int privilege = account != null ? account.getPrivilegeLevel() : 0;
         canAddProducts = privilege >= 2;
+        canEditPromotions = privilege >= 3;
         boolean showSku = privilege == 1;
         if (addProductBtn != null) {
             addProductBtn.setVisible(canAddProducts);
             addProductBtn.setManaged(canAddProducts);
             addProductBtn.setDisable(!canAddProducts);
+        }
+        if (togglePromotionBtn != null) {
+            togglePromotionBtn.setDisable(!canEditPromotions);
+            togglePromotionBtn.setVisible(canEditPromotions);
+            togglePromotionBtn.setManaged(canEditPromotions);
         }
         if (skuCol != null) {
             skuCol.setVisible(showSku);

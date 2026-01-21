@@ -142,6 +142,7 @@ public class AdminControlController {
             }
             UpdateMessage updateAcc = new UpdateMessage("account", "edit");
             updateAcc.setAccount(updatedAccount.get());
+            pendingUpdatedAccount = updatedAccount.get();
             sendUpdate(updateAcc);
         } else if ("worker".equals(updateClass)) {
             Optional<Worker> updatedWorker = buildWorkerFromForm();
@@ -150,6 +151,7 @@ public class AdminControlController {
             }
             UpdateMessage updateWorker = new UpdateMessage("worker", "edit");
             updateWorker.setWorker(updatedWorker.get());
+            pendingUpdatedAccount = updatedWorker.get();
             sendUpdate(updateWorker);
         } else if ("manager".equals(updateClass)) {
             Optional<Manager> updatedManager = buildManagerFromForm();
@@ -158,6 +160,7 @@ public class AdminControlController {
             }
             UpdateMessage updateManager = new UpdateMessage("manager", "edit");
             updateManager.setManager(updatedManager.get());
+            pendingUpdatedAccount = updatedManager.get();
             sendUpdate(updateManager);
         }
     }
@@ -211,6 +214,7 @@ public class AdminControlController {
     public List<Account> all_accounts = new ArrayList<>();
     public List<Manager> all_managers = new ArrayList<>();
     public List<Worker> all_workers = new ArrayList<>();
+    private Account pendingUpdatedAccount;
     Account currentUser;
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
@@ -335,8 +339,34 @@ public class AdminControlController {
         if (response.isSuccess()) {
             showStatus("User details updated successfully.", false);
             requestUserRefresh();
+            syncSessionAccount(pendingUpdatedAccount);
+            pendingUpdatedAccount = null;
+            EventBus.getDefault().post(new CatalogRefreshEvent("privilege-updated"));
         } else {
             showStatus(response.getErrorMessage() != null ? response.getErrorMessage() : "Failed to update user.", true);
+            pendingUpdatedAccount = null;
+        }
+    }
+
+    private void syncSessionAccount(Account updatedAccount) {
+        if (updatedAccount == null) {
+            return;
+        }
+        Account session = SimpleClient.getAccount();
+        if (session == null) {
+            return;
+        }
+        boolean matches = session.getAccountID() == updatedAccount.getAccountID();
+        if (!matches && session.getPersonID() == updatedAccount.getPersonID()) {
+            matches = true;
+        }
+        if (!matches && session.getEmail() != null && updatedAccount.getEmail() != null) {
+            matches = session.getEmail().equalsIgnoreCase(updatedAccount.getEmail());
+        }
+        if (matches) {
+            session.setPrivialge(updatedAccount.getPrivialge());
+            session.setFrozen(updatedAccount.isFrozen());
+            SimpleClient.setAccount(session);
         }
     }
 

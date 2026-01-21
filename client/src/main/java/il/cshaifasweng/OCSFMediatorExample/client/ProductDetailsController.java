@@ -115,16 +115,17 @@ public class ProductDetailsController {
             customOptionsContainer.setManaged(true);
         } else {
             // Regular product pricing
-            double actualPrice = product.getActualPrice();
+            PricingService.PricingResult pricing = PricingService.calculatePricing(product, SimpleClient.getAccount());
+            double actualPrice = pricing.getFinalPrice();
             priceText.setText(String.format("$%.2f", actualPrice));
 
             // Show discount information if on promotion
-            if (product.isPromotion() && product.getDiscountPercent() > 0) {
-                double originalPrice = product.getPrice();
+            if (pricing.isPromotionApplied()) {
+                double originalPrice = pricing.getBasePrice();
                 originalPriceText.setText(String.format("$%.2f", originalPrice));
                 originalPriceText.setVisible(true);
                 
-                discountBadge.setText(String.format("%.0f%% OFF", product.getDiscountPercent()));
+                discountBadge.setText(String.format("%.0f%% OFF", product.getNormalizedDiscountPercent()));
                 discountBadge.setVisible(true);
             }
         }
