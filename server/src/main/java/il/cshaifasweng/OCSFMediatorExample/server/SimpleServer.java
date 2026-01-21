@@ -203,6 +203,13 @@ public class SimpleServer extends AbstractServer {
 			String updateClassFunction = recievedMessage.getUpdateFunction();
 			System.out.println("Arrived At UpdateMessage 2");
 
+			if (requiresManagerPrivileges(recievedMessage) && !isManager(client)) {
+				tx1.rollback();
+				session.close();
+				client.sendToClient(new UserUpdateResponse(false, "Unauthorized: manager access required."));
+				return;
+			}
+
 			switch (updateClassName) {
 				case "product":
 					if (updateClassFunction.equals("add")) {
@@ -268,7 +275,12 @@ public class SimpleServer extends AbstractServer {
 					} else if (updateClassFunction.equals("edit")) {
 						System.out.println("Arrived edit account case in switch !");
 						Account editAcc = recievedMessage.getAccount();
-						editAccount(editAcc);
+						try {
+							editAccount(editAcc);
+							client.sendToClient(new UserUpdateResponse(true, null));
+						} catch (Exception e) {
+							client.sendToClient(new UserUpdateResponse(false, "Failed to update account details."));
+						}
 					}
 					break;
 
@@ -283,7 +295,12 @@ public class SimpleServer extends AbstractServer {
 					} else if (updateClassFunction.equals("edit")) {
 						System.out.println("Arrived edit worker case in switch !");
 						Worker recievedWorker = recievedMessage.getWorker();
-						WorkerUpdateManager.editWorker(recievedWorker);
+						try {
+							WorkerUpdateManager.editWorker(recievedWorker);
+							client.sendToClient(new UserUpdateResponse(true, null));
+						} catch (Exception e) {
+							client.sendToClient(new UserUpdateResponse(false, "Failed to update worker details."));
+						}
 					}
 					session.close();
 					break;
@@ -299,7 +316,12 @@ public class SimpleServer extends AbstractServer {
 					} else if (updateClassFunction.equals("edit")) {
 						System.out.println("Arrived edit manager case in switch !");
 						Manager recievedManager = recievedMessage.getManager();
-						ManagerUpdateManager.editManager(recievedManager);
+						try {
+							ManagerUpdateManager.editManager(recievedManager);
+							client.sendToClient(new UserUpdateResponse(true, null));
+						} catch (Exception e) {
+							client.sendToClient(new UserUpdateResponse(false, "Failed to update manager details."));
+						}
 					}
 					session.close();
 					break;
@@ -373,6 +395,13 @@ public class SimpleServer extends AbstractServer {
 				// DEBUG – اطبع الباسووردين مع الأطوال
 				String dbPass = matchedAccount.getPassword() != null ? matchedAccount.getPassword() : "";
 				String uiPass = recievedPasswordStr != null ? recievedPasswordStr : "";
+
+				if (matchedAccount.isFrozen()) {
+					tx1.rollback();
+					session.close();
+					client.sendToClient("account frozen");
+					return;
+				}
 
 				System.out.println("DEBUG LOGIN:");
 				System.out.println("  DB email     = '" + matchedAccount.getEmail() + "'");
@@ -656,6 +685,27 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 		return null;
+	}
+
+	private boolean isManager(ConnectionToClient client) {
+		Account account = client != null ? (Account) client.getInfo("account") : null;
+		return account != null && account.getPrivilegeLevel() >= 3;
+	}
+
+	private boolean requiresManagerPrivileges(UpdateMessage message) {
+		if (message == null) {
+			return false;
+		}
+		String updateClass = message.getUpdateClass();
+		String updateFunction = message.getUpdateFunction();
+		if (updateClass == null || updateFunction == null) {
+			return false;
+		}
+		boolean isEdit = "edit".equals(updateFunction);
+		boolean isUserDetails = "account".equals(updateClass)
+				|| "worker".equals(updateClass)
+				|| "manager".equals(updateClass);
+		return isEdit && isUserDetails;
 	}
 
 	private boolean isBlank(String value) {
@@ -984,6 +1034,7 @@ public class SimpleServer extends AbstractServer {
 
 		Account updateAccount = session.load(Account.class, recievedAccountID);
 
+		updateAccount.setID((int) accountEdit.getID());
 		updateAccount.setFullName(accountEdit.getFullName());
 		updateAccount.setAddress(accountEdit.getAddress());
 		updateAccount.setEmail(accountEdit.getEmail());
@@ -995,6 +1046,9 @@ public class SimpleServer extends AbstractServer {
 		updateAccount.setCreditYearExpire(accountEdit.getCreditYearExpire());
 		updateAccount.setLoggedIn(accountEdit.getLoggedIn());
 		updateAccount.setBelongShop(accountEdit.getBelongShop());
+		updateAccount.setSubscription(accountEdit.isSubscription());
+		updateAccount.setPrivialge(accountEdit.getPrivialge());
+		updateAccount.setFrozen(accountEdit.isFrozen());
 
 		session.update(updateAccount);
 		tx.commit();

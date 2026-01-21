@@ -342,6 +342,9 @@ public class LoginController {
             } else if (!checkML.getExistsPassword()) {
                 ErrorMsgPass.setText("The password you entered is incorrect.");
                 ErrorMsgPass.setVisible(true);
+            } else if (checkML.isFrozen()) {
+                alLog.setText("This account is frozen. Please contact support.");
+                alLog.setVisible(true);
             } else if (checkML.isLoggedIn()) {
                 alLog.setText("User already logged in from another session.");
                 alLog.setVisible(true);
