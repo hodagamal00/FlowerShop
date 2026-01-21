@@ -19,7 +19,7 @@ public class Manager extends Account {
     }
 
     public boolean isFrozen() {
-        return super.isFrozen();
+        return super.getFrozen();
     }
 
     public void setFrozen(boolean frozen) {
