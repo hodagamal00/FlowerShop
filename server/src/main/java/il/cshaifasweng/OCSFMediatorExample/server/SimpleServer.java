@@ -325,11 +325,18 @@ public class SimpleServer extends AbstractServer {
 					session.close();
 					break;
 
-				case "order":
-					if (updateClassFunction.equals("add")) {
-						System.out.println("arrived to here inside order add");
-						Order recievedOrder = recievedMessage.getOrder();
-						OrderUpdateManager.addOrder(recievedOrder);
+					case "order":
+						if (updateClassFunction.equals("add")) {
+							System.out.println("arrived to here inside order add");
+							Order recievedOrder = recievedMessage.getOrder();
+							try {
+								normalizeOrderForServer(recievedOrder, client);
+								OrderUpdateManager.addOrder(recievedOrder);
+								client.sendToClient(new UserUpdateResponse(true, null));
+							} catch (IllegalArgumentException ex) {
+								client.sendToClient(new UserUpdateResponse(false, ex.getMessage()));
+								break;
+							}
 					} else if (updateClassFunction.equals("remove")) {
 						String idToRemove = recievedMessage.getDelteId();
 						OrderUpdateManager.removeOrder(idToRemove, client);
@@ -714,6 +721,103 @@ public class SimpleServer extends AbstractServer {
 
 	private boolean isBlank(String value) {
 		return value == null || value.trim().isEmpty();
+	}
+
+	private void normalizeOrderForServer(Order order, ConnectionToClient client) {
+		if (order == null) {
+			throw new IllegalArgumentException("Order details are required.");
+		}
+
+		Account account = resolveAccount(client, order.getAccountID());
+		if (account != null) {
+			order.setAccountID(account.getAccountID());
+		}
+
+		order.setDelivered(false);
+		order.setCancelled(false);
+		order.setRefundAmount(0);
+		order.setRefundStatus("NONE");
+
+		int productsTotal = calculateProductsTotal(order.getProducts());
+		double deliveryFee = resolveDeliveryFee(order);
+		order.setDeliveryFee(deliveryFee);
+
+		int total = productsTotal + (int) Math.round(deliveryFee);
+		if (account != null && account.isSubscription() && total > 50) {
+			total = (int) (total * 0.9);
+		}
+
+		order.setTotalPrice(total);
+	}
+
+	private Account resolveAccount(ConnectionToClient client, int accountId) {
+		Account account = client != null ? (Account) client.getInfo("account") : null;
+		if (account != null) {
+			return account;
+		}
+		if (accountId <= 0) {
+			return null;
+		}
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session localSession = sessionFactory.openSession()) {
+			return localSession.get(Account.class, accountId);
+		}
+	}
+
+	private int calculateProductsTotal(String products) {
+		if (isBlank(products)) {
+			return 0;
+		}
+		int total = 0;
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session localSession = sessionFactory.openSession()) {
+			for (String item : products.split("%")) {
+				String trimmed = item.trim();
+				if (trimmed.isEmpty()) {
+					continue;
+				}
+				String[] parts = trimmed.split(" - ", 2);
+				String productName = parts[0].trim();
+				if (productName.isEmpty()) {
+					continue;
+				}
+				Product product = findProductByName(localSession, productName);
+				if (product == null) {
+					throw new IllegalArgumentException("Unknown product: " + productName);
+				}
+				total += (int) Math.round(product.getActualPrice());
+			}
+		}
+		return total;
+	}
+
+	private Product findProductByName(Session session, String name) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Product> query = builder.createQuery(Product.class);
+		Root<Product> root = query.from(Product.class);
+		query.select(root).where(builder.equal(builder.lower(root.get("name")), name.toLowerCase()));
+		List<Product> results = session.createQuery(query).getResultList();
+		if (results.isEmpty()) {
+			return null;
+		}
+		return results.get(0);
+	}
+
+	private double resolveDeliveryFee(Order order) {
+		if (order.isPickUp()) {
+			return 0;
+		}
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session localSession = sessionFactory.openSession()) {
+			BranchSettings settings = localSession.get(BranchSettings.class, order.getShopID());
+			if (settings == null) {
+				throw new IllegalArgumentException("Delivery configuration missing for shop " + order.getShopID());
+			}
+			if (!settings.isDeliveryEnabled()) {
+				throw new IllegalArgumentException("Delivery is disabled for shop " + order.getShopID());
+			}
+			return settings.getDeliveryFee();
+		}
 	}
 
 	private static List<Complaint> getAllComplaints() {
