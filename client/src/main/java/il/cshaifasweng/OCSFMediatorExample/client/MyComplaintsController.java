@@ -74,6 +74,7 @@ public class MyComplaintsController {
 
     @FXML
     void submitComplaint(ActionEvent event) {
+        resolveCurrentUser();
         if (currentUser == null) {
             showAlert("You must be logged in to submit a complaint.");
             return;
@@ -156,6 +157,7 @@ public class MyComplaintsController {
         assert compensationDecision != null : "fx:id=\"compensationDecision\" was not injected: check your FXML file 'mycomplaints.fxml'.";
 
         loadButton.setDisable(true);
+        resolveCurrentUser();
         complaintList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 Complaint selected = findComplaintByListEntry(newValue);
@@ -237,6 +239,7 @@ public class MyComplaintsController {
 
     private void refreshComplaintList() {
         Platform.runLater(() -> {
+            resolveCurrentUser();
             complaintList.getItems().clear();
             if (allComplaints == null || currentUser == null) {
                 return;
@@ -356,6 +359,12 @@ public class MyComplaintsController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void resolveCurrentUser() {
+        if (currentUser == null) {
+            currentUser = SimpleClient.getAccount();
+        }
     }
 
 }
