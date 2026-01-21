@@ -33,6 +33,11 @@ import javax.persistence.Column;
 public class MyOrdersController {
 
     private boolean cancelInProgress = false;
+    private LocalDateTime now;
+    private double refundAmount;
+    private double refundPercent;
+    private String refundPercentDisplay;
+    private boolean returned;
 
 
     Account currentUser;
@@ -190,12 +195,12 @@ public class MyOrdersController {
         if (SelectedOrder == null || cancelInProgress) {
             return;
         }
-        LocalDateTime now = LocalDateTime.now();
+        now = LocalDateTime.now();
         double refundFactor = SelectedOrder.calculateRefund(
                 now.getDayOfMonth(), now.getMonthValue(), now.getYear(), now.getHour(), now.getMinute());
-        double refundAmount = SelectedOrder.getTotalPrice() * refundFactor;
-        double refundPercent = refundFactor * 100.0;
-        String refundPercentDisplay = String.format("%.0f%%", refundPercent);
+        refundAmount = SelectedOrder.getTotalPrice() * refundFactor;
+        refundPercent = refundFactor * 100.0;
+        refundPercentDisplay = String.format("%.0f%%", refundPercent);
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Cancel Order");
@@ -555,6 +560,11 @@ public class MyOrdersController {
             cancelInProgress = false;
             cancelButton.setDisable(false);
             if (response.isSuccess()) {
+                now = LocalDateTime.now();
+                refundAmount = response.getRefundAmount();
+                refundPercent = response.getRefundPercent();
+                refundPercentDisplay = String.format("%.0f%%", refundPercent);
+                returned = true;
                 SelectedOrder.setCancelled(true);
                 SelectedOrder.setRefundAmount(response.getRefundAmount());
                 SelectedOrder.setRefundStatus(response.getRefundStatus());
