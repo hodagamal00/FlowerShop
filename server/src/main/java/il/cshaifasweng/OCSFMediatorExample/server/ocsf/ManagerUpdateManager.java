@@ -205,7 +205,7 @@ public class ManagerUpdateManager {
                 String recievedManagerEmail = managerEdit.getEmail();
                 String recievedManagerPassword = managerEdit.getPassword();
                 Boolean recievedManagerIsLoggedIn = managerEdit.getLoggedIn();
-                boolean recievedManagerFrozen = managerEdit.getFrozen();
+                boolean recievedManagerFrozen = managerEdit.isFrozen();
                 int recievedManagerPrivilege = managerEdit.getPrivialge();
                 int recievedManagerShopId = managerEdit.getShopID();
 
