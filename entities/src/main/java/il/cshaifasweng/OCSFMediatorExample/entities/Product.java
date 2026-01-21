@@ -136,6 +136,10 @@ public class Product implements Serializable {
         isPromotion = promotion;
     }
 
+    public boolean hasActivePromotion() {
+        return isPromotion && discountPercent > 0;
+    }
+
     public double getDiscountPercent() {
         return discountPercent;
     }
@@ -187,7 +191,7 @@ public class Product implements Serializable {
     // Helper method to calculate actual price after discount
     public double getActualPrice() {
         double basePrice = price;
-        if (isPromotion && discountPercent > 0) {
+        if (hasActivePromotion()) {
             return basePrice * (1 - discountPercent / 100.0);
         }
         return basePrice;
