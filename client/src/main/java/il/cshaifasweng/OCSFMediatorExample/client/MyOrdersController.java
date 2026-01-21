@@ -3,6 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -27,6 +28,11 @@ import javax.persistence.Column;
 
 public class MyOrdersController {
 
+    private LocalDateTime now;
+    private double refundAmount;
+    private double refundPercent;
+    private String refundPercentDisplay;
+    private boolean returned;
 
 
     Account currentUser;
@@ -178,7 +184,7 @@ public class MyOrdersController {
     @FXML
     void cancelOrder(ActionEvent event)
     {
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        now = LocalDateTime.now();
         int currentYear = now.getYear();
         int currentMonth = now.getMonthValue();
         int currentHour = now.getHour();
@@ -187,10 +193,10 @@ public class MyOrdersController {
 
         double refundFactor = SelectedOrder.calculateRefund(
             currentDay, currentMonth, currentYear, currentHour, currentMinute);
-        double refundAmount = SelectedOrder.getTotalPrice() * refundFactor;
-        double refundPercent = refundFactor * 100.0;
-        String refundPercentDisplay = String.format("%.0f%%", refundPercent);
-        boolean returned = refundAmount > 0;
+        refundAmount = SelectedOrder.getTotalPrice() * refundFactor;
+        refundPercent = refundFactor * 100.0;
+        refundPercentDisplay = String.format("%.0f%%", refundPercent);
+        returned = refundAmount > 0;
 
         int refundValue = (int) Math.round(refundAmount);
         Complaint cancelComplaint = new Complaint(0,currentUser.getAccountID(),SelectedOrder.getOrderID(),true,true,"Cancel Order",SelectedOrder.getShopID(),0,returned,refundValue,currentDay,currentMonth,currentYear,"Automated Reply");
