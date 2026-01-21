@@ -236,6 +236,10 @@ public class SimpleServer extends AbstractServer {
 					break;
 
 				case "account":
+					if (!"add".equals(updateClassFunction) && !isSystemManager(client)) {
+						client.sendToClient(new UserUpdateResponse(false, "Unauthorized: system manager access required."));
+						break;
+					}
 					if (updateClassFunction.equals("add")) {
 						System.out.println("arrived to here inside add");
 						Account NewAcc = recievedMessage.getAccount();
@@ -288,6 +292,10 @@ public class SimpleServer extends AbstractServer {
 					break;
 
 				case "worker":
+					if (!isSystemManager(client)) {
+						client.sendToClient(new UserUpdateResponse(false, "Unauthorized: system manager access required."));
+						break;
+					}
 					if (updateClassFunction.equals("add")) {
 						System.out.println("arrived to here inside worker add");
 						Worker recievedWorker = recievedMessage.getWorker();
@@ -309,6 +317,10 @@ public class SimpleServer extends AbstractServer {
 					break;
 
 				case "manager":
+					if (!isSystemManager(client)) {
+						client.sendToClient(new UserUpdateResponse(false, "Unauthorized: system manager access required."));
+						break;
+					}
 					if (updateClassFunction.equals("add")) {
 						System.out.println("arrived to here inside manager add");
 						Manager recievedManager = recievedMessage.getManager();
