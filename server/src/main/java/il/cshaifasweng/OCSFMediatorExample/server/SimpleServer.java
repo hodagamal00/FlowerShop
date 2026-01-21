@@ -202,15 +202,19 @@ public class SimpleServer extends AbstractServer {
 			String updateClassFunction = recievedMessage.getUpdateFunction();
 			System.out.println("Arrived At UpdateMessage 2");
 
-			if (requiresManagerPrivileges(recievedMessage) && !isManager(client)) {
+			if (requiresSystemManagerPrivileges(recievedMessage) && !isSystemManager(client)) {
 				tx1.rollback();
 				session.close();
-				client.sendToClient(new UserUpdateResponse(false, "Unauthorized: manager access required."));
+				client.sendToClient(new UserUpdateResponse(false, "Unauthorized: system manager access required."));
 				return;
 			}
 
 			switch (updateClassName) {
 				case "product":
+					if (!isManager(client)) {
+						client.sendToClient(new UserUpdateResponse(false, "Unauthorized: manager access required."));
+						break;
+					}
 					if (updateClassFunction.equals("add")) {
 						System.out.println("arrived to here inside add");
 						Product recievedProd = recievedMessage.getProduct();
@@ -603,8 +607,8 @@ public class SimpleServer extends AbstractServer {
 
 	private void handleAddProductRequest(AddProductRequest request, ConnectionToClient client) throws IOException {
 		Account account = (Account) client.getInfo("account");
-		if (account == null || account.getPrivilegeLevel() < 2) {
-			client.sendToClient(new AddProductResponse(false, "Unauthorized: only workers or managers can add products.", null));
+		if (account == null || account.getPrivilegeLevel() < 3) {
+			client.sendToClient(new AddProductResponse(false, "Unauthorized: manager access required.", null));
 			return;
 		}
 
@@ -707,7 +711,12 @@ public class SimpleServer extends AbstractServer {
 		return account != null && account.getPrivilegeLevel() >= 3;
 	}
 
-	private boolean requiresManagerPrivileges(UpdateMessage message) {
+	private boolean isSystemManager(ConnectionToClient client) {
+		Account account = client != null ? (Account) client.getInfo("account") : null;
+		return account != null && account.getPrivilegeLevel() >= 4;
+	}
+
+	private boolean requiresSystemManagerPrivileges(UpdateMessage message) {
 		if (message == null) {
 			return false;
 		}
@@ -738,6 +747,9 @@ public class SimpleServer extends AbstractServer {
 		}
 		if (account.isFrozen()) {
 			throw new IllegalArgumentException("Account is frozen.");
+		}
+		if (account.getPrivilegeLevel() != 1) {
+			throw new IllegalArgumentException("Unauthorized: customer access required.");
 		}
 		order.setAccountID(account.getAccountID());
 
