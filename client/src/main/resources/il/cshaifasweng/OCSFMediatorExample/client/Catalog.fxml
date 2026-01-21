@@ -106,7 +106,7 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo1" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo1" text="SALE" styleClass="promo-badge badge badge-warning">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
@@ -154,7 +154,7 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo2" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo2" text="SALE" styleClass="promo-badge badge badge-warning">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
@@ -202,7 +202,7 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo3" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo3" text="SALE" styleClass="promo-badge badge badge-warning">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
@@ -250,7 +250,7 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo4" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo4" text="SALE" styleClass="promo-badge badge badge-warning">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
@@ -298,7 +298,7 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo5" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo5" text="SALE" styleClass="promo-badge badge badge-warning">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
@@ -346,7 +346,7 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo6" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo6" text="SALE" styleClass="promo-badge badge badge-warning">
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>

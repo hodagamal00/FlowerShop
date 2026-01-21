@@ -332,8 +332,12 @@
 }
 
 .promo-badge {
+    -fx-background-color: #e53935;
+    -fx-text-fill: #ffffff;
     -fx-padding: 4px 10px;
     -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
 }
 
 .product-name {

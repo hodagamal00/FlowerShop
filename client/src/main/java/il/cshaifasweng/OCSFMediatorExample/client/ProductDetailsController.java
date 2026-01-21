@@ -125,7 +125,7 @@ public class ProductDetailsController {
                 originalPriceText.setText(String.format("$%.2f", originalPrice));
                 originalPriceText.setVisible(true);
                 
-                discountBadge.setText(String.format("%.0f%% OFF", product.getDiscountPercent()));
+                discountBadge.setText(String.format("%.0f%% OFF", product.getNormalizedDiscountPercent()));
                 discountBadge.setVisible(true);
             }
         }
