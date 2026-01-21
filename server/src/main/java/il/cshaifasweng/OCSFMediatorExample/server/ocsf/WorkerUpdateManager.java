@@ -208,7 +208,7 @@ public class WorkerUpdateManager {
                 String recievedWorkerEmail = workerEdit.getEmail();
                 String recievedWorkerPassword = workerEdit.getPassword();
                 Boolean recievedWorkerIsLoggedIn = workerEdit.getLoggedIn();
-                boolean recievedWorkerFrozen = workerEdit.isFrozen();
+                boolean recievedWorkerFrozen = workerEdit.getFrozen();
                 int recievedWorkerPrivilege = workerEdit.getPrivialge();
 
                 System.out.println("Arrived to edit worker 2");

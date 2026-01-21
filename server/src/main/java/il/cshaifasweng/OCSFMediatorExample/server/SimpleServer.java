@@ -452,7 +452,7 @@ private static SessionFactory cachedSessionFactory;
 					String dbPass = matchedAccount.getPassword() != null ? matchedAccount.getPassword() : "";
 					String uiPass = recievedPasswordStr != null ? recievedPasswordStr : "";
 
-					if (matchedAccount.isFrozen()) {
+					if (matchedAccount.getFrozen()) {
 						client.sendToClient("account frozen");
 						tx1.commit();
 						return;
@@ -857,7 +857,7 @@ private static SessionFactory cachedSessionFactory;
 		if (account == null) {
 			throw new IllegalArgumentException("Account is required to place an order.");
 		}
-		if (account.isFrozen()) {
+		if (account.getFrozen()) {
 			throw new IllegalArgumentException("Account is frozen.");
 		}
 		if (account.getPrivilegeLevel() != 1) {
@@ -1357,7 +1357,7 @@ private static SessionFactory cachedSessionFactory;
 				updateAccount.setBelongShop(accountEdit.getBelongShop());
 				updateAccount.setSubscription(accountEdit.isSubscription());
 				updateAccount.setPrivialge(accountEdit.getPrivialge());
-				updateAccount.setFrozen(accountEdit.isFrozen());
+				updateAccount.setFrozen(accountEdit.getFrozen());
 
 				session.update(updateAccount);
 				tx.commit();
