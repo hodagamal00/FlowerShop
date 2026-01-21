@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
 import il.cshaifasweng.OCSFMediatorExample.client.App;
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 
 /**
  * Controller for the Error page
@@ -88,16 +89,20 @@ public class ErrorController {
      * Load current user information
      */
     private void loadUserInfo() {
-        // Get current user from session/client
-        // For now, using placeholder
         try {
-            // Account currentUser = SimpleClient.getClient().getCurrentUser();
-            // if (currentUser != null) {
-            //     usernameLabel.setText(currentUser.getUserName());
-            // } else {
-            //     usernameLabel.setText("Guest");
-            // }
-            usernameLabel.setText("Guest");
+            Account currentUser = SimpleClient.getAccount();
+            if (currentUser != null) {
+                String displayName = currentUser.getFullName();
+                if (displayName == null || displayName.isBlank()) {
+                    displayName = currentUser.getEmail();
+                }
+                if (displayName == null || displayName.isBlank()) {
+                    displayName = "User";
+                }
+                usernameLabel.setText(displayName);
+            } else {
+                usernameLabel.setText("Guest");
+            }
         } catch (Exception e) {
             usernameLabel.setText("Guest");
         }
@@ -118,8 +123,7 @@ public class ErrorController {
      */
     private void configureNavigationByRole() {
         // Get current user privilege level
-        // int privilegeLevel = getPrivilegeLevel();
-        int privilegeLevel = 0; // Guest by default
+        int privilegeLevel = getPrivilegeLevel();
         
         // Show/hide links based on privilege
         if (privilegeLevel < 1) { // Guest
@@ -268,9 +272,8 @@ public class ErrorController {
      */
     private int getPrivilegeLevel() {
         try {
-            // Account currentUser = SimpleClient.getClient().getCurrentUser();
-            // return currentUser != null ? currentUser.getPrivilegeLevel() : 0;
-            return 0; // Guest
+            Account currentUser = SimpleClient.getAccount();
+            return currentUser != null ? currentUser.getPrivilegeLevel() : 0;
         } catch (Exception e) {
             return 0; // Guest on error
         }
