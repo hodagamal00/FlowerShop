@@ -12,7 +12,6 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
@@ -107,15 +106,16 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <StackPane fx:id="flower_promo1" styleClass="sale-badge">
+                                                    <VBox fx:id="flower_promo1" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
                                                         <children>
                                                             <Label text="SALE" styleClass="sale-badge-text" />
+                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
                                                         </children>
                                                         <StackPane.margin>
-                                                            <Insets top="8" left="8" />
+                                                            <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </StackPane>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
@@ -123,7 +123,7 @@
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
                                                     <Text fx:id="flower_price_before1" text="200₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after1" text="150₪" styleClass="price-after" />
+                                                    <Text fx:id="flower_price_after1" text="150₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -158,15 +158,16 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <StackPane fx:id="flower_promo2" styleClass="sale-badge">
+                                                    <VBox fx:id="flower_promo2" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
                                                         <children>
                                                             <Label text="SALE" styleClass="sale-badge-text" />
+                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
                                                         </children>
                                                         <StackPane.margin>
-                                                            <Insets top="8" left="8" />
+                                                            <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </StackPane>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
@@ -174,7 +175,7 @@
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
                                                     <Text fx:id="flower_price_before2" text="120₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after2" text="100₪" styleClass="price-after" />
+                                                    <Text fx:id="flower_price_after2" text="100₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -209,15 +210,16 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <StackPane fx:id="flower_promo3" styleClass="sale-badge">
+                                                    <VBox fx:id="flower_promo3" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
                                                         <children>
                                                             <Label text="SALE" styleClass="sale-badge-text" />
+                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
                                                         </children>
                                                         <StackPane.margin>
-                                                            <Insets top="8" left="8" />
+                                                            <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </StackPane>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
@@ -225,7 +227,7 @@
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
                                                     <Text fx:id="flower_price_before3" text="100₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after3" text="80₪" styleClass="price-after" />
+                                                    <Text fx:id="flower_price_after3" text="80₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -260,15 +262,16 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <StackPane fx:id="flower_promo4" styleClass="sale-badge">
+                                                    <VBox fx:id="flower_promo4" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
                                                         <children>
                                                             <Label text="SALE" styleClass="sale-badge-text" />
+                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
                                                         </children>
                                                         <StackPane.margin>
-                                                            <Insets top="8" left="8" />
+                                                            <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </StackPane>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
@@ -276,7 +279,7 @@
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
                                                     <Text fx:id="flower_price_before4" text="70₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after4" text="60₪" styleClass="price-after" />
+                                                    <Text fx:id="flower_price_after4" text="60₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -311,15 +314,16 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <StackPane fx:id="flower_promo5" styleClass="sale-badge">
+                                                    <VBox fx:id="flower_promo5" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
                                                         <children>
                                                             <Label text="SALE" styleClass="sale-badge-text" />
+                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
                                                         </children>
                                                         <StackPane.margin>
-                                                            <Insets top="8" left="8" />
+                                                            <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </StackPane>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
@@ -327,7 +331,7 @@
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
                                                     <Text fx:id="flower_price_before5" text="25₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after5" text="15₪" styleClass="price-after" />
+                                                    <Text fx:id="flower_price_after5" text="15₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -362,15 +366,16 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <StackPane fx:id="flower_promo6" styleClass="sale-badge">
+                                                    <VBox fx:id="flower_promo6" alignment="TOP_CENTER" spacing="2.0" styleClass="sale-badge">
                                                         <children>
                                                             <Label text="SALE" styleClass="sale-badge-text" />
+                                                            <Region prefHeight="4.0" prefWidth="38.0" styleClass="sale-badge-ribbon" />
                                                         </children>
                                                         <StackPane.margin>
-                                                            <Insets top="8" left="8" />
+                                                            <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </StackPane>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
@@ -378,7 +383,7 @@
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
                                                     <Text fx:id="flower_price_before6" text="150₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after6" text="120₪" styleClass="price-after" />
+                                                    <Text fx:id="flower_price_after6" text="120₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
