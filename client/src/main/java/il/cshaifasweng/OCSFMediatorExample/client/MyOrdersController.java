@@ -15,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -295,9 +296,16 @@ public class MyOrdersController {
 
     @FXML
     void goToMyComplaints(ActionEvent event) {
+        if (SelectedOrder == null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Please select an order before submitting a complaint.");
+            alert.showAndWait();
+            return;
+        }
         NavigationService.getInstance().navigate("mycomplaints");
 
-        PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentUser);
+        PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentUser, SelectedOrder.getOrderID());
         new java.util.Timer().schedule(
                 new java.util.TimerTask() {
                     @Override

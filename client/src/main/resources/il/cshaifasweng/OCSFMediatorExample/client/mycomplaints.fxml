@@ -69,7 +69,7 @@
                   </VBox>
                   <VBox prefWidth="250.0" spacing="8.0">
                      <Text strokeType="OUTSIDE" text="Related Order ID:"><font><Font size="14.0" /></font></Text>
-                     <TextField fx:id="orderID" promptText="Enter related order ID" prefWidth="250.0" />
+                     <TextField fx:id="orderID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
                   </VBox>
                </HBox>
 
@@ -78,17 +78,9 @@
                      <Text strokeType="OUTSIDE" text="Response Status:"><font><Font size="14.0" /></font></Text>
                      <TextField fx:id="answerBool" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
                   </VBox>
-                  <VBox prefWidth="250.0" spacing="8.0">
-                     <Text strokeType="OUTSIDE" text="Handled By:"><font><Font size="14.0" /></font></Text>
-                     <TextField fx:id="replyWorker" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                  </VBox>
                </HBox>
 
                <HBox spacing="15.0">
-                  <VBox spacing="8.0" prefWidth="250.0">
-                     <Text text="Created At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                     <TextField fx:id="createdAt" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                  </VBox>
                   <VBox spacing="8.0" prefWidth="250.0">
                      <Text text="Responded At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
                      <TextField fx:id="respondedAt" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
@@ -96,10 +88,6 @@
                </HBox>
 
                <HBox spacing="15.0">
-                  <VBox spacing="8.0" prefWidth="250.0">
-                     <Text text="SLA Status:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                     <TextField fx:id="slaStatus" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: #c0392b;" />
-                  </VBox>
                   <VBox spacing="8.0" prefWidth="250.0">
                      <Text text="Compensation Decision:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
                      <TextField fx:id="compensationDecision" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
@@ -128,7 +116,7 @@
             </VBox>
 
             <!-- Status Information -->
-            <VBox layoutX="30.0" layoutY="430.0" prefWidth="1050.0" spacing="15.0" style="-fx-padding: 20; -fx-border-color: #3498db; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #ecf0f1;" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
+            <VBox layoutX="30.0" layoutY="500.0" prefWidth="1050.0" spacing="15.0" style="-fx-padding: 20; -fx-border-color: #3498db; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #ecf0f1;" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
                <Text text="• Complaints are typically reviewed within 24 hours" wrappingWidth="1000.0">
                   <font><Font size="14.0" /></font>
                </Text>
