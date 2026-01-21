@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import javafx.application.Platform;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import il.cshaifasweng.OCSFMediatorExample.entities.RegistrationResultEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import il.cshaifasweng.OCSFMediatorExample.client.SimpleClient;
 import javafx.event.ActionEvent;
