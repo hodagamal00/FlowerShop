@@ -144,6 +144,10 @@ public class Product implements Serializable {
         return normalizeDiscountPercent(discountPercent);
     }
 
+    public double getNormalizedDiscountPercent() {
+        return normalizeDiscountPercent(discountPercent);
+    }
+
     public void setDiscountPercent(double discountPercent) {
         this.discountPercent = normalizeDiscountPercent(discountPercent);
     }
