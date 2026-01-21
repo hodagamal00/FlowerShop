@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.time.LocalDateTime;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
@@ -157,6 +158,9 @@ public class MyOrdersController {
     @FXML // fx:id="cancelButton"
     private Button cancelButton; // Value injected by FXMLLoader
 
+    @FXML // fx:id="refundDecisionLabel"
+    private Label refundDecisionLabel; // Value injected by FXMLLoader
+
 
     @FXML // fx:id="wait"
     private Label wait; // Value injected by FXMLLoader
@@ -181,10 +185,18 @@ public class MyOrdersController {
         if (SelectedOrder == null || cancelInProgress) {
             return;
         }
+        LocalDateTime now = LocalDateTime.now();
+        double refundFactor = SelectedOrder.calculateRefund(
+                now.getDayOfMonth(), now.getMonthValue(), now.getYear(), now.getHour(), now.getMinute());
+        double refundAmount = SelectedOrder.getTotalPrice() * refundFactor;
+        double refundPercent = refundFactor * 100.0;
+        String refundPercentDisplay = String.format("%.0f%%", refundPercent);
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Cancel Order");
         alert.setHeaderText("Are you sure you want to cancel this order?");
-        alert.setContentText("This action cannot be undone.");
+        alert.setContentText(String.format("Estimated refund: $%.2f (%s)\nThis action cannot be undone.",
+                refundAmount, refundPercentDisplay));
         if (alert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
             return;
         }
@@ -381,6 +393,14 @@ public class MyOrdersController {
             else
                 greetingText.setText("No Greeting");
             currentOrderShopID = retrievedOrder.getShopID();
+            if (retrievedOrder.isCancelled()) {
+                refundDecisionLabel.setText(String.format("Order cancelled. Refund: $%.2f (%s)",
+                        retrievedOrder.getRefundAmount(), retrievedOrder.getRefundStatus()));
+                refundDecisionLabel.setVisible(true);
+                cancelButton.setVisible(false);
+            } else {
+                refundDecisionLabel.setVisible(false);
+            }
         }
     }
     int currentOrderShopID;
@@ -435,6 +455,7 @@ public class MyOrdersController {
         assert totalPrice != null : "fx:id=\"totalPrice\" was not injected: check your FXML file 'myorders.fxml'.";
         assert viewOrder != null : "fx:id=\"viewOrder\" was not injected: check your FXML file 'myorders.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'myorders.fxml'.";
+        assert refundDecisionLabel != null : "fx:id=\"refundDecisionLabel\" was not injected: check your FXML file 'myorders.fxml'.";
 
 
         wait.setVisible(true);
@@ -461,6 +482,7 @@ public class MyOrdersController {
         totalPrice.setVisible(false);  // Value injected by FXMLLoader
         submitComplaint.setVisible(false);  // Value injected by FXMLLoader
         orderProducts.setVisible(false);
+        refundDecisionLabel.setVisible(false);
 
         viewOrder.setDisable(true);
         backToCatalog.setDisable(true);
@@ -512,6 +534,11 @@ public class MyOrdersController {
                 cancelButton.setVisible(false);
                 if (deliverStatus != null) {
                     deliverStatus.setText("Cancelled");
+                }
+                if (refundDecisionLabel != null) {
+                    refundDecisionLabel.setText(String.format("Order cancelled. Refund: $%.2f (%s)",
+                            response.getRefundAmount(), response.getRefundStatus()));
+                    refundDecisionLabel.setVisible(true);
                 }
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Order Cancelled");
