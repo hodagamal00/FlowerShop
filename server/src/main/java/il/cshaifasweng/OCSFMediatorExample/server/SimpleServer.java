@@ -161,34 +161,43 @@ private static SessionFactory cachedSessionFactory;
 				}
 
 				if (recievedStr.equals("get Managers")) {
-					ManagerUpdateManager obj = new ManagerUpdateManager();
-					FoundTable foundTbl = new FoundTable("managers table found");
-					foundTbl.setRecievedManagers(obj.managerGeneralList);
-					client.sendToClient(foundTbl);
+					if (requirePrivilege(client, 4, "Unauthorized: system manager access required.")) {
+						ManagerUpdateManager obj = new ManagerUpdateManager();
+						FoundTable foundTbl = new FoundTable("managers table found");
+						foundTbl.setRecievedManagers(obj.managerGeneralList);
+						client.sendToClient(foundTbl);
+					}
 				}
 
 				if (recievedStr.equals("get Workers")) {
-					WorkerUpdateManager obj = new WorkerUpdateManager();
-					FoundTable foundTbl = new FoundTable("workers table found");
-					foundTbl.setRecievedWorkers(obj.workerGeneralList);
-					client.sendToClient(foundTbl);
+					if (requirePrivilege(client, 4, "Unauthorized: system manager access required.")) {
+						WorkerUpdateManager obj = new WorkerUpdateManager();
+						FoundTable foundTbl = new FoundTable("workers table found");
+						foundTbl.setRecievedWorkers(obj.workerGeneralList);
+						client.sendToClient(foundTbl);
+					}
 				}
 
 				if (recievedStr.equals("get complaints")) {
-					GetAllComplaints obj = new GetAllComplaints();
-					obj.setComplaintsList(getAllComplaints(localSession));
-					System.out.println("Comp List Size = " + obj.getComplaintsList().size());
-					client.sendToClient(obj);
+					if (requireLoggedIn(client)) {
+						Account account = getSessionAccount(client);
+						GetAllComplaints obj = new GetAllComplaints();
+						obj.setComplaintsList(getScopedComplaints(localSession, account));
+						System.out.println("Comp List Size = " + obj.getComplaintsList().size());
+						client.sendToClient(obj);
+					}
 				}
 
 				if (recievedStr.equals("get Accounts")) {
-					System.out.println("get accounts test 1");
-					GetAllAccounts obj = new GetAllAccounts();
-					System.out.println("get accounts test 2");
-					obj.setAll_accounts(getAllAccounts(localSession));
-					System.out.println("get accounts test 3");
-					client.sendToClient(obj);
-					System.out.println("get accounts test 4");
+					if (requirePrivilege(client, 4, "Unauthorized: system manager access required.")) {
+						System.out.println("get accounts test 1");
+						GetAllAccounts obj = new GetAllAccounts();
+						System.out.println("get accounts test 2");
+						obj.setAll_accounts(getAllAccounts(localSession));
+						System.out.println("get accounts test 3");
+						client.sendToClient(obj);
+						System.out.println("get accounts test 4");
+					}
 				}
 
 				tx1.commit();
@@ -578,11 +587,22 @@ private static SessionFactory cachedSessionFactory;
 			try {
 				localSession = sessionFactory.openSession();
 				tx1 = localSession.beginTransaction();
-				getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
-				System.out.println("arrived to get all orders in simple server ! \n");
-				List<Order> orderList = getAllOrders(localSession);
-				ordersToBeSent.setOrderList(orderList);
-				client.sendToClient(ordersToBeSent);
+				boolean authorized = requireLoggedIn(client);
+				if (authorized) {
+					Account account = getSessionAccount(client);
+					int privilegeLevel = account.getPrivilegeLevel();
+					if ((privilegeLevel == 2 || privilegeLevel == 3) && account.getBelongShop() <= 0) {
+						client.sendToClient(new UserUpdateResponse(false, "Unauthorized: branch assignment required."));
+					} else if (privilegeLevel == 0) {
+						client.sendToClient(new UserUpdateResponse(false, "Unauthorized: access denied."));
+					} else {
+						getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
+						System.out.println("arrived to get all orders in simple server ! \n");
+						List<Order> orderList = getScopedOrders(localSession, account);
+						ordersToBeSent.setOrderList(orderList);
+						client.sendToClient(ordersToBeSent);
+					}
+				}
 				tx1.commit();
 			} catch (Exception ex) {
 				if (tx1 != null) {
@@ -605,10 +625,13 @@ private static SessionFactory cachedSessionFactory;
 				tx1 = localSession.beginTransaction();
 
 				System.out.println("arrived to getAllComplaints in server !");
-				GetAllComplaints complaintsToClient = new GetAllComplaints();
-				List<Complaint> recievedComplaints = getAllComplaints(localSession);
-				complaintsToClient.setComplaintsList(recievedComplaints);
-				client.sendToClient(complaintsToClient);
+				if (requireLoggedIn(client)) {
+					Account account = getSessionAccount(client);
+					GetAllComplaints complaintsToClient = new GetAllComplaints();
+					List<Complaint> recievedComplaints = getScopedComplaints(localSession, account);
+					complaintsToClient.setComplaintsList(recievedComplaints);
+					client.sendToClient(complaintsToClient);
+				}
 
 				tx1.commit();
 			} catch (Exception ex) {
@@ -828,6 +851,31 @@ private static SessionFactory cachedSessionFactory;
 		return account != null && account.getPrivilegeLevel() >= 4;
 	}
 
+	private Account getSessionAccount(ConnectionToClient client) {
+		return client != null ? (Account) client.getInfo("account") : null;
+	}
+
+	private boolean requireLoggedIn(ConnectionToClient client) throws IOException {
+		Account account = getSessionAccount(client);
+		if (account == null || !Boolean.TRUE.equals(account.getLoggedIn())) {
+			client.sendToClient(new UserUpdateResponse(false, "Unauthorized: login required."));
+			return false;
+		}
+		return true;
+	}
+
+	private boolean requirePrivilege(ConnectionToClient client, int minPrivilege, String message) throws IOException {
+		if (!requireLoggedIn(client)) {
+			return false;
+		}
+		Account account = getSessionAccount(client);
+		if (account == null || account.getPrivilegeLevel() < minPrivilege) {
+			client.sendToClient(new UserUpdateResponse(false, message));
+			return false;
+		}
+		return true;
+	}
+
 	private boolean requiresSystemManagerPrivileges(UpdateMessage message) {
 		if (message == null) {
 			return false;
@@ -989,6 +1037,28 @@ private static SessionFactory cachedSessionFactory;
 		return result;
 	}
 
+	private static List<Complaint> getScopedComplaints(Session session, Account account) {
+		System.out.println("Arrived to getScopedComplaints 1");
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Complaint> query = builder.createQuery(Complaint.class);
+		Root<Complaint> root = query.from(Complaint.class);
+		if (account != null) {
+			int privilegeLevel = account.getPrivilegeLevel();
+			if (privilegeLevel == 1) {
+				query.where(builder.equal(root.get("CustomerID"), account.getAccountID()));
+			} else if (privilegeLevel >= 2 && privilegeLevel < 4) {
+				int branchId = account.getBelongShop();
+				if (branchId > 0) {
+					query.where(builder.equal(root.get("shopID"), branchId));
+				}
+			}
+		}
+		List<Complaint> result = session.createQuery(query).getResultList();
+		ComplaintUpdateManager.refreshComplaintSlaStatuses(session, result);
+		System.out.println("Arrived to getScopedComplaints 2");
+		return result;
+	}
+
 	private static List<Order> getAllOrders(Session session) {
 		System.out.println("Arrived to getAllOrders 1");
 		CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -999,6 +1069,29 @@ private static SessionFactory cachedSessionFactory;
 		System.out.println("Arrived to getAllOrders 4");
 		List<Order> result = session.createQuery(query).getResultList();
 		System.out.println("Arrived to getAllOrders 5");
+		return result;
+	}
+
+	private static List<Order> getScopedOrders(Session session, Account account) {
+		System.out.println("Arrived to getScopedOrders 1");
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Order> query = builder.createQuery(Order.class);
+		Root<Order> root = query.from(Order.class);
+		if (account != null) {
+			int privilegeLevel = account.getPrivilegeLevel();
+			if (privilegeLevel == 1) {
+				query.where(builder.equal(root.get("accountID"), account.getAccountID()));
+			} else if (privilegeLevel == 2 || privilegeLevel == 3) {
+				int branchId = account.getBelongShop();
+				if (branchId > 0) {
+					query.where(builder.equal(root.get("shopID"), branchId));
+				} else {
+					return Collections.emptyList();
+				}
+			}
+		}
+		List<Order> result = session.createQuery(query).getResultList();
+		System.out.println("Arrived to getScopedOrders 2");
 		return result;
 	}
 
