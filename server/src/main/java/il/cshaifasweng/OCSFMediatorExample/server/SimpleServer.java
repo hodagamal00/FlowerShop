@@ -733,9 +733,13 @@ public class SimpleServer extends AbstractServer {
 		}
 
 		Account account = resolveAccount(client, order.getAccountID());
-		if (account != null) {
-			order.setAccountID(account.getAccountID());
+		if (account == null) {
+			throw new IllegalArgumentException("Account is required to place an order.");
 		}
+		if (account.isFrozen()) {
+			throw new IllegalArgumentException("Account is frozen.");
+		}
+		order.setAccountID(account.getAccountID());
 
 		order.setDelivered(false);
 		order.setCancelled(false);
