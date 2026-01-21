@@ -125,6 +125,10 @@ public class Account implements Serializable {
         return frozen;
     }
 
+    public boolean getFrozen() {
+        return frozen;
+    }
+
     public void setFrozen(boolean frozen) {
         this.frozen = frozen;
     }
