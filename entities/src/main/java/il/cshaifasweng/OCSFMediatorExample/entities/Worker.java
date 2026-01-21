@@ -16,4 +16,12 @@ public class Worker extends Account {
     public Worker(String fullName, String email, String password, int accountID) {
         super(fullName, email, password, accountID);
     }
+
+    public boolean isFrozen() {
+        return super.isFrozen();
+    }
+
+    public void setFrozen(boolean frozen) {
+        super.setFrozen(frozen);
+    }
 }
