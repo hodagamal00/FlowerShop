@@ -6,18 +6,15 @@ import il.cshaifasweng.OCSFMediatorExample.entities.GetAllComplaints;
 import il.cshaifasweng.OCSFMediatorExample.entities.Message;
 import il.cshaifasweng.OCSFMediatorExample.entities.NextComplaintIdMessage;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -34,9 +31,6 @@ public class MyComplaintsController {
     Account currentUser;
     @FXML // fx:id="answerBool"
     private TextField answerBool; // Value injected by FXMLLoader
-
-    @FXML // fx:id="backToCatalog"
-    private Button backToCatalog; // Value injected by FXMLLoader
 
     @FXML // fx:id="complaintID"
     private TextField complaintID; // Value injected by FXMLLoader
@@ -59,52 +53,16 @@ public class MyComplaintsController {
     @FXML // fx:id="refundMoney"
     private TextField refundMoney; // Value injected by FXMLLoader
 
-    @FXML // fx:id="replyWorker"
-    private TextField replyWorker; // Value injected by FXMLLoader
-
-    @FXML
-    private TextField createdAt;
-
     @FXML
     private TextField respondedAt;
-
-    @FXML
-    private TextField slaStatus;
 
     @FXML
     private TextField compensationDecision;
 
 
     private Integer nextComplaintId;
+    private Integer selectedOrderId;
 
-
-    @FXML
-    void openCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController  cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)backToCatalog.getScene().getWindow();
-        stagee.close();
-
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },2000
-        );
-
-    }
 
     List<Complaint> allComplaints ;
 
@@ -127,15 +85,8 @@ public class MyComplaintsController {
             return;
         }
 
-        String orderText = orderID.getText() == null ? "" : orderID.getText().trim();
-        if (orderText.isEmpty()) {
-            showAlert("Please enter a related order ID.");
-            return;
-        }
-
-        int parsedOrderId = parseOrderId(orderText);
-        if (parsedOrderId < 0) {
-            showAlert("Please enter a valid numeric order ID.");
+        if (selectedOrderId == null || selectedOrderId <= 0) {
+            showAlert("A related order must be selected before submitting a complaint.");
             return;
         }
         Calendar cal = Calendar.getInstance();
@@ -145,7 +96,7 @@ public class MyComplaintsController {
         }
 
         newComplaint.setCustomerID(currentUser.getAccountID());
-        newComplaint.setOrderID(parsedOrderId);
+        newComplaint.setOrderID(selectedOrderId);
         newComplaint.setAccepted(false);
         newComplaint.setIn24Hours(false);
         newComplaint.setComplaintText(complaintBody);
@@ -194,7 +145,6 @@ public class MyComplaintsController {
     void initialize() {
         EventBus.getDefault().register(this);
         assert answerBool != null : "fx:id=\"answerBool\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert backToCatalog != null : "fx:id=\"backToCatalog\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintID != null : "fx:id=\"complaintID\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintList != null : "fx:id=\"complaintList\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintText != null : "fx:id=\"complaintText\" was not injected: check your FXML file 'mycomplaints.fxml'.";
@@ -202,14 +152,10 @@ public class MyComplaintsController {
         assert orderID != null : "fx:id=\"orderID\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert submitComplaint != null : "fx:id=\"submitComplaint\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert refundMoney != null : "fx:id=\"refundMoney\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert replyWorker != null : "fx:id=\"replyWorker\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert createdAt != null : "fx:id=\"createdAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert respondedAt != null : "fx:id=\"respondedAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert slaStatus != null : "fx:id=\"slaStatus\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert compensationDecision != null : "fx:id=\"compensationDecision\" was not injected: check your FXML file 'mycomplaints.fxml'.";
 
         loadButton.setDisable(true);
-        backToCatalog.setDisable(true);
         complaintList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 Complaint selected = findComplaintByListEntry(newValue);
@@ -225,7 +171,6 @@ public class MyComplaintsController {
                     @Override
                     public void run() {
                         loadButton.setDisable(false);
-                        backToCatalog.setDisable(false);
                     }
                 },4500
         );
@@ -244,6 +189,11 @@ public class MyComplaintsController {
         System.out.println(recvAccount.getCreditCardNumber());
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
+        selectedOrderId = passAcc.getOrderId();
+        if (selectedOrderId != null && complaintList.getSelectionModel().getSelectedItem() == null) {
+            orderID.setText(Integer.toString(selectedOrderId));
+        }
+        refreshComplaintList();
         requestAllComplaints();
         requestNextComplaintId();
     }
@@ -263,6 +213,9 @@ public class MyComplaintsController {
         nextComplaintId = event.getComplaintId();
         if (complaintList.getSelectionModel().getSelectedItem() == null && complaintID != null) {
             complaintID.setText(Integer.toString(nextComplaintId));
+            if (selectedOrderId != null) {
+                orderID.setText(Integer.toString(selectedOrderId));
+            }
         }
     }
 
@@ -283,15 +236,17 @@ public class MyComplaintsController {
     }
 
     private void refreshComplaintList() {
-        complaintList.getItems().clear();
-        if (allComplaints == null || currentUser == null) {
-            return;
-        }
+        Platform.runLater(() -> {
+            complaintList.getItems().clear();
+            if (allComplaints == null || currentUser == null) {
+                return;
+            }
 
-        allComplaints.stream()
-                .filter(c -> c.getCustomerID() == currentUser.getAccountID())
-                .sorted((a, b) -> Integer.compare(a.getComplaintID(), b.getComplaintID()))
-                .forEach(c -> complaintList.getItems().add(formatListEntry(c)));
+            allComplaints.stream()
+                    .filter(c -> c.getCustomerID() == currentUser.getAccountID())
+                    .sorted((a, b) -> Integer.compare(a.getComplaintID(), b.getComplaintID()))
+                    .forEach(c -> complaintList.getItems().add(formatListEntry(c)));
+        });
     }
 
     private void selectComplaint(int complaintId) {
@@ -362,12 +317,10 @@ public class MyComplaintsController {
             answerBool.setText("No");
             refundMoney.setText("0");
         }
-        replyWorker.setText(Integer.toString(selectedComplaint.getAnswerworkerID()));
         complaintText.setText(selectedComplaint.getComplaintText());
-        createdAt.setText(formatDate(selectedComplaint.getCreatedAt()));
         respondedAt.setText(formatDate(selectedComplaint.getRespondedAt()));
-        slaStatus.setText(defaultIfBlank(selectedComplaint.getSlaStatus()));
         compensationDecision.setText(defaultIfBlank(selectedComplaint.getCompensationDecision()));
+        selectedOrderId = selectedComplaint.getOrderID();
     }
 
     private String formatDate(Date date) {
@@ -392,14 +345,4 @@ public class MyComplaintsController {
         alert.showAndWait();
     }
 
-    private int parseOrderId(String text) {
-        if (text == null || text.trim().isEmpty()) {
-            return -1;
-        }
-        try {
-            return Integer.parseInt(text.trim());
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
 }

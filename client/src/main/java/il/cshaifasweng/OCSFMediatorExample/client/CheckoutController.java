@@ -152,16 +152,7 @@ public class CheckoutController {
 
     @FXML
     void openCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)back.getScene().getWindow();
-        // do what you have to do
-        stagee.close();
+        NavigationService.getInstance().navigate("Catalog");
 
         Account recAcc = currentUser;
         System.out.println("the server sent me the account , NICE 2 !!");
