@@ -23,7 +23,7 @@ public final class PricingService {
         }
 
         double basePrice = product.getPrice();
-        boolean hasPromotion = product.isPromotion() && product.getDiscountPercent() > 0;
+        boolean hasPromotion = product.hasActivePromotion();
         double promotionPrice = basePrice;
         if (hasPromotion) {
             promotionPrice = basePrice * (1 - product.getDiscountPercent() / 100.0);
