@@ -11,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -375,12 +374,7 @@ public class PromotionsManagementController {
      */
     @FXML
     private void handleBackToCatalog() {
-        try {
-            App.setRoot("Catalog");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to catalog.");
-        }
+        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

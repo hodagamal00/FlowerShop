@@ -64,9 +64,9 @@ public class SecondaryController {
     //----------------------------------------------------------------//
 
     @FXML
-    void returnWindow(ActionEvent event) throws IOException {
+    void returnWindow(ActionEvent event) {
         CatalogController.setReturnedFromSecondaryController(true);
-        App.setRoot("Catalog");
+        NavigationService.getInstance().navigate("Catalog");
     }
 
     @FXML

@@ -16,7 +16,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -474,12 +473,7 @@ public class BranchReportsController {
      */
     @FXML
     private void handleBackToCatalog() {
-        try {
-            App.setRoot("Catalog");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to catalog.");
-        }
+        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

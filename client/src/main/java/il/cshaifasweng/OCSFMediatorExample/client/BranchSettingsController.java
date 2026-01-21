@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -347,12 +346,7 @@ public class BranchSettingsController {
      * Navigate to catalog page
      */
     private void navigateToCatalog() {
-        try {
-            App.setRoot("Catalog");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to catalog.");
-        }
+        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**
