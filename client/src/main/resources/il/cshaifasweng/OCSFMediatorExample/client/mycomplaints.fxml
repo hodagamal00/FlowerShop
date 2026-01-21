@@ -26,9 +26,6 @@
                      </font>
                   </Label>
                </left>
-               <center>
-                  <Button fx:id="backToCatalog" mnemonicParsing="false" onAction="#openCatalog" prefHeight="35.0" prefWidth="170.0" style="-fx-font-size: 14px;" text="← Back to Catalog" translateY="6.0" BorderPane.alignment="CENTER" />
-               </center>
                <padding>
                   <Insets bottom="0.0" left="20.0" right="20.0" top="0.0" />
                </padding>
@@ -105,18 +102,18 @@
             </VBox>
 
             <!-- Complaint Text Section -->
-            <VBox layoutX="580.0" layoutY="20.0" prefWidth="500.0" spacing="15.0">
+            <VBox layoutX="580.0" layoutY="20.0" prefWidth="440.0" spacing="15.0">
                <Text fill="#2c3e50" text="Your Complaint">
                   <font>
                      <Font name="System Bold" size="22.0" />
                   </font>
                </Text>
-               <TextArea fx:id="complaintText" prefHeight="250.0" prefWidth="500.0" promptText="Enter your complaint here..." wrapText="true" />
+               <TextArea fx:id="complaintText" prefHeight="250.0" prefWidth="440.0" promptText="Enter your complaint here..." wrapText="true" />
                <Button fx:id="submitComplaint" mnemonicParsing="false" onAction="#submitComplaint" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Submit Complaint" />
             </VBox>
 
             <!-- Status Information -->
-            <VBox layoutX="30.0" layoutY="500.0" prefWidth="1050.0" spacing="15.0" style="-fx-padding: 20; -fx-border-color: #3498db; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #ecf0f1;" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
+            <VBox layoutX="30.0" layoutY="580.0" prefWidth="1050.0" spacing="15.0" style="-fx-padding: 20; -fx-border-color: #3498db; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #ecf0f1;" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0">
                <Text text="• Complaints are typically reviewed within 24 hours" wrappingWidth="1000.0">
                   <font><Font size="14.0" /></font>
                </Text>
