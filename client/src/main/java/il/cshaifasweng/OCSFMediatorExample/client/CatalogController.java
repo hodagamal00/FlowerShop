@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 
@@ -227,58 +226,58 @@ public class CatalogController {
 	private javafx.scene.control.Label flower_price6; // Value injected by FXMLLoader
 
 	@FXML
-	private Pane flower_promo1;
+	private Label flower_promo1;
 
 	@FXML
-	private Pane flower_promo2;
+	private Label flower_promo2;
 
 	@FXML
-	private Pane flower_promo3;
+	private Label flower_promo3;
 
 	@FXML
-	private Pane flower_promo4;
+	private Label flower_promo4;
 
 	@FXML
-	private Pane flower_promo5;
+	private Label flower_promo5;
 
 	@FXML
-	private Pane flower_promo6;
+	private Label flower_promo6;
 
 	@FXML
-	private Text flower_price_before1;
+	private Label flower_price_before1;
 
 	@FXML
-	private Text flower_price_before2;
+	private Label flower_price_before2;
 
 	@FXML
-	private Text flower_price_before3;
+	private Label flower_price_before3;
 
 	@FXML
-	private Text flower_price_before4;
+	private Label flower_price_before4;
 
 	@FXML
-	private Text flower_price_before5;
+	private Label flower_price_before5;
 
 	@FXML
-	private Text flower_price_before6;
+	private Label flower_price_before6;
 
 	@FXML
-	private Text flower_price_after1;
+	private Label flower_price_after1;
 
 	@FXML
-	private Text flower_price_after2;
+	private Label flower_price_after2;
 
 	@FXML
-	private Text flower_price_after3;
+	private Label flower_price_after3;
 
 	@FXML
-	private Text flower_price_after4;
+	private Label flower_price_after4;
 
 	@FXML
-	private Text flower_price_after5;
+	private Label flower_price_after5;
 
 	@FXML
-	private Text flower_price_after6;
+	private Label flower_price_after6;
 
 
 	@FXML // fx:id="AddItem"
@@ -1420,7 +1419,7 @@ public class CatalogController {
 		return String.format(Locale.US, "%.2f₪", price);
 	}
 
-	private void updatePricingLabels(Product product, Label priceBadge, Text priceBefore, Text priceAfter, Pane promoBadge) {
+	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, Label promoBadge) {
 		if (product == null) {
 			return;
 		}
@@ -1442,7 +1441,7 @@ public class CatalogController {
 		priceBadge.setText(formattedActual);
 		priceAfter.setText(formattedActual);
 		priceBefore.setText(formattedBase);
-		priceBefore.setStrikethrough(hasPromotion);
+		priceBefore.setStyle(hasPromotion ? "-fx-strikethrough: true;" : "");
 
 		promoBadge.setVisible(hasPromotion);
 		promoBadge.setManaged(hasPromotion);
