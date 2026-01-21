@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 
@@ -226,22 +227,22 @@ public class CatalogController {
 	private javafx.scene.control.Label flower_price6; // Value injected by FXMLLoader
 
 	@FXML
-	private VBox flower_promo1;
+	private Pane flower_promo1;
 
 	@FXML
-	private VBox flower_promo2;
+	private Pane flower_promo2;
 
 	@FXML
-	private VBox flower_promo3;
+	private Pane flower_promo3;
 
 	@FXML
-	private VBox flower_promo4;
+	private Pane flower_promo4;
 
 	@FXML
-	private VBox flower_promo5;
+	private Pane flower_promo5;
 
 	@FXML
-	private VBox flower_promo6;
+	private Pane flower_promo6;
 
 	@FXML
 	private Label flower_price_before1;
@@ -1419,7 +1420,7 @@ public class CatalogController {
 		return String.format(Locale.US, "%.2f₪", price);
 	}
 
-	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, VBox promoBadge) {
+	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, Pane promoBadge) {
 		if (product == null) {
 			return;
 		}
