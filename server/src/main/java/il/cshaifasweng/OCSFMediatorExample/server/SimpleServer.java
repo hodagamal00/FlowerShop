@@ -26,8 +26,7 @@ import javax.persistence.criteria.Root;
 
 public class SimpleServer extends AbstractServer {
 
-	public static Session session;
-	private static SessionFactory cachedSessionFactory;
+private static SessionFactory cachedSessionFactory;
 	private static final Object sessionFactoryLock = new Object();
 	private List<Product> productGeneralList = new ArrayList<>();
 	private List<Account> accountGeneralList = new ArrayList<>();
@@ -39,14 +38,19 @@ public class SimpleServer extends AbstractServer {
 
 	public void Saveinsess() {
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-		for (int i = 0; i < productGeneralList.size(); i++) {
-			session.save(productGeneralList.get(i));
-			session.flush();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				for (int i = 0; i < productGeneralList.size(); i++) {
+					session.save(productGeneralList.get(i));
+					session.flush();
+				}
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
 		}
-		tx.commit();
-		session.close();
 	}
 
 	public static SessionFactory getSessionFactory() throws HibernateException {
@@ -101,8 +105,18 @@ public class SimpleServer extends AbstractServer {
 		System.out.println("arrived to generate products function");
 		Product product = new Product(5, "btn", "flower1", "someDetails", 5000.0);
 		System.out.println("finisehd creating the product");
-		session.save(product);
-		session.flush();
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				session.save(product);
+				session.flush();
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
+		}
 	}
 
 	@Override
@@ -114,67 +128,79 @@ public class SimpleServer extends AbstractServer {
 
 		if (msg instanceof String) {
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
 
-			String recievedStr = (String) msg;
-			if (recievedStr.equals("first entry")) {
-				System.out.println("entered first entry");
+				String recievedStr = (String) msg;
+				if (recievedStr.equals("first entry")) {
+					System.out.println("entered first entry");
 
-				List<String> list = session.createSQLQuery("SHOW TABLES;").list();
+					List<String> list = localSession.createSQLQuery("SHOW TABLES;").list();
 
-				int tableFoundIndex = -1;
-				for (int i = 0; i < list.size(); i++) {
-					if (list.get(i).equals("products_table")) {
-						tableFoundIndex = i;
+					int tableFoundIndex = -1;
+					for (int i = 0; i < list.size(); i++) {
+						if (list.get(i).equals("products_table")) {
+							tableFoundIndex = i;
+						}
 					}
-				}
-				if (tableFoundIndex != -1) {
-					if (countRows() == 0) {
-						System.out.println("didnt find a table (this message is from the server");
-						client.sendToClient("not found");
-						session.close();
+					if (tableFoundIndex != -1) {
+						if (countRows(localSession) == 0) {
+							System.out.println("didnt find a table (this message is from the server");
+							client.sendToClient("not found");
+						} else {
+							List<Product> resultList = getAllProducts(localSession);
+							FoundTable foundTbl = new FoundTable("found", resultList);
+							client.sendToClient(foundTbl);
+						}
 					} else {
-						List<Product> resultList = getAllProducts();
-						FoundTable foundTbl = new FoundTable("found", resultList);
-						client.sendToClient(foundTbl);
-						session.close();
+						client.sendToClient("not found");
 					}
-				} else {
-					client.sendToClient("not found");
-					session.close();
 				}
-			}
 
-			if (recievedStr.equals("get Managers")) {
-				ManagerUpdateManager obj = new ManagerUpdateManager();
-				FoundTable foundTbl = new FoundTable("managers table found");
-				foundTbl.setRecievedManagers(obj.managerGeneralList);
-				client.sendToClient(foundTbl);
-			}
+				if (recievedStr.equals("get Managers")) {
+					ManagerUpdateManager obj = new ManagerUpdateManager();
+					FoundTable foundTbl = new FoundTable("managers table found");
+					foundTbl.setRecievedManagers(obj.managerGeneralList);
+					client.sendToClient(foundTbl);
+				}
 
-			if (recievedStr.equals("get Workers")) {
-				WorkerUpdateManager obj = new WorkerUpdateManager();
-				FoundTable foundTbl = new FoundTable("workers table found");
-				foundTbl.setRecievedWorkers(obj.workerGeneralList);
-				client.sendToClient(foundTbl);
-			}
+				if (recievedStr.equals("get Workers")) {
+					WorkerUpdateManager obj = new WorkerUpdateManager();
+					FoundTable foundTbl = new FoundTable("workers table found");
+					foundTbl.setRecievedWorkers(obj.workerGeneralList);
+					client.sendToClient(foundTbl);
+				}
 
-			if (recievedStr.equals("get complaints")) {
-				GetAllComplaints obj = new GetAllComplaints();
-				obj.setComplaintsList(getAllComplaints());
-				System.out.println("Comp List Size = " + obj.getComplaintsList().size());
-				client.sendToClient(obj);
-			}
+				if (recievedStr.equals("get complaints")) {
+					GetAllComplaints obj = new GetAllComplaints();
+					obj.setComplaintsList(getAllComplaints(localSession));
+					System.out.println("Comp List Size = " + obj.getComplaintsList().size());
+					client.sendToClient(obj);
+				}
 
-			if (recievedStr.equals("get Accounts")) {
-				System.out.println("get accounts test 1");
-				GetAllAccounts obj = new GetAllAccounts();
-				System.out.println("get accounts test 2");
-				obj.setAll_accounts(getAllAccounts());
-				System.out.println("get accounts test 3");
-				client.sendToClient(obj);
-				System.out.println("get accounts test 4");
+				if (recievedStr.equals("get Accounts")) {
+					System.out.println("get accounts test 1");
+					GetAllAccounts obj = new GetAllAccounts();
+					System.out.println("get accounts test 2");
+					obj.setAll_accounts(getAllAccounts(localSession));
+					System.out.println("get accounts test 3");
+					client.sendToClient(obj);
+					System.out.println("get accounts test 4");
+				}
+
+				tx1.commit();
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
+				}
 			}
 		}
 
@@ -193,18 +219,12 @@ public class SimpleServer extends AbstractServer {
 
 		if (msg instanceof UpdateMessage) {
 			System.out.println("Arrived At UpdateMessage 1");
-			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
-
 			UpdateMessage recievedMessage = (UpdateMessage) msg;
 			String updateClassName = recievedMessage.getUpdateClass();
 			String updateClassFunction = recievedMessage.getUpdateFunction();
 			System.out.println("Arrived At UpdateMessage 2");
 
 			if (requiresSystemManagerPrivileges(recievedMessage) && !isSystemManager(client)) {
-				tx1.rollback();
-				session.close();
 				client.sendToClient(new UserUpdateResponse(false, "Unauthorized: system manager access required."));
 				return;
 			}
@@ -219,20 +239,18 @@ public class SimpleServer extends AbstractServer {
 						System.out.println("arrived to here inside add");
 						Product recievedProd = recievedMessage.getProduct();
 						addItemToCatalog(recievedProd);
-						sendToAllClients(getAllProducts());
+						sendToAllClients(loadAllProducts());
 						System.out.println("send the updated list to the client !");
 					} else if (updateClassFunction.equals("remove")) {
 						String idToRemove = recievedMessage.getDelteId();
 						removeItemFromCatalog(idToRemove, client);
-						session = sessionFactory.openSession();
-						sendToAllClients(getAllProducts());
+						sendToAllClients(loadAllProducts());
 					} else if (updateClassFunction.equals("edit")) {
 						System.out.println("Arrived edit case in the switch !");
 						Product recievedProd = recievedMessage.getProduct();
 						editCatalogProduct(recievedProd);
-						sendToAllClients(getAllProducts());
+						sendToAllClients(loadAllProducts());
 					}
-					session.close();
 					break;
 
 				case "account":
@@ -313,7 +331,6 @@ public class SimpleServer extends AbstractServer {
 							client.sendToClient(new UserUpdateResponse(false, "Failed to update worker details."));
 						}
 					}
-					session.close();
 					break;
 
 				case "manager":
@@ -338,7 +355,6 @@ public class SimpleServer extends AbstractServer {
 							client.sendToClient(new UserUpdateResponse(false, "Failed to update manager details."));
 						}
 					}
-					session.close();
 					break;
 
 					case "order":
@@ -361,7 +377,6 @@ public class SimpleServer extends AbstractServer {
 							String idToRemove = recievedMessage.getDelteId();
 							OrderUpdateManager.removeOrder(idToRemove, client);
 						}
-						session.close();
 						break;
 
 					case "complaint":
@@ -383,7 +398,6 @@ public class SimpleServer extends AbstractServer {
 							Complaint recievedComp = recievedMessage.getComplaint();
 							ComplaintUpdateManager.editComplaint(recievedComp);
 						}
-					session.close();
 					break;
 
 				case "message":
@@ -392,7 +406,6 @@ public class SimpleServer extends AbstractServer {
 						Message recievedMESSAGE = recievedMessage.getMessage();
 						addMessage(recievedMESSAGE);
 					}
-					session.close();
 					break;
 			}
 		}
@@ -401,74 +414,78 @@ public class SimpleServer extends AbstractServer {
 
 	// ================== هنا عدّلنا منطق CHECKMAIL ==================
 	if (msg instanceof CheckMail) {
-
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
 
-			CheckMail recievedMessage = (CheckMail) msg;
-			String recievedMailStr = recievedMessage.getEmail();
-			String recievedPasswordStr = recievedMessage.getPassword();
-			String person = recievedMessage.getPerson();
-			if (person == null || person.isBlank()) {
-				person = "customer";
-			}
-
-			Account matchedAccount = null;
-			boolean isEmployeeLogin = person.equalsIgnoreCase("employee")
-					|| person.equalsIgnoreCase("worker")
-					|| person.equalsIgnoreCase("manager");
-
-			if (isEmployeeLogin) {
-				Manager matchedManager = findAccountByEmail(Manager.class, recievedMailStr);
-				if (matchedManager != null) {
-					matchedAccount = matchedManager;
-				} else {
-					matchedAccount = findAccountByEmail(Worker.class, recievedMailStr);
-				}
-			} else {
-				matchedAccount = findAccountByEmail(Account.class, recievedMailStr);
-			}
-
-			if (matchedAccount == null) {
-				tx1.rollback();
-				session.close();
-				client.sendToClient("mail not found");
-			} else {
-				// DEBUG – اطبع الباسووردين مع الأطوال
-				String dbPass = matchedAccount.getPassword() != null ? matchedAccount.getPassword() : "";
-				String uiPass = recievedPasswordStr != null ? recievedPasswordStr : "";
-
-				if (matchedAccount.getFrozen()) {
-					tx1.rollback();
-					session.close();
-					client.sendToClient("account frozen");
-					return;
+				CheckMail recievedMessage = (CheckMail) msg;
+				String recievedMailStr = recievedMessage.getEmail();
+				String recievedPasswordStr = recievedMessage.getPassword();
+				String person = recievedMessage.getPerson();
+				if (person == null || person.isBlank()) {
+					person = "customer";
 				}
 
-				System.out.println("DEBUG LOGIN:");
-				System.out.println("  DB email     = '" + matchedAccount.getEmail() + "'");
-				System.out.println("  DB password  = '" + dbPass + "' (len=" + dbPass.length() + ")");
-				System.out.println("  UI password  = '" + uiPass + "' (len=" + uiPass.length() + ")");
+				Account matchedAccount = null;
+				boolean isEmployeeLogin = person.equalsIgnoreCase("employee")
+						|| person.equalsIgnoreCase("worker")
+						|| person.equalsIgnoreCase("manager");
 
-				// نقارن بعد trim عشان spaces مخفية ما تخرب
-				if (!dbPass.trim().equals(uiPass.trim())) {
-					tx1.rollback();
-					session.close();
-					client.sendToClient("wrong password");
-				} else if (matchedAccount.getLoggedIn()) {
-					tx1.rollback();
-					session.close();
-					client.sendToClient("already logged");
+				if (isEmployeeLogin) {
+					Manager matchedManager = findAccountByEmail(localSession, Manager.class, recievedMailStr);
+					if (matchedManager != null) {
+						matchedAccount = matchedManager;
+					} else {
+						matchedAccount = findAccountByEmail(localSession, Worker.class, recievedMailStr);
+					}
 				} else {
-					matchedAccount.setLoggedIn(true);
-					session.update(matchedAccount);
-					tx1.commit();
-					session.close();
+					matchedAccount = findAccountByEmail(localSession, Account.class, recievedMailStr);
+				}
 
-					client.setInfo("account", matchedAccount);
-					client.sendToClient(matchedAccount);
-					client.sendToClient("found mail and password");
+				if (matchedAccount == null) {
+					client.sendToClient("mail not found");
+				} else {
+					// DEBUG – اطبع الباسووردين مع الأطوال
+					String dbPass = matchedAccount.getPassword() != null ? matchedAccount.getPassword() : "";
+					String uiPass = recievedPasswordStr != null ? recievedPasswordStr : "";
+
+					if (matchedAccount.getFrozen()) {
+						client.sendToClient("account frozen");
+						tx1.commit();
+						return;
+					}
+
+					System.out.println("DEBUG LOGIN:");
+					System.out.println("  DB email     = '" + matchedAccount.getEmail() + "'");
+					System.out.println("  DB password  = '" + dbPass + "' (len=" + dbPass.length() + ")");
+					System.out.println("  UI password  = '" + uiPass + "' (len=" + uiPass.length() + ")");
+
+					// نقارن بعد trim عشان spaces مخفية ما تخرب
+					if (!dbPass.trim().equals(uiPass.trim())) {
+						client.sendToClient("wrong password");
+					} else if (matchedAccount.getLoggedIn()) {
+						client.sendToClient("already logged");
+					} else {
+						matchedAccount.setLoggedIn(true);
+						localSession.update(matchedAccount);
+
+						client.setInfo("account", matchedAccount);
+						client.sendToClient(matchedAccount);
+						client.sendToClient("found mail and password");
+					}
+				}
+				tx1.commit();
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
 				}
 			}
 		}
@@ -477,105 +494,163 @@ public class SimpleServer extends AbstractServer {
 		if (msg instanceof MailClass) {
 			System.out.println("arrived to msg instance of MailClass ");
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
-			List<Account> accountsList = getAllAccounts();
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
+				List<Account> accountsList = getAllAccounts(localSession);
 
-			MailClass recievedMessage = (MailClass) msg;
-			String recievedMailStr = recievedMessage.getMail();
+				MailClass recievedMessage = (MailClass) msg;
+				String recievedMailStr = recievedMessage.getMail();
 
-			Account matchedAccount = null;
-			for (Account account : accountsList) {
-				System.out.println(account.getEmail());
-				if (account.getEmail().equals(recievedMailStr)) {
-					matchedAccount = account;
-					break;
+				Account matchedAccount = null;
+				for (Account account : accountsList) {
+					System.out.println(account.getEmail());
+					if (account.getEmail().equals(recievedMailStr)) {
+						matchedAccount = account;
+						break;
+					}
+				}
+
+				if (matchedAccount != null) {
+					client.sendToClient(matchedAccount);
+				} else {
+					client.sendToClient("mail not found");
+				}
+
+				tx1.commit();
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
 				}
 			}
-
-			if (matchedAccount != null) {
-				client.sendToClient(matchedAccount);
-			} else {
-				client.sendToClient("mail not found");
-			}
-
-			tx1.commit();
-			session.close();
 		}
 
 		if (msg instanceof LogOut) {
 			System.out.println("arrived to Logout in server 1");
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
-			List<Account> accountsList = getAllAccounts();
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
 
-			System.out.println("arrived to Logout in server 2");
-			LogOut recievedMessage = (LogOut) msg;
-			String recievedMailStr = recievedMessage.getMail();
-			System.out.println("the mail is: " + recievedMailStr);
-			System.out.println("arrived to Logout in server 3");
+				System.out.println("arrived to Logout in server 2");
+				LogOut recievedMessage = (LogOut) msg;
+				String recievedMailStr = recievedMessage.getMail();
+				System.out.println("the mail is: " + recievedMailStr);
+				System.out.println("arrived to Logout in server 3");
 
-			for (int i = 0; i < accountsList.size(); i++) {
-				System.out.println("arrived to Logout in server 4");
-				System.out.println(accountsList.get(i).getEmail());
-				if (accountsList.get(i).getEmail().equals(recievedMailStr)) {
-					System.out.println("foudn the email in interation " + i);
+				Account matchedAccount = findAccountByEmail(localSession, Account.class, recievedMailStr);
+				if (matchedAccount != null) {
 					System.out.println("arrived to Logout in server 5");
-					Account updateAcc = SimpleServer.session.load(Account.class, accountsList.get(i).getAccountID());
-
+					Account updateAcc = localSession.load(Account.class, matchedAccount.getAccountID());
 					updateAcc.setLoggedIn(false);
-
 					System.out.println("arrived to Logout in server 6");
-					SimpleServer.session.update(updateAcc);
-					tx1.commit();
-					SimpleServer.session.close();
-					System.out.println("arrived to Logout in server 7");
-					client.setInfo("account", null);
+					localSession.update(updateAcc);
+				}
+
+				tx1.commit();
+				System.out.println("arrived to Logout in server 7");
+				client.setInfo("account", null);
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
 				}
 			}
 		}
 
 		if (msg instanceof getAllOrdersMessage) {
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
-			getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
-			System.out.println("arrived to get all orders in simple server ! \n");
-			List<Order> orderList = getAllOrders();
-			ordersToBeSent.setOrderList(orderList);
-			client.sendToClient(ordersToBeSent);
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
+				getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
+				System.out.println("arrived to get all orders in simple server ! \n");
+				List<Order> orderList = getAllOrders(localSession);
+				ordersToBeSent.setOrderList(orderList);
+				client.sendToClient(ordersToBeSent);
+				tx1.commit();
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
+				}
+			}
 		}
 
 		if (msg instanceof GetAllComplaints) {
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
 
-			System.out.println("arrived to getAllComplaints in server !");
-			GetAllComplaints complaintsToClient = new GetAllComplaints();
-			List<Complaint> recievedComplaints = getAllComplaints();
-			complaintsToClient.setComplaintsList(recievedComplaints);
-			client.sendToClient(complaintsToClient);
+				System.out.println("arrived to getAllComplaints in server !");
+				GetAllComplaints complaintsToClient = new GetAllComplaints();
+				List<Complaint> recievedComplaints = getAllComplaints(localSession);
+				complaintsToClient.setComplaintsList(recievedComplaints);
+				client.sendToClient(complaintsToClient);
+
+				tx1.commit();
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
+				}
+			}
+
 		}
 
 		if (msg instanceof GetAllMessages) {
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
 
-			System.out.println("arrived to getAllComplaints in server !");
-			GetAllMessages messagesToClient = new GetAllMessages();
-			List<Message> recievedMessages = getAllMessages();
-			messagesToClient.setMessageList(recievedMessages);
-			client.sendToClient(messagesToClient);
+				System.out.println("arrived to getAllComplaints in server !");
+				GetAllMessages messagesToClient = new GetAllMessages();
+				List<Message> recievedMessages = getAllMessages(localSession);
+				messagesToClient.setMessageList(recievedMessages);
+				client.sendToClient(messagesToClient);
+				tx1.commit();
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
+				}
+			}
 		}
 
 		if (msg instanceof Order) {
-			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
-
 			Order recievedMessage = (Order) msg;
 			int orderID = recievedMessage.getOrderID();
 			OrderUpdateManager.deliveredOrder(orderID);
@@ -587,32 +662,43 @@ public class SimpleServer extends AbstractServer {
 			System.out.println("list size 11111 = " + flowersnum);
 
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx1 = session.beginTransaction();
-			System.out.println("msg instance of arrayList ");
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
+				System.out.println("msg instance of arrayList ");
 
-			List<Product> resultList = (List<Product>) msg;
-			flowersnum = resultList.size();
-			System.out.println("list size 2222 = " + flowersnum);
-			for (int i = 0; i < resultList.size(); i++) {
-				session.save(resultList.get(i));
-				session.flush();
-				System.out.println(resultList.get(i).getName());
+				List<Product> resultList = (List<Product>) msg;
+				flowersnum = resultList.size();
+				System.out.println("list size 2222 = " + flowersnum);
+				for (int i = 0; i < resultList.size(); i++) {
+					localSession.save(resultList.get(i));
+					localSession.flush();
+					System.out.println(resultList.get(i).getName());
+				}
+				tx1.commit();
+
+				for (int i = 0; i < resultList.size(); i++) {
+					productGeneralList.add(resultList.get(i));
+					System.out.println(resultList.get(i).getName());
+				}
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
+				}
 			}
-			tx1.commit();
-
-			for (int i = 0; i < resultList.size(); i++) {
-				productGeneralList.add(resultList.get(i));
-				System.out.println(resultList.get(i).getName());
-			}
-
-			session.close();
 		} else {
 			// nothing
 		}
 	}
 
-	private static List<Message> getAllMessages() {
+	private static List<Message> getAllMessages(Session session) {
 		System.out.println("Arrived to getAllmessages 1");
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		System.out.println("Arrived to getAllMessages 2");
@@ -640,32 +726,28 @@ public class SimpleServer extends AbstractServer {
 		}
 
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
 
-		try {
-			if (isSkuAlreadyRegistered(product.getSku(), session)) {
+			try {
+				if (isSkuAlreadyRegistered(product.getSku(), session)) {
+					tx.rollback();
+					client.sendToClient(new AddProductResponse(false, "Duplicate SKU: " + product.getSku(), null));
+					return;
+				}
+
+				int newProductId = getNextProductId(session);
+				product.setID(newProductId);
+
+				session.save(product);
+				session.flush();
+				tx.commit();
+				client.sendToClient(new AddProductResponse(true, null, product));
+				sendToAllClients(getAllProducts(session));
+			} catch (Exception exception) {
 				tx.rollback();
-				client.sendToClient(new AddProductResponse(false, "Duplicate SKU: " + product.getSku(), null));
-				return;
+				client.sendToClient(new AddProductResponse(false, "Failed to add product due to a server error.", null));
 			}
-
-			long numOfRows = countRows();
-			int newProductId = (int) numOfRows + 1;
-			product.setID(newProductId);
-
-			session.save(product);
-			session.flush();
-			tx.commit();
-			client.sendToClient(new AddProductResponse(true, null, product));
-			sendToAllClients(getAllProducts());
-		} catch (Exception exception) {
-			if (tx != null) {
-				tx.rollback();
-			}
-			client.sendToClient(new AddProductResponse(false, "Failed to add product due to a server error.", null));
-		} finally {
-			session.close();
 		}
 	}
 
@@ -810,7 +892,15 @@ public class SimpleServer extends AbstractServer {
 		}
 		SessionFactory sessionFactory = getSessionFactory();
 		try (Session localSession = sessionFactory.openSession()) {
-			return localSession.get(Account.class, accountId);
+			Transaction tx = localSession.beginTransaction();
+			try {
+				Account resolved = localSession.get(Account.class, accountId);
+				tx.commit();
+				return resolved;
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
 		}
 	}
 
@@ -821,21 +911,28 @@ public class SimpleServer extends AbstractServer {
 		int total = 0;
 		SessionFactory sessionFactory = getSessionFactory();
 		try (Session localSession = sessionFactory.openSession()) {
-			for (String item : products.split("%")) {
-				String trimmed = item.trim();
-				if (trimmed.isEmpty()) {
-					continue;
+			Transaction tx = localSession.beginTransaction();
+			try {
+				for (String item : products.split("%")) {
+					String trimmed = item.trim();
+					if (trimmed.isEmpty()) {
+						continue;
+					}
+					String[] parts = trimmed.split(" - ", 2);
+					String productName = parts[0].trim();
+					if (productName.isEmpty()) {
+						continue;
+					}
+					Product product = findProductByName(localSession, productName);
+					if (product == null) {
+						throw new IllegalArgumentException("Unknown product: " + productName);
+					}
+					total += (int) Math.round(product.getActualPrice());
 				}
-				String[] parts = trimmed.split(" - ", 2);
-				String productName = parts[0].trim();
-				if (productName.isEmpty()) {
-					continue;
-				}
-				Product product = findProductByName(localSession, productName);
-				if (product == null) {
-					throw new IllegalArgumentException("Unknown product: " + productName);
-				}
-				total += (int) Math.round(product.getActualPrice());
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
 			}
 		}
 		return total;
@@ -859,18 +956,26 @@ public class SimpleServer extends AbstractServer {
 		}
 		SessionFactory sessionFactory = getSessionFactory();
 		try (Session localSession = sessionFactory.openSession()) {
-			BranchSettings settings = localSession.get(BranchSettings.class, order.getShopID());
-			if (settings == null) {
-				throw new IllegalArgumentException("Delivery configuration missing for shop " + order.getShopID());
+			Transaction tx = localSession.beginTransaction();
+			try {
+				BranchSettings settings = localSession.get(BranchSettings.class, order.getShopID());
+				if (settings == null) {
+					throw new IllegalArgumentException("Delivery configuration missing for shop " + order.getShopID());
+				}
+				if (!settings.isDeliveryEnabled()) {
+					throw new IllegalArgumentException("Delivery is disabled for shop " + order.getShopID());
+				}
+				double fee = settings.getDeliveryFee();
+				tx.commit();
+				return fee;
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
 			}
-			if (!settings.isDeliveryEnabled()) {
-				throw new IllegalArgumentException("Delivery is disabled for shop " + order.getShopID());
-			}
-			return settings.getDeliveryFee();
 		}
 	}
 
-	private static List<Complaint> getAllComplaints() {
+	private static List<Complaint> getAllComplaints(Session session) {
 		System.out.println("Arrived to getAllComplaints 1");
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		System.out.println("Arrived to getAllCompliants 2");
@@ -879,11 +984,12 @@ public class SimpleServer extends AbstractServer {
 		query.from(Complaint.class);
 		System.out.println("Arrived to getAllComplaints 4");
 		List<Complaint> result = session.createQuery(query).getResultList();
+		ComplaintUpdateManager.refreshComplaintSlaStatuses(session, result);
 		System.out.println("Arrived to getAllComplaints 5");
 		return result;
 	}
 
-	private static List<Order> getAllOrders() {
+	private static List<Order> getAllOrders(Session session) {
 		System.out.println("Arrived to getAllOrders 1");
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		System.out.println("Arrived to getAllOrders 2");
@@ -896,7 +1002,7 @@ public class SimpleServer extends AbstractServer {
 		return result;
 	}
 
-	private static List<Product> getAllProducts() {
+	private static List<Product> getAllProducts(Session session) {
 		System.out.println("Arrived to getAllProducts 1");
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		System.out.println("Arrived to getAllProducts 2");
@@ -909,7 +1015,22 @@ public class SimpleServer extends AbstractServer {
 		return result;
 	}
 
-	Long countRows() {
+	private List<Product> loadAllProducts() {
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				List<Product> products = getAllProducts(session);
+				tx.commit();
+				return products;
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
+		}
+	}
+
+	Long countRows(Session session) {
 		System.out.println("Arrived to coutnrwos 1");
 		final CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
 		System.out.println("Arrived to coutnrwos 2");
@@ -922,108 +1043,123 @@ public class SimpleServer extends AbstractServer {
 		return session.createQuery(criteria).getSingleResult();
 	}
 
+	private int getNextProductId(Session session) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+		Root<Product> root = query.from(Product.class);
+		query.select(builder.max(root.get("id")));
+		Integer maxId = session.createQuery(query).getSingleResult();
+		return maxId == null ? 1 : maxId + 1;
+	}
+
 	void addItemToCatalog(Product recievedProd) {
 		System.out.println("inside additemTocatalog1");
-		long numOfRows = countRows();
-		int castedId = (int) numOfRows;
-		int newProductId = castedId + 1;
-		recievedProd.setID(newProductId);
-
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				int newProductId = getNextProductId(session);
+				recievedProd.setID(newProductId);
 
-		session.save(recievedProd);
-		session.flush();
-		tx.commit();
+				session.save(recievedProd);
+				session.flush();
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
+		}
 	}
 
 	void editCatalogProduct(Product productEdit) {
 		System.out.println("Arrived to edit catalog product 1");
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				int recievedProductID = productEdit.getID();
+				double recievedProductPrice = productEdit.getPrice();
 
-		int recievedProductID = productEdit.getID();
-		double recievedProductPrice = productEdit.getPrice();
+				Product updateProd = session.load(Product.class, recievedProductID);
+				updateProd.setButton(productEdit.getButton());
+				updateProd.setPrice(recievedProductPrice);
+				updateProd.setName(productEdit.getName());
+				updateProd.setDetails(productEdit.getDetails());
+				updateProd.setImage(productEdit.getImage());
 
-		Product updateProd = session.load(Product.class, recievedProductID);
-		updateProd.setButton(productEdit.getButton());
-		updateProd.setPrice(recievedProductPrice);
-		updateProd.setName(productEdit.getName());
-		updateProd.setDetails(productEdit.getDetails());
-		updateProd.setImage(productEdit.getImage());
-
-		session.update(updateProd);
-		tx.commit();
+				session.update(updateProd);
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
+		}
 	}
 
 	void removeItemFromCatalog(String prodIdToRemove, ConnectionToClient _client) throws IOException {
 		System.out.println("arrived to removeItemFromCatalog 1");
 
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				flowersnum = Math.max(0, flowersnum - 1);
 
-		flowersnum--;
-
-		int removedId = Integer.parseInt(prodIdToRemove);
-		productGeneralList = getAllProducts();
-		productGeneralList.remove(removedId - 1);
-		for (int i = 0; i < productGeneralList.size(); i++) {
-			if (productGeneralList.get(i).getID() > removedId) {
-				productGeneralList.get(i).setID((productGeneralList.get(i).getID() - 1));
+				int removedId = Integer.parseInt(prodIdToRemove);
+				Product product = session.get(Product.class, removedId);
+				if (product != null) {
+					session.delete(product);
+				}
+				tx.commit();
+				System.out.println("arrived to removeItemFromCatalog 2.8");
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
 			}
 		}
-
-		session = sessionFactory.openSession();
-		Transaction tx1 = session.beginTransaction();
-		long longID = countRows();
-		session.close();
-		System.out.println("arrived to removeItemFromCatalog 3 and the longID is " + longID);
-		int castedID = (int) longID;
-		for (int l = 0; l < castedID; l++) {
-			deleteProduct(l + 1);
-		}
-
-		session = sessionFactory.openSession();
-		Transaction tx2 = session.beginTransaction();
-		for (int i = 0; i < productGeneralList.size(); i++) {
-			session.save(productGeneralList.get(i));
-			session.flush();
-		}
-		tx2.commit();
-		session.close();
-		System.out.println("arrived to removeItemFromCatalog 2.8");
 	}
 
 	public void deleteProduct(int deleteIndex) {
 		System.out.println("arrived to deleteProd 1");
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-		System.out.println("arrived to deleteProd 2");
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				System.out.println("arrived to deleteProd 2");
 
-		Object persistentInstance = session.load(Product.class, deleteIndex);
-		Product perProd = (Product) persistentInstance;
-		if (persistentInstance != null) {
-			session.delete(perProd);
+				Object persistentInstance = session.get(Product.class, deleteIndex);
+				Product perProd = (Product) persistentInstance;
+				if (persistentInstance != null) {
+					session.delete(perProd);
+				}
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
 		}
-		tx.commit();
-		session.close();
 	}
 
 	public void deleteAllProducts() {
 		System.out.println("arrived to deleteAllProducts 1");
-		long rows = countRows();
-		int castedRows = (int) rows;
-		for (int i = 1; i <= castedRows; i++) {
-			deleteProduct(i);
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				List<Product> products = getAllProducts(session);
+				for (Product product : products) {
+					session.delete(product);
+				}
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
 		}
 		System.out.println("arrived to deleteAllProducts 4");
 	}
 
-	public static List<Account> getAllAccounts() {
+	public static List<Account> getAllAccounts(Session session) {
 		System.out.println("Arrived to getAllAccounts 1");
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		System.out.println("Arrived to getAllAccounts 2");
@@ -1036,7 +1172,16 @@ public class SimpleServer extends AbstractServer {
 		return resultlest;
 	}
 
-	private <T extends Account> T findAccountByEmail(Class<T> type, String email) {
+	private int getNextAccountId(Session session) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+		Root<Account> root = query.from(Account.class);
+		query.select(builder.max(root.get("accountID")));
+		Integer maxId = session.createQuery(query).getSingleResult();
+		return maxId == null ? 1 : maxId + 1;
+	}
+
+	private <T extends Account> T findAccountByEmail(Session session, Class<T> type, String email) {
 		if (email == null) {
 			return null;
 		}
@@ -1055,6 +1200,7 @@ public class SimpleServer extends AbstractServer {
 		System.out.println("Checking for existing email " + email);
 		SessionFactory sessionFactory = getSessionFactory();
 		Session localSession = sessionFactory.openSession();
+		Transaction tx = localSession.beginTransaction();
 		try {
 			CriteriaBuilder builder = localSession.getCriteriaBuilder();
 			CriteriaQuery<Long> query = builder.createQuery(Long.class);
@@ -1062,7 +1208,11 @@ public class SimpleServer extends AbstractServer {
 			query.select(builder.count(root));
 			query.where(builder.equal(builder.lower(root.get("email")), email.toLowerCase()));
 			Long count = localSession.createQuery(query).getSingleResult();
+			tx.commit();
 			return count != null && count > 0;
+		} catch (Exception ex) {
+			tx.rollback();
+			throw ex;
 		} finally {
 			localSession.close();
 		}
@@ -1073,45 +1223,35 @@ public class SimpleServer extends AbstractServer {
 
 		try {
 			SessionFactory sessionFactory = getSessionFactory();
-			session = sessionFactory.openSession();
-			Transaction tx = session.beginTransaction();
+			try (Session session = sessionFactory.openSession()) {
+				Transaction tx = session.beginTransaction();
+				try {
+					if (isEmailAlreadyRegistered(newAcc.getEmail())) {
+						System.out.println("Email already exists: " + newAcc.getEmail());
+						tx.rollback();
+						return null;
+					}
 
-			if (isEmailAlreadyRegistered(newAcc.getEmail())) {
-				System.out.println("Email already exists: " + newAcc.getEmail());
-				tx.rollback();
-				session.close();
-				return null;
+					int newId = getNextAccountId(session);
+					newAcc.setAccountID(newId);
+					newAcc.setLoggedIn(true);
+
+					System.out.println("Saving account with email: " + newAcc.getEmail());
+					session.save(newAcc);
+					session.flush();
+					tx.commit();
+
+					System.out.println("Account saved successfully with ID: " + newId);
+					return newAcc;
+				} catch (Exception ex) {
+					tx.rollback();
+					throw ex;
+				}
 			}
-
-			long numOfRows = countAccountRows();
-			int castedId = (int) numOfRows;
-			int newId = castedId + 1;
-			newAcc.setAccountID(newId);
-			newAcc.setLoggedIn(true);
-
-			System.out.println("Saving account with email: " + newAcc.getEmail());
-			session.save(newAcc);
-			session.flush();
-			tx.commit();
-
-			System.out.println("Account saved successfully with ID: " + newId);
-			session.close();
-
-			return newAcc;
 
 		} catch (Exception exception) {
 			System.err.println("Error during account registration:");
 			exception.printStackTrace();
-
-			if (session != null) {
-				try {
-					session.getTransaction().rollback();
-				} catch (Exception rollbackEx) {
-					System.err.println("Error during transaction rollback:");
-					rollbackEx.printStackTrace();
-				}
-				session.close();
-			}
 
 			return null;
 		}
@@ -1121,110 +1261,111 @@ public class SimpleServer extends AbstractServer {
 		System.out.println("arrived to removeItemFromCatalog 1");
 
 		int removedId = Integer.parseInt(AccIdToRemove);
-		System.out.println("mr7ba");
-		accountGeneralList = getAllAccounts();
-		accountGeneralList.remove(removedId - 1);
-		for (int i = 0; i < accountGeneralList.size(); i++) {
-			if (accountGeneralList.get(i).getAccountID() > removedId) {
-				accountGeneralList.get(i).setAccountID((accountGeneralList.get(i).getAccountID() - 1));
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx1 = session.beginTransaction();
+			try {
+				Account account = session.get(Account.class, removedId);
+				if (account != null) {
+					session.delete(account);
+				}
+				List<Account> updatedAccounts = getAllAccounts(session);
+				GetAllAccounts response = new GetAllAccounts();
+				response.setAll_accounts(updatedAccounts);
+				try {
+					_client.sendToClient(response);
+				} catch (IOException ioException) {
+					ioException.printStackTrace();
+				}
+				tx1.commit();
+				System.out.println("arrived to removeItemFromCatalog 2.8");
+			} catch (Exception ex) {
+				tx1.rollback();
+				throw ex;
 			}
 		}
-		System.out.println("mr7ba2");
-
-		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx1 = session.beginTransaction();
-		System.out.println("mr7ba3");
-		long longID = countAccountRows();
-		tx1.commit();
-		session.close();
-		System.out.println("mr7ba4");
-		System.out.println("arrived to removeItemFromCatalog 3 and the longID is " + longID);
-		int castedID = (int) longID;
-		System.out.println(castedID);
-		for (int l = 0; l < castedID; l++) {
-			System.out.println("arrived to removeItemFromCatalog 2.5");
-			deleteAccount(l + 1);
-		}
-		System.out.println("mr7ba5");
-		sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx2 = session.beginTransaction();
-		for (int i = 0; i < accountGeneralList.size(); i++) {
-			session.save(accountGeneralList.get(i));
-			session.flush();
-		}
-		System.out.println("mr7ba6");
-		tx2.commit();
-		session.close();
-		System.out.println("mr7ba7");
-		System.out.println("arrived to removeItemFromCatalog 2.8");
 	}
 
 	public void deleteAccount(int deleteIndex) {
 		System.out.println("arrived to deleteProd 1");
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-		System.out.println("arrived to deleteProd 2");
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				System.out.println("arrived to deleteProd 2");
 
-		Object persistentInstance = session.load(Account.class, deleteIndex);
-		Account peracc = (Account) persistentInstance;
-		System.out.println("arrived to deleteProd 3");
-		if (persistentInstance != null) {
-			session.delete(peracc);
+				Object persistentInstance = session.get(Account.class, deleteIndex);
+				Account peracc = (Account) persistentInstance;
+				System.out.println("arrived to deleteProd 3");
+				if (persistentInstance != null) {
+					session.delete(peracc);
+				}
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
 		}
-		tx.commit();
-		session.close();
 	}
 
 	public Long countAccountRows() {
 		System.out.println("Arrived to coutnrwos 1");
 		SessionFactory sessionFactory = getSessionFactory();
 		try (Session countSession = sessionFactory.openSession()) {
-			final CriteriaBuilder criteriaBuilder = countSession.getCriteriaBuilder();
-			System.out.println("Arrived to coutnrwos 2");
-			CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-			System.out.println("Arrived to coutnrwos 3");
-			Root<Account> root = criteria.from(Account.class);
-			System.out.println("Arrived to coutnrwos 4");
-			criteria.select(criteriaBuilder.count(root));
-			Long count = countSession.createQuery(criteria).getSingleResult();
-			System.out.println("Arrived to coutnrwos 5");
-			System.out.println(count);
-			return count;
+			Transaction tx = countSession.beginTransaction();
+			try {
+				final CriteriaBuilder criteriaBuilder = countSession.getCriteriaBuilder();
+				System.out.println("Arrived to coutnrwos 2");
+				CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+				System.out.println("Arrived to coutnrwos 3");
+				Root<Account> root = criteria.from(Account.class);
+				System.out.println("Arrived to coutnrwos 4");
+				criteria.select(criteriaBuilder.count(root));
+				Long count = countSession.createQuery(criteria).getSingleResult();
+				System.out.println("Arrived to coutnrwos 5");
+				System.out.println(count);
+				tx.commit();
+				return count;
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
 		}
 	}
 
 	public void editAccount(Account accountEdit) {
 		System.out.println("Arrived to edit catalog product 1");
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				int recievedAccountID = accountEdit.getAccountID();
 
-		int recievedAccountID = accountEdit.getAccountID();
+				Account updateAccount = session.load(Account.class, recievedAccountID);
 
-		Account updateAccount = session.load(Account.class, recievedAccountID);
+				updateAccount.setID((int) accountEdit.getID());
+				updateAccount.setFullName(accountEdit.getFullName());
+				updateAccount.setAddress(accountEdit.getAddress());
+				updateAccount.setEmail(accountEdit.getEmail());
+				updateAccount.setPassword(accountEdit.getPassword());
+				updateAccount.setPhoneNumber(accountEdit.getPhoneNumber());
+				updateAccount.setCreditCardNumber(accountEdit.getCreditCardNumber());
+				updateAccount.setCcv(accountEdit.getCcv());
+				updateAccount.setCreditMonthExpire(accountEdit.getCreditMonthExpire());
+				updateAccount.setCreditYearExpire(accountEdit.getCreditYearExpire());
+				updateAccount.setLoggedIn(accountEdit.getLoggedIn());
+				updateAccount.setBelongShop(accountEdit.getBelongShop());
+				updateAccount.setSubscription(accountEdit.isSubscription());
+				updateAccount.setPrivialge(accountEdit.getPrivialge());
+				updateAccount.setFrozen(accountEdit.getFrozen());
 
-		updateAccount.setID((int) accountEdit.getID());
-		updateAccount.setFullName(accountEdit.getFullName());
-		updateAccount.setAddress(accountEdit.getAddress());
-		updateAccount.setEmail(accountEdit.getEmail());
-		updateAccount.setPassword(accountEdit.getPassword());
-		updateAccount.setPhoneNumber(accountEdit.getPhoneNumber());
-		updateAccount.setCreditCardNumber(accountEdit.getCreditCardNumber());
-		updateAccount.setCcv(accountEdit.getCcv());
-		updateAccount.setCreditMonthExpire(accountEdit.getCreditMonthExpire());
-		updateAccount.setCreditYearExpire(accountEdit.getCreditYearExpire());
-		updateAccount.setLoggedIn(accountEdit.getLoggedIn());
-		updateAccount.setBelongShop(accountEdit.getBelongShop());
-		updateAccount.setSubscription(accountEdit.isSubscription());
-		updateAccount.setPrivialge(accountEdit.getPrivialge());
-		updateAccount.setFrozen(accountEdit.getFrozen());
-
-		session.update(updateAccount);
-		tx.commit();
-		session.close();
+				session.update(updateAccount);
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
+		}
 	}
 
 	public void addMessage(Message newMessage) {
@@ -1235,14 +1376,18 @@ public class SimpleServer extends AbstractServer {
 		newMessage.setMessageID(newId);
 
 		SessionFactory sessionFactory = getSessionFactory();
-		session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
-
-		session.save(newMessage);
-		session.flush();
-		tx.commit();
-		System.out.println("khaled");
-		session.close();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				session.save(newMessage);
+				session.flush();
+				tx.commit();
+				System.out.println("khaled");
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
+		}
 	}
 
 	public Long countMessageRows() {
@@ -1250,17 +1395,24 @@ public class SimpleServer extends AbstractServer {
 		SessionFactory sessionFactory = getSessionFactory();
 		Session localSession = sessionFactory.openSession();
 		try {
-			final CriteriaBuilder criteriaBuilder = localSession.getCriteriaBuilder();
-			System.out.println("Arrived to coutnrwos 2");
-			CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-			System.out.println("Arrived to coutnrwos 3");
-			Root<Message> root = criteria.from(Message.class);
-			System.out.println("Arrived to coutnrwos 4");
-			criteria.select(criteriaBuilder.count(root));
-			System.out.println("Arrived to coutnrwos 5");
-			Long count = localSession.createQuery(criteria).getSingleResult();
-			System.out.println(count);
-			return count;
+			Transaction tx = localSession.beginTransaction();
+			try {
+				final CriteriaBuilder criteriaBuilder = localSession.getCriteriaBuilder();
+				System.out.println("Arrived to coutnrwos 2");
+				CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+				System.out.println("Arrived to coutnrwos 3");
+				Root<Message> root = criteria.from(Message.class);
+				System.out.println("Arrived to coutnrwos 4");
+				criteria.select(criteriaBuilder.count(root));
+				System.out.println("Arrived to coutnrwos 5");
+				Long count = localSession.createQuery(criteria).getSingleResult();
+				System.out.println(count);
+				tx.commit();
+				return count;
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
 		} finally {
 			localSession.close();
 		}
