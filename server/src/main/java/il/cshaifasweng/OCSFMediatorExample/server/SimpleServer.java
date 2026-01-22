@@ -1349,7 +1349,7 @@ private static SessionFactory cachedSessionFactory;
 		return branchA > 0 && branchA == branchB;
 	}
 
-	private int resolveBranchId(Account account) {
+	private static int resolveBranchId(Account account) {
 		if (account == null) {
 			return 0;
 		}
