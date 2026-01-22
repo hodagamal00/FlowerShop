@@ -396,6 +396,7 @@ public class CheckoutController {
             System.out.println(newOrder);
             UpdateMessage new_msg2 = new UpdateMessage("order", "add");
             new_msg2.setOrder(newOrder);
+            awaitingOrderConfirmation = true;
             try {
                 System.out.println("before sending updateMessage to server ");
                 SimpleClient.getClient().sendToServer(new_msg2); // sends the updated product to the server class
@@ -403,6 +404,7 @@ public class CheckoutController {
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
+                awaitingOrderConfirmation = false;
             }
 
 
@@ -524,8 +526,18 @@ public class CheckoutController {
 
     @Subscribe
     public void handleUserUpdateResponse(UserUpdateResponse response) {
-        if (response == null || response.isSuccess()) {
+        if (response == null) {
             return;
+        }
+        if (response.isSuccess()) {
+            if (awaitingOrderConfirmation) {
+                CartService.getInstance().clear();
+                awaitingOrderConfirmation = false;
+            }
+            return;
+        }
+        if (awaitingOrderConfirmation) {
+            awaitingOrderConfirmation = false;
         }
         String message = response.getMessage();
         if (message == null || message.isBlank()) {
@@ -535,6 +547,7 @@ public class CheckoutController {
         noDate.setVisible(true);
     }
     List<Product> cart = new ArrayList<>();
+    private boolean awaitingOrderConfirmation = false;
     @FXML
     void initialize() throws MalformedURLException
     {
@@ -774,7 +787,6 @@ public class CheckoutController {
     }
 
     private void navigateToOrderConfirmation(Order order, boolean delivery) {
-        CartService.getInstance().clear();
         OrderConfirmationController.setOrder(order, delivery);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("OrderConfirmation.fxml"));
