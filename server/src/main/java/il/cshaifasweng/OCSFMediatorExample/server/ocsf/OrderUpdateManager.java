@@ -249,9 +249,34 @@ public class OrderUpdateManager {
                 session.update(updateOrder);
                 System.out.println("Arrived to delivered order 4");
                 tx.commit();
+                notifyDeliveryIfGift(updateOrder, session);
             } catch (Exception ex) {
                 tx.rollback();
                 throw ex;
+            }
+        }
+    }
+
+    private static void notifyDeliveryIfGift(Order order, Session session) {
+        Account account = session.get(Account.class, order.getAccountID());
+        if (account == null) {
+            System.err.println("Warning: Unable to find account for delivered order " + order.getOrderID());
+            return;
+        }
+        String recipientName = order.getRecepName();
+        boolean hasRecipientName = recipientName != null;
+        boolean hasRecipientPhone = order.getRecepPhone() > 0;
+        boolean recipientNameDiffers = hasRecipientName
+                && account.getFullName() != null
+                && !recipientName.equals(account.getFullName());
+        boolean sentToSomeoneElse = (hasRecipientName && hasRecipientPhone) || recipientNameDiffers;
+
+        if (sentToSomeoneElse) {
+            try {
+                NotificationService.sendDeliveryNotification(order, account);
+            } catch (Exception ex) {
+                System.err.println("Warning: Failed to send delivery notification for order "
+                        + order.getOrderID() + ". " + ex.getMessage());
             }
         }
     }
