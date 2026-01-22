@@ -12,7 +12,6 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
@@ -93,7 +92,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button1" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -108,16 +107,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox spacing="2.0" alignment="CENTER">
+                                                    <Label fx:id="flower_promo1" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="6" left="6" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                        <children>
-                                                            <Label fx:id="flower_promo1" text="SALE" styleClass="sale-badge" rotate="-15" visible="false" />
-                                                            <Region fx:id="flower_promo_underline1" styleClass="sale-underline" visible="false" />
-                                                        </children>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -150,7 +145,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button2" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -165,16 +160,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox spacing="2.0" alignment="CENTER">
+                                                    <Label fx:id="flower_promo2" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="6" left="6" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                        <children>
-                                                            <Label fx:id="flower_promo2" text="SALE" styleClass="sale-badge" rotate="-15" visible="false" />
-                                                            <Region fx:id="flower_promo_underline2" styleClass="sale-underline" visible="false" />
-                                                        </children>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -207,7 +198,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button3" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -222,16 +213,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox spacing="2.0" alignment="CENTER">
+                                                    <Label fx:id="flower_promo3" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="6" left="6" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                        <children>
-                                                            <Label fx:id="flower_promo3" text="SALE" styleClass="sale-badge" rotate="-15" visible="false" />
-                                                            <Region fx:id="flower_promo_underline3" styleClass="sale-underline" visible="false" />
-                                                        </children>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -264,7 +251,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button4" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -279,16 +266,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox spacing="2.0" alignment="CENTER">
+                                                    <Label fx:id="flower_promo4" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="6" left="6" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                        <children>
-                                                            <Label fx:id="flower_promo4" text="SALE" styleClass="sale-badge" rotate="-15" visible="false" />
-                                                            <Region fx:id="flower_promo_underline4" styleClass="sale-underline" visible="false" />
-                                                        </children>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -321,7 +304,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button5" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -336,16 +319,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox spacing="2.0" alignment="CENTER">
+                                                    <Label fx:id="flower_promo5" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="6" left="6" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                        <children>
-                                                            <Label fx:id="flower_promo5" text="SALE" styleClass="sale-badge" rotate="-15" visible="false" />
-                                                            <Region fx:id="flower_promo_underline5" styleClass="sale-underline" visible="false" />
-                                                        </children>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
@@ -378,7 +357,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button6" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -393,16 +372,12 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <VBox spacing="2.0" alignment="CENTER">
+                                                    <Label fx:id="flower_promo6" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="6" left="6" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                        <children>
-                                                            <Label fx:id="flower_promo6" text="SALE" styleClass="sale-badge" rotate="-15" visible="false" />
-                                                            <Region fx:id="flower_promo_underline6" styleClass="sale-underline" visible="false" />
-                                                        </children>
-                                                    </VBox>
+                                                    </Label>
                                                 </children>
                                             </StackPane>
 
