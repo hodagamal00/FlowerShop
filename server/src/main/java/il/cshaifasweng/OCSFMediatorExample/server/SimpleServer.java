@@ -499,7 +499,7 @@ private static SessionFactory cachedSessionFactory;
 					if (!dbPass.trim().equals(uiPass.trim())) {
 						client.sendToClient("wrong password");
 					} else if (matchedAccount.getLoggedIn()) {
-						client.sendToClient("already logged");
+						client.sendToClient(new UserUpdateResponse(false, "User already logged in"));
 					} else {
 						matchedAccount.setLoggedIn(true);
 						localSession.update(matchedAccount);
@@ -875,6 +875,36 @@ private static SessionFactory cachedSessionFactory;
 			}
 		}
 		return null;
+	}
+
+	@Override
+	synchronized protected void clientDisconnected(ConnectionToClient client) {
+		Account account = client != null ? (Account) client.getInfo("account") : null;
+		if (account == null) {
+			return;
+		}
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				int accountId = account.getAccountID();
+				Account managedAccount = null;
+				if (accountId > 0) {
+					managedAccount = session.get(account.getClass(), accountId);
+					if (managedAccount == null && account.getClass() != Account.class) {
+						managedAccount = session.get(Account.class, accountId);
+					}
+				}
+				if (managedAccount != null) {
+					managedAccount.setLoggedIn(false);
+					session.update(managedAccount);
+				}
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				System.err.println("Failed to clear login state on disconnect: " + ex.getMessage());
+			}
+		}
 	}
 
 	private boolean isManager(ConnectionToClient client) {

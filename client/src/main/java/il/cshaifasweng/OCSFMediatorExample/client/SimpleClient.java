@@ -54,6 +54,13 @@ public class SimpleClient extends AbstractClient {
 
 		if (msg instanceof UserUpdateResponse) {
 			UserUpdateResponse response = (UserUpdateResponse) msg;
+			if ("User already logged in".equals(response.getMessage())) {
+				MailChecker mailCheckEvent = new MailChecker(true);
+				mailCheckEvent.setPasswordExists(true);
+				mailCheckEvent.setLoggedIn(true);
+				EventBus.getDefault().post(mailCheckEvent);
+				return;
+			}
 			EventBus.getDefault().post(response);
 			return;
 		}
