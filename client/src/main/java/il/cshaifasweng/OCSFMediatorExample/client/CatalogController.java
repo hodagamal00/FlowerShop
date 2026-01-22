@@ -1074,7 +1074,9 @@ public class CatalogController {
 		priceBefore.setText(formattedBase);
 		if (oldPriceContainer != null) {
 			oldPriceContainer.setVisible(hasDiscount);
-			oldPriceContainer.setManaged(hasDiscount);
+			if (!oldPriceContainer.managedProperty().isBound()) {
+				oldPriceContainer.setManaged(hasDiscount);
+			}
 		}
 		if (oldPriceStrike != null) {
 			oldPriceStrike.setVisible(hasDiscount);
