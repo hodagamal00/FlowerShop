@@ -126,7 +126,7 @@ public class CatalogManagementController {
                     PricingService.PricingResult pricing = PricingService.calculatePricing(product, SimpleClient.getAccount());
                     double basePrice = pricing.getBasePrice();
                     double finalPrice = pricing.getFinalPrice();
-                    if (pricing.isPromotionApplied()) {
+                    if (pricing.isPromotionApplied() || pricing.isSubscriptionDiscountApplied()) {
                         setText(String.format("$%.2f → $%.2f", basePrice, finalPrice));
                     } else {
                         setText(String.format("$%.2f", basePrice));

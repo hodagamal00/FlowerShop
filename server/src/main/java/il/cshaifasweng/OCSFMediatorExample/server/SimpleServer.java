@@ -960,32 +960,33 @@ private static SessionFactory cachedSessionFactory;
 		} catch (DateTimeException ex) {
 			return new CancelOrderResponse(false, "Order delivery time is invalid.", orderId, 0, 0, "NONE");
 		}
-		long minutesUntilDelivery = Duration.between(now, deliveryTime).toMinutes();
-		double refundFactor;
-		String refundStatus;
-		if (minutesUntilDelivery >= 180) {
-			refundFactor = 1.0;
-			refundStatus = "FULL";
-		} else if (minutesUntilDelivery >= 60) {
-			refundFactor = 0.5;
-			refundStatus = "HALF";
-		} else {
-			refundFactor = 0.0;
-			refundStatus = "NONE";
-		}
-
-		double refundAmount = order.getTotalPrice() * refundFactor;
+		double refundFactor = order.calculateRefund(
+				now.getDayOfMonth(),
+				now.getMonthValue(),
+				now.getYear(),
+				now.getHour(),
+				now.getMinute()
+		);
+		double refundAmount = order.getRefundAmount();
+		String refundStatus = order.getRefundStatus();
 		order.setCancelled(true);
 		order.setCancelDay(now.getDayOfMonth());
 		order.setCancelMonth(now.getMonthValue());
 		order.setCancelYear(now.getYear());
 		order.setCancelHour(now.getHour());
 		order.setCancelMinute(now.getMinute());
-		order.setRefundAmount(refundAmount);
-		order.setRefundStatus(refundStatus);
 		session.update(order);
 
-		return new CancelOrderResponse(true, "Order cancelled successfully.", orderId,
+		if (refundAmount > 0) {
+			Account refundAccount = session.get(Account.class, order.getAccountID());
+			if (refundAccount != null) {
+				refundAccount.addCreditBalance(refundAmount);
+				session.update(refundAccount);
+			}
+		}
+
+		String message = String.format(Locale.US, "Order cancelled successfully. Refund amount: ₪%.2f", refundAmount);
+		return new CancelOrderResponse(true, message, orderId,
 				refundAmount, refundFactor * 100.0, refundStatus);
 	}
 
@@ -1016,21 +1017,30 @@ private static SessionFactory cachedSessionFactory;
 		}
 		order.setAccountID(account.getAccountID());
 
+		try {
+			LocalDateTime orderTime = order.getOrderDate();
+			LocalDateTime deliveryTime = order.getDelivery_time();
+			if (deliveryTime.isBefore(orderTime)) {
+				throw new IllegalArgumentException("Requested delivery time cannot be before the order time.");
+			}
+			if (deliveryTime.isBefore(LocalDateTime.now())) {
+				throw new IllegalArgumentException("Requested delivery time must be in the future.");
+			}
+		} catch (DateTimeException ex) {
+			throw new IllegalArgumentException("Requested delivery time is invalid.", ex);
+		}
+
 		order.setDelivered(false);
 		order.setCancelled(false);
 		order.setRefundAmount(0);
 		order.setRefundStatus("NONE");
 
-		int productsTotal = calculateProductsTotal(order.getProducts());
+		double productsTotal = calculateProductsTotal(order.getProducts(), account);
 		double deliveryFee = resolveDeliveryFee(order);
 		order.setDeliveryFee(deliveryFee);
 
-		int total = productsTotal + (int) Math.round(deliveryFee);
-		if (account != null && account.isSubscription() && total > 50) {
-			total = (int) (total * 0.9);
-		}
-
-		order.setTotalPrice(total);
+		double total = Product.roundCurrency(productsTotal + deliveryFee);
+		order.setTotalPrice((int) Math.round(total));
 	}
 
 	private Account resolveAccount(ConnectionToClient client, int accountId) {
@@ -1055,11 +1065,11 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
-	private int calculateProductsTotal(String products) {
+	private double calculateProductsTotal(String products, Account account) {
 		if (isBlank(products)) {
 			return 0;
 		}
-		int total = 0;
+		double total = 0.0;
 		SessionFactory sessionFactory = getSessionFactory();
 		try (Session localSession = sessionFactory.openSession()) {
 			Transaction tx = localSession.beginTransaction();
@@ -1078,7 +1088,14 @@ private static SessionFactory cachedSessionFactory;
 					if (product == null) {
 						throw new IllegalArgumentException("Unknown product: " + productName);
 					}
-					total += (int) Math.round(product.getActualPrice());
+					double promoPrice = product.hasActivePromotion()
+							? Product.roundCurrency(Product.calculateDiscountedPrice(product.getPrice(), product.getDiscountPercent()))
+							: Product.roundCurrency(product.getPrice());
+					double finalPrice = promoPrice;
+					if (account != null && account.isSubscription() && promoPrice > 50.0) {
+						finalPrice = Product.roundCurrency(Product.calculateDiscountedPrice(promoPrice, 10.0));
+					}
+					total += finalPrice;
 				}
 				tx.commit();
 			} catch (Exception ex) {

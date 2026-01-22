@@ -96,27 +96,32 @@ public class ReplyComplaintController {
     @FXML
     void SendReply(ActionEvent event)
     {
-        int PercentInt = 0;
-        String TempPercent = "";
+        int compensationAmount = 0;
         boolean willReturnMoney=  false;
-        int returnedMoney = 0;
         selectedComplaint.setAccepted(true);
         selectedComplaint.setAnswerworkerID(currentUser.getAccountID());
         selectedComplaint.setReplyText(replyText.getText());
         selectedComplaint.setRespondedAt(new Date());
-        selectedComplaint.setSlaStatus("RESOLVED_ON_TIME");
         if(refundCheck.isSelected())
         {
             willReturnMoney = true;
-            TempPercent = Character.toString(refundPercent.getSelectionModel().getSelectedItem().charAt(0)) + Character.toString(refundPercent.getSelectionModel().getSelectedItem().charAt(1));
-            PercentInt = Integer.parseInt(TempPercent);
-            selectedComplaint.setCompensationDecision(PercentInt + "% refund approved");
+            String selection = refundPercent.getSelectionModel().getSelectedItem();
+            if (selection == null || selection.isBlank()) {
+                showAlert("Please select a compensation amount.");
+                return;
+            }
+            compensationAmount = parseCompensationAmount(selection);
+            if (compensationAmount < 0) {
+                showAlert("Compensation amount must be a positive number.");
+                return;
+            }
+            selectedComplaint.setCompensationDecision(compensationAmount + "₪ compensation approved");
         }
         else {
             selectedComplaint.setCompensationDecision("No compensation");
         }
         selectedComplaint.setReturnedMoney(willReturnMoney);
-        selectedComplaint.setReturnedmoneyvalue(PercentInt);
+        selectedComplaint.setReturnedmoneyvalue(compensationAmount);
 
         System.out.println("ReplyComplaintController before updating complaint");
         UpdateMessage update_complaint = new UpdateMessage("complaint","edit");
@@ -129,15 +134,6 @@ public class ReplyComplaintController {
             e.printStackTrace();
         }
         System.out.println("ReplyComplaintController before updating complaint");
-        UpdateMessage update_complainte = new UpdateMessage("complaint","edit");
-        update_complainte.setComplaint(selectedComplaint);
-
-        try {
-            SimpleClient.getClient().sendToServer(update_complaint);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         System.out.println("ReplyComplaintController after updating complaint");
 
         Calendar calle = Calendar.getInstance();
@@ -182,6 +178,35 @@ public class ReplyComplaintController {
 
     }
 
+    private int parseCompensationAmount(String selection) {
+        String digitsOnly = selection.replaceAll("[^0-9]", "");
+        if (digitsOnly.isEmpty()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(digitsOnly);
+        } catch (NumberFormatException ex) {
+            return 0;
+        }
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Compensation");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private boolean isLateStatus(String status) {
+        if (status == null) {
+            return false;
+        }
+        return "RESOLVED_LATE".equalsIgnoreCase(status)
+                || "OVERDUE".equalsIgnoreCase(status)
+                || "LATE".equalsIgnoreCase(status);
+    }
+
     Complaint selectedComplaint = new Complaint();
     @FXML
     void loadComplaints(ActionEvent event)
@@ -194,6 +219,9 @@ public class ReplyComplaintController {
                 if(retrievedComplaints.get(z).isAccepted() == false)
                 {
                     aString = "#" + retrievedComplaints.get(z).getComplaintID() + " - " + retrievedComplaints.get(z).getDay() + "/" + retrievedComplaints.get(z).getMonth() + "/" + retrievedComplaints.get(z).getYear();
+                    if (isLateStatus(retrievedComplaints.get(z).getSlaStatus())) {
+                        aString = aString + " (Late)";
+                    }
                     complaintList.getItems().add(aString);
                     aString = "";
                 }
@@ -285,10 +313,10 @@ public class ReplyComplaintController {
         assert compensationDecisionField != null : "fx:id=\"compensationDecisionField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
 
 
-        refundPercent.getItems().add("25%");
-        refundPercent.getItems().add("50%");
-        refundPercent.getItems().add("75%");
-        refundPercent.getItems().add("100%");
+        refundPercent.getItems().add("25₪");
+        refundPercent.getItems().add("50₪");
+        refundPercent.getItems().add("75₪");
+        refundPercent.getItems().add("100₪");
 
         //Complaint a = new Complaint(0,23,22,false,false,"Fuck you",2,0,false,0,23,2,2004,"");
         refundPercent.setVisible(false);

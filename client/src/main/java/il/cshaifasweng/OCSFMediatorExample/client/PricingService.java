@@ -3,40 +3,39 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public final class PricingService {
 
-    private static final double WORKER_DISCOUNT_PERCENT = 10.0;
-    private static final double MANAGER_DISCOUNT_PERCENT = 15.0;
-    private static final double CHAIN_MANAGER_DISCOUNT_PERCENT = 20.0;
+    private static final double SUBSCRIPTION_DISCOUNT_PERCENT = 10.0;
 
     private PricingService() {
     }
 
     public static PricingResult calculatePricing(Product product, Account account) {
-        int privilege = account != null ? account.getPrivilegeLevel() : 0;
-        return calculatePricing(product, privilege);
-    }
-
-    public static PricingResult calculatePricing(Product product, int privilege) {
         if (product == null) {
             return new PricingResult(0.0, 0.0, 0.0, false, false);
         }
 
-        double basePrice = product.getPrice();
+        double basePrice = roundCurrency(product.getPrice());
         boolean hasPromotion = product.hasActivePromotion();
         double promotionPrice = hasPromotion
-                ? Product.calculateDiscountedPrice(basePrice, product.getDiscountPercent())
+                ? roundCurrency(Product.calculateDiscountedPrice(basePrice, product.getDiscountPercent()))
                 : basePrice;
 
-        double privilegeDiscountPercent = resolvePrivilegeDiscountPercent(privilege);
-        boolean hasPrivilegeDiscount = privilegeDiscountPercent > 0;
-        double finalPrice = hasPrivilegeDiscount
-                ? Product.calculateDiscountedPrice(promotionPrice, privilegeDiscountPercent)
-                : promotionPrice;
-        double roundedFinalPrice = Product.roundCurrency(finalPrice);
-        double roundedPromotionPrice = Product.roundCurrency(promotionPrice);
+        boolean subscriptionApplied = false;
+        double finalPrice = promotionPrice;
+        if (account != null && account.isSubscription() && promotionPrice > 50.0) {
+            finalPrice = roundCurrency(Product.calculateDiscountedPrice(promotionPrice, SUBSCRIPTION_DISCOUNT_PERCENT));
+            subscriptionApplied = true;
+        }
 
-        return new PricingResult(basePrice, roundedPromotionPrice, roundedFinalPrice, hasPromotion, hasPrivilegeDiscount);
+        return new PricingResult(basePrice, promotionPrice, finalPrice, hasPromotion, subscriptionApplied);
+    }
+
+    public static PricingResult calculatePricing(Product product, int privilege) {
+        return calculatePricing(product, (Account) null);
     }
 
     public static double calculateDisplayPrice(Product product, Account account) {
@@ -47,33 +46,20 @@ public final class PricingService {
         return calculatePricing(product, privilege).getFinalPrice();
     }
 
-    private static double resolvePrivilegeDiscountPercent(int privilege) {
-        if (privilege >= 4) {
-            return CHAIN_MANAGER_DISCOUNT_PERCENT;
-        }
-        if (privilege >= 3) {
-            return MANAGER_DISCOUNT_PERCENT;
-        }
-        if (privilege >= 2) {
-            return WORKER_DISCOUNT_PERCENT;
-        }
-        return 0.0;
-    }
-
     public static class PricingResult {
         private final double basePrice;
         private final double promotionPrice;
         private final double finalPrice;
         private final boolean promotionApplied;
-        private final boolean privilegeDiscountApplied;
+        private final boolean subscriptionDiscountApplied;
 
         public PricingResult(double basePrice, double promotionPrice, double finalPrice,
-                             boolean promotionApplied, boolean privilegeDiscountApplied) {
+                             boolean promotionApplied, boolean subscriptionDiscountApplied) {
             this.basePrice = basePrice;
             this.promotionPrice = promotionPrice;
             this.finalPrice = finalPrice;
             this.promotionApplied = promotionApplied;
-            this.privilegeDiscountApplied = privilegeDiscountApplied;
+            this.subscriptionDiscountApplied = subscriptionDiscountApplied;
         }
 
         public double getBasePrice() {
@@ -92,8 +78,12 @@ public final class PricingService {
             return promotionApplied;
         }
 
-        public boolean isPrivilegeDiscountApplied() {
-            return privilegeDiscountApplied;
+        public boolean isSubscriptionDiscountApplied() {
+            return subscriptionDiscountApplied;
         }
+    }
+
+    public static double roundCurrency(double value) {
+        return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 }
