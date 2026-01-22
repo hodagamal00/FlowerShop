@@ -12,6 +12,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
@@ -106,19 +107,23 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo1" text="SALE" styleClass="sale-badge">
+                                                    <VBox alignment="TOP_LEFT" spacing="2.0">
+                                                        <children>
+                                                            <Label fx:id="flower_promo1" text="SALE" styleClass="sale-badge" />
+                                                            <Region fx:id="flower_sale_underline1" styleClass="sale-underline" />
+                                                        </children>
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </Label>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name1" text="Sunflower" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before1" text="200₪" styleClass="price-before" />
+                                                    <Text fx:id="flower_price_before1" text="200₪" styleClass="price-before" />
                                                     <Label fx:id="flower_price_after1" text="150₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
@@ -154,19 +159,23 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo2" text="SALE" styleClass="sale-badge">
+                                                    <VBox alignment="TOP_LEFT" spacing="2.0">
+                                                        <children>
+                                                            <Label fx:id="flower_promo2" text="SALE" styleClass="sale-badge" />
+                                                            <Region fx:id="flower_sale_underline2" styleClass="sale-underline" />
+                                                        </children>
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </Label>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name2" text="Daisy" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before2" text="120₪" styleClass="price-before" />
+                                                    <Text fx:id="flower_price_before2" text="120₪" styleClass="price-before" />
                                                     <Label fx:id="flower_price_after2" text="100₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
@@ -202,19 +211,23 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo3" text="SALE" styleClass="sale-badge">
+                                                    <VBox alignment="TOP_LEFT" spacing="2.0">
+                                                        <children>
+                                                            <Label fx:id="flower_promo3" text="SALE" styleClass="sale-badge" />
+                                                            <Region fx:id="flower_sale_underline3" styleClass="sale-underline" />
+                                                        </children>
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </Label>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name3" text="Lily" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before3" text="100₪" styleClass="price-before" />
+                                                    <Text fx:id="flower_price_before3" text="100₪" styleClass="price-before" />
                                                     <Label fx:id="flower_price_after3" text="80₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
@@ -250,19 +263,23 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo4" text="SALE" styleClass="sale-badge">
+                                                    <VBox alignment="TOP_LEFT" spacing="2.0">
+                                                        <children>
+                                                            <Label fx:id="flower_promo4" text="SALE" styleClass="sale-badge" />
+                                                            <Region fx:id="flower_sale_underline4" styleClass="sale-underline" />
+                                                        </children>
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </Label>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name4" text="Tulip" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before4" text="70₪" styleClass="price-before" />
+                                                    <Text fx:id="flower_price_before4" text="70₪" styleClass="price-before" />
                                                     <Label fx:id="flower_price_after4" text="60₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
@@ -298,19 +315,23 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo5" text="SALE" styleClass="sale-badge">
+                                                    <VBox alignment="TOP_LEFT" spacing="2.0">
+                                                        <children>
+                                                            <Label fx:id="flower_promo5" text="SALE" styleClass="sale-badge" />
+                                                            <Region fx:id="flower_sale_underline5" styleClass="sale-underline" />
+                                                        </children>
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </Label>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name5" text="Rose" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before5" text="25₪" styleClass="price-before" />
+                                                    <Text fx:id="flower_price_before5" text="25₪" styleClass="price-before" />
                                                     <Label fx:id="flower_price_after5" text="15₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
@@ -346,19 +367,23 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo6" text="SALE" styleClass="sale-badge">
+                                                    <VBox alignment="TOP_LEFT" spacing="2.0">
+                                                        <children>
+                                                            <Label fx:id="flower_promo6" text="SALE" styleClass="sale-badge" />
+                                                            <Region fx:id="flower_sale_underline6" styleClass="sale-underline" />
+                                                        </children>
                                                         <StackPane.margin>
                                                             <Insets top="10" left="10" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
-                                                    </Label>
+                                                    </VBox>
                                                 </children>
                                             </StackPane>
 
                                             <Label fx:id="flower_name6" text="Orchid" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before6" text="150₪" styleClass="price-before" />
+                                                    <Text fx:id="flower_price_before6" text="150₪" styleClass="price-before" />
                                                     <Label fx:id="flower_price_after6" text="120₪" styleClass="price-after" />
                                                 </children>
                                             </HBox>
