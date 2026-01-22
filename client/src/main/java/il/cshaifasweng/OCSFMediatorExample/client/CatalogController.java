@@ -333,13 +333,6 @@ public class CatalogController {
 	private TextField cartTextPrice;
 
 	@FXML
-	private Text cartTextPriceDiscount;
-
-	@FXML
-	private Text cartTextPriceFinal;
-
-
-	@FXML
 	private Text cartTopText;
 
 	@FXML
@@ -583,10 +576,9 @@ public class CatalogController {
 
 		// إضافة المنتج
 		Product selectedProduct = displayProducts.get(index);
-		CartItemsList.getItems().add(selectedProduct.getName());
 		CartService.getInstance().addProduct(selectedProduct, 1);
 
-		updateCartSummaryFromItems(CartService.getInstance().getItems());
+		refreshCartDisplay();
 	}
 
 	private void addProductToCartByIndex(int offset) {
@@ -670,8 +662,6 @@ public class CatalogController {
 			cartTopText.setVisible(true);
 			cartTextPrice.setVisible(true);
 			cartTextDiscount.setVisible(true);
-			cartTextPriceDiscount.setVisible(true);
-			cartTextPriceFinal.setVisible(true);
 		}
 		else
 		{
@@ -685,8 +675,6 @@ public class CatalogController {
 			cartTopText.setVisible(false);
 			cartTextPrice.setVisible(false);
 			cartTextDiscount.setVisible(false);
-			cartTextPriceDiscount.setVisible(false);
-			cartTextPriceFinal.setVisible(false);
 		}
 		ViewItems(mode);
 		CartItemsList.setVisible(!mode);
@@ -1578,8 +1566,6 @@ public class CatalogController {
 		checkout.setVisible(false);
 		if (cartTextPrice != null) cartTextPrice.setVisible(false);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
-		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(false);
-		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(false);
 		if (CartItemsList != null) CartItemsList.setVisible(false);
 		if (cartTopText != null) cartTopText.setVisible(false);
 		flower1_addCart.setVisible(false);
@@ -1671,8 +1657,6 @@ public class CatalogController {
 		//cartTopText.setVisible(false);
 		//cartTextPrice.setVisible(false);
 		//cartTextDiscount.setVisible(false);
-		//cartTextPriceDiscount.setVisible(false);
-		//cartTextPriceFinal.setVisible(false);
 
 		// Populate filter combo boxes after data initialisation.  We only have six
 		// products at present; categories and colours are pulled from the Product
@@ -1725,7 +1709,7 @@ public class CatalogController {
 		if (cartTextDiscount != null) {
 			cartTextDiscount.setText("0");
 		}
-		updateCartSummaryFromItems(CartService.getInstance().getItems());
+		refreshCartDisplay();
 		worker_edit.setVisible(false);
 
 		inboxList.setVisible(false);
@@ -2180,16 +2164,6 @@ public class CatalogController {
 			cartTextPrice.setManaged(true);
 			cartTextPrice.setText("0");
 		}
-		if (cartTextPriceDiscount != null) {
-			cartTextPriceDiscount.setVisible(true);
-			cartTextPriceDiscount.setManaged(true);
-			cartTextPriceDiscount.setText("0");
-		}
-		if (cartTextPriceFinal != null) {
-			cartTextPriceFinal.setVisible(true);
-			cartTextPriceFinal.setManaged(true);
-			cartTextPriceFinal.setText("0");
-		}
 		if (viewCart != null) {
 			viewCart.setVisible(true);
 			viewCart.setManaged(true);
@@ -2197,6 +2171,7 @@ public class CatalogController {
 		if (checkout != null) {
 			checkout.setDisable(true);
 		}
+		refreshCartDisplay();
 	}
 
 	/**
@@ -2211,8 +2186,6 @@ public class CatalogController {
 		}
 		if (cartTextPrice != null) cartTextPrice.setVisible(true);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(true);
-		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(true);
-		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(true);
 		if (CartItemsList != null) CartItemsList.setVisible(true);
 		if (cartTopText != null) cartTopText.setVisible(true);
 		if (viewCart != null) viewCart.setVisible(true);
@@ -2292,18 +2265,7 @@ public class CatalogController {
 	}
 
 	private void syncCartFromService() {
-		if (CartItemsList == null) {
-			return;
-		}
-		CartItemsList.getItems().clear();
-		List<Product> items = CartService.getInstance().getItems();
-		for (Product product : items) {
-			if (product == null) {
-				continue;
-			}
-			CartItemsList.getItems().add(product.getName());
-		}
-		updateCartSummaryFromItems(items);
+		refreshCartDisplay();
 	}
 
 	private void addProductToCart(Product product) {
@@ -2311,32 +2273,83 @@ public class CatalogController {
 			return;
 		}
 
-		if (CartItemsList != null) {
-			CartItemsList.getItems().add(product.getName());
-		}
 		CartService.getInstance().addProduct(product, 1);
-		updateCartSummaryFromItems(CartService.getInstance().getItems());
+		refreshCartDisplay();
 	}
 
-	private void updateCartSummaryFromItems(List<Product> items) {
+	private void refreshCartDisplay() {
+		List<Product> items = CartService.getInstance().getItems();
+		updateCartList(items);
+		recalculateCartTotals(items);
+	}
+
+	private void updateCartList(List<Product> items) {
+		if (CartItemsList == null) {
+			return;
+		}
+		CartItemsList.getItems().setAll(buildCartLineLabels(items));
+	}
+
+	private List<String> buildCartLineLabels(List<Product> items) {
+		List<CartLine> lines = buildCartLines(items);
+		List<String> labels = new ArrayList<>();
+		for (CartLine line : lines) {
+			String label = line.quantity > 1
+					? String.format("%s x%d", line.product.getName(), line.quantity)
+					: line.product.getName();
+			labels.add(label);
+		}
+		return labels;
+	}
+
+	private List<CartLine> buildCartLines(List<Product> items) {
+		Map<String, CartLine> lines = new LinkedHashMap<>();
+		if (items != null) {
+			for (Product product : items) {
+				if (product == null) {
+					continue;
+				}
+				String key = product.getID() + "|" + product.getName() + "|" + product.getPrice();
+				CartLine line = lines.get(key);
+				if (line == null) {
+					line = new CartLine(product, 0);
+					lines.put(key, line);
+				}
+				line.quantity += 1;
+			}
+		}
+		return new ArrayList<>(lines.values());
+	}
+
+	private void recalculateCartTotals(List<Product> items) {
 		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
-		PricingService.CartTotals totals = PricingService.calculateCartTotals(items, account);
-		double baseTotal = totals.getBaseTotal();
-		double finalTotal = totals.getFinalTotal();
-
-		if (cartTextPrice != null) {
-			cartTextPrice.setText(String.format(Locale.US, "%.2f", baseTotal));
+		double subtotal = 0.0;
+		for (CartLine line : buildCartLines(items)) {
+			PricingService.PricingResult pricing = PricingService.calculatePricing(line.product, account);
+			subtotal += pricing.getFinalPrice() * line.quantity;
 		}
+		subtotal = PricingService.roundCurrency(subtotal);
+		double total = subtotal;
 
-		boolean discountApplied = finalTotal < baseTotal;
 		if (cartTextDiscount != null) {
-			cartTextDiscount.setText(String.format(Locale.US, "%.2f", finalTotal));
+			cartTextDiscount.setText(String.format(Locale.US, "%.2f", subtotal));
 		}
-		if (cartTextPriceDiscount != null) {
-			cartTextPriceDiscount.setText(discountApplied ? "Subscriber discount applied" : "No discounts applied");
+		if (cartTextPrice != null) {
+			cartTextPrice.setText(String.format(Locale.US, "%.2f", total));
 		}
-		if (cartTextPriceFinal != null) {
-			cartTextPriceFinal.setText(String.format(Locale.US, "Final total: %.2f", finalTotal));
+	}
+
+	private void recalculateCartTotals() {
+		recalculateCartTotals(CartService.getInstance().getItems());
+	}
+
+	private static class CartLine {
+		private final Product product;
+		private int quantity;
+
+		private CartLine(Product product, int quantity) {
+			this.product = product;
+			this.quantity = quantity;
 		}
 	}
 
