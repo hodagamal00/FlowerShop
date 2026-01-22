@@ -774,6 +774,7 @@ public class CheckoutController {
     }
 
     private void navigateToOrderConfirmation(Order order, boolean delivery) {
+        CartService.getInstance().clear();
         OrderConfirmationController.setOrder(order, delivery);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("OrderConfirmation.fxml"));
