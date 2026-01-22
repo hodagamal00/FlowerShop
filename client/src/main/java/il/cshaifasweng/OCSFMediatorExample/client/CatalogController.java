@@ -42,10 +42,7 @@ public class CatalogController {
 	public int managernum2 =0;
 	static boolean returnedFromSecondaryController = false;
 	boolean firstRun = true;
-	@FXML // fx:id="adminEditCatalog"
-	private ComboBox<String> adminEditCatalog; // Value injected by FXMLLoader
-
-	@FXML // fx:id="adminEditCatalog"
+	@FXML // fx:id="worker_edit"
 	private ComboBox<String> worker_edit; // Value injected by FXMLLoader
 
 	@FXML // Filter ComboBoxes
@@ -87,36 +84,11 @@ public class CatalogController {
 	@FXML
 	private VBox init_container;
 
-	@FXML // fx:id="EditItemDesc"
-	private TextField EditItemDesc; // Value injected by FXMLLoader
-
-	@FXML // fx:id="EditItemPrice"
-	private TextField EditItemPrice; // Value injected by FXMLLoader
-
-	@FXML // fx:id="EditItemType"
-	private TextField EditItemType; // Value injected by FXMLLoader
-
-
-	@FXML // fx:id="EditItemExtra"
-	private TextField EditItemExtra; // Value injected by FXMLLoader
-
-	@FXML // fx:id="customPrice"
-	private TextField customPrice; // Value injected by FXMLLoader
-
 	@FXML
 	private TextField customid;
 
-	@FXML // fx:id="CreateCustomItem"
-	public Button CreateCustomItem; // Value injected by FXMLLoader
-
 	@FXML
 	public Button infoo;
-
-	@FXML // fx:id="CancelCustomItem"
-	private Button CancelCustomItem; // Value injected by FXMLLoader
-
-	@FXML // fx:id="FinishCustomItem"
-	private Button FinishCustomItem; // Value injected by FXMLLoader
 
 
 	@FXML // fx:id="flower_button1"
@@ -300,18 +272,6 @@ public class CatalogController {
 	private Label flower_price_after6;
 
 
-	@FXML // fx:id="AddItem"
-	private Button AddItem; // Value injected by FXMLLoader
-
-	//@FXML // fx:id="AddItem"
-	//private Button remID;
-
-	@FXML // fx:id="RemoveItem"
-	private Button RemoveItem; // Value injected by FXMLLoader
-
-	@FXML // fx:id="UpdateItem"
-	private Button UpdateItem; // Value injected by FXMLLoader
-
 	@FXML
 	private Button printProd;
 
@@ -324,12 +284,6 @@ public class CatalogController {
 	@FXML
 	private Button prevPage;
 
-
-	@FXML
-	private ComboBox<String> chooseCustomColor;
-
-	@FXML
-	private ComboBox<String> chooseCustomType;
 
 	@FXML
 	private Button flower1_addCart;
@@ -365,9 +319,6 @@ public class CatalogController {
 	private Text cartTextPriceFinal;
 
 
-	@FXML // fx:id="customError"
-	private Text customError; // Value injected by FXMLLoader
-
 	@FXML
 	private Text cartTopText;
 
@@ -400,9 +351,6 @@ public class CatalogController {
 
 	@FXML // fx:id="deliveryButton"
 	private Button deliveryButton; // Value injected by FXMLLoader
-
-	@FXML // fx:id="catalogManagementBtn"
-	private Button catalogManagementBtn; // Value injected by FXMLLoader
 
 	@FXML // fx:id="catalogAddProductBtn"
 	private Button catalogAddProductBtn; // Value injected by FXMLLoader
@@ -473,6 +421,18 @@ public class CatalogController {
 			openMessage.setVisible(false);
 		}
 
+	}
+
+	@FXML
+	void chooseAdminEditCatalog(ActionEvent event) {
+		if (worker_edit == null) {
+			return;
+		}
+		String selection = worker_edit.getSelectionModel().getSelectedItem();
+		if (selection == null) {
+			return;
+		}
+		System.out.println("Worker action selected: " + selection);
 	}
 
 
@@ -731,7 +691,6 @@ public class CatalogController {
 			cartTextPriceFinal.setVisible(false);
 		}
 		ViewItems(mode);
-		viewAdminGUI(mode);
 		CartItemsList.setVisible(!mode);
 	}
 	@FXML
@@ -948,389 +907,6 @@ public class CatalogController {
 		);
 	}
 	public static String current_button;
-
-	@FXML
-	Product createCustomitem(ActionEvent event) {
-		if (!ensureLoggedInForCart()) {
-			return null;
-		}
-
-		FinishCustomItem.setText("Add Custom Item To Cart");
-		CancelCustomItem.setText("Cancel Custom Item Designer");
-		flower_button1.setVisible(true);
-		flower_button2.setVisible(true);
-		flower_button3.setVisible(true);
-		flower_button4.setVisible(true);
-		flower_button5.setVisible(true);
-		flower_button6.setVisible(true);
-
-		flower_price1.setVisible(true);
-		flower_price2.setVisible(true);
-		flower_price3.setVisible(true);
-		flower_price4.setVisible(true);
-		flower_price5.setVisible(true);
-		flower_price6.setVisible(true);
-
-		flower_name1.setVisible(true);
-		flower_name2.setVisible(true);
-		flower_name3.setVisible(true);
-		flower_name4.setVisible(true);
-		flower_name5.setVisible(true);
-		flower_name6.setVisible(true);
-
-		CreateCustomItem.setVisible(false);
-		adminEditCatalog.setVisible(false);
-		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
-		//	remID.setVisible(false);
-
-		EditItemExtra.setVisible(false);
-		EditItemDesc.setVisible(false);
-		EditItemType.setVisible(false);
-		EditItemPrice.setVisible(false);
-		AddItem.setVisible(false);
-		RemoveItem.setVisible(false);
-		UpdateItem.setVisible(false);
-
-		chooseCustomColor.setVisible(true);
-		customPrice.setVisible(true);
-		customid.setVisible(true);
-		chooseCustomType.setVisible(true);
-
-		CancelCustomItem.setVisible(true);
-		FinishCustomItem.setVisible(true);
-
-		// When creating a placeholder product, provide a numeric price (e.g., 0.0)
-		// instead of a string to match the Product constructor signature.
-		Product newProduct = new Product(0, "test", "test", "test", 0.0);  // Please insert real values
-		//CREATE A NEW PRODUCT DYNAMICALLY
-		// Tips: A global variable called ProductID which is incremented after each product created.
-		// A function GetNextProductID that returns a fresh ID for the new product to be added.
-		// Static fields and functions.
-		return newProduct;
-	}
-
-	@FXML
-	void cancelCustomitem(ActionEvent event) {
-		//.setVisible(false);
-		flower_button1.setVisible(true);
-		flower_button2.setVisible(true);
-		flower_button3.setVisible(true);
-		flower_button4.setVisible(true);
-		flower_button5.setVisible(true);
-		flower_button6.setVisible(true);
-
-		flower_price1.setVisible(true);
-		flower_price2.setVisible(true);
-		flower_price3.setVisible(true);
-		flower_price4.setVisible(true);
-		flower_price5.setVisible(true);
-		flower_price6.setVisible(true);
-
-		flower_name1.setVisible(true);
-		flower_name2.setVisible(true);
-		flower_name3.setVisible(true);
-		flower_name4.setVisible(true);
-		flower_name5.setVisible(true);
-		flower_name6.setVisible(true);
-
-		CreateCustomItem.setVisible(true);
-		adminEditCatalog.setVisible(true);
-
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-	}
-
-	@FXML
-	void addCartCustomitem(ActionEvent event)
-	{
-		if (!ensureLoggedInForCart()) {
-			return;
-		}
-		customError.setVisible(false);
-		boolean fail = false;
-		if(chooseCustomType.getSelectionModel().getSelectedIndex() == -1)
-		{
-			customError.setText("Please choose a type");
-			customError.setVisible(true);
-			fail = true;
-		}
-		if(chooseCustomColor.getSelectionModel().getSelectedIndex() == -1)
-		{
-			customError.setText("Please choose a color");
-			customError.setVisible(true);
-			fail = true;
-		}
-		String customPriceString = customPrice.getText();
-		PriceRange desiredRange = parsePriceRange(customPriceString);
-		if (desiredRange == null) {
-			fail = true;
-			customError.setText("Please enter a valid price range (e.g., 50-120)");
-			customError.setVisible(true);
-		}
-
-		if(fail == false)
-		{
-			String color = chooseCustomColor.getSelectionModel().getSelectedItem();
-			String Type = chooseCustomType.getSelectionModel().getSelectedItem();
-			// Parse the custom price text into a double before constructing the Product.
-			double priceValue = desiredRange.getSuggestedPrice();
-			// Use the selected type and color strings rather than the ComboBox objects themselves.
-			String selectedType = chooseCustomType.getSelectionModel().getSelectedItem();
-			String selectedColor = chooseCustomColor.getSelectionModel().getSelectedItem();
-			Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor + " (Price Range " + desiredRange.getDisplayText() + ")", priceValue);
-
-			addProductToCart(product);
-
-
-
-			customid.setVisible(false);
-
-			CancelCustomItem.setVisible(false);
-			FinishCustomItem.setVisible(false);
-
-			chooseCustomType.setVisible(false);
-			chooseCustomColor.setVisible(false);
-			customPrice.setVisible(false);
-			CreateCustomItem.setVisible(true);
-			customError.setVisible(false);
-		}
-
-	}
-
-
-	@FXML
-	void adminAddItemFunc(ActionEvent event) {
-
-		String newType = EditItemType.getText();
-		String newDesc = EditItemDesc.getText();
-		String newPrice = EditItemPrice.getText();
-		Product new_flower = new Product();
-		new_flower.setPrice(Double.parseDouble(newPrice));
-		new_flower.setName(newType);
-		new_flower.setDetails(newDesc);
-		flowersnum2++;
-		new_flower.setID(flowersnum2);
-		UpdateMessage updateMessage1 = new UpdateMessage("product", "add");
-		updateMessage1.setProduct(new_flower);
-		updateMessage1.setId(flowersnum2);
-		System.out.println("before try - edit");
-		try {
-			System.out.println("before sending updateMessage to server ");
-			SimpleClient.getClient().sendToServer(updateMessage1); // sends the updated product to the server class
-			System.out.println("afater sending updateMessage to server ");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		CreateCustomItem.setVisible(true);
-		adminEditCatalog.setVisible(true);
-
-		//	remID.setVisible(false);
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-
-		EditItemExtra.setVisible(false);
-
-		if(CatalogENDIndex - CatalogSTARTIndex < 6)
-		{
-			CatalogENDIndex++;
-		}
-		showStatusMessage("Catalog Updated Successfully - 0 Errors");
-		//	AddItem.setVisible(false);
-	}
-
-	@FXML
-	void adminRemoveItemFunc(ActionEvent event) {
-
-		String deleteID = EditItemExtra.getText();
-		// Remove the item with the currnet ID from the catalog
-		// create removeItem object
-		// give the deleteID to the removeItem object
-		// send the object to the server
-		//System.out.println(deleteID);
-		//	System.out.println(deleteID);
-		UpdateMessage removeType = new UpdateMessage("product", "remove");
-		removeType.setDelteId(deleteID);
-
-		flowersnum2--;
-		try {
-			SimpleClient.getClient().sendToServer(removeType); // sends the updated product to the server class
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		CreateCustomItem.setVisible(true);
-		adminEditCatalog.setVisible(true);
-
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-
-		EditItemType.setVisible(false);
-		EditItemDesc.setVisible(false);
-		EditItemPrice.setVisible(false);
-		EditItemExtra.setVisible(false);
-		//	RemoveItem.setVisible(false);
-		//.setVisible(false);
-
-		showStatusMessage("Catalog Updated Successfully - 0 Errors");
-		RemoveItem.setVisible(false);
-
-		allProducts.remove(Integer.parseInt(EditItemExtra.getText())-1);
-
-		updateFields(2);
-
-	}
-
-	@FXML
-	void adminUpdateItemFunc(ActionEvent event) {
-
-		String TempType = allProducts.get(0).getName();
-		String TempDesc = allProducts.get(0).getDetails();
-		double TempPrice = allProducts.get(0).getPrice();
-
-		String newType = EditItemType.getText();
-		System.out.println(newType);
-		String newDesc = EditItemDesc.getText();
-		System.out.println(newDesc);
-		String newPrice = EditItemPrice.getText();
-		System.out.println(newPrice);
-		String updateID = EditItemExtra.getText();
-		System.out.println(updateID);
-
-		List<Product> tempList = allProducts;
-		int TargerID = Integer.parseInt(updateID) - 1;
-
-		allProducts.get(TargerID).setName(newType);
-		allProducts.get(TargerID).setPrice(Double.parseDouble(newPrice));
-		allProducts.get(TargerID).setDetails(newDesc);
-
-		Product currtProduct  = CatalogController.getCurrent_button();
-
-
-		currtProduct.setPrice(Double.parseDouble(newPrice));
-		currtProduct.setDetails(newDesc);
-		currtProduct.setName(newType);
-		int castedID = Integer.parseInt(updateID);
-		currtProduct.setID(castedID);
-
-		UpdateMessage updateMessage1 = new UpdateMessage("product","edit");
-		updateMessage1.setProduct(currtProduct);
-
-
-		updateMessage1.setId(castedID);
-		System.out.println("arrived here before sending the updatemessage1");
-		try {
-			SimpleClient.getClient().sendToServer(updateMessage1); // sends the updated product to the server class
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-
-		allProducts.get(0).setName(TempType);
-		allProducts.get(0).setPrice(TempPrice);
-		allProducts.get(0).setDetails(TempDesc);
-
-		// Update the item with the current ID with the new variables
-		//remID.setVisible(false);
-		CreateCustomItem.setVisible(true);
-		adminEditCatalog.setVisible(true);
-
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-
-		EditItemType.setVisible(false);
-		EditItemDesc.setVisible(false);
-		EditItemPrice.setVisible(false);
-		EditItemExtra.setVisible(false);
-		//	UpdateItem.setVisible(false);
-
-		updateFields(2);
-
-		showStatusMessage("Catalog Updated Successfully - 0 Errors");
-	}
-
-	@FXML
-	void chooseAdminEditCatalog(ActionEvent event) {
-		//	remID.setVisible(false);
-		CreateCustomItem.setVisible(false);
-		adminEditCatalog.setVisible(true);
-
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-
-		String chosen = adminEditCatalog.getSelectionModel().getSelectedItem();
-		System.out.println(chosen);
-		System.out.println("OKAY OKAY");
-		if (chosen == "Add Item") {
-			EditItemType.setText("New Item Type");
-			EditItemDesc.setText("New Item Desc");
-			EditItemPrice.setText("New Item Price");
-			EditItemType.setVisible(true);
-			EditItemDesc.setVisible(true);
-			EditItemPrice.setVisible(true);
-			EditItemExtra.setVisible(false);
-			System.out.println("WENT ADD");
-			RemoveItem.setVisible(false);
-			UpdateItem.setVisible(false);
-			AddItem.setVisible(true);
-		}
-		if (chosen == "Remove Item") {
-			//EditItemExtra.setText("Item ID To Remove");
-			//UpdateItem.setText("Remove");
-			EditItemType.setVisible(false);
-			EditItemDesc.setVisible(false);
-			EditItemPrice.setVisible(false);
-			EditItemExtra.setVisible(true);
-			EditItemExtra.setText("ID to remove");
-			//.setVisible(true);
-			System.out.println("WENT REMOVE");
-			AddItem.setVisible(false);
-			UpdateItem.setVisible(false);
-			RemoveItem.setVisible(true);
-			//send id to server
-		}
-		if (chosen == "Edit Item") {
-			EditItemType.setText("New Item Type");
-			EditItemDesc.setText("New Item Desc");
-			EditItemPrice.setText("New Item Price");
-			EditItemExtra.setText("Item ID To Update");
-			EditItemType.setVisible(true);
-			EditItemDesc.setVisible(true);
-			EditItemPrice.setVisible(true);
-			EditItemExtra.setVisible(true);
-			System.out.println("WENT UPDATE");
-			AddItem.setVisible(false);
-			RemoveItem.setVisible(false);
-			UpdateItem.setVisible(true);
-		}
-	}
-
 
 	int updateFieldsBounds = 0;
 
@@ -1847,12 +1423,6 @@ public class CatalogController {
 
 
 	}
-	public void viewAdminGUI(boolean mode)
-	{
-		adminEditCatalog.setVisible(mode);
-		worker_edit.setVisible(mode);
-		CreateCustomItem.setVisible(mode);
-	}
 	int cartPrice = 0;
 	Account currentLoggedAccount;
 	boolean availableProducts = false;
@@ -1923,10 +1493,8 @@ public class CatalogController {
 		assert flower_price_after5 != null : "fx:id=\"flower_price_after5\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_after6 != null : "fx:id=\"flower_price_after6\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert catalogManagementBtn != null : "fx:id=\"catalogManagementBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert catalogAddProductBtn != null : "fx:id=\"catalogAddProductBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
 
 		bindManagedToVisible(
 				flower_promo1, flower_promo2, flower_promo3, flower_promo4, flower_promo5, flower_promo6,
@@ -1938,13 +1506,11 @@ public class CatalogController {
 				flower_price_after5, flower_price_after6
 		);
 
-		customError.setVisible(false);
 		messageField.setVisible(false);
 		if (viewMyOrders != null) viewMyOrders.setVisible(false);
 		if (viewMyComplaints != null) viewMyComplaints.setVisible(false);
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
-		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
 		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(false);
 		if (infoo != null) infoo.setVisible(false);
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
@@ -1973,9 +1539,6 @@ public class CatalogController {
 		flower4_addCart.setVisible(false);
 		flower5_addCart.setVisible(false);
 		flower6_addCart.setVisible(false);
-		CreateCustomItem.setVisible(false);
-		adminEditCatalog.setVisible(false);
-
 		compln.setVisible(false);
 		customid.setVisible(false);
 
@@ -1996,22 +1559,7 @@ public class CatalogController {
 				break;
 			}
 		}
-		chooseCustomType.setVisible(false);
-		customPrice.setVisible(false);
 		customid.setVisible(false);
-		chooseCustomColor.setVisible(false);
-
-		EditItemType.setVisible(false);
-		EditItemDesc.setVisible(false);
-		EditItemPrice.setVisible(false);
-		EditItemExtra.setVisible(false);
-
-		AddItem.setVisible(false);
-		RemoveItem.setVisible(false);
-		UpdateItem.setVisible(false);
-		//remID.setVisible(false);
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
 
 		flower_button1.setVisible(false);
 		flower_button2.setVisible(false);
@@ -2065,21 +1613,6 @@ public class CatalogController {
 		}
 
 		//CartItemsList.setVisible(false);
-
-		adminEditCatalog.getItems().add("Add Item");
-		adminEditCatalog.getItems().add("Remove Item");
-		adminEditCatalog.getItems().add("Edit Item");
-
-		chooseCustomColor.getItems().add("Red");
-		chooseCustomColor.getItems().add("Blue");
-		chooseCustomColor.getItems().add("Yellow");
-		chooseCustomColor.getItems().add("White");
-		chooseCustomColor.getItems().add("Purple");
-
-		chooseCustomType.getItems().add("Arrangement");
-		chooseCustomType.getItems().add("Bloom & Pot");
-		chooseCustomType.getItems().add("Bouquet");
-		chooseCustomType.getItems().add("Colletion");
 
 		worker_edit.getItems().add("Add worker");
 		worker_edit.getItems().add("Remove worker");
@@ -2487,7 +2020,7 @@ public class CatalogController {
 	}
 
 
-	@FXML // fx:id="RemoveItem"
+	@FXML // fx:id="accbtn"
 	private Button accbtn; // Value injected by FXMLLoader
 
 	@FXML
@@ -2563,18 +2096,15 @@ public class CatalogController {
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
 		showCartPanelForGuest();
 		setAddToCartButtonsVisible(false);
-		if (CreateCustomItem != null) CreateCustomItem.setVisible(false);
 
 		// Worker features
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
-		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
 		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(false);
 
 		// Manager features
 		if (infoo != null) infoo.setVisible(false);
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
-		if (adminEditCatalog != null) adminEditCatalog.setVisible(false);
 	}
 
 	private void showCartPanelForGuest() {
@@ -2646,24 +2176,7 @@ public class CatalogController {
 	}
 
 	private void enableCustomerOnlyFeatures() {
-		boolean showCustomerOnly = shouldShowCustomerOnlyFeatures();
-		if (CreateCustomItem != null) CreateCustomItem.setVisible(showCustomerOnly);
-		if (customError != null) customError.setVisible(false);
-		if (!showCustomerOnly) {
-			hideCustomOrderFields();
-			setSkuLabelsVisible(false);
-		} else {
-			setSkuLabelsVisible(true);
-		}
-	}
-
-	private void hideCustomOrderFields() {
-		if (chooseCustomType != null) chooseCustomType.setVisible(false);
-		if (chooseCustomColor != null) chooseCustomColor.setVisible(false);
-		if (customPrice != null) customPrice.setVisible(false);
-		if (customid != null) customid.setVisible(false);
-		if (FinishCustomItem != null) FinishCustomItem.setVisible(false);
-		if (CancelCustomItem != null) CancelCustomItem.setVisible(false);
+		setSkuLabelsVisible(shouldShowCustomerOnlyFeatures());
 	}
 
 	/**
@@ -2674,7 +2187,6 @@ public class CatalogController {
 		// Worker panel access
 		if (deliveryButton != null) deliveryButton.setVisible(true);
 		if (openComplaints != null) openComplaints.setVisible(true);
-		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(true);
 		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(true);
 
 		System.out.println("  \u2713 Worker features enabled");
@@ -2834,7 +2346,6 @@ public class CatalogController {
 		// Admin dashboard and controls
 		if (infoo != null) infoo.setVisible(true);
 		if (adminControlButtton != null) adminControlButtton.setVisible(true);
-		if (adminEditCatalog != null) adminEditCatalog.setVisible(true);
 
 		System.out.println("  \u2713 Manager features enabled (Admin Dashboard)");
 	}
