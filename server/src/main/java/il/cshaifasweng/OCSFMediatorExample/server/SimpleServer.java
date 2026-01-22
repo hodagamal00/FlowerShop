@@ -166,65 +166,61 @@ private static SessionFactory cachedSessionFactory;
 				}
 
 				if (recievedStr.equals("get Managers")) {
-					if (requirePrivilegeAtLeast(client, 2)) {
-						Account requester = getClientAccount(client);
-						if (requester != null) {
-							if (requiresBranchAssignment(requester) && resolveBranchId(requester) <= 0) {
-								sendAuthError(client, "forbidden");
-							} else {
-								ManagerUpdateManager obj = new ManagerUpdateManager();
-								FoundTable foundTbl = new FoundTable("managers table found");
-								foundTbl.setRecievedManagers(filterManagersByScope(obj.managerGeneralList, requester));
-								client.sendToClient(foundTbl);
-							}
-						}
+					Account requester = getClientAccount(client);
+					if (requester == null || requester.getPrivilegeLevel() < 3) {
+						sendAuthError(client, "Access denied");
+					} else if (requiresBranchAssignment(requester) && resolveBranchId(requester) <= 0) {
+						sendAuthError(client, "Access denied");
+					} else {
+						ManagerUpdateManager obj = new ManagerUpdateManager();
+						FoundTable foundTbl = new FoundTable("managers table found");
+						foundTbl.setRecievedManagers(filterManagersByScope(obj.managerGeneralList, requester));
+						client.sendToClient(foundTbl);
 					}
 				}
 
 				if (recievedStr.equals("get Workers")) {
-					if (requirePrivilegeAtLeast(client, 2)) {
-						Account requester = getClientAccount(client);
-						if (requester != null) {
-							if (requiresBranchAssignment(requester) && resolveBranchId(requester) <= 0) {
-								sendAuthError(client, "forbidden");
-							} else {
-								WorkerUpdateManager obj = new WorkerUpdateManager();
-								FoundTable foundTbl = new FoundTable("workers table found");
-								foundTbl.setRecievedWorkers(filterWorkersByScope(obj.workerGeneralList, requester));
-								client.sendToClient(foundTbl);
-							}
-						}
+					Account requester = getClientAccount(client);
+					if (requester == null || requester.getPrivilegeLevel() < 3) {
+						sendAuthError(client, "Access denied");
+					} else if (requiresBranchAssignment(requester) && resolveBranchId(requester) <= 0) {
+						sendAuthError(client, "Access denied");
+					} else {
+						WorkerUpdateManager obj = new WorkerUpdateManager();
+						FoundTable foundTbl = new FoundTable("workers table found");
+						foundTbl.setRecievedWorkers(filterWorkersByScope(obj.workerGeneralList, requester));
+						client.sendToClient(foundTbl);
 					}
 				}
 
 				if (recievedStr.equals("get complaints")) {
-					if (requirePrivilegeAtLeast(client, 1)) {
-						Account account = getClientAccount(client);
-						if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
-							sendAuthError(client, "forbidden");
-						} else {
-							GetAllComplaints obj = new GetAllComplaints();
-							obj.setComplaintsList(getScopedComplaints(localSession, account));
-							System.out.println("Comp List Size = " + obj.getComplaintsList().size());
-							client.sendToClient(obj);
-						}
+					Account account = getClientAccount(client);
+					if (account == null || account.getPrivilegeLevel() < 2) {
+						sendAuthError(client, "Access denied");
+					} else if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
+						sendAuthError(client, "Access denied");
+					} else {
+						GetAllComplaints obj = new GetAllComplaints();
+						obj.setComplaintsList(getScopedComplaints(localSession, account));
+						System.out.println("Comp List Size = " + obj.getComplaintsList().size());
+						client.sendToClient(obj);
 					}
 				}
 
 				if (recievedStr.equals("get Accounts")) {
-					if (requirePrivilegeAtLeast(client, 1)) {
-						Account requester = getClientAccount(client);
-						if (requiresBranchAssignment(requester) && resolveBranchId(requester) <= 0) {
-							sendAuthError(client, "forbidden");
-						} else {
-							System.out.println("get accounts test 1");
-							GetAllAccounts obj = new GetAllAccounts();
-							System.out.println("get accounts test 2");
-							obj.setAll_accounts(getScopedAccounts(localSession, requester));
-							System.out.println("get accounts test 3");
-							client.sendToClient(obj);
-							System.out.println("get accounts test 4");
-						}
+					Account requester = getClientAccount(client);
+					if (requester == null || requester.getPrivilegeLevel() < 4) {
+						sendAuthError(client, "Access denied");
+					} else if (requiresBranchAssignment(requester) && resolveBranchId(requester) <= 0) {
+						sendAuthError(client, "Access denied");
+					} else {
+						System.out.println("get accounts test 1");
+						GetAllAccounts obj = new GetAllAccounts();
+						System.out.println("get accounts test 2");
+						obj.setAll_accounts(getScopedAccounts(localSession, requester));
+						System.out.println("get accounts test 3");
+						client.sendToClient(obj);
+						System.out.println("get accounts test 4");
 					}
 				}
 
@@ -667,16 +663,16 @@ private static SessionFactory cachedSessionFactory;
 				tx1 = localSession.beginTransaction();
 
 				System.out.println("arrived to getAllComplaints in server !");
-				if (requirePrivilegeAtLeast(client, 1)) {
-					Account account = getClientAccount(client);
-					if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
-						sendAuthError(client, "forbidden");
-					} else {
-						GetAllComplaints complaintsToClient = new GetAllComplaints();
-						List<Complaint> recievedComplaints = getScopedComplaints(localSession, account);
-						complaintsToClient.setComplaintsList(recievedComplaints);
-						client.sendToClient(complaintsToClient);
-					}
+				Account account = getClientAccount(client);
+				if (account == null || account.getPrivilegeLevel() < 2) {
+					sendAuthError(client, "Access denied");
+				} else if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
+					sendAuthError(client, "Access denied");
+				} else {
+					GetAllComplaints complaintsToClient = new GetAllComplaints();
+					List<Complaint> recievedComplaints = getScopedComplaints(localSession, account);
+					complaintsToClient.setComplaintsList(recievedComplaints);
+					client.sendToClient(complaintsToClient);
 				}
 
 				tx1.commit();
