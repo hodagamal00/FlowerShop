@@ -71,11 +71,15 @@
                                     <Font size="18.0" />
                                 </font>
                             </Text>
-                            <Text fx:id="priceText" text="\\$39.99" fill="#4a148c">
+                            <Text fx:id="discountedPriceText" text="\\$39.99" fill="#4a148c">
                                 <font>
                                     <Font name="System Bold" size="26.0" />
                                 </font>
                             </Text>
+                            <VBox spacing="2.0" alignment="CENTER">
+                                <Label fx:id="saleLabel" text="SALE" styleClass="sale-badge" visible="false" />
+                                <Region fx:id="saleUnderline" styleClass="sale-underline" visible="false" />
+                            </VBox>
                             <Label fx:id="discountBadge" text="20% OFF" styleClass="badge badge-success discount-badge" visible="false" />
                         </HBox>
                         <Label fx:id="priceRangeLabel" text="Price Range: $30 - $100" visible="false" styleClass="price-range-label" />
