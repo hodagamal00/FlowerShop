@@ -5,10 +5,6 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 
 public final class PricingService {
 
-    private static final double WORKER_DISCOUNT_PERCENT = 10.0;
-    private static final double MANAGER_DISCOUNT_PERCENT = 15.0;
-    private static final double CHAIN_MANAGER_DISCOUNT_PERCENT = 20.0;
-
     private PricingService() {
     }
 
@@ -30,9 +26,7 @@ public final class PricingService {
 
         double privilegeDiscountPercent = resolvePrivilegeDiscountPercent(privilege);
         boolean hasPrivilegeDiscount = privilegeDiscountPercent > 0;
-        double finalPrice = hasPrivilegeDiscount
-                ? Product.calculateDiscountedPrice(promotionPrice, privilegeDiscountPercent)
-                : promotionPrice;
+        double finalPrice = promotionPrice;
         double roundedFinalPrice = Product.roundCurrency(finalPrice);
         double roundedPromotionPrice = Product.roundCurrency(promotionPrice);
 
@@ -48,15 +42,6 @@ public final class PricingService {
     }
 
     private static double resolvePrivilegeDiscountPercent(int privilege) {
-        if (privilege >= 4) {
-            return CHAIN_MANAGER_DISCOUNT_PERCENT;
-        }
-        if (privilege >= 3) {
-            return MANAGER_DISCOUNT_PERCENT;
-        }
-        if (privilege >= 2) {
-            return WORKER_DISCOUNT_PERCENT;
-        }
         return 0.0;
     }
 
