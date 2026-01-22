@@ -756,6 +756,40 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
+	@Override
+	protected void clientDisconnected(ConnectionToClient client) {
+		cleanupClientSession(client);
+	}
+
+	@Override
+	protected void clientException(ConnectionToClient client, Throwable exception) {
+		cleanupClientSession(client);
+	}
+
+	private void cleanupClientSession(ConnectionToClient client) {
+		Account account = getSessionAccount(client);
+		if (account == null) {
+			return;
+		}
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				Account managedAccount = session.get(Account.class, account.getAccountID());
+				if (managedAccount != null && Boolean.TRUE.equals(managedAccount.getLoggedIn())) {
+					managedAccount.setLoggedIn(false);
+					session.update(managedAccount);
+				}
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
+		} finally {
+			client.setInfo("account", null);
+		}
+	}
+
 	private static List<Message> getAllMessages(Session session) {
 		System.out.println("Arrived to getAllmessages 1");
 		CriteriaBuilder builder = session.getCriteriaBuilder();
