@@ -142,9 +142,18 @@ public class OrderUpdateManager {
         try {
             LocalDateTime orderDate = order.getOrderDate();
             LocalDateTime deliveryDate = order.getDelivery_time();
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime immediateCutoff = now.plusHours(3);
 
             if (deliveryDate.isBefore(orderDate)) {
                 throw new IllegalArgumentException("Requested delivery time cannot be before the order time");
+            }
+            if (deliveryDate.isBefore(now)) {
+                throw new IllegalArgumentException("Requested delivery time must be in the future");
+            }
+            if (!deliveryDate.isAfter(immediateCutoff)) {
+                // Immediate orders are those scheduled within the next 3 hours.
+                return;
             }
         } catch (DateTimeException ex) {
             throw new IllegalArgumentException("Invalid order or delivery date/time provided", ex);

@@ -1083,11 +1083,17 @@ private static SessionFactory cachedSessionFactory;
 		try {
 			LocalDateTime orderTime = order.getOrderDate();
 			LocalDateTime deliveryTime = order.getDelivery_time();
+			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime immediateCutoff = now.plusHours(3);
+
 			if (deliveryTime.isBefore(orderTime)) {
 				throw new IllegalArgumentException("Requested delivery time cannot be before the order time.");
 			}
-			if (deliveryTime.isBefore(LocalDateTime.now())) {
+			if (deliveryTime.isBefore(now)) {
 				throw new IllegalArgumentException("Requested delivery time must be in the future.");
+			}
+			if (!deliveryTime.isAfter(immediateCutoff)) {
+				// Immediate orders are any delivery/pickup scheduled within the next 3 hours.
 			}
 		} catch (DateTimeException ex) {
 			throw new IllegalArgumentException("Requested delivery time is invalid.", ex);
