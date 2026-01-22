@@ -371,6 +371,9 @@ private static SessionFactory cachedSessionFactory;
 
 					case "order":
 						if (updateClassFunction.equals("add")) {
+							if (!requireLoggedIn(client)) {
+								break;
+							}
 							System.out.println("arrived to here inside order add");
 							Order recievedOrder = recievedMessage.getOrder();
 							try {
@@ -511,24 +514,23 @@ private static SessionFactory cachedSessionFactory;
 			try {
 				localSession = sessionFactory.openSession();
 				tx1 = localSession.beginTransaction();
-				List<Account> accountsList = getAllAccounts(localSession);
-
 				MailClass recievedMessage = (MailClass) msg;
-				String recievedMailStr = recievedMessage.getMail();
-
-				Account matchedAccount = null;
-				for (Account account : accountsList) {
-					System.out.println(account.getEmail());
-					if (account.getEmail().equals(recievedMailStr)) {
-						matchedAccount = account;
-						break;
-					}
+				if (!requireLoggedIn(client)) {
+					tx1.commit();
+					return;
 				}
-
-				if (matchedAccount != null) {
-					client.sendToClient(matchedAccount);
-				} else {
+				String recievedMailStr = recievedMessage.getMail();
+				Account sessionAccount = getSessionAccount(client);
+				if (sessionAccount == null || (!isSystemManager(client) && !sessionAccount.getEmail().equals(recievedMailStr))) {
+					client.sendToClient(new UserUpdateResponse(false, "Unauthorized: account access denied."));
+					tx1.commit();
+					return;
+				}
+				Account matchedAccount = findAccountByEmail(localSession, Account.class, recievedMailStr);
+				if (matchedAccount == null) {
 					client.sendToClient("mail not found");
+				} else {
+					client.sendToClient(matchedAccount);
 				}
 
 				tx1.commit();
@@ -682,10 +684,17 @@ private static SessionFactory cachedSessionFactory;
 				tx1 = localSession.beginTransaction();
 
 				System.out.println("arrived to getAllComplaints in server !");
-				GetAllMessages messagesToClient = new GetAllMessages();
-				List<Message> recievedMessages = getAllMessages(localSession);
-				messagesToClient.setMessageList(recievedMessages);
-				client.sendToClient(messagesToClient);
+				if (requireLoggedIn(client)) {
+					Account account = getSessionAccount(client);
+					if (account != null && (account.getPrivilegeLevel() == 1 || account.getPrivilegeLevel() >= 4)) {
+						GetAllMessages messagesToClient = new GetAllMessages();
+						List<Message> recievedMessages = getScopedMessages(localSession, account);
+						messagesToClient.setMessageList(recievedMessages);
+						client.sendToClient(messagesToClient);
+					} else {
+						client.sendToClient(new UserUpdateResponse(false, "Unauthorized: customer access required."));
+					}
+				}
 				tx1.commit();
 			} catch (Exception ex) {
 				if (tx1 != null) {
@@ -758,6 +767,23 @@ private static SessionFactory cachedSessionFactory;
 		List<Message> result = session.createQuery(query).getResultList();
 		System.out.println("Arrived to getAllMessages 5");
 		return result;
+	}
+
+	private static List<Message> getScopedMessages(Session session, Account account) {
+		if (account == null) {
+			return Collections.emptyList();
+		}
+		if (account.getPrivilegeLevel() >= 4) {
+			return getAllMessages(session);
+		}
+		if (account.getPrivilegeLevel() != 1) {
+			return Collections.emptyList();
+		}
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Message> query = builder.createQuery(Message.class);
+		Root<Message> root = query.from(Message.class);
+		query.select(root).where(builder.equal(root.get("customerID"), account.getAccountID()));
+		return session.createQuery(query).getResultList();
 	}
 
 	private void handleAddProductRequest(AddProductRequest request, ConnectionToClient client) throws IOException {
