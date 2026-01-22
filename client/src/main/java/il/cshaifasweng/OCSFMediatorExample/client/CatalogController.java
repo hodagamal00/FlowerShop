@@ -2101,7 +2101,7 @@ public class CatalogController {
 		System.out.println(CatalogFlag.getFlagg());
 		cartTextPrice.setText("0");
 		cartTextDiscount.setText("0");
-		updateCartSummary(0);
+		updateCartSummaryFromItems(CartService.getInstance().getItems());
 		worker_edit.setVisible(false);
 
 		inboxList.setVisible(false);
