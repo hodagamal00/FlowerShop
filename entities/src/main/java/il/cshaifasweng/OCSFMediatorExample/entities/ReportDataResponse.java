@@ -1,8 +1,10 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ReportDataResponse implements Serializable {
     private boolean success;
@@ -10,6 +12,9 @@ public class ReportDataResponse implements Serializable {
     private String requestId;
     private String periodLabel;
     private int branchId;
+    private double totalRevenue;
+    private Map<String, Integer> ordersByProductType;
+    private Map<LocalDate, Integer> complaintsHistogram;
     private List<Order> orders = new ArrayList<>();
     private List<Complaint> complaints = new ArrayList<>();
     private List<BranchSettings> branches = new ArrayList<>();
@@ -18,12 +23,17 @@ public class ReportDataResponse implements Serializable {
     }
 
     public ReportDataResponse(boolean success, String errorMessage, String requestId, String periodLabel, int branchId,
+                              double totalRevenue, Map<String, Integer> ordersByProductType,
+                              Map<LocalDate, Integer> complaintsHistogram,
                               List<Order> orders, List<Complaint> complaints, List<BranchSettings> branches) {
         this.success = success;
         this.errorMessage = errorMessage;
         this.requestId = requestId;
         this.periodLabel = periodLabel;
         this.branchId = branchId;
+        this.totalRevenue = totalRevenue;
+        this.ordersByProductType = ordersByProductType;
+        this.complaintsHistogram = complaintsHistogram;
         if (orders != null) {
             this.orders = orders;
         }
@@ -73,6 +83,30 @@ public class ReportDataResponse implements Serializable {
 
     public void setBranchId(int branchId) {
         this.branchId = branchId;
+    }
+
+    public double getTotalRevenue() {
+        return totalRevenue;
+    }
+
+    public void setTotalRevenue(double totalRevenue) {
+        this.totalRevenue = totalRevenue;
+    }
+
+    public Map<String, Integer> getOrdersByProductType() {
+        return ordersByProductType;
+    }
+
+    public void setOrdersByProductType(Map<String, Integer> ordersByProductType) {
+        this.ordersByProductType = ordersByProductType;
+    }
+
+    public Map<LocalDate, Integer> getComplaintsHistogram() {
+        return complaintsHistogram;
+    }
+
+    public void setComplaintsHistogram(Map<LocalDate, Integer> complaintsHistogram) {
+        this.complaintsHistogram = complaintsHistogram;
     }
 
     public List<Order> getOrders() {

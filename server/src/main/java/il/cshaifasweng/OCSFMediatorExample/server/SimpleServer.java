@@ -18,7 +18,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DateTimeException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.hibernate.*;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -250,6 +252,11 @@ private static SessionFactory cachedSessionFactory;
 			return;
 		}
 
+		if (msg instanceof ReportDataRequest) {
+			handleReportDataRequest((ReportDataRequest) msg, client);
+			return;
+		}
+
 		if (msg instanceof UpdateMessage) {
 			System.out.println("Arrived At UpdateMessage 1");
 			UpdateMessage recievedMessage = (UpdateMessage) msg;
@@ -424,7 +431,10 @@ private static SessionFactory cachedSessionFactory;
 							}
 							System.out.println("arrived to here inside complaint edit");
 							Complaint recievedComp = recievedMessage.getComplaint();
-							ComplaintUpdateManager.editComplaint(recievedComp);
+							boolean replyLate = ComplaintUpdateManager.editComplaint(recievedComp);
+							if (replyLate) {
+								client.sendToClient("Reply sent after 24 hours");
+							}
 						}
 					break;
 
@@ -1324,6 +1334,230 @@ private static SessionFactory cachedSessionFactory;
 		List<Order> result = session.createQuery(query).getResultList();
 		System.out.println("Arrived to getAllOrders 5");
 		return result;
+	}
+
+	private ReportDataResponse buildReportDataResponse(Session session, ReportDataRequest request) {
+		LocalDate startDate = request.getStartDate();
+		LocalDate endDate = request.getEndDate();
+		int branchId = request.getBranchId();
+
+		List<Order> orders = getOrdersForReport(session, startDate, endDate, branchId);
+		List<Complaint> complaints = getComplaintsForReport(session, startDate, endDate, branchId);
+		List<BranchSettings> branches = getBranchesForReport(session, branchId);
+
+		double totalRevenue = calculateTotalRevenue(orders);
+		Map<String, Integer> ordersByProductType = buildOrdersByProductType(session, orders);
+		Map<LocalDate, Integer> complaintsHistogram = buildComplaintsHistogram(complaints);
+
+		return new ReportDataResponse(
+				true,
+				null,
+				request.getRequestId(),
+				request.getPeriodLabel(),
+				branchId,
+				totalRevenue,
+				ordersByProductType,
+				complaintsHistogram,
+				orders,
+				complaints,
+				branches
+		);
+	}
+
+	private void handleReportDataRequest(ReportDataRequest request, ConnectionToClient client) throws IOException {
+		Account account = getClientAccount(client);
+		if (account == null || account.getPrivilegeLevel() < 3) {
+			client.sendToClient(new ReportDataResponse(false, "Access denied", request.getRequestId(),
+					request.getPeriodLabel(), request.getBranchId(), 0.0, null, null,
+					Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+			return;
+		}
+		if (request.getBranchId() == 0 && account.getPrivilegeLevel() < 4) {
+			client.sendToClient(new ReportDataResponse(false, "Access denied", request.getRequestId(),
+					request.getPeriodLabel(), request.getBranchId(), 0.0, null, null,
+					Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+			return;
+		}
+		if (requiresBranchAssignment(account) && request.getBranchId() > 0
+				&& resolveBranchId(account) != request.getBranchId()) {
+			client.sendToClient(new ReportDataResponse(false, "Access denied", request.getRequestId(),
+					request.getPeriodLabel(), request.getBranchId(), 0.0, null, null,
+					Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+			return;
+		}
+
+		SessionFactory sessionFactory = getSessionFactory();
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				ReportDataResponse response = buildReportDataResponse(session, request);
+				tx.commit();
+				client.sendToClient(response);
+			} catch (Exception ex) {
+				tx.rollback();
+				client.sendToClient(new ReportDataResponse(false, "Failed to load report data.",
+						request.getRequestId(), request.getPeriodLabel(), request.getBranchId(), 0.0,
+						null, null, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+			}
+		}
+	}
+
+	private List<Order> getOrdersForReport(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Order> query = builder.createQuery(Order.class);
+		Root<Order> root = query.from(Order.class);
+		if (branchId > 0) {
+			query.where(builder.equal(root.get("shopID"), branchId));
+		}
+		List<Order> orders = session.createQuery(query).getResultList();
+		if (startDate == null || endDate == null) {
+			return orders;
+		}
+		List<Order> filtered = new ArrayList<>();
+		for (Order order : orders) {
+			LocalDate orderDate = resolveOrderDate(order);
+			if (orderDate != null && isWithinRange(orderDate, startDate, endDate)) {
+				filtered.add(order);
+			}
+		}
+		return filtered;
+	}
+
+	private List<Complaint> getComplaintsForReport(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Complaint> query = builder.createQuery(Complaint.class);
+		Root<Complaint> root = query.from(Complaint.class);
+		if (branchId > 0) {
+			query.where(builder.equal(root.get("shopID"), branchId));
+		}
+		List<Complaint> complaints = session.createQuery(query).getResultList();
+		if (startDate == null || endDate == null) {
+			return complaints;
+		}
+		List<Complaint> filtered = new ArrayList<>();
+		for (Complaint complaint : complaints) {
+			LocalDate complaintDate = resolveComplaintDate(complaint);
+			if (complaintDate != null && isWithinRange(complaintDate, startDate, endDate)) {
+				filtered.add(complaint);
+			}
+		}
+		return filtered;
+	}
+
+	private List<BranchSettings> getBranchesForReport(Session session, int branchId) {
+		if (branchId <= 0) {
+			CriteriaBuilder builder = session.getCriteriaBuilder();
+			CriteriaQuery<BranchSettings> query = builder.createQuery(BranchSettings.class);
+			query.from(BranchSettings.class);
+			return session.createQuery(query).getResultList();
+		}
+		BranchSettings settings = session.get(BranchSettings.class, branchId);
+		if (settings == null) {
+			return Collections.emptyList();
+		}
+		return Collections.singletonList(settings);
+	}
+
+	private double calculateTotalRevenue(List<Order> orders) {
+		return orders.stream()
+				.filter(order -> !order.isCancelled())
+				.mapToDouble(Order::getTotalPrice)
+				.sum();
+	}
+
+	private Map<String, Integer> buildOrdersByProductType(Session session, List<Order> orders) {
+		List<Product> products = getAllProducts(session);
+		Map<String, Product> productsByName = new HashMap<>();
+		for (Product product : products) {
+			if (product.getName() != null) {
+				productsByName.put(product.getName().toLowerCase(Locale.ROOT), product);
+			}
+		}
+		Map<String, Integer> counts = new LinkedHashMap<>();
+		for (Order order : orders) {
+			for (String productName : parseProductNames(order.getProducts())) {
+				Product product = productsByName.get(productName.toLowerCase(Locale.ROOT));
+				String type = resolveProductType(product);
+				counts.merge(type, 1, Integer::sum);
+			}
+		}
+		return counts;
+	}
+
+	private List<String> parseProductNames(String products) {
+		if (products == null || products.isBlank()) {
+			return Collections.emptyList();
+		}
+		List<String> names = new ArrayList<>();
+		for (String item : products.split("%")) {
+			String trimmed = item.trim();
+			if (trimmed.isEmpty()) {
+				continue;
+			}
+			String[] parts = trimmed.split(" - ", 2);
+			if (parts.length == 0) {
+				continue;
+			}
+			String name = parts[0].trim();
+			if (!name.isEmpty()) {
+				names.add(name);
+			}
+		}
+		return names;
+	}
+
+	private String resolveProductType(Product product) {
+		if (product == null) {
+			return "Unknown";
+		}
+		if (product.getCategory() != null && !product.getCategory().isBlank()) {
+			return product.getCategory();
+		}
+		if (product.getCustomType() != null && !product.getCustomType().isBlank()) {
+			return product.getCustomType();
+		}
+		return "Uncategorized";
+	}
+
+	private Map<LocalDate, Integer> buildComplaintsHistogram(List<Complaint> complaints) {
+		Map<LocalDate, Integer> histogram = new LinkedHashMap<>();
+		for (Complaint complaint : complaints) {
+			LocalDate complaintDate = resolveComplaintDate(complaint);
+			if (complaintDate != null) {
+				histogram.merge(complaintDate, 1, Integer::sum);
+			}
+		}
+		return histogram;
+	}
+
+	private LocalDate resolveOrderDate(Order order) {
+		try {
+			return LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	private LocalDate resolveComplaintDate(Complaint complaint) {
+		if (complaint.getCreatedAt() != null) {
+			return complaint.getCreatedAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		}
+		int year = complaint.getYear();
+		int month = complaint.getMonth();
+		int day = complaint.getDay();
+		if (year <= 0 || month <= 0 || day <= 0) {
+			return null;
+		}
+		try {
+			return LocalDate.of(year, month, day);
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	private boolean isWithinRange(LocalDate date, LocalDate startDate, LocalDate endDate) {
+		return (date.isEqual(startDate) || date.isAfter(startDate))
+				&& (date.isEqual(endDate) || date.isBefore(endDate));
 	}
 
 	private static List<Order> getScopedOrders(Session session, Account account) {

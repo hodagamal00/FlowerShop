@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.server.ocsf;
 import il.cshaifasweng.OCSFMediatorExample.server.SimpleServer;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -153,9 +154,10 @@ public class ComplaintUpdateManager {
         }
     }
 
-    public static void editComplaint(Complaint recievedComplaint){
+    public static boolean editComplaint(Complaint recievedComplaint){
         System.out.println("Arrived to edit Complaint");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        boolean replyLate = false;
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             try {
@@ -185,10 +187,16 @@ public class ComplaintUpdateManager {
                 if (updateComplaint.getCreatedAt() == null) {
                     updateComplaint.setCreatedAt(buildCreatedAtFromLegacy(updateComplaint));
                 }
-                updateComplaint.setRespondedAt(new Date());
+                Date respondedAt = new Date();
+                updateComplaint.setRespondedAt(respondedAt);
+                replyLate = isReplyLate(updateComplaint.getCreatedAt(), respondedAt);
 
                 int responseWindow = resolveResponseWindowHours(session);
                 applySlaStatus(updateComplaint, responseWindow);
+                if (replyLate) {
+                    updateComplaint.setSlaStatus("LATE");
+                    updateComplaint.setIn24Hours(false);
+                }
 
                 if (recievedIsAccpeted && recievedIsReturnMoney && recievedMoneyValue > 0) {
                     Account customer = session.get(Account.class, updateComplaint.getCustomerID());
@@ -207,6 +215,7 @@ public class ComplaintUpdateManager {
                 throw ex;
             }
         }
+        return replyLate;
     }
 
     public static void refreshComplaintSlaStatuses(Session session, List<Complaint> complaints) {
@@ -273,6 +282,14 @@ public class ComplaintUpdateManager {
         }
         LocalDateTime timestamp = LocalDateTime.of(complaint.getYear(), complaint.getMonth(), complaint.getDay(), 12, 0);
         return Date.from(timestamp.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private static boolean isReplyLate(Date createdAt, Date respondedAt) {
+        if (createdAt == null || respondedAt == null) {
+            return false;
+        }
+        long hours = Duration.between(createdAt.toInstant(), respondedAt.toInstant()).toHours();
+        return hours > 24;
     }
 
 }
