@@ -2874,8 +2874,7 @@ public class CatalogController {
 			return;
 		}
 		syncProductImageFromCatalog(selected, getImageViewForProduct(selected));
-		ProductDetailsController.setPendingProduct(selected);
-		navigateInShell("ProductDetails");
+		openProductDetailsModal(selected);
 	}
 
 	private ImageView getImageViewForContainer(String containerId) {
