@@ -56,9 +56,6 @@
                         </children>
                     </HBox>
 
-                    <Text fx:id="cartTextPriceDiscount" text="" styleClass="price-note" />
-                    <Text fx:id="cartTextPriceFinal" text="" styleClass="price-final" />
-
                     <Button fx:id="checkout" styleClass="btn-primary" mnemonicParsing="false"
                             onAction="#openCheckout" prefHeight="45.0" prefWidth="240.0"
                             text="Checkout" />
