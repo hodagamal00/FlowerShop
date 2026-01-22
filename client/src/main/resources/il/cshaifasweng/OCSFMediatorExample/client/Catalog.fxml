@@ -426,38 +426,6 @@
     </center>
     <right>
         <VBox spacing="24.0" styleClass="catalog-rightbar">
-            <VBox spacing="12.0" styleClass="catalog-panel">
-                <Text text="Custom Order" styleClass="panel-title" />
-                <Button fx:id="CreateCustomItem" mnemonicParsing="false"
-                        onAction="#createCustomitem" prefWidth="180.0" text="Create Custom Item" />
-                <ComboBox fx:id="chooseCustomType" prefWidth="180.0" promptText="Item Type" />
-                <ComboBox fx:id="chooseCustomColor" prefWidth="180.0" promptText="Color" />
-                <TextField fx:id="customPrice" prefWidth="180.0" promptText="Price Range" />
-                <Button id="btttn" fx:id="FinishCustomItem" mnemonicParsing="false"
-                        onAction="#addCartCustomitem" prefWidth="180.0" text="Add to Cart" />
-                <Button id="btttn" fx:id="CancelCustomItem" mnemonicParsing="false"
-                        onAction="#cancelCustomitem" prefWidth="180.0" text="Cancel" />
-                <Text fx:id="customError" styleClass="error-text" wrappingWidth="180.0" />
-            </VBox>
-
-            <VBox spacing="10.0" styleClass="catalog-panel">
-                <Text text="Admin Catalog" styleClass="panel-title" />
-                <Button fx:id="catalogManagementBtn" mnemonicParsing="false"
-                        onAction="#openCatalogManagement" prefWidth="180.0" text="Update Product" />
-                <ComboBox id="btttn" fx:id="adminEditCatalog" onAction="#chooseAdminEditCatalog"
-                          prefWidth="180.0" promptText="Select Product" />
-                <TextField fx:id="EditItemType" prefWidth="180.0" promptText="Item Type" />
-                <TextField fx:id="EditItemDesc" prefWidth="180.0" promptText="Description" />
-                <TextField fx:id="EditItemPrice" prefWidth="180.0" promptText="Price" />
-                <TextField fx:id="EditItemExtra" prefWidth="180.0" promptText="Extra Info" />
-                <Button id="btttn" fx:id="AddItem" mnemonicParsing="false"
-                        onAction="#adminAddItemFunc" prefWidth="180.0" text="Add Product" />
-                <Button id="btttn" fx:id="UpdateItem" mnemonicParsing="false"
-                        onAction="#adminUpdateItemFunc" prefWidth="180.0" text="Update Product" />
-                <Button id="btttn" fx:id="RemoveItem" mnemonicParsing="false"
-                        onAction="#adminRemoveItemFunc" prefWidth="180.0" text="Remove Product" />
-            </VBox>
-
             <VBox spacing="8.0" styleClass="catalog-panel">
                 <Text text="Account &amp; Tools" styleClass="panel-title" />
                 <Button fx:id="viewMyOrders" mnemonicParsing="false"
