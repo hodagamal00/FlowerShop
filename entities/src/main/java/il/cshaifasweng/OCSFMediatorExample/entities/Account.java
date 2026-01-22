@@ -197,10 +197,6 @@ public class Account implements Serializable {
         this.belongShop = belongShop;
     }
 
-    public void setCreditBalance(double creditBalance) {
-        this.creditBalance = creditBalance;
-    }
-
     public int getAccountID() {
         return accountID;
     }
@@ -247,10 +243,6 @@ public class Account implements Serializable {
 
     public int getBelongShop() {
         return belongShop;
-    }
-
-    public double getCreditBalance() {
-        return creditBalance;
     }
 
     public long getID() {
