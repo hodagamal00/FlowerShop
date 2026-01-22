@@ -2717,21 +2717,9 @@ public class CatalogController {
 
 	private void updateCartSummaryFromItems(List<Product> items) {
 		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
-		double baseTotal = 0.0;
-		double finalTotal = 0.0;
-		if (items != null) {
-			for (Product product : items) {
-				if (product == null) {
-					continue;
-				}
-				PricingService.PricingResult pricing = PricingService.calculatePricing(product, account);
-				baseTotal += pricing.getPromotionPrice();
-				finalTotal += pricing.getFinalPrice();
-			}
-		}
-
-		baseTotal = PricingService.roundCurrency(baseTotal);
-		finalTotal = PricingService.roundCurrency(finalTotal);
+		PricingService.CartTotals totals = PricingService.calculateCartTotals(items, account);
+		double baseTotal = totals.getBaseTotal();
+		double finalTotal = totals.getFinalTotal();
 
 		if (cartTextPrice != null) {
 			cartTextPrice.setText(String.format(Locale.US, "%.2f", baseTotal));

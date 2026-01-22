@@ -384,14 +384,11 @@ public class CheckoutController {
                 return;
             }
 
-            double totalPrice = 0.0;
-            for (int z = 0; z < cart.size(); z++) {
-                totalPrice += PricingService.calculateDisplayPrice(cart.get(z), currentUser);
-            }
-            if (deliveryBox.isSelected()) {
-                totalPrice += deliveryFee;
-            }
-            totalPrice = PricingService.roundCurrency(totalPrice);
+            double totalPrice = PricingService.calculateOrderTotal(
+                    cart,
+                    currentUser,
+                    deliveryBox.isSelected() ? deliveryFee : 0.0
+            );
 
             String paymentMethod = "CREDIT_CARD";
 
