@@ -581,10 +581,6 @@ public class CatalogController {
 	/* ========================= */
 
 	private void addToCart(int offset) {
-		if (!ensureLoggedInForCart()) {
-			return;
-		}
-
 		int index = CatalogSTARTIndex + offset;
 		List<Product> displayProducts = getDisplayedProducts();
 		if (index < 0 || index >= displayProducts.size()) {
@@ -594,21 +590,6 @@ public class CatalogController {
 		// إضافة المنتج
 		Product selectedProduct = displayProducts.get(index);
 		CartService.getInstance().addProduct(selectedProduct, 1);
-	}
-
-	private boolean ensureLoggedInForCart() {
-		if (resolveCurrentPrivilegeLevel() >= 1) {
-			return true;
-		}
-
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Login Required");
-		alert.setHeaderText("Please log in to add items to your cart.");
-		alert.setContentText("Guests can browse the catalog, but checkout and ordering require a user account.");
-		alert.showAndWait();
-
-		NavigationService.getInstance().navigate("Login");
-		return false;
 	}
 
 	private void addProductToCartByIndex(int offset) {
@@ -678,9 +659,6 @@ public class CatalogController {
 	@FXML
 	void viewUserCart(ActionEvent event)
 	{
-		if (!ensureLoggedInForCart()) {
-			return;
-		}
 		syncCartFromService();
 		boolean mode;
 		if(cartViewBinary == 0)
@@ -755,7 +733,13 @@ public class CatalogController {
 	@FXML
 	void openCheckout(ActionEvent event) throws IOException
 	{
-		if (!ensurePrivilege(event, 1, "Checkout")) {
+		if (resolveCurrentPrivilegeLevel() < 1) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Login Required");
+			alert.setHeaderText("Login required to checkout.");
+			alert.setContentText("Login required to checkout. You can add items as a guest, but you must login/register to place an order.");
+			alert.showAndWait();
+			navigateInShell("Login");
 			return;
 		}
 
