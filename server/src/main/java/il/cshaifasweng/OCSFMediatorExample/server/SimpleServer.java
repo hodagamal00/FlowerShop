@@ -29,6 +29,9 @@ import org.hibernate.service.ServiceRegistry;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 public class SimpleServer extends AbstractServer {
@@ -1345,9 +1348,9 @@ private static SessionFactory cachedSessionFactory;
 		List<Complaint> complaints = getComplaintsForReport(session, startDate, endDate, branchId);
 		List<BranchSettings> branches = getBranchesForReport(session, branchId);
 
-		double totalRevenue = calculateTotalRevenue(orders);
-		Map<String, Integer> ordersByProductType = buildOrdersByProductType(session, orders);
-		Map<LocalDate, Integer> complaintsHistogram = buildComplaintsHistogram(complaints);
+		double totalRevenue = queryTotalRevenue(session, startDate, endDate, branchId);
+		Map<String, Integer> ordersByProductType = queryOrdersByProductType(session, startDate, endDate, branchId);
+		Map<LocalDate, Integer> complaintsHistogram = queryComplaintsHistogram(session, startDate, endDate, branchId);
 
 		return new ReportDataResponse(
 				true,
@@ -1458,76 +1461,128 @@ private static SessionFactory cachedSessionFactory;
 		return Collections.singletonList(settings);
 	}
 
-	private double calculateTotalRevenue(List<Order> orders) {
-		return orders.stream()
-				.filter(order -> !order.isCancelled())
-				.mapToDouble(Order::getTotalPrice)
-				.sum();
+	private double queryTotalRevenue(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Double> query = builder.createQuery(Double.class);
+		Root<Order> root = query.from(Order.class);
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.equal(root.get("isCancelled"), false));
+		if (branchId > 0) {
+			predicates.add(builder.equal(root.get("shopID"), branchId));
+		}
+		if (startDate != null && endDate != null) {
+			predicates.add(buildOrderDateRangePredicate(builder, root, startDate, endDate));
+		}
+		query.select(builder.coalesce(builder.sumAsDouble(root.get("totalPrice")), 0.0))
+				.where(predicates.toArray(new Predicate[0]));
+		Double result = session.createQuery(query).getSingleResult();
+		return result != null ? result : 0.0;
 	}
 
-	private Map<String, Integer> buildOrdersByProductType(Session session, List<Order> orders) {
-		List<Product> products = getAllProducts(session);
-		Map<String, Product> productsByName = new HashMap<>();
-		for (Product product : products) {
-			if (product.getName() != null) {
-				productsByName.put(product.getName().toLowerCase(Locale.ROOT), product);
-			}
+	private Map<String, Integer> queryOrdersByProductType(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
+		Root<Order> orderRoot = query.from(Order.class);
+		Root<Product> productRoot = query.from(Product.class);
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.greaterThan(
+				builder.locate(builder.lower(orderRoot.get("Products")), builder.lower(productRoot.get("name"))), 0));
+		if (branchId > 0) {
+			predicates.add(builder.equal(orderRoot.get("shopID"), branchId));
 		}
+		if (startDate != null && endDate != null) {
+			predicates.add(buildOrderDateRangePredicate(builder, orderRoot, startDate, endDate));
+		}
+		Expression<String> categoryExpr = builder.<String>selectCase()
+				.when(builder.and(
+						builder.isNotNull(productRoot.get("category")),
+						builder.notEqual(builder.trim(productRoot.get("category")), "")),
+						productRoot.get("category"))
+				.when(builder.and(
+						builder.isNotNull(productRoot.get("customType")),
+						builder.notEqual(builder.trim(productRoot.get("customType")), "")),
+						productRoot.get("customType"))
+				.otherwise("Uncategorized");
+
+		query.multiselect(categoryExpr, builder.count(productRoot))
+				.where(predicates.toArray(new Predicate[0]))
+				.groupBy(categoryExpr)
+				.orderBy(builder.asc(categoryExpr));
+
+		List<Object[]> results = session.createQuery(query).getResultList();
 		Map<String, Integer> counts = new LinkedHashMap<>();
-		for (Order order : orders) {
-			for (String productName : parseProductNames(order.getProducts())) {
-				Product product = productsByName.get(productName.toLowerCase(Locale.ROOT));
-				String type = resolveProductType(product);
-				counts.merge(type, 1, Integer::sum);
-			}
+		for (Object[] row : results) {
+			String category = row[0] != null ? row[0].toString() : "Uncategorized";
+			Number count = (Number) row[1];
+			counts.put(category, count != null ? count.intValue() : 0);
 		}
 		return counts;
 	}
 
-	private List<String> parseProductNames(String products) {
-		if (products == null || products.isBlank()) {
-			return Collections.emptyList();
+	private Map<LocalDate, Integer> queryComplaintsHistogram(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
+		Root<Complaint> root = query.from(Complaint.class);
+		Expression<java.sql.Date> dateExpr = builder.function("date", java.sql.Date.class, root.get("createdAt"));
+		List<Predicate> predicates = new ArrayList<>();
+		if (branchId > 0) {
+			predicates.add(builder.equal(root.get("shopID"), branchId));
 		}
-		List<String> names = new ArrayList<>();
-		for (String item : products.split("%")) {
-			String trimmed = item.trim();
-			if (trimmed.isEmpty()) {
-				continue;
-			}
-			String[] parts = trimmed.split(" - ", 2);
-			if (parts.length == 0) {
-				continue;
-			}
-			String name = parts[0].trim();
-			if (!name.isEmpty()) {
-				names.add(name);
-			}
+		if (startDate != null && endDate != null) {
+			Date start = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+			Date endExclusive = Date.from(endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+			predicates.add(builder.greaterThanOrEqualTo(root.get("createdAt"), start));
+			predicates.add(builder.lessThan(root.get("createdAt"), endExclusive));
 		}
-		return names;
-	}
-
-	private String resolveProductType(Product product) {
-		if (product == null) {
-			return "Unknown";
-		}
-		if (product.getCategory() != null && !product.getCategory().isBlank()) {
-			return product.getCategory();
-		}
-		if (product.getCustomType() != null && !product.getCustomType().isBlank()) {
-			return product.getCustomType();
-		}
-		return "Uncategorized";
-	}
-
-	private Map<LocalDate, Integer> buildComplaintsHistogram(List<Complaint> complaints) {
+		query.multiselect(dateExpr, builder.count(root))
+				.where(predicates.toArray(new Predicate[0]))
+				.groupBy(dateExpr)
+				.orderBy(builder.asc(dateExpr));
+		List<Object[]> results = session.createQuery(query).getResultList();
 		Map<LocalDate, Integer> histogram = new LinkedHashMap<>();
-		for (Complaint complaint : complaints) {
-			LocalDate complaintDate = resolveComplaintDate(complaint);
-			if (complaintDate != null) {
-				histogram.merge(complaintDate, 1, Integer::sum);
+		for (Object[] row : results) {
+			java.sql.Date date = (java.sql.Date) row[0];
+			Number count = (Number) row[1];
+			if (date != null) {
+				histogram.put(date.toLocalDate(), count != null ? count.intValue() : 0);
 			}
 		}
 		return histogram;
+	}
+
+	private Predicate buildOrderDateRangePredicate(CriteriaBuilder builder, Root<Order> root,
+												  LocalDate startDate, LocalDate endDate) {
+		Path<Integer> yearPath = root.get("orderYear");
+		Path<Integer> monthPath = root.get("orderMonth");
+		Path<Integer> dayPath = root.get("orderDay");
+
+		Predicate startPredicate = builder.or(
+				builder.greaterThan(yearPath, startDate.getYear()),
+				builder.and(
+						builder.equal(yearPath, startDate.getYear()),
+						builder.greaterThan(monthPath, startDate.getMonthValue())
+				),
+				builder.and(
+						builder.equal(yearPath, startDate.getYear()),
+						builder.equal(monthPath, startDate.getMonthValue()),
+						builder.greaterThanOrEqualTo(dayPath, startDate.getDayOfMonth())
+				)
+		);
+
+		Predicate endPredicate = builder.or(
+				builder.lessThan(yearPath, endDate.getYear()),
+				builder.and(
+						builder.equal(yearPath, endDate.getYear()),
+						builder.lessThan(monthPath, endDate.getMonthValue())
+				),
+				builder.and(
+						builder.equal(yearPath, endDate.getYear()),
+						builder.equal(monthPath, endDate.getMonthValue()),
+						builder.lessThanOrEqualTo(dayPath, endDate.getDayOfMonth())
+				)
+		);
+
+		return builder.and(startPredicate, endPredicate);
 	}
 
 	private LocalDate resolveOrderDate(Order order) {
