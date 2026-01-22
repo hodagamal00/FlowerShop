@@ -2,7 +2,6 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 
 // Removed unused AWT imports.  Including AWT packages alongside JavaFX
 // introduces ambiguous references for classes like Button and List.  This
@@ -12,7 +11,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.*;
 import javafx.scene.control.TextField;
-import javafx.geometry.Insets;
 import javafx.scene.layout.VBox;
 
 
@@ -27,7 +25,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 // Added for detailed product navigation
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -336,13 +333,6 @@ public class CatalogController {
 	private TextField cartTextPrice;
 
 	@FXML
-	private Text cartTextPriceDiscount;
-
-	@FXML
-	private Text cartTextPriceFinal;
-
-
-	@FXML
 	private Text cartTopText;
 
 	@FXML
@@ -353,7 +343,7 @@ public class CatalogController {
 
 
 	@FXML
-	private ListView<Product> CartItemsList;
+	private ListView<String> CartItemsList;
 
 
 	@FXML // fx:id="adminControlButtton"
@@ -377,9 +367,6 @@ public class CatalogController {
 
 	@FXML // fx:id="catalogAddProductBtn"
 	private Button catalogAddProductBtn; // Value injected by FXMLLoader
-
-	@FXML
-	private Button btnCustomItem;
 
 	@FXML // fx:id="messageField"
 	private TextField messageField; // Value injected by FXMLLoader
@@ -590,6 +577,8 @@ public class CatalogController {
 		// إضافة المنتج
 		Product selectedProduct = displayProducts.get(index);
 		CartService.getInstance().addProduct(selectedProduct, 1);
+
+		refreshCartDisplay();
 	}
 
 	private void addProductToCartByIndex(int offset) {
@@ -673,8 +662,6 @@ public class CatalogController {
 			cartTopText.setVisible(true);
 			cartTextPrice.setVisible(true);
 			cartTextDiscount.setVisible(true);
-			cartTextPriceDiscount.setVisible(true);
-			cartTextPriceFinal.setVisible(true);
 		}
 		else
 		{
@@ -688,8 +675,6 @@ public class CatalogController {
 			cartTopText.setVisible(false);
 			cartTextPrice.setVisible(false);
 			cartTextDiscount.setVisible(false);
-			cartTextPriceDiscount.setVisible(false);
-			cartTextPriceFinal.setVisible(false);
 		}
 		ViewItems(mode);
 		CartItemsList.setVisible(!mode);
@@ -1542,21 +1527,7 @@ public class CatalogController {
 		assert flower_price_after6 != null : "fx:id=\"flower_price_after6\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert catalogAddProductBtn != null : "fx:id=\"catalogAddProductBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert btnCustomItem != null : "fx:id=\"btnCustomItem\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
-
-		if (CartItemsList != null) {
-			CartItemsList.setItems(CartService.getInstance().getObservableItems());
-			CartItemsList.setCellFactory(listView -> new ListCell<>() {
-				@Override
-				protected void updateItem(Product item, boolean empty) {
-					super.updateItem(item, empty);
-					setText(empty || item == null ? null : formatCartItemDisplay(item));
-				}
-			});
-			CartService.getInstance().getObservableItems().addListener((ListChangeListener<Product>) change -> recalculateCartTotals());
-			recalculateCartTotals();
-		}
 
 		bindManagedToVisible(
 				flower_price_before_container1, flower_price_before_container2, flower_price_before_container3,
@@ -1595,8 +1566,6 @@ public class CatalogController {
 		checkout.setVisible(false);
 		if (cartTextPrice != null) cartTextPrice.setVisible(false);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
-		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(false);
-		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(false);
 		if (CartItemsList != null) CartItemsList.setVisible(false);
 		if (cartTopText != null) cartTopText.setVisible(false);
 		flower1_addCart.setVisible(false);
@@ -1688,8 +1657,6 @@ public class CatalogController {
 		//cartTopText.setVisible(false);
 		//cartTextPrice.setVisible(false);
 		//cartTextDiscount.setVisible(false);
-		//cartTextPriceDiscount.setVisible(false);
-		//cartTextPriceFinal.setVisible(false);
 
 		// Populate filter combo boxes after data initialisation.  We only have six
 		// products at present; categories and colours are pulled from the Product
@@ -1742,7 +1709,7 @@ public class CatalogController {
 		if (cartTextDiscount != null) {
 			cartTextDiscount.setText("0");
 		}
-		recalculateCartTotals();
+		refreshCartDisplay();
 		worker_edit.setVisible(false);
 
 		inboxList.setVisible(false);
@@ -2185,6 +2152,7 @@ public class CatalogController {
 		if (CartItemsList != null) {
 			CartItemsList.setVisible(true);
 			CartItemsList.setManaged(true);
+			CartItemsList.setItems(FXCollections.observableArrayList());
 		}
 		if (cartTextDiscount != null) {
 			cartTextDiscount.setVisible(true);
@@ -2196,16 +2164,6 @@ public class CatalogController {
 			cartTextPrice.setManaged(true);
 			cartTextPrice.setText("0");
 		}
-		if (cartTextPriceDiscount != null) {
-			cartTextPriceDiscount.setVisible(true);
-			cartTextPriceDiscount.setManaged(true);
-			cartTextPriceDiscount.setText("No discounts applied");
-		}
-		if (cartTextPriceFinal != null) {
-			cartTextPriceFinal.setVisible(true);
-			cartTextPriceFinal.setManaged(true);
-			cartTextPriceFinal.setText("0");
-		}
 		if (viewCart != null) {
 			viewCart.setVisible(true);
 			viewCart.setManaged(true);
@@ -2213,7 +2171,7 @@ public class CatalogController {
 		if (checkout != null) {
 			checkout.setDisable(true);
 		}
-		recalculateCartTotals();
+		refreshCartDisplay();
 	}
 
 	/**
@@ -2228,8 +2186,6 @@ public class CatalogController {
 		}
 		if (cartTextPrice != null) cartTextPrice.setVisible(true);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(true);
-		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(true);
-		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(true);
 		if (CartItemsList != null) CartItemsList.setVisible(true);
 		if (cartTopText != null) cartTopText.setVisible(true);
 		if (viewCart != null) viewCart.setVisible(true);
@@ -2309,230 +2265,91 @@ public class CatalogController {
 	}
 
 	private void syncCartFromService() {
-		if (CartItemsList == null) {
-			return;
-		}
-		recalculateCartTotals();
+		refreshCartDisplay();
 	}
 
 	private void addProductToCart(Product product) {
 		if (product == null) {
 			return;
 		}
+
 		CartService.getInstance().addProduct(product, 1);
+		refreshCartDisplay();
 	}
 
-	@FXML
-	void onCustomItemClicked(ActionEvent event) {
-		if (!ensureLoggedInForCart()) {
+	private void refreshCartDisplay() {
+		List<Product> items = CartService.getInstance().getItems();
+		updateCartList(items);
+		recalculateCartTotals(items);
+	}
+
+	private void updateCartList(List<Product> items) {
+		if (CartItemsList == null) {
 			return;
 		}
-
-		Dialog<ButtonType> dialog = new Dialog<>();
-		dialog.setTitle("Custom Item");
-		dialog.setHeaderText("Create a custom floral item");
-
-		ButtonType addButtonType = new ButtonType("Add to Cart", ButtonBar.ButtonData.OK_DONE);
-		dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-
-		GridPane grid = new GridPane();
-		grid.setHgap(12);
-		grid.setVgap(10);
-		grid.setPadding(new Insets(20, 20, 10, 20));
-
-		ComboBox<String> typeField = new ComboBox<>(FXCollections.observableArrayList(
-				"Arrangement",
-				"Flowering Pot",
-				"Bridal Bouquet",
-				"Flowers Cluster",
-				"Bouquet",
-				"Other"
-		));
-		typeField.setPromptText("Select type");
-
-		TextField budgetMinField = new TextField();
-		budgetMinField.setPromptText("Min budget");
-
-		TextField budgetMaxField = new TextField();
-		budgetMaxField.setPromptText("Max budget");
-
-		TextField colorField = new TextField();
-		colorField.setPromptText("Dominant color (optional)");
-
-		TextArea notesField = new TextArea();
-		notesField.setPromptText("Notes (optional)");
-		notesField.setPrefRowCount(3);
-
-		grid.add(new Label("Type"), 0, 0);
-		grid.add(typeField, 1, 0);
-		grid.add(new Label("Budget Min"), 0, 1);
-		grid.add(budgetMinField, 1, 1);
-		grid.add(new Label("Budget Max"), 0, 2);
-		grid.add(budgetMaxField, 1, 2);
-		grid.add(new Label("Dominant Color"), 0, 3);
-		grid.add(colorField, 1, 3);
-		grid.add(new Label("Notes"), 0, 4);
-		grid.add(notesField, 1, 4);
-
-		dialog.getDialogPane().setContent(grid);
-
-		Node addButton = dialog.getDialogPane().lookupButton(addButtonType);
-		addButton.addEventFilter(ActionEvent.ACTION, actionEvent -> {
-			String type = typeField.getValue();
-			Double minBudget = parseBudgetValue(budgetMinField.getText());
-			Double maxBudget = parseBudgetValue(budgetMaxField.getText());
-
-			if (type == null || type.trim().isEmpty()) {
-				showValidationAlert("Type is required.");
-				actionEvent.consume();
-				return;
-			}
-
-			if (minBudget == null || maxBudget == null) {
-				showValidationAlert("Budget values must be valid numbers.");
-				actionEvent.consume();
-				return;
-			}
-
-			if (minBudget < 0 || maxBudget <= 0 || maxBudget < minBudget) {
-				showValidationAlert("Budget must be valid (min ≥ 0, max ≥ min, max > 0).");
-				actionEvent.consume();
-			}
-		});
-
-		dialog.showAndWait().ifPresent(result -> {
-			if (result != addButtonType) {
-				return;
-			}
-			String type = typeField.getValue();
-			Double minBudgetValue = parseBudgetValue(budgetMinField.getText());
-			Double maxBudgetValue = parseBudgetValue(budgetMaxField.getText());
-			if (minBudgetValue == null || maxBudgetValue == null) {
-				return;
-			}
-			double minBudget = minBudgetValue;
-			double maxBudget = maxBudgetValue;
-			String color = safeTrim(colorField.getText());
-			String notes = safeTrim(notesField.getText());
-			Product customProduct = buildCustomProduct(type, color, notes, minBudget, maxBudget);
-			addProductToCart(customProduct);
-		});
+		CartItemsList.getItems().setAll(buildCartLineLabels(items));
 	}
 
-	private void showValidationAlert(String message) {
-		Alert alert = new Alert(Alert.AlertType.WARNING);
-		alert.setTitle("Invalid Custom Item");
-		alert.setHeaderText(message);
-		alert.setContentText("Please correct the fields and try again.");
-		alert.showAndWait();
+	private List<String> buildCartLineLabels(List<Product> items) {
+		List<CartLine> lines = buildCartLines(items);
+		List<String> labels = new ArrayList<>();
+		for (CartLine line : lines) {
+			String label = line.quantity > 1
+					? String.format("%s x%d", line.product.getName(), line.quantity)
+					: line.product.getName();
+			labels.add(label);
+		}
+		return labels;
 	}
 
-	private Double parseBudgetValue(String rawValue) {
-		if (rawValue == null) {
-			return null;
-		}
-		String trimmed = rawValue.trim();
-		if (trimmed.isEmpty()) {
-			return null;
-		}
-		try {
-			return Double.parseDouble(trimmed);
-		} catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
-	private Product buildCustomProduct(String type, String color, String notes, double minBudget, double maxBudget) {
-		Product product = new Product();
-		product.setID(-1);
-		product.setName("Custom Item");
-		product.setCustomProduct(true);
-		product.setCustomType(type);
-		product.setCategory(type);
-		product.setColor(color);
-		product.setPriceRangeMin(minBudget);
-		product.setPriceRangeMax(maxBudget);
-		product.setPrice(maxBudget);
-		if (!notes.isEmpty()) {
-			product.setDetails(notes);
-		}
-		return product;
-	}
-
-	private String formatCartItemDisplay(Product product) {
-		if (product == null) {
-			return "";
-		}
-		if (!product.isCustomProduct()) {
-			return product.getName();
-		}
-		String type = safeTrim(product.getCustomType());
-		String color = safeTrim(product.getColor());
-		StringBuilder title = new StringBuilder("Custom Item");
-		if (!type.isEmpty() || !color.isEmpty()) {
-			title.append(" (");
-			if (!type.isEmpty()) {
-				title.append(type);
-			}
-			if (!color.isEmpty()) {
-				if (!type.isEmpty()) {
-					title.append(", ");
+	private List<CartLine> buildCartLines(List<Product> items) {
+		Map<String, CartLine> lines = new LinkedHashMap<>();
+		if (items != null) {
+			for (Product product : items) {
+				if (product == null) {
+					continue;
 				}
-				title.append(color);
+				String key = product.getID() + "|" + product.getName() + "|" + product.getPrice();
+				CartLine line = lines.get(key);
+				if (line == null) {
+					line = new CartLine(product, 0);
+					lines.put(key, line);
+				}
+				line.quantity += 1;
 			}
-			title.append(")");
 		}
-		String budgetLabel = formatCustomBudgetLabel(product);
-		if (!budgetLabel.isEmpty()) {
-			title.append("\n").append(budgetLabel);
-		}
-		return title.toString();
+		return new ArrayList<>(lines.values());
 	}
 
-	private String formatCustomBudgetLabel(Product product) {
-		double minBudget = product.getPriceRangeMin();
-		double maxBudget = product.getPriceRangeMax();
-		if (minBudget <= 0 && maxBudget <= 0) {
-			return "";
+	private void recalculateCartTotals(List<Product> items) {
+		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
+		double subtotal = 0.0;
+		for (CartLine line : buildCartLines(items)) {
+			PricingService.PricingResult pricing = PricingService.calculatePricing(line.product, account);
+			subtotal += pricing.getFinalPrice() * line.quantity;
 		}
-		if (minBudget > 0 && maxBudget > 0 && maxBudget > minBudget) {
-			return String.format(Locale.US, "Budget: %s–%s ₪", formatBudgetValue(minBudget), formatBudgetValue(maxBudget));
-		}
-		double value = maxBudget > 0 ? maxBudget : minBudget;
-		return String.format(Locale.US, "Budget: %s ₪", formatBudgetValue(value));
-	}
+		subtotal = PricingService.roundCurrency(subtotal);
+		double total = subtotal;
 
-	private String formatBudgetValue(double value) {
-		if (value == Math.rint(value)) {
-			return String.format(Locale.US, "%.0f", value);
+		if (cartTextDiscount != null) {
+			cartTextDiscount.setText(String.format(Locale.US, "%.2f", subtotal));
 		}
-		return String.format(Locale.US, "%.2f", value);
-	}
-
-	private String safeTrim(String value) {
-		return value == null ? "" : value.trim();
+		if (cartTextPrice != null) {
+			cartTextPrice.setText(String.format(Locale.US, "%.2f", total));
+		}
 	}
 
 	private void recalculateCartTotals() {
-		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
-		List<Product> items = CartService.getInstance().getItems();
-		PricingService.CartTotals totals = PricingService.calculateCartTotals(items, account);
-		double baseTotal = totals.getBaseTotal();
-		double finalTotal = totals.getFinalTotal();
+		recalculateCartTotals(CartService.getInstance().getItems());
+	}
 
-		if (cartTextPrice != null) {
-			cartTextPrice.setText(String.format(Locale.US, "%.2f", items.isEmpty() ? 0.0 : baseTotal));
-		}
+	private static class CartLine {
+		private final Product product;
+		private int quantity;
 
-		boolean discountApplied = finalTotal < baseTotal;
-		if (cartTextDiscount != null) {
-			cartTextDiscount.setText(String.format(Locale.US, "%.2f", items.isEmpty() ? 0.0 : finalTotal));
-		}
-		if (cartTextPriceDiscount != null) {
-			cartTextPriceDiscount.setText(discountApplied ? "Subscriber discount applied" : "No discounts applied");
-		}
-		if (cartTextPriceFinal != null) {
-			cartTextPriceFinal.setText(String.format(Locale.US, "Final total: %.2f", items.isEmpty() ? 0.0 : finalTotal));
+		private CartLine(Product product, int quantity) {
+			this.product = product;
+			this.quantity = quantity;
 		}
 	}
 
