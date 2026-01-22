@@ -25,6 +25,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 // Added for detailed product navigation
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.Node;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -242,6 +244,24 @@ public class CatalogController {
 
 	@FXML
 	private Label flower_promo6;
+
+	@FXML
+	private Region flower_promo_underline1;
+
+	@FXML
+	private Region flower_promo_underline2;
+
+	@FXML
+	private Region flower_promo_underline3;
+
+	@FXML
+	private Region flower_promo_underline4;
+
+	@FXML
+	private Region flower_promo_underline5;
+
+	@FXML
+	private Region flower_promo_underline6;
 
 	@FXML
 	private Label flower_price_before1;
@@ -1400,7 +1420,8 @@ public class CatalogController {
 		return String.format(Locale.US, "%.2f₪", price);
 	}
 
-	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, Label promoBadge) {
+	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter,
+									 Label promoBadge, Region promoUnderline) {
 		if (product == null) {
 			return;
 		}
@@ -1425,11 +1446,18 @@ public class CatalogController {
 
 		promoBadge.setText("SALE");
 		promoBadge.setVisible(hasPromotion);
-		promoBadge.setManaged(hasPromotion);
+		promoUnderline.setVisible(hasPromotion);
 		priceBefore.setVisible(hasPromotion);
-		priceBefore.setManaged(hasPromotion);
 		priceAfter.setVisible(hasPromotion);
-		priceAfter.setManaged(hasPromotion);
+	}
+
+	private void bindManagedToVisible(Node... nodes) {
+		for (Node node : nodes) {
+			if (node == null) {
+				continue;
+			}
+			node.managedProperty().bind(node.visibleProperty());
+		}
 	}
 
 	public void updateFields(int mode)
@@ -1467,12 +1495,12 @@ public class CatalogController {
 			flower_color5.setText(formatCatalogField("Color", displayProducts.get(4).getColor()));
 			flower_color6.setText(formatCatalogField("Color", displayProducts.get(5).getColor()));
 
-			updatePricingLabels(displayProducts.get(0), flower_price1, flower_price_before1, flower_price_after1, flower_promo1);
-			updatePricingLabels(displayProducts.get(1), flower_price2, flower_price_before2, flower_price_after2, flower_promo2);
-			updatePricingLabels(displayProducts.get(2), flower_price3, flower_price_before3, flower_price_after3, flower_promo3);
-			updatePricingLabels(displayProducts.get(3), flower_price4, flower_price_before4, flower_price_after4, flower_promo4);
-			updatePricingLabels(displayProducts.get(4), flower_price5, flower_price_before5, flower_price_after5, flower_promo5);
-			updatePricingLabels(displayProducts.get(5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6);
+			updatePricingLabels(displayProducts.get(0), flower_price1, flower_price_before1, flower_price_after1, flower_promo1, flower_promo_underline1);
+			updatePricingLabels(displayProducts.get(1), flower_price2, flower_price_before2, flower_price_after2, flower_promo2, flower_promo_underline2);
+			updatePricingLabels(displayProducts.get(2), flower_price3, flower_price_before3, flower_price_after3, flower_promo3, flower_promo_underline3);
+			updatePricingLabels(displayProducts.get(3), flower_price4, flower_price_before4, flower_price_after4, flower_promo4, flower_promo_underline4);
+			updatePricingLabels(displayProducts.get(4), flower_price5, flower_price_before5, flower_price_after5, flower_promo5, flower_promo_underline5);
+			updatePricingLabels(displayProducts.get(5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6, flower_promo_underline6);
 
 		}
 		else
@@ -1516,12 +1544,12 @@ public class CatalogController {
 			flower_promo4.setVisible(false);
 			flower_promo5.setVisible(false);
 			flower_promo6.setVisible(false);
-			flower_promo1.setManaged(false);
-			flower_promo2.setManaged(false);
-			flower_promo3.setManaged(false);
-			flower_promo4.setManaged(false);
-			flower_promo5.setManaged(false);
-			flower_promo6.setManaged(false);
+			flower_promo_underline1.setVisible(false);
+			flower_promo_underline2.setVisible(false);
+			flower_promo_underline3.setVisible(false);
+			flower_promo_underline4.setVisible(false);
+			flower_promo_underline5.setVisible(false);
+			flower_promo_underline6.setVisible(false);
 
 			flower_name1.setText("/");
 			flower_name2.setText("/");
@@ -1564,7 +1592,7 @@ public class CatalogController {
 			if(CatalogENDIndex - CatalogSTARTIndex > 0)
 			{
 				flower_name1.setText(displayProducts.get(CatalogSTARTIndex).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex), flower_price1, flower_price_before1, flower_price_after1, flower_promo1);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex), flower_price1, flower_price_before1, flower_price_after1, flower_promo1, flower_promo_underline1);
 				flower_sku1.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex).getSku()));
 				flower_category1.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex).getCategory()));
 				flower_color1.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex).getColor()));
@@ -1581,7 +1609,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 1)
 			{
 				flower_name2.setText(displayProducts.get(CatalogSTARTIndex + 1).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 1), flower_price2, flower_price_before2, flower_price_after2, flower_promo2);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 1), flower_price2, flower_price_before2, flower_price_after2, flower_promo2, flower_promo_underline2);
 				flower_sku2.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 1).getSku()));
 				flower_category2.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 1).getCategory()));
 				flower_color2.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 1).getColor()));
@@ -1597,7 +1625,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 2)
 			{
 				flower_name3.setText(displayProducts.get(CatalogSTARTIndex + 2).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 2), flower_price3, flower_price_before3, flower_price_after3, flower_promo3);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 2), flower_price3, flower_price_before3, flower_price_after3, flower_promo3, flower_promo_underline3);
 				flower_sku3.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 2).getSku()));
 				flower_category3.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 2).getCategory()));
 				flower_color3.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 2).getColor()));
@@ -1613,7 +1641,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 3)
 			{
 				flower_name4.setText(displayProducts.get(CatalogSTARTIndex + 3).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 3), flower_price4, flower_price_before4, flower_price_after4, flower_promo4);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 3), flower_price4, flower_price_before4, flower_price_after4, flower_promo4, flower_promo_underline4);
 				flower_sku4.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 3).getSku()));
 				flower_category4.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 3).getCategory()));
 				flower_color4.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 3).getColor()));
@@ -1629,7 +1657,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 4)
 			{
 				flower_name5.setText(displayProducts.get(CatalogSTARTIndex + 4).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 4), flower_price5, flower_price_before5, flower_price_after5, flower_promo5);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 4), flower_price5, flower_price_before5, flower_price_after5, flower_promo5, flower_promo_underline5);
 				flower_sku5.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 4).getSku()));
 				flower_category5.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 4).getCategory()));
 				flower_color5.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 4).getColor()));
@@ -1648,7 +1676,7 @@ public class CatalogController {
 				// select the sixth element in the current window and update the corresponding
 				// UI components (name, price, button, cart button and container) for slot 6.
 				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6, flower_promo_underline6);
 				flower_sku6.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 5).getSku()));
 				flower_category6.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 5).getCategory()));
 				flower_color6.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 5).getColor()));
@@ -1664,7 +1692,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex == 6)
 			{
 				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6, flower_promo_underline6);
 				flower_sku6.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 5).getSku()));
 				flower_category6.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 5).getCategory()));
 				flower_color6.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 5).getColor()));
@@ -1876,6 +1904,12 @@ public class CatalogController {
 		assert flower_promo4 != null : "fx:id=\"flower_promo4\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_promo5 != null : "fx:id=\"flower_promo5\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_promo6 != null : "fx:id=\"flower_promo6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_promo_underline1 != null : "fx:id=\"flower_promo_underline1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_promo_underline2 != null : "fx:id=\"flower_promo_underline2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_promo_underline3 != null : "fx:id=\"flower_promo_underline3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_promo_underline4 != null : "fx:id=\"flower_promo_underline4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_promo_underline5 != null : "fx:id=\"flower_promo_underline5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_promo_underline6 != null : "fx:id=\"flower_promo_underline6\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_before1 != null : "fx:id=\"flower_price_before1\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_before2 != null : "fx:id=\"flower_price_before2\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_before3 != null : "fx:id=\"flower_price_before3\" was not injected: check your FXML file 'Catalog.fxml'.";
@@ -1893,6 +1927,16 @@ public class CatalogController {
 		assert catalogAddProductBtn != null : "fx:id=\"catalogAddProductBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
+
+		bindManagedToVisible(
+				flower_promo1, flower_promo2, flower_promo3, flower_promo4, flower_promo5, flower_promo6,
+				flower_promo_underline1, flower_promo_underline2, flower_promo_underline3,
+				flower_promo_underline4, flower_promo_underline5, flower_promo_underline6,
+				flower_price_before1, flower_price_before2, flower_price_before3, flower_price_before4,
+				flower_price_before5, flower_price_before6,
+				flower_price_after1, flower_price_after2, flower_price_after3, flower_price_after4,
+				flower_price_after5, flower_price_after6
+		);
 
 		customError.setVisible(false);
 		messageField.setVisible(false);
@@ -1988,24 +2032,18 @@ public class CatalogController {
 		flower_promo4.setVisible(false);
 		flower_promo5.setVisible(false);
 		flower_promo6.setVisible(false);
-		flower_promo1.setManaged(false);
-		flower_promo2.setManaged(false);
-		flower_promo3.setManaged(false);
-		flower_promo4.setManaged(false);
-		flower_promo5.setManaged(false);
-		flower_promo6.setManaged(false);
+		flower_promo_underline1.setVisible(false);
+		flower_promo_underline2.setVisible(false);
+		flower_promo_underline3.setVisible(false);
+		flower_promo_underline4.setVisible(false);
+		flower_promo_underline5.setVisible(false);
+		flower_promo_underline6.setVisible(false);
 		flower_price_before1.setVisible(false);
 		flower_price_before2.setVisible(false);
 		flower_price_before3.setVisible(false);
 		flower_price_before4.setVisible(false);
 		flower_price_before5.setVisible(false);
 		flower_price_before6.setVisible(false);
-		flower_price_before1.setManaged(false);
-		flower_price_before2.setManaged(false);
-		flower_price_before3.setManaged(false);
-		flower_price_before4.setManaged(false);
-		flower_price_before5.setManaged(false);
-		flower_price_before6.setManaged(false);
 		flower_price_after1.setVisible(false);
 		flower_price_after2.setVisible(false);
 		flower_price_after3.setVisible(false);

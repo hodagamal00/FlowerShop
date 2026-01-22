@@ -352,6 +352,13 @@
     -fx-padding: 2px 8px 2px 8px;
 }
 
+.sale-underline {
+    -fx-background-color: #d11;
+    -fx-pref-height: 4px;
+    -fx-pref-width: 40px;
+    -fx-background-radius: 2px;
+}
+
 .product-name {
     -fx-font-size: 18px;
     -fx-font-weight: bold;

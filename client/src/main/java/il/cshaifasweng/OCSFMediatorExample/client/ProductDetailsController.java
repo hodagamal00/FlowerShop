@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -26,7 +27,9 @@ public class ProductDetailsController {
     @FXML private Label categoryLabel;
     @FXML private Label colorLabel;
     @FXML private Text originalPriceText;
-    @FXML private Text priceText;
+    @FXML private Text discountedPriceText;
+    @FXML private Label saleLabel;
+    @FXML private javafx.scene.layout.Region saleUnderline;
     @FXML private Label discountBadge;
     @FXML private Label priceRangeLabel;
     @FXML private Text descriptionText;
@@ -53,6 +56,7 @@ public class ProductDetailsController {
             SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
             quantitySpinner.setValueFactory(valueFactory);
         }
+        bindManagedToVisible(originalPriceText, discountedPriceText, saleLabel, saleUnderline);
         if (selectedProduct == null && pendingProduct != null) {
             setProduct(pendingProduct);
             pendingProduct = null;
@@ -98,6 +102,8 @@ public class ProductDetailsController {
         priceRangeLabel.setVisible(false);
         priceRangeLabel.setManaged(false);
         originalPriceText.setVisible(false);
+        saleLabel.setVisible(false);
+        saleUnderline.setVisible(false);
         discountBadge.setVisible(false);
         customOptionsContainer.setVisible(false);
         customOptionsContainer.setManaged(false);
@@ -108,7 +114,7 @@ public class ProductDetailsController {
             priceRangeLabel.setManaged(true);
             priceRangeLabel.setText(String.format("Price Range: $%.2f - $%.2f", 
                 product.getPriceRangeMin(), product.getPriceRangeMax()));
-            priceText.setText("Custom Price");
+            discountedPriceText.setText("Custom Price");
             
             // Show custom options
             customOptionsContainer.setVisible(true);
@@ -117,13 +123,16 @@ public class ProductDetailsController {
             // Regular product pricing
             PricingService.PricingResult pricing = PricingService.calculatePricing(product, SimpleClient.getAccount());
             double actualPrice = pricing.getFinalPrice();
-            priceText.setText(String.format("$%.2f", actualPrice));
+            discountedPriceText.setText(String.format("$%.2f", actualPrice));
 
             // Show discount information if on promotion
             if (pricing.isPromotionApplied()) {
                 double originalPrice = pricing.getBasePrice();
                 originalPriceText.setText(String.format("$%.2f", originalPrice));
                 originalPriceText.setVisible(true);
+
+                saleLabel.setVisible(true);
+                saleUnderline.setVisible(true);
                 
                 discountBadge.setText(String.format("%.0f%% OFF", product.getNormalizedDiscountPercent()));
                 discountBadge.setVisible(true);
@@ -280,8 +289,8 @@ public class ProductDetailsController {
     }
 
     private Stage getCurrentStage() {
-        if (priceText != null && priceText.getScene() != null) {
-            return (Stage) priceText.getScene().getWindow();
+        if (discountedPriceText != null && discountedPriceText.getScene() != null) {
+            return (Stage) discountedPriceText.getScene().getWindow();
         }
         if (productNameText != null && productNameText.getScene() != null) {
             return (Stage) productNameText.getScene().getWindow();
@@ -300,6 +309,15 @@ public class ProductDetailsController {
         alert.showAndWait();
         NavigationService.getInstance().navigate("Login");
         return false;
+    }
+
+    private void bindManagedToVisible(Node... nodes) {
+        for (Node node : nodes) {
+            if (node == null) {
+                continue;
+            }
+            node.managedProperty().bind(node.visibleProperty());
+        }
     }
 
     private void showMissingProductState() {
