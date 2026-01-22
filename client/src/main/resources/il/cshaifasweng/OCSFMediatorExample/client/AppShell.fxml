@@ -33,10 +33,8 @@
                     <Label fx:id="loggedInIndicatorLabel" text="Guest" styleClass="account-indicator" visible="true" managed="true" />
                     <VBox fx:id="profileContainer" alignment="CENTER_RIGHT" spacing="4.0" visible="false" managed="false">
                         <Label fx:id="profileNameLabel" styleClass="profile-label" />
-                        <Button fx:id="profileButton" text="Profile" styleClass="btn-secondary" />
+                        <Button fx:id="profileButton" text="My Account" styleClass="btn-secondary" />
                     </VBox>
-                    <Button fx:id="btnMyAccount" text="My Account" styleClass="btn-secondary"
-                            onAction="#onMyAccountClicked" visible="false" managed="false" />
                     <Button fx:id="logoutButton" text="Logout" styleClass="btn-secondary" onAction="#handleLogout" visible="false" managed="false" />
                     <Button fx:id="loginButton" text="Login" styleClass="btn-primary" />
                 </HBox>
