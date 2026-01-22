@@ -168,7 +168,7 @@ public class ComplaintUpdateManager {
                 int recievedMoneyValue = recievedComplaint.getReturnedmoneyvalue();
                 boolean recievedIsReturnMoney = recievedComplaint.isReturnedMoney();
                 boolean recievedIsAccpeted = recievedComplaint.isAccepted();
-                String compensationDecision = recievedIsReturnMoney ? recievedMoneyValue + "% refund approved" : "No compensation";
+                String compensationDecision = recievedIsReturnMoney ? recievedMoneyValue + "₪ compensation approved" : "No compensation";
 
 
                 System.out.println("Arrived to edit Complaint 2");
@@ -190,6 +190,13 @@ public class ComplaintUpdateManager {
                 int responseWindow = resolveResponseWindowHours(session);
                 applySlaStatus(updateComplaint, responseWindow);
 
+                if (recievedIsAccpeted && recievedIsReturnMoney && recievedMoneyValue > 0) {
+                    Account customer = session.get(Account.class, updateComplaint.getCustomerID());
+                    if (customer != null) {
+                        customer.addCreditBalance(recievedMoneyValue);
+                        session.update(customer);
+                    }
+                }
 
                 System.out.println("Arrived to edit Complaint 3");
                 session.update(updateComplaint);

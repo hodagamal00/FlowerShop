@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.time.DateTimeException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import org.hibernate.*;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -13,7 +12,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 public class OrderUpdateManager {
-    private static final int IMMEDIATE_ORDER_WINDOW_HOURS = 3;
     public static int ordersnum = 0;
     public static List<Order> orderGeneralList = new ArrayList<Order>();
 
@@ -147,13 +145,6 @@ public class OrderUpdateManager {
 
             if (deliveryDate.isBefore(orderDate)) {
                 throw new IllegalArgumentException("Requested delivery time cannot be before the order time");
-            }
-
-            if (orderDate.toLocalDate().equals(deliveryDate.toLocalDate())) {
-                long minutesBetween = Duration.between(orderDate, deliveryDate).toMinutes();
-                if (minutesBetween > IMMEDIATE_ORDER_WINDOW_HOURS * 60L) {
-                    throw new IllegalArgumentException("Immediate orders must be scheduled within a 3-hour window");
-                }
             }
         } catch (DateTimeException ex) {
             throw new IllegalArgumentException("Invalid order or delivery date/time provided", ex);

@@ -99,7 +99,7 @@ public class Account implements Serializable {
 
     public Account()
     {
-
+        this.creditBalance = 0.0;
     }
 
     /**
@@ -135,6 +135,18 @@ public class Account implements Serializable {
 
     public void setFrozen(boolean frozen) {
         this.frozen = frozen;
+    }
+
+    public double getCreditBalance() {
+        return creditBalance;
+    }
+
+    public void setCreditBalance(double creditBalance) {
+        this.creditBalance = creditBalance;
+    }
+
+    public void addCreditBalance(double amount) {
+        this.creditBalance += amount;
     }
 
     public void setAccountID(int accountID) {

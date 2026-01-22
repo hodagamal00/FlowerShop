@@ -585,31 +585,12 @@ public class CatalogController {
 			return; // حماية من IndexOutOfBounds
 		}
 
-		// السعر الحالي (إذا الحقل فاضي يبدأ من 0)
-		int basePrice = 0;
-		if (!cartTextPrice.getText().isEmpty()) {
-			basePrice = Integer.parseInt(cartTextPrice.getText());
-		}
-
-		int addedPrice = (int) Math.round(PricingService.calculateDisplayPrice(displayProducts.get(index), currentLoggedAccount));
-		basePrice += addedPrice;
-
 		// إضافة المنتج
 		Product selectedProduct = displayProducts.get(index);
 		CartItemsList.getItems().add(selectedProduct.getName());
 		CartService.getInstance().addProduct(selectedProduct, 1);
 
-		// تحديث السعر قبل الخصم
-		cartTextPrice.setText(String.valueOf(basePrice));
-
-		// الخصم: 10% فقط إذا مشترك والمجموع أكبر من 50₪
-		if (currentLoggedAccount != null
-				&& currentLoggedAccount.isSubscription()
-				&& basePrice > 50) {
-			cartTextDiscount.setText(String.valueOf((int)(basePrice * 0.9)));
-		} else {
-			cartTextDiscount.setText(String.valueOf(basePrice));
-		}
+		updateCartSummaryFromItems(CartService.getInstance().getItems());
 	}
 
 	private boolean ensureLoggedInForCart() {
@@ -1424,25 +1405,25 @@ public class CatalogController {
 			return;
 		}
 
-		double basePrice = Product.roundCurrency(product.getPrice());
-		double discountPercent = Product.normalizeDiscountPercent(product.getDiscountPercent());
-		boolean hasPromotion = product.hasActivePromotion();
-		double actualPrice = hasPromotion
-				? Product.roundCurrency(Product.calculateDiscountedPrice(basePrice, discountPercent))
-				: basePrice;
+		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
+		PricingService.PricingResult pricing = PricingService.calculatePricing(product, account);
+		double basePrice = pricing.getBasePrice();
+		boolean hasPromotion = pricing.isPromotionApplied();
+		double finalPrice = pricing.getFinalPrice();
 
 		System.out.printf(Locale.US,
-				"Product %d | original=%.2f | discountPercent=%.2f | final=%.2f%n",
-				product.getID(), basePrice, discountPercent, actualPrice);
+				"Product %d | original=%.2f | final=%.2f%n",
+				product.getID(), basePrice, finalPrice);
 
 		String formattedBase = formatPrice(basePrice);
-		String formattedActual = formatPrice(actualPrice);
+		String formattedFinal = formatPrice(finalPrice);
 
-		priceBadge.setText(formattedActual);
-		priceAfter.setText(formattedActual);
+		priceBadge.setText(formattedFinal);
+		priceAfter.setText(formattedFinal);
 		priceBefore.setText(formattedBase);
 		priceBefore.setStyle(hasPromotion ? "-fx-strikethrough: true;" : "");
 
+		promoBadge.setText("SALE");
 		promoBadge.setVisible(hasPromotion);
 		promoBadge.setManaged(hasPromotion);
 		priceBefore.setVisible(hasPromotion);
@@ -2417,7 +2398,7 @@ public class CatalogController {
 			}
 			// Price filter
 			if (!"All".equals(selectedPrice)) {
-				double price = PricingService.calculateDisplayPrice(p, resolveCurrentPrivilegeLevel());
+				double price = PricingService.calculateDisplayPrice(p, currentLoggedAccount);
 				try {
 					String[] parts = selectedPrice.split("-");
 					double min = Double.parseDouble(parts[0]);
@@ -2712,15 +2693,14 @@ public class CatalogController {
 			return;
 		}
 		CartItemsList.getItems().clear();
-		int basePrice = 0;
-		for (Product product : CartService.getInstance().getItems()) {
+		List<Product> items = CartService.getInstance().getItems();
+		for (Product product : items) {
 			if (product == null) {
 				continue;
 			}
 			CartItemsList.getItems().add(product.getName());
-			basePrice += (int) Math.round(PricingService.calculateDisplayPrice(product, currentLoggedAccount));
 		}
-		updateCartSummary(basePrice);
+		updateCartSummaryFromItems(items);
 	}
 
 	private void addProductToCart(Product product) {
@@ -2732,52 +2712,41 @@ public class CatalogController {
 			CartItemsList.getItems().add(product.getName());
 		}
 		CartService.getInstance().addProduct(product, 1);
-
-		int basePrice = parseCartTotal();
-		basePrice += (int) Math.round(PricingService.calculateDisplayPrice(product, currentLoggedAccount));
-		updateCartSummary(basePrice);
+		updateCartSummaryFromItems(CartService.getInstance().getItems());
 	}
 
-	private int parseCartTotal() {
-		if (cartTextPrice == null) {
-			return 0;
+	private void updateCartSummaryFromItems(List<Product> items) {
+		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
+		double baseTotal = 0.0;
+		double finalTotal = 0.0;
+		if (items != null) {
+			for (Product product : items) {
+				if (product == null) {
+					continue;
+				}
+				PricingService.PricingResult pricing = PricingService.calculatePricing(product, account);
+				baseTotal += pricing.getPromotionPrice();
+				finalTotal += pricing.getFinalPrice();
+			}
 		}
-		String value = cartTextPrice.getText();
-		if (value == null || value.isBlank()) {
-			return 0;
-		}
-		try {
-			return Integer.parseInt(value.trim());
-		} catch (NumberFormatException ignored) {
-			return 0;
-		}
-	}
 
-	private void updateCartSummary(int basePrice) {
+		baseTotal = PricingService.roundCurrency(baseTotal);
+		finalTotal = PricingService.roundCurrency(finalTotal);
+
 		if (cartTextPrice != null) {
-			cartTextPrice.setText(String.valueOf(basePrice));
+			cartTextPrice.setText(String.format(Locale.US, "%.2f", baseTotal));
 		}
 
-		boolean discountApplied = hasSubscriptionDiscount() && basePrice > 50;
-		int discountedTotal = discountApplied ? (int) Math.round(basePrice * 0.9) : basePrice;
-
+		boolean discountApplied = finalTotal < baseTotal;
 		if (cartTextDiscount != null) {
-			cartTextDiscount.setText(String.valueOf(discountedTotal));
+			cartTextDiscount.setText(String.format(Locale.US, "%.2f", finalTotal));
 		}
 		if (cartTextPriceDiscount != null) {
 			cartTextPriceDiscount.setText(discountApplied ? "Subscriber discount applied" : "No discounts applied");
 		}
 		if (cartTextPriceFinal != null) {
-			cartTextPriceFinal.setText("Final total: " + discountedTotal);
+			cartTextPriceFinal.setText(String.format(Locale.US, "Final total: %.2f", finalTotal));
 		}
-	}
-
-	private boolean hasSubscriptionDiscount() {
-		if (currentLoggedAccount != null) {
-			return currentLoggedAccount.isSubscription();
-		}
-		Account account = SimpleClient.getUser();
-		return account != null && account.isSubscription();
 	}
 
 	private PriceRange parsePriceRange(String rawValue) {

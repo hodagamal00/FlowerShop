@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.time.DateTimeException;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.*;
@@ -643,31 +642,6 @@ private static SessionFactory cachedSessionFactory;
 			}
 		}
 
-		if (msg instanceof ReportDataRequest) {
-			SessionFactory sessionFactory = getSessionFactory();
-			Session localSession = null;
-			Transaction tx1 = null;
-			try {
-				localSession = sessionFactory.openSession();
-				tx1 = localSession.beginTransaction();
-
-				ReportDataRequest request = (ReportDataRequest) msg;
-				ReportDataResponse response = handleReportDataRequest(localSession, client, request);
-				client.sendToClient(response);
-
-				tx1.commit();
-			} catch (Exception ex) {
-				if (tx1 != null) {
-					tx1.rollback();
-				}
-				throw ex;
-			} finally {
-				if (localSession != null) {
-					localSession.close();
-				}
-			}
-		}
-
 		if (msg instanceof GetAllComplaints) {
 			SessionFactory sessionFactory = getSessionFactory();
 			Session localSession = null;
@@ -986,175 +960,34 @@ private static SessionFactory cachedSessionFactory;
 		} catch (DateTimeException ex) {
 			return new CancelOrderResponse(false, "Order delivery time is invalid.", orderId, 0, 0, "NONE");
 		}
-		long minutesUntilDelivery = Duration.between(now, deliveryTime).toMinutes();
-		double refundFactor;
-		String refundStatus;
-		if (minutesUntilDelivery >= 180) {
-			refundFactor = 1.0;
-			refundStatus = "FULL";
-		} else if (minutesUntilDelivery >= 60) {
-			refundFactor = 0.5;
-			refundStatus = "HALF";
-		} else {
-			refundFactor = 0.0;
-			refundStatus = "NONE";
-		}
-
-		double refundAmount = order.getTotalPrice() * refundFactor;
-		applyRefundCredit(session, order.getAccountID(), refundAmount);
+		double refundFactor = order.calculateRefund(
+				now.getDayOfMonth(),
+				now.getMonthValue(),
+				now.getYear(),
+				now.getHour(),
+				now.getMinute()
+		);
+		double refundAmount = order.getRefundAmount();
+		String refundStatus = order.getRefundStatus();
 		order.setCancelled(true);
 		order.setCancelDay(now.getDayOfMonth());
 		order.setCancelMonth(now.getMonthValue());
 		order.setCancelYear(now.getYear());
 		order.setCancelHour(now.getHour());
 		order.setCancelMinute(now.getMinute());
-		order.setRefundAmount(refundAmount);
-		order.setRefundStatus(refundStatus);
 		session.update(order);
 
-		return new CancelOrderResponse(true, "Order cancelled successfully.", orderId,
+		if (refundAmount > 0) {
+			Account refundAccount = session.get(Account.class, order.getAccountID());
+			if (refundAccount != null) {
+				refundAccount.addCreditBalance(refundAmount);
+				session.update(refundAccount);
+			}
+		}
+
+		String message = String.format(Locale.US, "Order cancelled successfully. Refund amount: ₪%.2f", refundAmount);
+		return new CancelOrderResponse(true, message, orderId,
 				refundAmount, refundFactor * 100.0, refundStatus);
-	}
-
-	private void applyRefundCredit(Session session, int accountId, double refundAmount) {
-		if (refundAmount <= 0) {
-			return;
-		}
-		Account account = session.get(Account.class, accountId);
-		if (account == null) {
-			return;
-		}
-		account.setCreditBalance(account.getCreditBalance() + refundAmount);
-		session.update(account);
-	}
-
-	private ReportDataResponse handleReportDataRequest(Session session, ConnectionToClient client, ReportDataRequest request)
-			throws IOException {
-		if (!requirePrivilege(client, 3, "Unauthorized: manager access required.")) {
-			return new ReportDataResponse(false, "Unauthorized: manager access required.",
-					request.getRequestId(), request.getPeriodLabel(), request.getBranchId(),
-					Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-		}
-
-		Account account = getSessionAccount(client);
-		boolean isChainManager = account != null && account.getPrivilegeLevel() >= 4;
-		int requestedBranch = request.getBranchId();
-		int effectiveBranch = requestedBranch;
-
-		if (!isChainManager) {
-			effectiveBranch = resolveBranchId(account);
-			if (effectiveBranch <= 0) {
-				return new ReportDataResponse(false, "Unauthorized: branch assignment required.",
-						request.getRequestId(), request.getPeriodLabel(), requestedBranch,
-						Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-			}
-			if (requestedBranch == 0) {
-				return new ReportDataResponse(false, "Unauthorized: chain access required.",
-						request.getRequestId(), request.getPeriodLabel(), requestedBranch,
-						Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-			}
-		}
-
-		LocalDate startDate = request.getStartDate();
-		LocalDate endDate = request.getEndDate();
-		if (startDate == null || endDate == null) {
-			return new ReportDataResponse(false, "Invalid date range.",
-					request.getRequestId(), request.getPeriodLabel(), requestedBranch,
-					Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-		}
-
-		boolean includeAllBranches = isChainManager && requestedBranch == 0;
-		List<Order> orders = getOrdersForReport(session, effectiveBranch, includeAllBranches, startDate, endDate);
-		List<Complaint> complaints = getComplaintsForReport(session, effectiveBranch, includeAllBranches, startDate, endDate);
-		List<BranchSettings> branches = getBranchSettingsForReport(session, effectiveBranch, includeAllBranches);
-
-		return new ReportDataResponse(true, null, request.getRequestId(), request.getPeriodLabel(),
-				requestedBranch, orders, complaints, branches);
-	}
-
-	private int resolveBranchId(Account account) {
-		if (account == null) {
-			return 0;
-		}
-		int branchId = account.getBelongShop();
-		if (branchId <= 0 && account instanceof Manager) {
-			branchId = ((Manager) account).getShopID();
-		}
-		return branchId;
-	}
-
-	private List<Order> getOrdersForReport(Session session, int branchId, boolean includeAllBranches,
-										   LocalDate startDate, LocalDate endDate) {
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Order> query = builder.createQuery(Order.class);
-		Root<Order> root = query.from(Order.class);
-		if (!includeAllBranches && branchId > 0) {
-			query.where(builder.equal(root.get("shopID"), branchId));
-		}
-		List<Order> orders = session.createQuery(query).getResultList();
-		List<Order> filtered = new ArrayList<>();
-		for (Order order : orders) {
-			LocalDate orderDate = resolveOrderDate(order);
-			if (orderDate != null && !orderDate.isBefore(startDate) && !orderDate.isAfter(endDate)) {
-				filtered.add(order);
-			}
-		}
-		return filtered;
-	}
-
-	private List<Complaint> getComplaintsForReport(Session session, int branchId, boolean includeAllBranches,
-												   LocalDate startDate, LocalDate endDate) {
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Complaint> query = builder.createQuery(Complaint.class);
-		Root<Complaint> root = query.from(Complaint.class);
-		if (!includeAllBranches && branchId > 0) {
-			query.where(builder.equal(root.get("shopID"), branchId));
-		}
-		List<Complaint> complaints = session.createQuery(query).getResultList();
-		List<Complaint> filtered = new ArrayList<>();
-		for (Complaint complaint : complaints) {
-			LocalDate complaintDate = resolveComplaintDate(complaint);
-			if (complaintDate != null && !complaintDate.isBefore(startDate) && !complaintDate.isAfter(endDate)) {
-				filtered.add(complaint);
-			}
-		}
-		ComplaintUpdateManager.refreshComplaintSlaStatuses(session, filtered);
-		return filtered;
-	}
-
-	private List<BranchSettings> getBranchSettingsForReport(Session session, int branchId, boolean includeAllBranches) {
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<BranchSettings> query = builder.createQuery(BranchSettings.class);
-		Root<BranchSettings> root = query.from(BranchSettings.class);
-		if (!includeAllBranches && branchId > 0) {
-			query.where(builder.equal(root.get("branchId"), branchId));
-		}
-		return session.createQuery(query).getResultList();
-	}
-
-	private LocalDate resolveOrderDate(Order order) {
-		if (order == null) {
-			return null;
-		}
-		try {
-			return LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
-		} catch (DateTimeException ex) {
-			return null;
-		}
-	}
-
-	private LocalDate resolveComplaintDate(Complaint complaint) {
-		if (complaint == null) {
-			return null;
-		}
-		if (complaint.getCreatedAt() != null) {
-			return complaint.getCreatedAt().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-		}
-		try {
-			return LocalDate.of(complaint.getYear(), complaint.getMonth(), complaint.getDay());
-		} catch (DateTimeException ex) {
-			return null;
-		}
 	}
 
 	private double refundPercentFromStatus(String refundStatus) {
@@ -1184,21 +1017,30 @@ private static SessionFactory cachedSessionFactory;
 		}
 		order.setAccountID(account.getAccountID());
 
+		try {
+			LocalDateTime orderTime = order.getOrderDate();
+			LocalDateTime deliveryTime = order.getDelivery_time();
+			if (deliveryTime.isBefore(orderTime)) {
+				throw new IllegalArgumentException("Requested delivery time cannot be before the order time.");
+			}
+			if (deliveryTime.isBefore(LocalDateTime.now())) {
+				throw new IllegalArgumentException("Requested delivery time must be in the future.");
+			}
+		} catch (DateTimeException ex) {
+			throw new IllegalArgumentException("Requested delivery time is invalid.", ex);
+		}
+
 		order.setDelivered(false);
 		order.setCancelled(false);
 		order.setRefundAmount(0);
 		order.setRefundStatus("NONE");
 
-		int productsTotal = calculateProductsTotal(order.getProducts());
+		double productsTotal = calculateProductsTotal(order.getProducts(), account);
 		double deliveryFee = resolveDeliveryFee(order);
 		order.setDeliveryFee(deliveryFee);
 
-		int total = productsTotal + (int) Math.round(deliveryFee);
-		if (account != null && account.isSubscription() && total > 50) {
-			total = (int) (total * 0.9);
-		}
-
-		order.setTotalPrice(total);
+		double total = Product.roundCurrency(productsTotal + deliveryFee);
+		order.setTotalPrice((int) Math.round(total));
 	}
 
 	private Account resolveAccount(ConnectionToClient client, int accountId) {
@@ -1223,11 +1065,11 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
-	private int calculateProductsTotal(String products) {
+	private double calculateProductsTotal(String products, Account account) {
 		if (isBlank(products)) {
 			return 0;
 		}
-		int total = 0;
+		double total = 0.0;
 		SessionFactory sessionFactory = getSessionFactory();
 		try (Session localSession = sessionFactory.openSession()) {
 			Transaction tx = localSession.beginTransaction();
@@ -1246,7 +1088,14 @@ private static SessionFactory cachedSessionFactory;
 					if (product == null) {
 						throw new IllegalArgumentException("Unknown product: " + productName);
 					}
-					total += (int) Math.round(product.getActualPrice());
+					double promoPrice = product.hasActivePromotion()
+							? Product.roundCurrency(Product.calculateDiscountedPrice(product.getPrice(), product.getDiscountPercent()))
+							: Product.roundCurrency(product.getPrice());
+					double finalPrice = promoPrice;
+					if (account != null && account.isSubscription() && promoPrice > 50.0) {
+						finalPrice = Product.roundCurrency(Product.calculateDiscountedPrice(promoPrice, 10.0));
+					}
+					total += finalPrice;
 				}
 				tx.commit();
 			} catch (Exception ex) {
