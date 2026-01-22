@@ -300,6 +300,17 @@
                                legendVisible="true" title="Complaints by Status">
                      </PieChart>
 
+                     <!-- Complaints Histogram -->
+                     <BarChart fx:id="complaintsHistogramChart" prefHeight="300.0"
+                               legendVisible="false" title="Complaints by Day">
+                        <xAxis>
+                           <CategoryAxis fx:id="complaintsHistogramXAxis" label="Date" />
+                        </xAxis>
+                        <yAxis>
+                           <NumberAxis fx:id="complaintsHistogramYAxis" label="Complaints" />
+                        </yAxis>
+                     </BarChart>
+
                      <!-- Complaints Data Table -->
                      <TableView fx:id="complaintsTable" prefHeight="200.0">
                         <columns>
