@@ -84,6 +84,11 @@ public class SimpleClient extends AbstractClient {
 
 			String recievedStr = (String) msg;
 
+			if (recievedStr.equals("Reply sent after 24 hours")) {
+				EventBus.getDefault().post(new WarningEvent(new Warning(recievedStr)));
+				return;
+			}
+
 			if (recievedStr.equals("not found")) {
 				// products table not found - need to init DB
 				System.out.println("didnt find a table");

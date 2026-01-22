@@ -73,6 +73,9 @@ public class BranchReportsController {
     @FXML private VBox complaintsReportCard;
     @FXML private Label totalComplaintsLabel;
     @FXML private PieChart complaintsPieChart;
+    @FXML private BarChart<String, Number> complaintsHistogramChart;
+    @FXML private CategoryAxis complaintsHistogramXAxis;
+    @FXML private NumberAxis complaintsHistogramYAxis;
     @FXML private TableView<ComplaintData> complaintsTable;
     @FXML private TableColumn<ComplaintData, String> complaintStatusCol;
     @FXML private TableColumn<ComplaintData, Integer> complaintCountCol;
@@ -82,6 +85,7 @@ public class BranchReportsController {
     // Data storage
     private List<Order> branchOrders = new ArrayList<>();
     private List<Complaint> branchComplaints = new ArrayList<>();
+    private Map<LocalDate, Integer> complaintsHistogram = new java.util.HashMap<>();
     private int currentBranchId = 1;
     private String pendingRequestId;
     private String lastReportType;
@@ -226,6 +230,9 @@ public class BranchReportsController {
 
             branchOrders = response.getOrders() != null ? response.getOrders() : new ArrayList<>();
             branchComplaints = response.getComplaints() != null ? response.getComplaints() : new ArrayList<>();
+            complaintsHistogram = response.getComplaintsHistogram() != null
+                    ? response.getComplaintsHistogram()
+                    : new java.util.HashMap<>();
             updateBranchLabel(response.getBranches());
             refreshReports(lastReportType);
         });
@@ -381,6 +388,7 @@ public class BranchReportsController {
         
         // Apply colors to pie chart segments
         applyPieChartColors();
+        updateComplaintsHistogramChart(complaintsHistogram);
 
     }
     private String resolveStatusLabel(Complaint complaint) {
@@ -409,6 +417,51 @@ public class BranchReportsController {
                 data.getNode().setStyle("-fx-pie-color: " + color + ";");
             });
         });
+    }
+
+    private void updateComplaintsHistogramChart(Map<LocalDate, Integer> histogram) {
+        if (histogram == null || histogram.isEmpty()) {
+            if (complaintsHistogramChart != null) {
+                complaintsHistogramChart.getData().clear();
+            }
+            return;
+        }
+        BarChart<String, Number> chart = ensureComplaintsHistogramChart();
+        chart.getData().clear();
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Complaints");
+
+        histogram.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> series.getData().add(
+                        new XYChart.Data<>(entry.getKey().toString(), entry.getValue())));
+
+        chart.getData().add(series);
+    }
+
+    private BarChart<String, Number> ensureComplaintsHistogramChart() {
+        if (complaintsHistogramChart != null) {
+            return complaintsHistogramChart;
+        }
+        CategoryAxis xAxis = complaintsHistogramXAxis != null ? complaintsHistogramXAxis : new CategoryAxis();
+        NumberAxis yAxis = complaintsHistogramYAxis != null ? complaintsHistogramYAxis : new NumberAxis();
+        if (complaintsHistogramXAxis == null) {
+            xAxis.setLabel("Date");
+            complaintsHistogramXAxis = xAxis;
+        }
+        if (complaintsHistogramYAxis == null) {
+            yAxis.setLabel("Complaints");
+            complaintsHistogramYAxis = yAxis;
+        }
+        BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
+        chart.setTitle("Complaints by Day");
+        chart.setLegendVisible(false);
+        complaintsHistogramChart = chart;
+        if (complaintsReportCard != null && !complaintsReportCard.getChildren().contains(chart)) {
+            complaintsReportCard.getChildren().add(chart);
+        }
+        return chart;
     }
     
     /**
