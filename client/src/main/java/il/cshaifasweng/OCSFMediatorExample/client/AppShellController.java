@@ -31,7 +31,6 @@ public class AppShellController {
 
     @FXML private Button loginButton;
     @FXML private Button logoutButton;
-    @FXML private Button btnMyAccount;
     @FXML private VBox profileContainer;
     @FXML private Button profileButton;
     @FXML private Label profileNameLabel;
@@ -51,7 +50,7 @@ public class AppShellController {
             NavDestination.forLoggedIn("Checkout", "checkout", 1),
             NavDestination.forLoggedIn("Orders", "myorders", 1),
             NavDestination.forLoggedIn("Complaints", "mycomplaints", 1),
-            NavDestination.forLoggedIn("Profile", "Profile", 1),
+            NavDestination.forLoggedIn("My Account", "Profile", 1),
             NavDestination.forGuestsOnly("Login", "Login"),
             NavDestination.forGuestsOnly("Register", "register"),
             NavDestination.forLoggedIn("Admin Panel", "admincontrol", 3),
@@ -84,9 +83,6 @@ public class AppShellController {
         }
         if (profileButton != null) {
             profileButton.setOnAction(e -> NavigationService.getInstance().navigate("Profile"));
-        }
-        if (btnMyAccount != null) {
-            btnMyAccount.setOnAction(e -> onMyAccountClicked());
         }
         buildNavigationBar(SimpleClient.getUser());
         updateLoginState(SimpleClient.getUser());
@@ -206,7 +202,7 @@ public class AppShellController {
 
             profileNameLabel.setText(loggedIn ? displayName : "");
             updateAccountIndicator();
-            updateMyAccountButton(finalAccount);
+            updateProfileButtonVisibility(finalAccount);
 
             loginButton.setVisible(!loggedIn);
             loginButton.setManaged(!loggedIn);
@@ -215,8 +211,9 @@ public class AppShellController {
                 logoutButton.setManaged(loggedIn);
             }
 
-            profileContainer.setVisible(loggedIn);
-            profileContainer.setManaged(loggedIn);
+            boolean showProfile = finalAccount != null && finalAccount.getPrivilegeLevel() == 1;
+            profileContainer.setVisible(showProfile);
+            profileContainer.setManaged(showProfile);
             buildNavigationBar(finalAccount);
 
         });
@@ -261,18 +258,13 @@ public class AppShellController {
         };
     }
 
-    private void updateMyAccountButton(Account account) {
-        if (btnMyAccount == null) {
+    private void updateProfileButtonVisibility(Account account) {
+        if (profileButton == null) {
             return;
         }
         boolean show = account != null && account.getPrivilegeLevel() == 1;
-        btnMyAccount.setVisible(show);
-        btnMyAccount.setManaged(show);
-    }
-
-    @FXML
-    private void onMyAccountClicked() {
-        NavigationService.getInstance().navigate("MyAccount");
+        profileButton.setVisible(show);
+        profileButton.setManaged(show);
     }
 
     @FXML
@@ -298,6 +290,9 @@ public class AppShellController {
 
         for (NavDestination destination : NAV_LINKS) {
             if (!destination.isVisibleFor(privilege, loggedIn)) {
+                continue;
+            }
+            if ("Profile".equalsIgnoreCase(destination.getViewName()) && privilege != 1) {
                 continue;
             }
             ToggleButton button = new ToggleButton(destination.getLabel());
