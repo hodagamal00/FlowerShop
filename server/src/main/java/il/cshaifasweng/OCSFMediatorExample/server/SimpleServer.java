@@ -1001,6 +1001,7 @@ private static SessionFactory cachedSessionFactory;
 		}
 
 		double refundAmount = order.getTotalPrice() * refundFactor;
+		applyRefundCredit(session, order.getAccountID(), refundAmount);
 		order.setCancelled(true);
 		order.setCancelDay(now.getDayOfMonth());
 		order.setCancelMonth(now.getMonthValue());
@@ -1013,6 +1014,18 @@ private static SessionFactory cachedSessionFactory;
 
 		return new CancelOrderResponse(true, "Order cancelled successfully.", orderId,
 				refundAmount, refundFactor * 100.0, refundStatus);
+	}
+
+	private void applyRefundCredit(Session session, int accountId, double refundAmount) {
+		if (refundAmount <= 0) {
+			return;
+		}
+		Account account = session.get(Account.class, accountId);
+		if (account == null) {
+			return;
+		}
+		account.setCreditBalance(account.getCreditBalance() + refundAmount);
+		session.update(account);
 	}
 
 	private ReportDataResponse handleReportDataRequest(Session session, ConnectionToClient client, ReportDataRequest request)
