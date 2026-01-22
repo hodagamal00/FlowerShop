@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.time.DateTimeException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.*;
@@ -642,6 +643,31 @@ private static SessionFactory cachedSessionFactory;
 			}
 		}
 
+		if (msg instanceof ReportDataRequest) {
+			SessionFactory sessionFactory = getSessionFactory();
+			Session localSession = null;
+			Transaction tx1 = null;
+			try {
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
+
+				ReportDataRequest request = (ReportDataRequest) msg;
+				ReportDataResponse response = handleReportDataRequest(localSession, client, request);
+				client.sendToClient(response);
+
+				tx1.commit();
+			} catch (Exception ex) {
+				if (tx1 != null) {
+					tx1.rollback();
+				}
+				throw ex;
+			} finally {
+				if (localSession != null) {
+					localSession.close();
+				}
+			}
+		}
+
 		if (msg instanceof GetAllComplaints) {
 			SessionFactory sessionFactory = getSessionFactory();
 			Session localSession = null;
@@ -987,6 +1013,135 @@ private static SessionFactory cachedSessionFactory;
 
 		return new CancelOrderResponse(true, "Order cancelled successfully.", orderId,
 				refundAmount, refundFactor * 100.0, refundStatus);
+	}
+
+	private ReportDataResponse handleReportDataRequest(Session session, ConnectionToClient client, ReportDataRequest request)
+			throws IOException {
+		if (!requirePrivilege(client, 3, "Unauthorized: manager access required.")) {
+			return new ReportDataResponse(false, "Unauthorized: manager access required.",
+					request.getRequestId(), request.getPeriodLabel(), request.getBranchId(),
+					Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+		}
+
+		Account account = getSessionAccount(client);
+		boolean isChainManager = account != null && account.getPrivilegeLevel() >= 4;
+		int requestedBranch = request.getBranchId();
+		int effectiveBranch = requestedBranch;
+
+		if (!isChainManager) {
+			effectiveBranch = resolveBranchId(account);
+			if (effectiveBranch <= 0) {
+				return new ReportDataResponse(false, "Unauthorized: branch assignment required.",
+						request.getRequestId(), request.getPeriodLabel(), requestedBranch,
+						Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+			}
+			if (requestedBranch == 0) {
+				return new ReportDataResponse(false, "Unauthorized: chain access required.",
+						request.getRequestId(), request.getPeriodLabel(), requestedBranch,
+						Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+			}
+		}
+
+		LocalDate startDate = request.getStartDate();
+		LocalDate endDate = request.getEndDate();
+		if (startDate == null || endDate == null) {
+			return new ReportDataResponse(false, "Invalid date range.",
+					request.getRequestId(), request.getPeriodLabel(), requestedBranch,
+					Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+		}
+
+		boolean includeAllBranches = isChainManager && requestedBranch == 0;
+		List<Order> orders = getOrdersForReport(session, effectiveBranch, includeAllBranches, startDate, endDate);
+		List<Complaint> complaints = getComplaintsForReport(session, effectiveBranch, includeAllBranches, startDate, endDate);
+		List<BranchSettings> branches = getBranchSettingsForReport(session, effectiveBranch, includeAllBranches);
+
+		return new ReportDataResponse(true, null, request.getRequestId(), request.getPeriodLabel(),
+				requestedBranch, orders, complaints, branches);
+	}
+
+	private int resolveBranchId(Account account) {
+		if (account == null) {
+			return 0;
+		}
+		int branchId = account.getBelongShop();
+		if (branchId <= 0 && account instanceof Manager) {
+			branchId = ((Manager) account).getShopID();
+		}
+		return branchId;
+	}
+
+	private List<Order> getOrdersForReport(Session session, int branchId, boolean includeAllBranches,
+										   LocalDate startDate, LocalDate endDate) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Order> query = builder.createQuery(Order.class);
+		Root<Order> root = query.from(Order.class);
+		if (!includeAllBranches && branchId > 0) {
+			query.where(builder.equal(root.get("shopID"), branchId));
+		}
+		List<Order> orders = session.createQuery(query).getResultList();
+		List<Order> filtered = new ArrayList<>();
+		for (Order order : orders) {
+			LocalDate orderDate = resolveOrderDate(order);
+			if (orderDate != null && !orderDate.isBefore(startDate) && !orderDate.isAfter(endDate)) {
+				filtered.add(order);
+			}
+		}
+		return filtered;
+	}
+
+	private List<Complaint> getComplaintsForReport(Session session, int branchId, boolean includeAllBranches,
+												   LocalDate startDate, LocalDate endDate) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Complaint> query = builder.createQuery(Complaint.class);
+		Root<Complaint> root = query.from(Complaint.class);
+		if (!includeAllBranches && branchId > 0) {
+			query.where(builder.equal(root.get("shopID"), branchId));
+		}
+		List<Complaint> complaints = session.createQuery(query).getResultList();
+		List<Complaint> filtered = new ArrayList<>();
+		for (Complaint complaint : complaints) {
+			LocalDate complaintDate = resolveComplaintDate(complaint);
+			if (complaintDate != null && !complaintDate.isBefore(startDate) && !complaintDate.isAfter(endDate)) {
+				filtered.add(complaint);
+			}
+		}
+		ComplaintUpdateManager.refreshComplaintSlaStatuses(session, filtered);
+		return filtered;
+	}
+
+	private List<BranchSettings> getBranchSettingsForReport(Session session, int branchId, boolean includeAllBranches) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<BranchSettings> query = builder.createQuery(BranchSettings.class);
+		Root<BranchSettings> root = query.from(BranchSettings.class);
+		if (!includeAllBranches && branchId > 0) {
+			query.where(builder.equal(root.get("branchId"), branchId));
+		}
+		return session.createQuery(query).getResultList();
+	}
+
+	private LocalDate resolveOrderDate(Order order) {
+		if (order == null) {
+			return null;
+		}
+		try {
+			return LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
+		} catch (DateTimeException ex) {
+			return null;
+		}
+	}
+
+	private LocalDate resolveComplaintDate(Complaint complaint) {
+		if (complaint == null) {
+			return null;
+		}
+		if (complaint.getCreatedAt() != null) {
+			return complaint.getCreatedAt().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+		}
+		try {
+			return LocalDate.of(complaint.getYear(), complaint.getMonth(), complaint.getDay());
+		} catch (DateTimeException ex) {
+			return null;
+		}
 	}
 
 	private double refundPercentFromStatus(String refundStatus) {
