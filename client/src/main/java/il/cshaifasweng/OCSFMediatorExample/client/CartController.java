@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 
 import java.util.Locale;
@@ -9,19 +10,21 @@ import java.util.Locale;
 public class CartController
 {
     @FXML
-    private ListView<String> CartItemsList;
+    private ListView<Product> CartItemsList;
 
     @FXML
     void initialize() {
         if (CartItemsList == null) {
             return;
         }
-        CartItemsList.getItems().clear();
-        for (var product : CartService.getInstance().getItems()) {
-            if (product != null) {
-                CartItemsList.getItems().add(formatCartItemDisplay(product));
+        CartItemsList.setItems(CartService.getInstance().getObservableItems());
+        CartItemsList.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(Product item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : formatCartItemDisplay(item));
             }
-        }
+        });
     }
 
     private String formatCartItemDisplay(Product product) {

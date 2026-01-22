@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 
 // Removed unused AWT imports.  Including AWT packages alongside JavaFX
 // introduces ambiguous references for classes like Button and List.  This
@@ -352,7 +353,7 @@ public class CatalogController {
 
 
 	@FXML
-	private ListView<String> CartItemsList;
+	private ListView<Product> CartItemsList;
 
 
 	@FXML // fx:id="adminControlButtton"
@@ -592,10 +593,7 @@ public class CatalogController {
 
 		// إضافة المنتج
 		Product selectedProduct = displayProducts.get(index);
-		CartItemsList.getItems().add(formatCartItemDisplay(selectedProduct));
 		CartService.getInstance().addProduct(selectedProduct, 1);
-
-		updateCartSummaryFromItems(CartService.getInstance().getItems());
 	}
 
 	private boolean ensureLoggedInForCart() {
@@ -1563,6 +1561,19 @@ public class CatalogController {
 		assert btnCustomItem != null : "fx:id=\"btnCustomItem\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
 
+		if (CartItemsList != null) {
+			CartItemsList.setItems(CartService.getInstance().getObservableItems());
+			CartItemsList.setCellFactory(listView -> new ListCell<>() {
+				@Override
+				protected void updateItem(Product item, boolean empty) {
+					super.updateItem(item, empty);
+					setText(empty || item == null ? null : formatCartItemDisplay(item));
+				}
+			});
+			CartService.getInstance().getObservableItems().addListener((ListChangeListener<Product>) change -> recalculateCartTotals());
+			recalculateCartTotals();
+		}
+
 		bindManagedToVisible(
 				flower_price_before_container1, flower_price_before_container2, flower_price_before_container3,
 				flower_price_before_container4, flower_price_before_container5, flower_price_before_container6,
@@ -1747,7 +1758,7 @@ public class CatalogController {
 		if (cartTextDiscount != null) {
 			cartTextDiscount.setText("0");
 		}
-		updateCartSummaryFromItems(CartService.getInstance().getItems());
+		recalculateCartTotals();
 		worker_edit.setVisible(false);
 
 		inboxList.setVisible(false);
@@ -2190,7 +2201,6 @@ public class CatalogController {
 		if (CartItemsList != null) {
 			CartItemsList.setVisible(true);
 			CartItemsList.setManaged(true);
-			CartItemsList.setItems(FXCollections.observableArrayList());
 		}
 		if (cartTextDiscount != null) {
 			cartTextDiscount.setVisible(true);
@@ -2205,7 +2215,7 @@ public class CatalogController {
 		if (cartTextPriceDiscount != null) {
 			cartTextPriceDiscount.setVisible(true);
 			cartTextPriceDiscount.setManaged(true);
-			cartTextPriceDiscount.setText("0");
+			cartTextPriceDiscount.setText("No discounts applied");
 		}
 		if (cartTextPriceFinal != null) {
 			cartTextPriceFinal.setVisible(true);
@@ -2219,6 +2229,7 @@ public class CatalogController {
 		if (checkout != null) {
 			checkout.setDisable(true);
 		}
+		recalculateCartTotals();
 	}
 
 	/**
@@ -2317,27 +2328,14 @@ public class CatalogController {
 		if (CartItemsList == null) {
 			return;
 		}
-		CartItemsList.getItems().clear();
-		List<Product> items = CartService.getInstance().getItems();
-		for (Product product : items) {
-			if (product == null) {
-				continue;
-			}
-			CartItemsList.getItems().add(formatCartItemDisplay(product));
-		}
-		updateCartSummaryFromItems(items);
+		recalculateCartTotals();
 	}
 
 	private void addProductToCart(Product product) {
 		if (product == null) {
 			return;
 		}
-
-		if (CartItemsList != null) {
-			CartItemsList.getItems().add(formatCartItemDisplay(product));
-		}
 		CartService.getInstance().addProduct(product, 1);
-		updateCartSummaryFromItems(CartService.getInstance().getItems());
 	}
 
 	@FXML
@@ -2531,25 +2529,26 @@ public class CatalogController {
 		return value == null ? "" : value.trim();
 	}
 
-	private void updateCartSummaryFromItems(List<Product> items) {
+	private void recalculateCartTotals() {
 		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
+		List<Product> items = CartService.getInstance().getItems();
 		PricingService.CartTotals totals = PricingService.calculateCartTotals(items, account);
 		double baseTotal = totals.getBaseTotal();
 		double finalTotal = totals.getFinalTotal();
 
 		if (cartTextPrice != null) {
-			cartTextPrice.setText(String.format(Locale.US, "%.2f", baseTotal));
+			cartTextPrice.setText(String.format(Locale.US, "%.2f", items.isEmpty() ? 0.0 : baseTotal));
 		}
 
 		boolean discountApplied = finalTotal < baseTotal;
 		if (cartTextDiscount != null) {
-			cartTextDiscount.setText(String.format(Locale.US, "%.2f", finalTotal));
+			cartTextDiscount.setText(String.format(Locale.US, "%.2f", items.isEmpty() ? 0.0 : finalTotal));
 		}
 		if (cartTextPriceDiscount != null) {
 			cartTextPriceDiscount.setText(discountApplied ? "Subscriber discount applied" : "No discounts applied");
 		}
 		if (cartTextPriceFinal != null) {
-			cartTextPriceFinal.setText(String.format(Locale.US, "Final total: %.2f", finalTotal));
+			cartTextPriceFinal.setText(String.format(Locale.US, "Final total: %.2f", items.isEmpty() ? 0.0 : finalTotal));
 		}
 	}
 
