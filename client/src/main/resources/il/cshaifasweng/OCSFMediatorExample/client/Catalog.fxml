@@ -82,6 +82,8 @@
                                     <ComboBox fx:id="priceFilter" styleClass="combo-box" promptText="Price Range" prefWidth="150.0" />
                                     <Button fx:id="catalogAddProductBtn" styleClass="btn-primary" text="Update Product"
                                             onAction="#openCatalogManagement" prefWidth="140.0" />
+                                    <Button fx:id="btnCustomItem" styleClass="btn-primary" text="Custom Item"
+                                            onAction="#onCustomItemClicked" prefWidth="130.0" />
                                     <Button styleClass="btn-secondary" text="Clear Filters" onAction="#clearFilters" prefWidth="110.0" />
                                 </children>
                             </HBox>
