@@ -64,6 +64,12 @@ public class SimpleClient extends AbstractClient {
 			return;
 		}
 
+		if (msg instanceof ReportDataResponse) {
+			ReportDataResponse response = (ReportDataResponse) msg;
+			EventBus.getDefault().post(response);
+			return;
+		}
+
 		// =========================
 		// STRING MESSAGES
 		// =========================
