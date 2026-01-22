@@ -14,6 +14,8 @@ import java.util.Properties;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -1104,12 +1106,14 @@ private static SessionFactory cachedSessionFactory;
 		order.setRefundAmount(0);
 		order.setRefundStatus("NONE");
 
-		double productsTotal = calculateProductsTotal(order.getProducts(), account);
-		double deliveryFee = resolveDeliveryFee(order);
-		order.setDeliveryFee(deliveryFee);
+		PricingResult pricing = calculateProductsTotal(order.getProducts(), account);
+		order.setProducts(pricing.productsSummary);
 
-		double total = Product.roundCurrency(productsTotal + deliveryFee);
-		order.setTotalPrice((int) Math.round(total));
+		BigDecimal deliveryFee = roundCurrency(BigDecimal.valueOf(resolveDeliveryFee(order)));
+		order.setDeliveryFee(deliveryFee.doubleValue());
+
+		BigDecimal total = roundCurrency(pricing.total.add(deliveryFee));
+		order.setTotalPrice(total.setScale(0, RoundingMode.HALF_UP).intValue());
 	}
 
 	private Account resolveAccount(ConnectionToClient client, int accountId) {
@@ -1134,11 +1138,12 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
-	private double calculateProductsTotal(String products, Account account) {
+	private PricingResult calculateProductsTotal(String products, Account account) {
 		if (isBlank(products)) {
-			return 0;
+			return new PricingResult(BigDecimal.ZERO, "");
 		}
-		double total = 0.0;
+		BigDecimal total = BigDecimal.ZERO;
+		StringBuilder normalizedProducts = new StringBuilder();
 		SessionFactory sessionFactory = getSessionFactory();
 		try (Session localSession = sessionFactory.openSession()) {
 			Transaction tx = localSession.beginTransaction();
@@ -1157,14 +1162,21 @@ private static SessionFactory cachedSessionFactory;
 					if (product == null) {
 						throw new IllegalArgumentException("Unknown product: " + productName);
 					}
-					double promoPrice = product.hasActivePromotion()
-							? Product.roundCurrency(Product.calculateDiscountedPrice(product.getPrice(), product.getDiscountPercent()))
-							: Product.roundCurrency(product.getPrice());
-					double finalPrice = promoPrice;
-					if (account != null && account.isSubscription() && promoPrice > 50.0) {
-						finalPrice = Product.roundCurrency(Product.calculateDiscountedPrice(promoPrice, 10.0));
+					BigDecimal promoPrice = product.hasActivePromotion()
+							? applyDiscount(BigDecimal.valueOf(product.getPrice()), product.getDiscountPercent())
+							: roundCurrency(BigDecimal.valueOf(product.getPrice()));
+					BigDecimal finalPrice = promoPrice;
+					if (account != null && account.isSubscription() && promoPrice.compareTo(BigDecimal.valueOf(50.0)) > 0) {
+						finalPrice = applyDiscount(promoPrice, 10.0);
 					}
-					total += finalPrice;
+					finalPrice = roundCurrency(finalPrice);
+					total = total.add(finalPrice);
+					normalizedProducts
+							.append("%")
+							.append(productName)
+							.append(" - ")
+							.append(formatCurrency(finalPrice))
+							.append("%");
 				}
 				tx.commit();
 			} catch (Exception ex) {
@@ -1172,7 +1184,32 @@ private static SessionFactory cachedSessionFactory;
 				throw ex;
 			}
 		}
-		return total;
+		return new PricingResult(total, normalizedProducts.toString());
+	}
+
+	private static BigDecimal applyDiscount(BigDecimal basePrice, double discountPercent) {
+		BigDecimal normalizedDiscount = BigDecimal.valueOf(Product.normalizeDiscountPercent(discountPercent));
+		BigDecimal discountFactor = BigDecimal.ONE.subtract(
+				normalizedDiscount.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP));
+		return basePrice.multiply(discountFactor);
+	}
+
+	private static BigDecimal roundCurrency(BigDecimal value) {
+		return value.setScale(2, RoundingMode.HALF_UP);
+	}
+
+	private static String formatCurrency(BigDecimal value) {
+		return value.setScale(2, RoundingMode.HALF_UP).toPlainString();
+	}
+
+	private static class PricingResult {
+		private final BigDecimal total;
+		private final String productsSummary;
+
+		private PricingResult(BigDecimal total, String productsSummary) {
+			this.total = total;
+			this.productsSummary = productsSummary;
+		}
 	}
 
 	private Product findProductByName(Session session, String name) {
