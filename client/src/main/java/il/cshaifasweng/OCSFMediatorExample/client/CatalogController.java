@@ -2449,6 +2449,40 @@ public class CatalogController {
 		openProductDetailsModal(selected);
 	}
 
+	@FXML
+	void onCustomItemClicked(ActionEvent event) {
+		if (resolveCurrentPrivilegeLevel() < 1) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Login Required");
+			alert.setHeaderText("Login required to start a custom order.");
+			alert.setContentText("Please log in or register to start a custom item.");
+			alert.showAndWait();
+			navigateInShell("Login");
+			return;
+		}
+
+		ensureCatalogDataLoaded();
+		Product customProduct = null;
+		for (Product product : allProducts) {
+			if (product != null && product.isCustomProduct()) {
+				customProduct = product;
+				break;
+			}
+		}
+
+		if (customProduct == null) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Custom Item");
+			alert.setHeaderText("No custom items available");
+			alert.setContentText("Custom products are not available at the moment.");
+			alert.showAndWait();
+			return;
+		}
+
+		syncProductImageFromCatalog(customProduct, getImageViewForProduct(customProduct));
+		openProductDetailsModal(customProduct);
+	}
+
 	private ImageView getImageViewForContainer(String containerId) {
 		switch (containerId) {
 			case "container1":
