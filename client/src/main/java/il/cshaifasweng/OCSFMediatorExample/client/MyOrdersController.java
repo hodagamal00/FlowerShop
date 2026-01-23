@@ -287,6 +287,13 @@ public class MyOrdersController {
     {
         if (viewOrderMode == 0)
         {
+            ensureCurrentUser();
+            if (currentUser == null) {
+                showAlert(Alert.AlertType.WARNING, "My Orders", "Unable to load orders",
+                        "Please sign in again before viewing your orders.");
+                return;
+            }
+            orderList.getItems().clear();
             for(int i = 0 ; i < allOrders.size(); i ++)
             {
                 if (allOrders.get(i).getAccountID() == currentUser.getAccountID())
@@ -297,6 +304,10 @@ public class MyOrdersController {
                     System.out.println("Adding String - " + orderString);
                     orderList.getItems().add(orderString);
                 }
+            }
+            if (orderList.getItems().isEmpty()) {
+                showAlert(Alert.AlertType.INFORMATION, "My Orders", "No orders found",
+                        "We couldn't find any orders for this account yet.");
             }
             viewOrder.setText("Load Selected Order");
             viewOrderMode = 1;
@@ -338,7 +349,12 @@ public class MyOrdersController {
         {
             cancelButton.setVisible(true);
 
-            int selected = orderList.getSelectionModel().getSelectedItem().charAt(0) - 48;
+            Integer selected = getSelectedOrderId();
+            if (selected == null) {
+                showAlert(Alert.AlertType.INFORMATION, "My Orders", "Select an order",
+                        "Please select an order from the list to view its details.");
+                return;
+            }
             System.out.println("Selected is " + selected);
             //int theID = Integer.parseInt(enterID.getText());
             for (int i = 0; i < allOrders.size(); i++) {
@@ -522,6 +538,38 @@ public class MyOrdersController {
         System.out.println("arrived to subscriebr of passOrders !");
         List<Order> recievedOrders = passOrders.getRecievedOrders();
         allOrders = recievedOrders;
+    }
+
+    private void ensureCurrentUser() {
+        if (currentUser == null) {
+            currentUser = SimpleClient.getAccount();
+        }
+    }
+
+    private Integer getSelectedOrderId() {
+        String selectedItem = orderList.getSelectionModel().getSelectedItem();
+        if (selectedItem == null || selectedItem.isBlank()) {
+            return null;
+        }
+        String trimmed = selectedItem.trim();
+        if (trimmed.startsWith("#")) {
+            trimmed = trimmed.substring(1).trim();
+        }
+        String[] parts = trimmed.split("\\s*-\\s*", 2);
+        String idPart = parts.length > 0 ? parts[0] : trimmed;
+        try {
+            return Integer.parseInt(idPart.trim());
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     @Subscribe

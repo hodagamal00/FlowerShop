@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import org.greenrobot.eventbus.EventBus;
 
 public class OrderConfirmationController {
 
@@ -300,6 +302,11 @@ public class OrderConfirmationController {
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
+            Account currentAccount = SimpleClient.getAccount();
+            if (currentAccount != null) {
+                PassAccountEventOrders passAccount = new PassAccountEventOrders(currentAccount);
+                EventBus.getDefault().post(passAccount);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error loading my orders page: " + e.getMessage());
