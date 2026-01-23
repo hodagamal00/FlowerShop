@@ -8,11 +8,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.FlowPane;
-import il.cshaifasweng.OCSFMediatorExample.entities.Account;
-import javafx.application.Platform;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -32,7 +29,6 @@ import java.util.Map;
  */
 public class AppShellController {
 
-    @FXML private TextField searchField;
     @FXML private Button loginButton;
     @FXML private Button logoutButton;
     @FXML private VBox profileContainer;
@@ -54,8 +50,7 @@ public class AppShellController {
             NavDestination.forLoggedIn("Checkout", "checkout", 1),
             NavDestination.forLoggedIn("Orders", "myorders", 1),
             NavDestination.forLoggedIn("Complaints", "mycomplaints", 1),
-            NavDestination.forLoggedIn("Profile", "Profile", 1),
-            NavDestination.forAllUsers("About", "About"),
+            NavDestination.forLoggedIn("My Account", "Profile", 1),
             NavDestination.forGuestsOnly("Login", "Login"),
             NavDestination.forGuestsOnly("Register", "register"),
             NavDestination.forLoggedIn("Admin Panel", "admincontrol", 3),
@@ -178,7 +173,7 @@ public class AppShellController {
         if (account == null) {
             return;
         }
-        Platform.runLater(() -> showAccountName(account.getFullName()));
+        Platform.runLater(() -> updateLoginState(account));
     }
     public void onAccountReceived(PassAccountEvent event) {
         updateLoginState(event.getRecievedAccount());
@@ -207,6 +202,7 @@ public class AppShellController {
 
             profileNameLabel.setText(loggedIn ? displayName : "");
             updateAccountIndicator();
+            updateProfileButtonVisibility(finalAccount);
 
             loginButton.setVisible(!loggedIn);
             loginButton.setManaged(!loggedIn);
@@ -215,8 +211,9 @@ public class AppShellController {
                 logoutButton.setManaged(loggedIn);
             }
 
-            profileContainer.setVisible(loggedIn);
-            profileContainer.setManaged(loggedIn);
+            boolean showProfile = finalAccount != null && finalAccount.getPrivilegeLevel() == 1;
+            profileContainer.setVisible(showProfile);
+            profileContainer.setManaged(showProfile);
             buildNavigationBar(finalAccount);
 
         });
@@ -261,6 +258,15 @@ public class AppShellController {
         };
     }
 
+    private void updateProfileButtonVisibility(Account account) {
+        if (profileButton == null) {
+            return;
+        }
+        boolean show = account != null && account.getPrivilegeLevel() == 1;
+        profileButton.setVisible(show);
+        profileButton.setManaged(show);
+    }
+
     @FXML
     private void handleLogout() {
         SimpleClient.logoutCurrentUser();
@@ -284,6 +290,9 @@ public class AppShellController {
 
         for (NavDestination destination : NAV_LINKS) {
             if (!destination.isVisibleFor(privilege, loggedIn)) {
+                continue;
+            }
+            if ("Profile".equalsIgnoreCase(destination.getViewName()) && privilege != 1) {
                 continue;
             }
             ToggleButton button = new ToggleButton(destination.getLabel());

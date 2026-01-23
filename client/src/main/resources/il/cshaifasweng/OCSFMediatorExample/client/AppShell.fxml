@@ -2,7 +2,6 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
@@ -11,7 +10,7 @@
 
 <!--
     AppShell.fxml defines a reusable application shell using a BorderPane.
-    The top region contains a header bar with the logo, search box,
+    The top region contains a header bar with the logo, navigation links,
     login/profile buttons and cart badge.  The center region is a StackPane
     (`contentPane`) that will host different views (catalog, checkout, etc.)
     loaded via NavigationService.  The bottom region displays a simple
@@ -29,13 +28,12 @@
                     <Label text="Lilach" styleClass="brand-title" />
                     <Label text="Flower Shop" styleClass="brand-tagline" />
                 </HBox>
-                <TextField fx:id="searchField" promptText="Search bouquets or gifts" maxWidth="320.0" prefWidth="260.0" styleClass="text-field" HBox.hgrow="NEVER" />
                 <FlowPane fx:id="navBar" hgap="8.0" vgap="10.0" orientation="HORIZONTAL" styleClass="nav-bar top-nav" HBox.hgrow="ALWAYS" minWidth="0.0" />
                 <HBox spacing="10.0" alignment="CENTER_RIGHT" HBox.hgrow="NEVER">
                     <Label fx:id="loggedInIndicatorLabel" text="Guest" styleClass="account-indicator" visible="true" managed="true" />
                     <VBox fx:id="profileContainer" alignment="CENTER_RIGHT" spacing="4.0" visible="false" managed="false">
                         <Label fx:id="profileNameLabel" styleClass="profile-label" />
-                        <Button fx:id="profileButton" text="Profile" styleClass="btn-secondary" />
+                        <Button fx:id="profileButton" text="My Account" styleClass="btn-secondary" />
                     </VBox>
                     <Button fx:id="logoutButton" text="Logout" styleClass="btn-secondary" onAction="#handleLogout" visible="false" managed="false" />
                     <Button fx:id="loginButton" text="Login" styleClass="btn-primary" />

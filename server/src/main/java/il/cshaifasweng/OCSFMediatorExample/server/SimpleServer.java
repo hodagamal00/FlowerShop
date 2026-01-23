@@ -267,7 +267,9 @@ private static SessionFactory cachedSessionFactory;
 			String updateClassFunction = recievedMessage.getUpdateFunction();
 			System.out.println("Arrived At UpdateMessage 2");
 
-			if (requiresSystemManagerPrivileges(recievedMessage) && !isSystemManager(client)) {
+			if (requiresSystemManagerPrivileges(recievedMessage)
+					&& !isSystemManager(client)
+					&& !isSelfAccountEdit(recievedMessage, client)) {
 				client.sendToClient(new UserUpdateResponse(false, "Unauthorized: system manager access required."));
 				return;
 			}
@@ -1020,6 +1022,26 @@ private static SessionFactory cachedSessionFactory;
 				|| "worker".equals(updateClass)
 				|| "manager".equals(updateClass);
 		return isEdit && isUserDetails;
+	}
+
+	private boolean isSelfAccountEdit(UpdateMessage message, ConnectionToClient client) {
+		if (message == null) {
+			return false;
+		}
+		String updateClass = message.getUpdateClass();
+		String updateFunction = message.getUpdateFunction();
+		if (!"account".equals(updateClass) || !"edit".equals(updateFunction)) {
+			return false;
+		}
+		Account account = getClientAccount(client);
+		Account updatedAccount = message.getAccount();
+		if (account == null || updatedAccount == null) {
+			return false;
+		}
+		if (account.getPrivilegeLevel() != 1 || !Boolean.TRUE.equals(account.getLoggedIn())) {
+			return false;
+		}
+		return account.getAccountID() == updatedAccount.getAccountID();
 	}
 
 	private boolean isBlank(String value) {

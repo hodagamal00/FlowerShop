@@ -1,7 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 
 // Removed unused AWT imports.  Including AWT packages alongside JavaFX
 // introduces ambiguous references for classes like Button and List.  This
@@ -324,7 +324,7 @@ public class CatalogController {
 	private Button flower6_addCart;
 
 	@FXML
-	private Button viewCart;
+	private Button btnClearCart;
 
 	@FXML
 	private TextField cartTextDiscount;
@@ -644,40 +644,18 @@ public class CatalogController {
 	}
 
 
-	int cartViewBinary = 0;
 	@FXML
-	void viewUserCart(ActionEvent event)
-	{
-		syncCartFromService();
-		boolean mode;
-		if(cartViewBinary == 0)
-		{
-			nextPage.setVisible(false);
-			prevPage.setVisible(false);
-			mode = false;
-			cartViewBinary++;
-			viewCart.setText("Close Cart");
-
-			CartItemsList.setVisible(true);
-			cartTopText.setVisible(true);
-			cartTextPrice.setVisible(true);
-			cartTextDiscount.setVisible(true);
+	private void onClearCartClicked(ActionEvent event) {
+		Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+				"Clear all items from your cart?",
+				ButtonType.CANCEL, ButtonType.OK);
+		alert.setTitle("Clear Cart");
+		alert.setHeaderText(null);
+		Optional<ButtonType> response = alert.showAndWait();
+		if (response.isPresent() && response.get() == ButtonType.OK) {
+			CartService.getInstance().clear();
+			refreshCartDisplay();
 		}
-		else
-		{
-			nextPage.setVisible(true);
-			prevPage.setVisible(true);
-			mode = true;
-			cartViewBinary--;
-			viewCart.setText("View Cart");
-
-			CartItemsList.setVisible(false);
-			cartTopText.setVisible(false);
-			cartTextPrice.setVisible(false);
-			cartTextDiscount.setVisible(false);
-		}
-		ViewItems(mode);
-		CartItemsList.setVisible(!mode);
 	}
 	@FXML
 	void openComplaintManager(ActionEvent event) throws IOException {
@@ -718,6 +696,14 @@ public class CatalogController {
 	@FXML
 	void openCheckout(ActionEvent event) throws IOException
 	{
+		if (CartService.getInstance().getItems().isEmpty()) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Cart is empty");
+			alert.setHeaderText(null);
+			alert.setContentText("Add items before checkout.");
+			alert.showAndWait();
+			return;
+		}
 		if (resolveCurrentPrivilegeLevel() < 1) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setTitle("Login Required");
@@ -1653,7 +1639,7 @@ public class CatalogController {
 		worker_edit.getItems().add("Remove worker");
 		worker_edit.getItems().add("Edit worker");
 
-		viewCart.setVisible(false);
+		if (btnClearCart != null) btnClearCart.setVisible(false);
 		//cartTopText.setVisible(false);
 		//cartTextPrice.setVisible(false);
 		//cartTextDiscount.setVisible(false);
@@ -1709,6 +1695,8 @@ public class CatalogController {
 		if (cartTextDiscount != null) {
 			cartTextDiscount.setText("0");
 		}
+		CartService.getInstance().getObservableItems()
+				.addListener((ListChangeListener<Product>) change -> refreshCartDisplay());
 		refreshCartDisplay();
 		worker_edit.setVisible(false);
 
@@ -2132,7 +2120,7 @@ public class CatalogController {
 		if (viewMyComplaints != null) viewMyComplaints.setVisible(false);
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
 		showCartPanelForGuest();
-		setAddToCartButtonsVisible(false);
+		setAddToCartButtonsVisible(true);
 
 		// Worker features
 		if (deliveryButton != null) deliveryButton.setVisible(false);
@@ -2152,7 +2140,6 @@ public class CatalogController {
 		if (CartItemsList != null) {
 			CartItemsList.setVisible(true);
 			CartItemsList.setManaged(true);
-			CartItemsList.setItems(FXCollections.observableArrayList());
 		}
 		if (cartTextDiscount != null) {
 			cartTextDiscount.setVisible(true);
@@ -2164,12 +2151,14 @@ public class CatalogController {
 			cartTextPrice.setManaged(true);
 			cartTextPrice.setText("0");
 		}
-		if (viewCart != null) {
-			viewCart.setVisible(true);
-			viewCart.setManaged(true);
-		}
 		if (checkout != null) {
-			checkout.setDisable(true);
+			checkout.setVisible(true);
+			checkout.setManaged(true);
+			checkout.setDisable(false);
+		}
+		if (btnClearCart != null) {
+			btnClearCart.setVisible(true);
+			btnClearCart.setManaged(true);
 		}
 		refreshCartDisplay();
 	}
@@ -2188,7 +2177,7 @@ public class CatalogController {
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(true);
 		if (CartItemsList != null) CartItemsList.setVisible(true);
 		if (cartTopText != null) cartTopText.setVisible(true);
-		if (viewCart != null) viewCart.setVisible(true);
+		if (btnClearCart != null) btnClearCart.setVisible(true);
 
 		// Add to cart buttons
 		setAddToCartButtonsVisible(true);
@@ -2223,7 +2212,7 @@ public class CatalogController {
 	 * Allows: catalog browsing, temporary cart management
 	 */
 	private void enableGuestFeatures() {
-		if (viewCart != null) viewCart.setVisible(true);
+		if (btnClearCart != null) btnClearCart.setVisible(true);
 		setAddToCartButtonsVisible(true);
 	}
 
@@ -2262,10 +2251,6 @@ public class CatalogController {
 
 	private boolean shouldShowSku() {
 		return shouldShowCustomerOnlyFeatures();
-	}
-
-	private void syncCartFromService() {
-		refreshCartDisplay();
 	}
 
 	private void addProductToCart(Product product) {
