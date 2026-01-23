@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,6 +10,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 
@@ -85,6 +87,10 @@ public class WorkerDashboardController {
 
     @FXML
     void goToComplaints() {
+        Account currentAccount = SimpleClient.getAccount();
+        if (currentAccount != null) {
+            EventBus.getDefault().post(new PassAccountEventReplyComplaint(currentAccount));
+        }
         loadScene("replycomplaint.fxml", complaintsBtn);
     }
 
