@@ -134,9 +134,9 @@
                         <VBox spacing="10.0">
                            <CheckBox fx:id="refundCheck" mnemonicParsing="false" onAction="#addRefund" text="Include Refund" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
                            <HBox spacing="10.0" alignment="CENTER_LEFT">
-                              <Text text="Refund Percentage:" strokeType="OUTSIDE" prefWidth="140.0">
+                              <Label text="Refund Percentage:" prefWidth="140.0">
                                  <font><Font size="14.0" /></font>
-                              </Text>
+                              </Label>
                               <ComboBox fx:id="refundPercent" onAction="#addRefundPercent" prefHeight="35.0" prefWidth="130.0" promptText="Select %" />
                            </HBox>
                         </VBox>
