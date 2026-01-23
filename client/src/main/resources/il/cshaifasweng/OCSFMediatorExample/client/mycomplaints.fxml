@@ -109,6 +109,12 @@
                   </font>
                </Text>
                <TextArea fx:id="complaintText" prefHeight="250.0" prefWidth="440.0" promptText="Enter your complaint here..." wrapText="true" />
+               <Text fill="#2c3e50" text="Worker Response">
+                  <font>
+                     <Font name="System Bold" size="18.0" />
+                  </font>
+               </Text>
+               <TextArea fx:id="responseText" editable="false" prefHeight="180.0" prefWidth="440.0" style="-fx-background-color: #f0f0f0;" wrapText="true" />
                <Button fx:id="submitComplaint" mnemonicParsing="false" onAction="#submitComplaint" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" text="Submit Complaint" />
             </VBox>
 

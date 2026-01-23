@@ -16,9 +16,11 @@ import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
+import il.cshaifasweng.OCSFMediatorExample.entities.ComplaintUpdateResponse;
 import il.cshaifasweng.OCSFMediatorExample.entities.GetAllComplaints;
 import il.cshaifasweng.OCSFMediatorExample.entities.Message;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserUpdateResponse;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -95,11 +97,24 @@ public class ReplyComplaintController {
     @FXML
     void SendReply(ActionEvent event)
     {
+        if (currentUser == null) {
+            showError("You must be logged in to send a response.");
+            return;
+        }
+        if (selectedComplaint == null || selectedComplaint.getComplaintID() <= 0) {
+            showAlert("Please select a complaint to respond to.");
+            return;
+        }
+        String replyBody = replyText.getText() == null ? "" : replyText.getText().trim();
+        if (replyBody.isEmpty()) {
+            showAlert("Please enter a response before sending.");
+            return;
+        }
         int compensationAmount = 0;
         boolean willReturnMoney=  false;
         selectedComplaint.setAccepted(true);
         selectedComplaint.setAnswerworkerID(currentUser.getAccountID());
-        selectedComplaint.setReplyText(replyText.getText());
+        selectedComplaint.setReplyText(replyBody);
         selectedComplaint.setRespondedAt(new Date());
         if(refundCheck.isSelected())
         {
@@ -127,37 +142,18 @@ public class ReplyComplaintController {
         update_complaint.setComplaint(selectedComplaint);
 
         try {
+            awaitingComplaintUpdate = true;
+            sendButton.setDisable(true);
             SimpleClient.getClient().sendToServer(update_complaint);
 
         } catch (IOException e) {
+            awaitingComplaintUpdate = false;
+            sendButton.setDisable(false);
             e.printStackTrace();
+            showError("Failed to send response. Please try again.");
         }
         System.out.println("ReplyComplaintController before updating complaint");
         System.out.println("ReplyComplaintController after updating complaint");
-
-        Calendar calle = Calendar.getInstance();
-        int currentYear = calle.get(Calendar.YEAR);
-        int currentMonth = calle.get(Calendar.MONTH);
-        currentMonth++;
-        int currentHour = calle.get(Calendar.HOUR_OF_DAY);
-        int currentMintue = calle.get(Calendar.MINUTE);
-        int currentDay = calle.get(Calendar.DAY_OF_MONTH);
-
-        Message confirm = new Message();
-        confirm.setCustomerID(selectedComplaint.getCustomerID());
-        confirm.setMsgText(currentYear + "/" + currentMonth + "/" + currentDay + " - " + currentHour + ":" + currentMintue + ":" + "\n" +  "Your Complaint Has Been Answered!");
-
-        UpdateMessage updateMessage1 = new UpdateMessage("message", "add");
-        updateMessage1.setMessage(confirm);
-        System.out.println("before try - edit");
-        try {
-            System.out.println("before sending updateMessage to server ");
-            SimpleClient.getClient().sendToServer(updateMessage1);
-            System.out.println("afater sending updateMessage to server ");
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
     }
 
@@ -197,6 +193,22 @@ public class ReplyComplaintController {
         alert.showAndWait();
     }
 
+    private void showSuccess(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Complaint Response");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Complaint Response");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     private boolean isLateStatus(String status) {
         if (status == null) {
             return false;
@@ -207,6 +219,7 @@ public class ReplyComplaintController {
     }
 
     Complaint selectedComplaint = new Complaint();
+    private boolean awaitingComplaintUpdate = false;
     @FXML
     void loadComplaints(ActionEvent event)
     {
@@ -290,6 +303,66 @@ public class ReplyComplaintController {
         System.out.println(recvAccount.getCreditCardNumber());
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
+    }
+
+    @Subscribe
+    public void handleComplaintUpdateResponse(ComplaintUpdateResponse response) {
+        if (!awaitingComplaintUpdate) {
+            return;
+        }
+        awaitingComplaintUpdate = false;
+        sendButton.setDisable(false);
+        if (response == null || !response.isSuccess()) {
+            String message = response != null && response.getMessage() != null
+                    ? response.getMessage()
+                    : "Failed to update complaint response.";
+            showError(message);
+            return;
+        }
+        if (response.getComplaint() != null) {
+            selectedComplaint = response.getComplaint();
+            respondedAtField.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
+            slaStatusField.setText(selectedComplaint.getSlaStatus());
+            compensationDecisionField.setText(selectedComplaint.getCompensationDecision());
+        }
+        showSuccess(response.getMessage() != null ? response.getMessage() : "Response sent.");
+        sendComplaintNotification();
+        requestAllComplaints();
+    }
+
+    @Subscribe
+    public void handleComplaintUpdateAuthFailure(UserUpdateResponse response) {
+        if (!awaitingComplaintUpdate || response == null || response.isSuccess()) {
+            return;
+        }
+        awaitingComplaintUpdate = false;
+        sendButton.setDisable(false);
+        showError(response.getMessage() != null ? response.getMessage() : "Unable to send response.");
+    }
+
+    private void sendComplaintNotification() {
+        if (selectedComplaint == null) {
+            return;
+        }
+        Calendar calle = Calendar.getInstance();
+        int currentYear = calle.get(Calendar.YEAR);
+        int currentMonth = calle.get(Calendar.MONTH);
+        currentMonth++;
+        int currentHour = calle.get(Calendar.HOUR_OF_DAY);
+        int currentMintue = calle.get(Calendar.MINUTE);
+        int currentDay = calle.get(Calendar.DAY_OF_MONTH);
+
+        Message confirm = new Message();
+        confirm.setCustomerID(selectedComplaint.getCustomerID());
+        confirm.setMsgText(currentYear + "/" + currentMonth + "/" + currentDay + " - " + currentHour + ":" + currentMintue + ":" + "\n" +  "Your Complaint Has Been Answered!");
+
+        UpdateMessage updateMessage1 = new UpdateMessage("message", "add");
+        updateMessage1.setMessage(confirm);
+        try {
+            SimpleClient.getClient().sendToServer(updateMessage1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     private String formatTimestamp(Date date) {
         if (date == null) {

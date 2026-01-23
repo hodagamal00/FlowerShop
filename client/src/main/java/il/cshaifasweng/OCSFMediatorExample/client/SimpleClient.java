@@ -72,6 +72,12 @@ public class SimpleClient extends AbstractClient {
 			return;
 		}
 
+		if (msg instanceof ComplaintUpdateResponse) {
+			ComplaintUpdateResponse response = (ComplaintUpdateResponse) msg;
+			EventBus.getDefault().post(response);
+			return;
+		}
+
 		if (msg instanceof ReportDataResponse) {
 			ReportDataResponse response = (ReportDataResponse) msg;
 			EventBus.getDefault().post(response);

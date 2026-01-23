@@ -160,15 +160,14 @@ public class ComplaintUpdateManager {
         }
     }
 
-    public static boolean editComplaint(Complaint recievedComplaint){
+    public static ComplaintUpdateResponse editComplaint(Complaint recievedComplaint){
         System.out.println("Arrived to edit Complaint");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         boolean replyLate = false;
+        Complaint updateComplaint = null;
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             try {
-                int receivedComplaintID = recievedComplaint.getComplaintID();
-
                 int recievedComplaintID = recievedComplaint.getComplaintID();
                 int recievedCustomerID = recievedComplaint.getCustomerID();
                 int recievedAnswerWorkerID = recievedComplaint.getAnswerworkerID();
@@ -180,7 +179,7 @@ public class ComplaintUpdateManager {
 
 
                 System.out.println("Arrived to edit Complaint 2");
-                Complaint updateComplaint  = session.load(Complaint.class, recievedComplaintID);
+                updateComplaint  = session.load(Complaint.class, recievedComplaintID);
 
                 updateComplaint.setComplaintID(recievedComplaintID);
                 updateComplaint.setCustomerID(recievedCustomerID);
@@ -221,7 +220,8 @@ public class ComplaintUpdateManager {
                 throw ex;
             }
         }
-        return replyLate;
+        String message = replyLate ? "Reply sent after 24 hours." : "Complaint response sent.";
+        return new ComplaintUpdateResponse(true, message, updateComplaint);
     }
 
     public static void refreshComplaintSlaStatuses(Session session, List<Complaint> complaints) {
