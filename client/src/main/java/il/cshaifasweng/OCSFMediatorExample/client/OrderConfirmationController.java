@@ -14,7 +14,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class OrderConfirmationController {
@@ -129,7 +131,7 @@ public class OrderConfirmationController {
                 estimatedDeliveryLabel.setText(deliveryFormat.format(estimatedDate));
             }
             
-            deliveryFeeLabel.setText(String.format("%d₪", Math.round(order.getDeliveryFee())));
+            deliveryFeeLabel.setText(formatCurrency(PricingService.roundCurrency(order.getDeliveryFee())));
         } else {
             deliveryTypeTitle.setText("Pickup Information");
             deliveryAddressContainer.setVisible(false);
@@ -193,7 +195,7 @@ public class OrderConfirmationController {
     private void renderOrderSummary(Order order, boolean delivery) {
         orderItemsContainer.getChildren().clear();
         String products = order.getProducts();
-        double subtotal = 0.0;
+        List<Double> itemPrices = new ArrayList<>();
         if (products != null && !products.isBlank()) {
             String[] tokens = products.split("%");
             for (String token : tokens) {
@@ -206,14 +208,15 @@ public class OrderConfirmationController {
                 if (parts.length > 1) {
                     price = parsePrice(parts[1]);
                 }
-                subtotal += price;
+                itemPrices.add(price);
                 orderItemsContainer.getChildren().add(buildItemRow(name, price));
             }
         }
 
-        double deliveryFee = delivery ? order.getDeliveryFee() : 0.0;
-        double total = order.getPrice();
-        double discount = Math.max(0.0, (subtotal + deliveryFee) - total);
+        double subtotal = PricingService.calculateSubtotal(itemPrices);
+        double deliveryFee = delivery ? PricingService.roundCurrency(order.getDeliveryFee()) : 0.0;
+        double total = PricingService.roundCurrency(order.getPrice());
+        double discount = PricingService.calculateDiscountAmount(subtotal, deliveryFee, total);
 
         subtotalLabel.setText(formatCurrency(subtotal));
         deliveryFeeSummaryLabel.setText(formatCurrency(deliveryFee));
@@ -265,7 +268,7 @@ public class OrderConfirmationController {
     }
 
     private String formatCurrency(double value) {
-        return String.format(Locale.US, "%.2f₪", value);
+        return String.format(Locale.US, "%.2f₪", PricingService.roundCurrency(value));
     }
 
     @FXML

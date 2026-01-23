@@ -39,6 +39,10 @@ public class Account implements Serializable {
     private boolean Subscription;
     @Column(name = "Privilage")
     private int privialge;
+    @Column(name = "Frozen")
+    private boolean frozen;
+    @Column(name = "Credit_Balance")
+    private double creditBalance;
 
     /*
     public Account(String fullName, String address,String email, String password,long phoneNumber, long creditCardNumber,int creditYearExpire,int creditMonthExpire,int ccv,int belongShop)
@@ -73,6 +77,8 @@ public class Account implements Serializable {
         this.loggedIn = loggedIn;
         this.belongShop = belongShop;
         this.Subscription = subscription;
+        this.frozen = false;
+        this.creditBalance = 0.0;
     }
 
     public void setPrivialge(int privialge) {
@@ -93,7 +99,7 @@ public class Account implements Serializable {
 
     public Account()
     {
-
+        this.creditBalance = 0.0;
     }
 
     /**
@@ -107,6 +113,8 @@ public class Account implements Serializable {
         this.loggedIn = false;
         this.belongShop = 0;
         this.Subscription = false;
+        this.frozen = false;
+        this.creditBalance = 0.0;
     }
 
     public boolean isSubscription() {
@@ -115,6 +123,30 @@ public class Account implements Serializable {
 
     public void setSubscription(boolean subscription) {
         Subscription = subscription;
+    }
+
+    public boolean isFrozen() {
+        return getFrozen();
+    }
+
+    public boolean getFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
+
+    public double getCreditBalance() {
+        return creditBalance;
+    }
+
+    public void setCreditBalance(double creditBalance) {
+        this.creditBalance = creditBalance;
+    }
+
+    public void addCreditBalance(double amount) {
+        this.creditBalance += amount;
     }
 
     public void setAccountID(int accountID) {
@@ -164,7 +196,6 @@ public class Account implements Serializable {
     public void setBelongShop(int belongShop) {
         this.belongShop = belongShop;
     }
-
 
     public int getAccountID() {
         return accountID;

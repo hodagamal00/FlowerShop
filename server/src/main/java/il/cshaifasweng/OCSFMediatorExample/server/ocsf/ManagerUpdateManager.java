@@ -30,28 +30,49 @@ public class ManagerUpdateManager {
 
     private static List<Manager> getAllManagers() {
         System.out.println("Arrived to getAllManagers 1");
-        CriteriaBuilder builder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to getAllManagers 2");
-        CriteriaQuery<Manager> query = builder.createQuery(Manager.class);
-        System.out.println("Arrived to getAllManagers 3");
-        query.from(Manager.class);
-        System.out.println("Arrived to getAllManagers 4");
-        List<Manager> result = SimpleServer.session.createQuery(query).getResultList();
-        System.out.println("Arrived to getAllManagers 5");
-        return result;
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                CriteriaBuilder builder = session.getCriteriaBuilder();
+                System.out.println("Arrived to getAllManagers 2");
+                CriteriaQuery<Manager> query = builder.createQuery(Manager.class);
+                System.out.println("Arrived to getAllManagers 3");
+                query.from(Manager.class);
+                System.out.println("Arrived to getAllManagers 4");
+                List<Manager> result = session.createQuery(query).getResultList();
+                System.out.println("Arrived to getAllManagers 5");
+                tx.commit();
+                return result;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
     }
 
     static Long countRowsManager() {
         System.out.println("Arrived to coutnrwos 1");
-        final CriteriaBuilder criteriaBuilder = SimpleServer.session.getCriteriaBuilder();
-        System.out.println("Arrived to coutnrwos 2");
-        CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
-        System.out.println("Arrived to coutnrwos 3");
-        Root<Manager> root = criteria.from(Manager.class);
-        System.out.println("Arrived to coutnrwos 4");
-        criteria.select(criteriaBuilder.count(root));
-        System.out.println("Arrived to coutnrwos 5");
-        return SimpleServer.session.createQuery(criteria).getSingleResult();
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                final CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+                System.out.println("Arrived to coutnrwos 2");
+                CriteriaQuery<Long> criteria = criteriaBuilder.createQuery(Long.class);
+                System.out.println("Arrived to coutnrwos 3");
+                Root<Manager> root = criteria.from(Manager.class);
+                System.out.println("Arrived to coutnrwos 4");
+                criteria.select(criteriaBuilder.count(root));
+                System.out.println("Arrived to coutnrwos 5");
+                Long count = session.createQuery(criteria).getSingleResult();
+                tx.commit();
+                return count;
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
     }
 
     public static void addManager(Manager recievedManager) {
@@ -72,17 +93,23 @@ public class ManagerUpdateManager {
         Boolean recievedManagerloggedIn = recievedManager.getLoggedIn();
 
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
-        System.out.println("inside additemTocatalog8");
-        System.out.println("the new index is:" + newManagerId);
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                System.out.println("inside additemTocatalog8");
+                System.out.println("the new index is:" + newManagerId);
 
-        SimpleServer.session.save(recievedManager);
-        System.out.println("inside additemTocatalog9");
-        SimpleServer.session.flush();
-        System.out.println("inside additemTocatalog10");
-        tx.commit();
-        System.out.println("inside additemTocatalog11");
+                session.save(recievedManager);
+                System.out.println("inside additemTocatalog9");
+                session.flush();
+                System.out.println("inside additemTocatalog10");
+                tx.commit();
+                System.out.println("inside additemTocatalog11");
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
 
         System.out.println("inside additemTocatalog12");
     }
@@ -93,8 +120,6 @@ public class ManagerUpdateManager {
         System.out.println("arrived to removeManager");
 
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
 
 
         managersnum--;
@@ -113,10 +138,7 @@ public class ManagerUpdateManager {
         System.out.println("arrived to removeManager 2");
 
 
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx1 = SimpleServer.session.beginTransaction();
         long longID = countRowsManager();
-        SimpleServer.session.close();
         //tx1.commit();
         System.out.println("arrived to removeManager 3 and the longID is " + longID);
         int castedID = (int) longID;
@@ -126,14 +148,19 @@ public class ManagerUpdateManager {
             deleteManager(l+1);
         }
 
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx2 = SimpleServer.session.beginTransaction();
-        for(int i=0;i<managerGeneralList.size();i++){
-            SimpleServer.session.save(managerGeneralList.get(i));
-            SimpleServer.session.flush();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx2 = session.beginTransaction();
+            try {
+                for(int i=0;i<managerGeneralList.size();i++){
+                    session.save(managerGeneralList.get(i));
+                    session.flush();
+                }
+                tx2.commit();
+            } catch (Exception ex) {
+                tx2.rollback();
+                throw ex;
+            }
         }
-        tx2.commit();
-        SimpleServer.session.close();
 
         //session.close(); // here we finished deleting a Manager, everything else is for updating the id's
         System.out.println("arrived to removeItemFromCatalog 2.8");
@@ -143,55 +170,71 @@ public class ManagerUpdateManager {
     public static void deleteManager(int deleteIndex) {
         System.out.println("arrived to deleteManager 1");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
-        System.out.println("arrived to deleteManager 2");
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                System.out.println("arrived to deleteManager 2");
 
-        Object persistentInstance = SimpleServer.session.load(Manager.class, deleteIndex);
-        Manager perManager = (Manager) persistentInstance;
-        System.out.println("arrived to deleteManager 3");
-        if (persistentInstance != null) {
-            SimpleServer.session.delete(perManager);
+                Object persistentInstance = session.get(Manager.class, deleteIndex);
+                Manager perManager = (Manager) persistentInstance;
+                System.out.println("arrived to deleteManager 3");
+                if (persistentInstance != null) {
+                    session.delete(perManager);
+                }
+                System.out.println("arrived to deleteProd 4");
+
+                tx.commit();
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
         }
-        System.out.println("arrived to deleteProd 4");
-
-        tx.commit();
-        SimpleServer.session.close();
 
     }
 
     public static void editManager(Manager managerEdit){
         System.out.println("Arrived to edit Manager");
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-        SimpleServer.session = sessionFactory.openSession();
-        Transaction tx = SimpleServer.session.beginTransaction();
+        try (Session session = sessionFactory.openSession()) {
+            Transaction tx = session.beginTransaction();
+            try {
+                // managerEdit.getPersonID() returns a long but the entity setters take int.
+                // Cast to int explicitly to avoid a possible lossy conversion compilation error.
+                int recievedManagerID = (int) managerEdit.getPersonID();
+                String recievedManagerName = managerEdit.getFullName();
+                String recievedManagerEmail = managerEdit.getEmail();
+                String recievedManagerPassword = managerEdit.getPassword();
+                Boolean recievedManagerIsLoggedIn = managerEdit.getLoggedIn();
+                boolean recievedManagerFrozen = managerEdit.getFrozen();
+                int recievedManagerPrivilege = managerEdit.getPrivialge();
+                int recievedManagerShopId = managerEdit.getShopID();
 
-        // managerEdit.getPersonID() returns a long but the entity setters take int.
-        // Cast to int explicitly to avoid a possible lossy conversion compilation error.
-        int recievedManagerID = (int) managerEdit.getPersonID();
-        String recievedManagerName = managerEdit.getFullName();
-        String recievedManagerEmail = managerEdit.getEmail();
-        String recievedManagerPassword = managerEdit.getPassword();
-        Boolean recievedManagerIsLoggedIn = managerEdit.getLoggedIn();
+                System.out.println("Arrived to edit Manager 2");
+                Manager updateManager  = session.load(Manager.class, recievedManagerID);
 
-        System.out.println("Arrived to edit Manager 2");
-        Manager updateManager  = SimpleServer.session.load(Manager.class, recievedManagerID);
+                //System.out.println(updateManager.getButton());
+                //Manager updateManager = (Manager) persistentInstance1 ;
+                //updateManager.setID(16);
+                updateManager.setPersonID(recievedManagerID);
+                updateManager.setFullName(recievedManagerName);
+                updateManager.setEmail(recievedManagerEmail);
+                updateManager.setPassword(recievedManagerPassword);
+                updateManager.setLoggedIn(recievedManagerIsLoggedIn);
+                updateManager.setFrozen(recievedManagerFrozen);
+                updateManager.setPrivialge(recievedManagerPrivilege);
+                updateManager.setShopID(recievedManagerShopId);
 
-        //System.out.println(updateManager.getButton());
-        //Manager updateManager = (Manager) persistentInstance1 ;
-        //updateManager.setID(16);
-        updateManager.setPersonID(recievedManagerID);
-        updateManager.setFullName(recievedManagerName);
-        updateManager.setEmail(recievedManagerEmail);
-        updateManager.setPassword(recievedManagerPassword);
-        updateManager.setLoggedIn(recievedManagerIsLoggedIn);
-
-        System.out.println("Arrived to edit catalog product 3");
-        System.out.println(updateManager.getPersonID());
-        SimpleServer.session.update(updateManager);
-        System.out.println("Arrived to edit managercatalog product 4");
-        tx.commit();
-        System.out.println("Arrived to edit manager5");
+                System.out.println("Arrived to edit catalog product 3");
+                System.out.println(updateManager.getPersonID());
+                session.update(updateManager);
+                System.out.println("Arrived to edit managercatalog product 4");
+                tx.commit();
+                System.out.println("Arrived to edit manager5");
+            } catch (Exception ex) {
+                tx.rollback();
+                throw ex;
+            }
+        }
 
 		/*try {
 

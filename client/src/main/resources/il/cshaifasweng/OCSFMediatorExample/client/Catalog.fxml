@@ -15,6 +15,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
@@ -55,9 +56,6 @@
                         </children>
                     </HBox>
 
-                    <Text fx:id="cartTextPriceDiscount" text="" styleClass="price-note" />
-                    <Text fx:id="cartTextPriceFinal" text="" styleClass="price-final" />
-
                     <Button fx:id="checkout" styleClass="btn-primary" mnemonicParsing="false"
                             onAction="#openCheckout" prefHeight="45.0" prefWidth="240.0"
                             text="Checkout" />
@@ -81,6 +79,8 @@
                                     <ComboBox fx:id="priceFilter" styleClass="combo-box" promptText="Price Range" prefWidth="150.0" />
                                     <Button fx:id="catalogAddProductBtn" styleClass="btn-primary" text="Update Product"
                                             onAction="#openCatalogManagement" prefWidth="140.0" />
+                                    <Button fx:id="btnCustomItem" styleClass="btn-primary" text="Custom Item"
+                                            onAction="#onCustomItemClicked" prefWidth="130.0" />
                                     <Button styleClass="btn-secondary" text="Clear Filters" onAction="#clearFilters" prefWidth="110.0" />
                                 </children>
                             </HBox>
@@ -91,7 +91,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button1" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -106,9 +106,9 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo1" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo1" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="10" left="10" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
                                                     </Label>
@@ -118,8 +118,13 @@
                                             <Label fx:id="flower_name1" text="Sunflower" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before1" text="200₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after1" text="150₪" styleClass="price-after" />
+                                                    <StackPane fx:id="flower_price_before_container1">
+                                                        <children>
+                                                            <Label fx:id="flower_price_before1" text="200₪" styleClass="old-price-text" />
+                                                            <Line fx:id="flower_price_before_line1" />
+                                                        </children>
+                                                    </StackPane>
+                                                    <Label fx:id="flower_price_after1" text="150₪" styleClass="new-price-text" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -139,7 +144,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button2" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -154,9 +159,9 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo2" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo2" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="10" left="10" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
                                                     </Label>
@@ -166,8 +171,13 @@
                                             <Label fx:id="flower_name2" text="Daisy" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before2" text="120₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after2" text="100₪" styleClass="price-after" />
+                                                    <StackPane fx:id="flower_price_before_container2">
+                                                        <children>
+                                                            <Label fx:id="flower_price_before2" text="120₪" styleClass="old-price-text" />
+                                                            <Line fx:id="flower_price_before_line2" />
+                                                        </children>
+                                                    </StackPane>
+                                                    <Label fx:id="flower_price_after2" text="100₪" styleClass="new-price-text" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -187,7 +197,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button3" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -202,9 +212,9 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo3" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo3" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="10" left="10" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
                                                     </Label>
@@ -214,8 +224,13 @@
                                             <Label fx:id="flower_name3" text="Lily" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before3" text="100₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after3" text="80₪" styleClass="price-after" />
+                                                    <StackPane fx:id="flower_price_before_container3">
+                                                        <children>
+                                                            <Label fx:id="flower_price_before3" text="100₪" styleClass="old-price-text" />
+                                                            <Line fx:id="flower_price_before_line3" />
+                                                        </children>
+                                                    </StackPane>
+                                                    <Label fx:id="flower_price_after3" text="80₪" styleClass="new-price-text" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -235,7 +250,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button4" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -250,9 +265,9 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo4" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo4" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="10" left="10" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
                                                     </Label>
@@ -262,8 +277,13 @@
                                             <Label fx:id="flower_name4" text="Tulip" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before4" text="70₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after4" text="60₪" styleClass="price-after" />
+                                                    <StackPane fx:id="flower_price_before_container4">
+                                                        <children>
+                                                            <Label fx:id="flower_price_before4" text="70₪" styleClass="old-price-text" />
+                                                            <Line fx:id="flower_price_before_line4" />
+                                                        </children>
+                                                    </StackPane>
+                                                    <Label fx:id="flower_price_after4" text="60₪" styleClass="new-price-text" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -283,7 +303,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button5" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -298,9 +318,9 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo5" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo5" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="10" left="10" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
                                                     </Label>
@@ -310,8 +330,13 @@
                                             <Label fx:id="flower_name5" text="Rose" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before5" text="25₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after5" text="15₪" styleClass="price-after" />
+                                                    <StackPane fx:id="flower_price_before_container5">
+                                                        <children>
+                                                            <Label fx:id="flower_price_before5" text="25₪" styleClass="old-price-text" />
+                                                            <Line fx:id="flower_price_before_line5" />
+                                                        </children>
+                                                    </StackPane>
+                                                    <Label fx:id="flower_price_after5" text="15₪" styleClass="new-price-text" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -331,7 +356,7 @@
                                           onMouseClicked="#productCardClicked"
                                           spacing="10.0" prefHeight="320.0" prefWidth="260.0" maxWidth="260.0">
                                         <children>
-                                            <StackPane prefHeight="200.0">
+                                            <StackPane prefHeight="200.0" styleClass="product-image-container">
                                                 <children>
                                                     <ImageView fx:id="flower_button6" fitHeight="180.0" fitWidth="220.0"
                                                                preserveRatio="true" styleClass="imgg">
@@ -346,9 +371,9 @@
                                                         <StackPane.alignment>TOP_RIGHT</StackPane.alignment>
                                                     </Label>
 
-                                                    <Label fx:id="flower_promo6" text="מבצע" styleClass="promo-badge badge badge-warning">
+                                                    <Label fx:id="flower_promo6" text="SALE" styleClass="sale-badge" visible="false">
                                                         <StackPane.margin>
-                                                            <Insets top="10" left="10" />
+                                                            <Insets top="8" left="8" />
                                                         </StackPane.margin>
                                                         <StackPane.alignment>TOP_LEFT</StackPane.alignment>
                                                     </Label>
@@ -358,8 +383,13 @@
                                             <Label fx:id="flower_name6" text="Orchid" styleClass="product-name" />
                                             <HBox spacing="6.0" alignment="CENTER_LEFT" styleClass="price-row">
                                                 <children>
-                                                    <Label fx:id="flower_price_before6" text="150₪" styleClass="price-before" />
-                                                    <Label fx:id="flower_price_after6" text="120₪" styleClass="price-after" />
+                                                    <StackPane fx:id="flower_price_before_container6">
+                                                        <children>
+                                                            <Label fx:id="flower_price_before6" text="150₪" styleClass="old-price-text" />
+                                                            <Line fx:id="flower_price_before_line6" />
+                                                        </children>
+                                                    </StackPane>
+                                                    <Label fx:id="flower_price_after6" text="120₪" styleClass="new-price-text" />
                                                 </children>
                                             </HBox>
                                             <VBox spacing="2.0" alignment="CENTER_LEFT" prefWidth="220.0">
@@ -401,38 +431,6 @@
     </center>
     <right>
         <VBox spacing="24.0" styleClass="catalog-rightbar">
-            <VBox spacing="12.0" styleClass="catalog-panel">
-                <Text text="Custom Order" styleClass="panel-title" />
-                <Button fx:id="CreateCustomItem" mnemonicParsing="false"
-                        onAction="#createCustomitem" prefWidth="180.0" text="Create Custom Item" />
-                <ComboBox fx:id="chooseCustomType" prefWidth="180.0" promptText="Item Type" />
-                <ComboBox fx:id="chooseCustomColor" prefWidth="180.0" promptText="Color" />
-                <TextField fx:id="customPrice" prefWidth="180.0" promptText="Price Range" />
-                <Button id="btttn" fx:id="FinishCustomItem" mnemonicParsing="false"
-                        onAction="#addCartCustomitem" prefWidth="180.0" text="Add to Cart" />
-                <Button id="btttn" fx:id="CancelCustomItem" mnemonicParsing="false"
-                        onAction="#cancelCustomitem" prefWidth="180.0" text="Cancel" />
-                <Text fx:id="customError" styleClass="error-text" wrappingWidth="180.0" />
-            </VBox>
-
-            <VBox spacing="10.0" styleClass="catalog-panel">
-                <Text text="Admin Catalog" styleClass="panel-title" />
-                <Button fx:id="catalogManagementBtn" mnemonicParsing="false"
-                        onAction="#openCatalogManagement" prefWidth="180.0" text="Update Product" />
-                <ComboBox id="btttn" fx:id="adminEditCatalog" onAction="#chooseAdminEditCatalog"
-                          prefWidth="180.0" promptText="Select Product" />
-                <TextField fx:id="EditItemType" prefWidth="180.0" promptText="Item Type" />
-                <TextField fx:id="EditItemDesc" prefWidth="180.0" promptText="Description" />
-                <TextField fx:id="EditItemPrice" prefWidth="180.0" promptText="Price" />
-                <TextField fx:id="EditItemExtra" prefWidth="180.0" promptText="Extra Info" />
-                <Button id="btttn" fx:id="AddItem" mnemonicParsing="false"
-                        onAction="#adminAddItemFunc" prefWidth="180.0" text="Add Product" />
-                <Button id="btttn" fx:id="UpdateItem" mnemonicParsing="false"
-                        onAction="#adminUpdateItemFunc" prefWidth="180.0" text="Update Product" />
-                <Button id="btttn" fx:id="RemoveItem" mnemonicParsing="false"
-                        onAction="#adminRemoveItemFunc" prefWidth="180.0" text="Remove Product" />
-            </VBox>
-
             <VBox spacing="8.0" styleClass="catalog-panel">
                 <Text text="Account &amp; Tools" styleClass="panel-title" />
                 <Button fx:id="viewMyOrders" mnemonicParsing="false"

@@ -322,7 +322,7 @@
 .price-before {
     -fx-text-fill: -fx-secondary;
     -fx-font-size: 12px;
-    -fx-strikethrough: true;
+    -fx-opacity: 0.7;
 }
 
 .price-after {
@@ -331,9 +331,34 @@
     -fx-font-weight: bold;
 }
 
+.old-price-text {
+    -fx-text-fill: #9e9e9e;
+    -fx-font-size: 13px;
+}
+
+.new-price-text {
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-text-fill: #6a1b9a;
+}
+
 .promo-badge {
+    -fx-background-color: #e53935;
+    -fx-text-fill: #ffffff;
     -fx-padding: 4px 10px;
     -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+}
+
+.sale-badge {
+    -fx-background-color: #e53935;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 0 0 6 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 6, 0.2, 0, 2);
 }
 
 .product-name {

@@ -215,6 +215,11 @@ public class LogInSecondary {
                 e.printStackTrace();
             }*/
         }
+        else if(checkML.isFrozen())
+        {
+            ErrorMsgPass.setText("This account is frozen.");
+            ErrorMsgPass.setVisible(true);
+        }
         else if(checkML.getExistsPassword() == false)
         { // case email found but the password is incorrect
             System.out.println("arrived to case incorrect password  succesfully");

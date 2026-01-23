@@ -303,7 +303,11 @@ public class MyComplaintsController {
     }
 
     private String formatListEntry(Complaint complaint) {
-        return "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
+        String entry = "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
+        if (isLateStatus(complaint.getSlaStatus())) {
+            entry += " (Late)";
+        }
+        return entry;
     }
 
     private void showComplaintDetails(Complaint selectedComplaint) {
@@ -339,6 +343,15 @@ public class MyComplaintsController {
             return "—";
         }
         return value;
+    }
+
+    private boolean isLateStatus(String status) {
+        if (status == null) {
+            return false;
+        }
+        return "RESOLVED_LATE".equalsIgnoreCase(status)
+                || "OVERDUE".equalsIgnoreCase(status)
+                || "LATE".equalsIgnoreCase(status);
     }
 
     private void showAlert(String message) {

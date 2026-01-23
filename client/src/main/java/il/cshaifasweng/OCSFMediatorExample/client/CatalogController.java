@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 
 // Removed unused AWT imports.  Including AWT packages alongside JavaFX
 // introduces ambiguous references for classes like Button and List.  This
@@ -24,6 +25,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 // Added for detailed product navigation
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.Node;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -39,10 +44,7 @@ public class CatalogController {
 	public int managernum2 =0;
 	static boolean returnedFromSecondaryController = false;
 	boolean firstRun = true;
-	@FXML // fx:id="adminEditCatalog"
-	private ComboBox<String> adminEditCatalog; // Value injected by FXMLLoader
-
-	@FXML // fx:id="adminEditCatalog"
+	@FXML // fx:id="worker_edit"
 	private ComboBox<String> worker_edit; // Value injected by FXMLLoader
 
 	@FXML // Filter ComboBoxes
@@ -84,36 +86,11 @@ public class CatalogController {
 	@FXML
 	private VBox init_container;
 
-	@FXML // fx:id="EditItemDesc"
-	private TextField EditItemDesc; // Value injected by FXMLLoader
-
-	@FXML // fx:id="EditItemPrice"
-	private TextField EditItemPrice; // Value injected by FXMLLoader
-
-	@FXML // fx:id="EditItemType"
-	private TextField EditItemType; // Value injected by FXMLLoader
-
-
-	@FXML // fx:id="EditItemExtra"
-	private TextField EditItemExtra; // Value injected by FXMLLoader
-
-	@FXML // fx:id="customPrice"
-	private TextField customPrice; // Value injected by FXMLLoader
-
 	@FXML
 	private TextField customid;
 
-	@FXML // fx:id="CreateCustomItem"
-	public Button CreateCustomItem; // Value injected by FXMLLoader
-
 	@FXML
 	public Button infoo;
-
-	@FXML // fx:id="CancelCustomItem"
-	private Button CancelCustomItem; // Value injected by FXMLLoader
-
-	@FXML // fx:id="FinishCustomItem"
-	private Button FinishCustomItem; // Value injected by FXMLLoader
 
 
 	@FXML // fx:id="flower_button1"
@@ -278,18 +255,42 @@ public class CatalogController {
 	@FXML
 	private Label flower_price_after6;
 
+	@FXML
+	private StackPane flower_price_before_container1;
 
-	@FXML // fx:id="AddItem"
-	private Button AddItem; // Value injected by FXMLLoader
+	@FXML
+	private StackPane flower_price_before_container2;
 
-	//@FXML // fx:id="AddItem"
-	//private Button remID;
+	@FXML
+	private StackPane flower_price_before_container3;
 
-	@FXML // fx:id="RemoveItem"
-	private Button RemoveItem; // Value injected by FXMLLoader
+	@FXML
+	private StackPane flower_price_before_container4;
 
-	@FXML // fx:id="UpdateItem"
-	private Button UpdateItem; // Value injected by FXMLLoader
+	@FXML
+	private StackPane flower_price_before_container5;
+
+	@FXML
+	private StackPane flower_price_before_container6;
+
+	@FXML
+	private Line flower_price_before_line1;
+
+	@FXML
+	private Line flower_price_before_line2;
+
+	@FXML
+	private Line flower_price_before_line3;
+
+	@FXML
+	private Line flower_price_before_line4;
+
+	@FXML
+	private Line flower_price_before_line5;
+
+	@FXML
+	private Line flower_price_before_line6;
+
 
 	@FXML
 	private Button printProd;
@@ -303,12 +304,6 @@ public class CatalogController {
 	@FXML
 	private Button prevPage;
 
-
-	@FXML
-	private ComboBox<String> chooseCustomColor;
-
-	@FXML
-	private ComboBox<String> chooseCustomType;
 
 	@FXML
 	private Button flower1_addCart;
@@ -336,16 +331,6 @@ public class CatalogController {
 
 	@FXML
 	private TextField cartTextPrice;
-
-	@FXML
-	private Text cartTextPriceDiscount;
-
-	@FXML
-	private Text cartTextPriceFinal;
-
-
-	@FXML // fx:id="customError"
-	private Text customError; // Value injected by FXMLLoader
 
 	@FXML
 	private Text cartTopText;
@@ -379,9 +364,6 @@ public class CatalogController {
 
 	@FXML // fx:id="deliveryButton"
 	private Button deliveryButton; // Value injected by FXMLLoader
-
-	@FXML // fx:id="catalogManagementBtn"
-	private Button catalogManagementBtn; // Value injected by FXMLLoader
 
 	@FXML // fx:id="catalogAddProductBtn"
 	private Button catalogAddProductBtn; // Value injected by FXMLLoader
@@ -452,6 +434,18 @@ public class CatalogController {
 			openMessage.setVisible(false);
 		}
 
+	}
+
+	@FXML
+	void chooseAdminEditCatalog(ActionEvent event) {
+		if (worker_edit == null) {
+			return;
+		}
+		String selection = worker_edit.getSelectionModel().getSelectedItem();
+		if (selection == null) {
+			return;
+		}
+		System.out.println("Worker action selected: " + selection);
 	}
 
 
@@ -574,56 +568,17 @@ public class CatalogController {
 	/* ========================= */
 
 	private void addToCart(int offset) {
-		if (!ensureLoggedInForCart()) {
-			return;
-		}
-
 		int index = CatalogSTARTIndex + offset;
 		List<Product> displayProducts = getDisplayedProducts();
 		if (index < 0 || index >= displayProducts.size()) {
 			return; // حماية من IndexOutOfBounds
 		}
 
-		// السعر الحالي (إذا الحقل فاضي يبدأ من 0)
-		int basePrice = 0;
-		if (!cartTextPrice.getText().isEmpty()) {
-			basePrice = Integer.parseInt(cartTextPrice.getText());
-		}
-
-		int addedPrice = (int) Math.round(displayProducts.get(index).getPrice());
-		basePrice += addedPrice;
-
 		// إضافة المنتج
 		Product selectedProduct = displayProducts.get(index);
-		CartItemsList.getItems().add(selectedProduct.getName());
 		CartService.getInstance().addProduct(selectedProduct, 1);
 
-		// تحديث السعر قبل الخصم
-		cartTextPrice.setText(String.valueOf(basePrice));
-
-		// الخصم: 10% فقط إذا مشترك والمجموع أكبر من 50₪
-		if (currentLoggedAccount != null
-				&& currentLoggedAccount.isSubscription()
-				&& basePrice > 50) {
-			cartTextDiscount.setText(String.valueOf((int)(basePrice * 0.9)));
-		} else {
-			cartTextDiscount.setText(String.valueOf(basePrice));
-		}
-	}
-
-	private boolean ensureLoggedInForCart() {
-		if (resolveCurrentPrivilegeLevel() >= 1) {
-			return true;
-		}
-
-		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Login Required");
-		alert.setHeaderText("Please log in to add items to your cart.");
-		alert.setContentText("Guests can browse the catalog, but checkout and ordering require a user account.");
-		alert.showAndWait();
-
-		NavigationService.getInstance().navigate("Login");
-		return false;
+		refreshCartDisplay();
 	}
 
 	private void addProductToCartByIndex(int offset) {
@@ -693,9 +648,6 @@ public class CatalogController {
 	@FXML
 	void viewUserCart(ActionEvent event)
 	{
-		if (!ensureLoggedInForCart()) {
-			return;
-		}
 		syncCartFromService();
 		boolean mode;
 		if(cartViewBinary == 0)
@@ -710,8 +662,6 @@ public class CatalogController {
 			cartTopText.setVisible(true);
 			cartTextPrice.setVisible(true);
 			cartTextDiscount.setVisible(true);
-			cartTextPriceDiscount.setVisible(true);
-			cartTextPriceFinal.setVisible(true);
 		}
 		else
 		{
@@ -725,11 +675,8 @@ public class CatalogController {
 			cartTopText.setVisible(false);
 			cartTextPrice.setVisible(false);
 			cartTextDiscount.setVisible(false);
-			cartTextPriceDiscount.setVisible(false);
-			cartTextPriceFinal.setVisible(false);
 		}
 		ViewItems(mode);
-		viewAdminGUI(mode);
 		CartItemsList.setVisible(!mode);
 	}
 	@FXML
@@ -771,7 +718,13 @@ public class CatalogController {
 	@FXML
 	void openCheckout(ActionEvent event) throws IOException
 	{
-		if (!ensurePrivilege(event, 1, "Checkout")) {
+		if (resolveCurrentPrivilegeLevel() < 1) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Login Required");
+			alert.setHeaderText("Login required to checkout.");
+			alert.setContentText("Login required to checkout. You can add items as a guest, but you must login/register to place an order.");
+			alert.showAndWait();
+			navigateInShell("Login");
 			return;
 		}
 
@@ -947,389 +900,6 @@ public class CatalogController {
 	}
 	public static String current_button;
 
-	@FXML
-	Product createCustomitem(ActionEvent event) {
-		if (!ensureLoggedInForCart()) {
-			return null;
-		}
-
-		FinishCustomItem.setText("Add Custom Item To Cart");
-		CancelCustomItem.setText("Cancel Custom Item Designer");
-		flower_button1.setVisible(true);
-		flower_button2.setVisible(true);
-		flower_button3.setVisible(true);
-		flower_button4.setVisible(true);
-		flower_button5.setVisible(true);
-		flower_button6.setVisible(true);
-
-		flower_price1.setVisible(true);
-		flower_price2.setVisible(true);
-		flower_price3.setVisible(true);
-		flower_price4.setVisible(true);
-		flower_price5.setVisible(true);
-		flower_price6.setVisible(true);
-
-		flower_name1.setVisible(true);
-		flower_name2.setVisible(true);
-		flower_name3.setVisible(true);
-		flower_name4.setVisible(true);
-		flower_name5.setVisible(true);
-		flower_name6.setVisible(true);
-
-		CreateCustomItem.setVisible(false);
-		adminEditCatalog.setVisible(false);
-		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
-		//	remID.setVisible(false);
-
-		EditItemExtra.setVisible(false);
-		EditItemDesc.setVisible(false);
-		EditItemType.setVisible(false);
-		EditItemPrice.setVisible(false);
-		AddItem.setVisible(false);
-		RemoveItem.setVisible(false);
-		UpdateItem.setVisible(false);
-
-		chooseCustomColor.setVisible(true);
-		customPrice.setVisible(true);
-		customid.setVisible(true);
-		chooseCustomType.setVisible(true);
-
-		CancelCustomItem.setVisible(true);
-		FinishCustomItem.setVisible(true);
-
-		// When creating a placeholder product, provide a numeric price (e.g., 0.0)
-		// instead of a string to match the Product constructor signature.
-		Product newProduct = new Product(0, "test", "test", "test", 0.0);  // Please insert real values
-		//CREATE A NEW PRODUCT DYNAMICALLY
-		// Tips: A global variable called ProductID which is incremented after each product created.
-		// A function GetNextProductID that returns a fresh ID for the new product to be added.
-		// Static fields and functions.
-		return newProduct;
-	}
-
-	@FXML
-	void cancelCustomitem(ActionEvent event) {
-		//.setVisible(false);
-		flower_button1.setVisible(true);
-		flower_button2.setVisible(true);
-		flower_button3.setVisible(true);
-		flower_button4.setVisible(true);
-		flower_button5.setVisible(true);
-		flower_button6.setVisible(true);
-
-		flower_price1.setVisible(true);
-		flower_price2.setVisible(true);
-		flower_price3.setVisible(true);
-		flower_price4.setVisible(true);
-		flower_price5.setVisible(true);
-		flower_price6.setVisible(true);
-
-		flower_name1.setVisible(true);
-		flower_name2.setVisible(true);
-		flower_name3.setVisible(true);
-		flower_name4.setVisible(true);
-		flower_name5.setVisible(true);
-		flower_name6.setVisible(true);
-
-		CreateCustomItem.setVisible(true);
-		adminEditCatalog.setVisible(true);
-
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-	}
-
-	@FXML
-	void addCartCustomitem(ActionEvent event)
-	{
-		if (!ensureLoggedInForCart()) {
-			return;
-		}
-		customError.setVisible(false);
-		boolean fail = false;
-		if(chooseCustomType.getSelectionModel().getSelectedIndex() == -1)
-		{
-			customError.setText("Please choose a type");
-			customError.setVisible(true);
-			fail = true;
-		}
-		if(chooseCustomColor.getSelectionModel().getSelectedIndex() == -1)
-		{
-			customError.setText("Please choose a color");
-			customError.setVisible(true);
-			fail = true;
-		}
-		String customPriceString = customPrice.getText();
-		PriceRange desiredRange = parsePriceRange(customPriceString);
-		if (desiredRange == null) {
-			fail = true;
-			customError.setText("Please enter a valid price range (e.g., 50-120)");
-			customError.setVisible(true);
-		}
-
-		if(fail == false)
-		{
-			String color = chooseCustomColor.getSelectionModel().getSelectedItem();
-			String Type = chooseCustomType.getSelectionModel().getSelectedItem();
-			// Parse the custom price text into a double before constructing the Product.
-			double priceValue = desiredRange.getSuggestedPrice();
-			// Use the selected type and color strings rather than the ComboBox objects themselves.
-			String selectedType = chooseCustomType.getSelectionModel().getSelectedItem();
-			String selectedColor = chooseCustomColor.getSelectionModel().getSelectedItem();
-			Product product = new Product(0, "btn", "Custom Item", "A " + selectedType + " With dominant color " + selectedColor + " (Price Range " + desiredRange.getDisplayText() + ")", priceValue);
-
-			addProductToCart(product);
-
-
-
-			customid.setVisible(false);
-
-			CancelCustomItem.setVisible(false);
-			FinishCustomItem.setVisible(false);
-
-			chooseCustomType.setVisible(false);
-			chooseCustomColor.setVisible(false);
-			customPrice.setVisible(false);
-			CreateCustomItem.setVisible(true);
-			customError.setVisible(false);
-		}
-
-	}
-
-
-	@FXML
-	void adminAddItemFunc(ActionEvent event) {
-
-		String newType = EditItemType.getText();
-		String newDesc = EditItemDesc.getText();
-		String newPrice = EditItemPrice.getText();
-		Product new_flower = new Product();
-		new_flower.setPrice(Double.parseDouble(newPrice));
-		new_flower.setName(newType);
-		new_flower.setDetails(newDesc);
-		flowersnum2++;
-		new_flower.setID(flowersnum2);
-		UpdateMessage updateMessage1 = new UpdateMessage("product", "add");
-		updateMessage1.setProduct(new_flower);
-		updateMessage1.setId(flowersnum2);
-		System.out.println("before try - edit");
-		try {
-			System.out.println("before sending updateMessage to server ");
-			SimpleClient.getClient().sendToServer(updateMessage1); // sends the updated product to the server class
-			System.out.println("afater sending updateMessage to server ");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		CreateCustomItem.setVisible(true);
-		adminEditCatalog.setVisible(true);
-
-		//	remID.setVisible(false);
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-
-		EditItemExtra.setVisible(false);
-
-		if(CatalogENDIndex - CatalogSTARTIndex < 6)
-		{
-			CatalogENDIndex++;
-		}
-		showStatusMessage("Catalog Updated Successfully - 0 Errors");
-		//	AddItem.setVisible(false);
-	}
-
-	@FXML
-	void adminRemoveItemFunc(ActionEvent event) {
-
-		String deleteID = EditItemExtra.getText();
-		// Remove the item with the currnet ID from the catalog
-		// create removeItem object
-		// give the deleteID to the removeItem object
-		// send the object to the server
-		//System.out.println(deleteID);
-		//	System.out.println(deleteID);
-		UpdateMessage removeType = new UpdateMessage("product", "remove");
-		removeType.setDelteId(deleteID);
-
-		flowersnum2--;
-		try {
-			SimpleClient.getClient().sendToServer(removeType); // sends the updated product to the server class
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		CreateCustomItem.setVisible(true);
-		adminEditCatalog.setVisible(true);
-
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-
-		EditItemType.setVisible(false);
-		EditItemDesc.setVisible(false);
-		EditItemPrice.setVisible(false);
-		EditItemExtra.setVisible(false);
-		//	RemoveItem.setVisible(false);
-		//.setVisible(false);
-
-		showStatusMessage("Catalog Updated Successfully - 0 Errors");
-		RemoveItem.setVisible(false);
-
-		allProducts.remove(Integer.parseInt(EditItemExtra.getText())-1);
-
-		updateFields(2);
-
-	}
-
-	@FXML
-	void adminUpdateItemFunc(ActionEvent event) {
-
-		String TempType = allProducts.get(0).getName();
-		String TempDesc = allProducts.get(0).getDetails();
-		double TempPrice = allProducts.get(0).getPrice();
-
-		String newType = EditItemType.getText();
-		System.out.println(newType);
-		String newDesc = EditItemDesc.getText();
-		System.out.println(newDesc);
-		String newPrice = EditItemPrice.getText();
-		System.out.println(newPrice);
-		String updateID = EditItemExtra.getText();
-		System.out.println(updateID);
-
-		List<Product> tempList = allProducts;
-		int TargerID = Integer.parseInt(updateID) - 1;
-
-		allProducts.get(TargerID).setName(newType);
-		allProducts.get(TargerID).setPrice(Double.parseDouble(newPrice));
-		allProducts.get(TargerID).setDetails(newDesc);
-
-		Product currtProduct  = CatalogController.getCurrent_button();
-
-
-		currtProduct.setPrice(Double.parseDouble(newPrice));
-		currtProduct.setDetails(newDesc);
-		currtProduct.setName(newType);
-		int castedID = Integer.parseInt(updateID);
-		currtProduct.setID(castedID);
-
-		UpdateMessage updateMessage1 = new UpdateMessage("product","edit");
-		updateMessage1.setProduct(currtProduct);
-
-
-		updateMessage1.setId(castedID);
-		System.out.println("arrived here before sending the updatemessage1");
-		try {
-			SimpleClient.getClient().sendToServer(updateMessage1); // sends the updated product to the server class
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-
-		allProducts.get(0).setName(TempType);
-		allProducts.get(0).setPrice(TempPrice);
-		allProducts.get(0).setDetails(TempDesc);
-
-		// Update the item with the current ID with the new variables
-		//remID.setVisible(false);
-		CreateCustomItem.setVisible(true);
-		adminEditCatalog.setVisible(true);
-
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-
-		EditItemType.setVisible(false);
-		EditItemDesc.setVisible(false);
-		EditItemPrice.setVisible(false);
-		EditItemExtra.setVisible(false);
-		//	UpdateItem.setVisible(false);
-
-		updateFields(2);
-
-		showStatusMessage("Catalog Updated Successfully - 0 Errors");
-	}
-
-	@FXML
-	void chooseAdminEditCatalog(ActionEvent event) {
-		//	remID.setVisible(false);
-		CreateCustomItem.setVisible(false);
-		adminEditCatalog.setVisible(true);
-
-		chooseCustomColor.setVisible(false);
-		customPrice.setVisible(false);
-		customid.setVisible(false);
-		chooseCustomType.setVisible(false);
-
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
-
-		String chosen = adminEditCatalog.getSelectionModel().getSelectedItem();
-		System.out.println(chosen);
-		System.out.println("OKAY OKAY");
-		if (chosen == "Add Item") {
-			EditItemType.setText("New Item Type");
-			EditItemDesc.setText("New Item Desc");
-			EditItemPrice.setText("New Item Price");
-			EditItemType.setVisible(true);
-			EditItemDesc.setVisible(true);
-			EditItemPrice.setVisible(true);
-			EditItemExtra.setVisible(false);
-			System.out.println("WENT ADD");
-			RemoveItem.setVisible(false);
-			UpdateItem.setVisible(false);
-			AddItem.setVisible(true);
-		}
-		if (chosen == "Remove Item") {
-			//EditItemExtra.setText("Item ID To Remove");
-			//UpdateItem.setText("Remove");
-			EditItemType.setVisible(false);
-			EditItemDesc.setVisible(false);
-			EditItemPrice.setVisible(false);
-			EditItemExtra.setVisible(true);
-			EditItemExtra.setText("ID to remove");
-			//.setVisible(true);
-			System.out.println("WENT REMOVE");
-			AddItem.setVisible(false);
-			UpdateItem.setVisible(false);
-			RemoveItem.setVisible(true);
-			//send id to server
-		}
-		if (chosen == "Edit Item") {
-			EditItemType.setText("New Item Type");
-			EditItemDesc.setText("New Item Desc");
-			EditItemPrice.setText("New Item Price");
-			EditItemExtra.setText("Item ID To Update");
-			EditItemType.setVisible(true);
-			EditItemDesc.setVisible(true);
-			EditItemPrice.setVisible(true);
-			EditItemExtra.setVisible(true);
-			System.out.println("WENT UPDATE");
-			AddItem.setVisible(false);
-			RemoveItem.setVisible(false);
-			UpdateItem.setVisible(true);
-		}
-	}
-
-
 	int updateFieldsBounds = 0;
 
 	private String formatCatalogField(String label, String value) {
@@ -1415,30 +985,69 @@ public class CatalogController {
 	}
 
 	private String formatPrice(double price) {
-		if (price == Math.floor(price)) {
-			return String.format(Locale.US, "%.0f₪", price);
-		}
 		return String.format(Locale.US, "%.2f₪", price);
 	}
 
-	private void updatePricingLabels(Product product, Label priceBadge, Label priceBefore, Label priceAfter, Label promoBadge) {
-		double basePrice = product.getPrice();
-		double actualPrice = product.getActualPrice();
-		boolean hasPromotion = product.isPromotion() && product.getDiscountPercent() > 0 && actualPrice < basePrice;
+	private void configureOldPriceStrike(Line line) {
+		if (line == null) {
+			return;
+		}
+		line.setStroke(Color.RED);
+		line.setStrokeWidth(2.0);
+		line.setStartX(0);
+		line.setStartY(18);
+		line.setEndX(60);
+		line.setEndY(0);
+		line.toFront();
+	}
+
+	private void updatePricingLabels(Product product, Label priceBadge, StackPane oldPriceContainer,
+									 Label priceBefore, Line oldPriceStrike, Label priceAfter,
+									 Label promoBadge) {
+		if (product == null) {
+			return;
+		}
+
+		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
+		PricingService.PricingResult pricing = PricingService.calculatePricing(product, account);
+		double basePrice = pricing.getBasePrice();
+		double finalPrice = pricing.getFinalPrice();
+		boolean hasDiscount = basePrice > finalPrice;
+
+		System.out.printf(Locale.US,
+				"Product %d | original=%.2f | final=%.2f%n",
+				product.getID(), basePrice, finalPrice);
 
 		String formattedBase = formatPrice(basePrice);
-		String formattedActual = formatPrice(actualPrice);
+		String formattedFinal = formatPrice(finalPrice);
 
-		priceBadge.setText(formattedActual);
-		priceAfter.setText(formattedActual);
+		priceBadge.setText(formattedFinal);
+		priceAfter.setText(formattedFinal);
 		priceBefore.setText(formattedBase);
+		if (oldPriceContainer != null) {
+			oldPriceContainer.setVisible(hasDiscount);
+			if (!oldPriceContainer.managedProperty().isBound()) {
+				oldPriceContainer.setManaged(hasDiscount);
+			}
+		}
+		if (oldPriceStrike != null) {
+			oldPriceStrike.setVisible(hasDiscount);
+			oldPriceStrike.toFront();
+		}
 
-		promoBadge.setVisible(hasPromotion);
-		promoBadge.setManaged(hasPromotion);
-		priceBefore.setVisible(hasPromotion);
-		priceBefore.setManaged(hasPromotion);
-		priceAfter.setVisible(true);
-		priceAfter.setManaged(true);
+		promoBadge.setText("SALE");
+		promoBadge.setVisible(hasDiscount);
+		promoBadge.setManaged(hasDiscount);
+		priceAfter.setVisible(hasDiscount);
+	}
+
+	private void bindManagedToVisible(Node... nodes) {
+		for (Node node : nodes) {
+			if (node == null) {
+				continue;
+			}
+			node.managedProperty().bind(node.visibleProperty());
+		}
 	}
 
 	public void updateFields(int mode)
@@ -1476,12 +1085,18 @@ public class CatalogController {
 			flower_color5.setText(formatCatalogField("Color", displayProducts.get(4).getColor()));
 			flower_color6.setText(formatCatalogField("Color", displayProducts.get(5).getColor()));
 
-			updatePricingLabels(displayProducts.get(0), flower_price1, flower_price_before1, flower_price_after1, flower_promo1);
-			updatePricingLabels(displayProducts.get(1), flower_price2, flower_price_before2, flower_price_after2, flower_promo2);
-			updatePricingLabels(displayProducts.get(2), flower_price3, flower_price_before3, flower_price_after3, flower_promo3);
-			updatePricingLabels(displayProducts.get(3), flower_price4, flower_price_before4, flower_price_after4, flower_promo4);
-			updatePricingLabels(displayProducts.get(4), flower_price5, flower_price_before5, flower_price_after5, flower_promo5);
-			updatePricingLabels(displayProducts.get(5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6);
+			updatePricingLabels(displayProducts.get(0), flower_price1, flower_price_before_container1, flower_price_before1,
+					flower_price_before_line1, flower_price_after1, flower_promo1);
+			updatePricingLabels(displayProducts.get(1), flower_price2, flower_price_before_container2, flower_price_before2,
+					flower_price_before_line2, flower_price_after2, flower_promo2);
+			updatePricingLabels(displayProducts.get(2), flower_price3, flower_price_before_container3, flower_price_before3,
+					flower_price_before_line3, flower_price_after3, flower_promo3);
+			updatePricingLabels(displayProducts.get(3), flower_price4, flower_price_before_container4, flower_price_before4,
+					flower_price_before_line4, flower_price_after4, flower_promo4);
+			updatePricingLabels(displayProducts.get(4), flower_price5, flower_price_before_container5, flower_price_before5,
+					flower_price_before_line5, flower_price_after5, flower_promo5);
+			updatePricingLabels(displayProducts.get(5), flower_price6, flower_price_before_container6, flower_price_before6,
+					flower_price_before_line6, flower_price_after6, flower_promo6);
 
 		}
 		else
@@ -1520,16 +1135,16 @@ public class CatalogController {
 			flower_price_after6.setText("/");
 
 			flower_promo1.setVisible(false);
-			flower_promo2.setVisible(false);
-			flower_promo3.setVisible(false);
-			flower_promo4.setVisible(false);
-			flower_promo5.setVisible(false);
-			flower_promo6.setVisible(false);
 			flower_promo1.setManaged(false);
+			flower_promo2.setVisible(false);
 			flower_promo2.setManaged(false);
+			flower_promo3.setVisible(false);
 			flower_promo3.setManaged(false);
+			flower_promo4.setVisible(false);
 			flower_promo4.setManaged(false);
+			flower_promo5.setVisible(false);
 			flower_promo5.setManaged(false);
+			flower_promo6.setVisible(false);
 			flower_promo6.setManaged(false);
 
 			flower_name1.setText("/");
@@ -1573,7 +1188,8 @@ public class CatalogController {
 			if(CatalogENDIndex - CatalogSTARTIndex > 0)
 			{
 				flower_name1.setText(displayProducts.get(CatalogSTARTIndex).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex), flower_price1, flower_price_before1, flower_price_after1, flower_promo1);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex), flower_price1, flower_price_before_container1, flower_price_before1,
+						flower_price_before_line1, flower_price_after1, flower_promo1);
 				flower_sku1.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex).getSku()));
 				flower_category1.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex).getCategory()));
 				flower_color1.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex).getColor()));
@@ -1590,7 +1206,8 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 1)
 			{
 				flower_name2.setText(displayProducts.get(CatalogSTARTIndex + 1).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 1), flower_price2, flower_price_before2, flower_price_after2, flower_promo2);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 1), flower_price2, flower_price_before_container2, flower_price_before2,
+						flower_price_before_line2, flower_price_after2, flower_promo2);
 				flower_sku2.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 1).getSku()));
 				flower_category2.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 1).getCategory()));
 				flower_color2.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 1).getColor()));
@@ -1606,7 +1223,8 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 2)
 			{
 				flower_name3.setText(displayProducts.get(CatalogSTARTIndex + 2).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 2), flower_price3, flower_price_before3, flower_price_after3, flower_promo3);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 2), flower_price3, flower_price_before_container3, flower_price_before3,
+						flower_price_before_line3, flower_price_after3, flower_promo3);
 				flower_sku3.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 2).getSku()));
 				flower_category3.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 2).getCategory()));
 				flower_color3.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 2).getColor()));
@@ -1622,7 +1240,8 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 3)
 			{
 				flower_name4.setText(displayProducts.get(CatalogSTARTIndex + 3).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 3), flower_price4, flower_price_before4, flower_price_after4, flower_promo4);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 3), flower_price4, flower_price_before_container4, flower_price_before4,
+						flower_price_before_line4, flower_price_after4, flower_promo4);
 				flower_sku4.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 3).getSku()));
 				flower_category4.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 3).getCategory()));
 				flower_color4.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 3).getColor()));
@@ -1638,7 +1257,8 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 4)
 			{
 				flower_name5.setText(displayProducts.get(CatalogSTARTIndex + 4).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 4), flower_price5, flower_price_before5, flower_price_after5, flower_promo5);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 4), flower_price5, flower_price_before_container5, flower_price_before5,
+						flower_price_before_line5, flower_price_after5, flower_promo5);
 				flower_sku5.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 4).getSku()));
 				flower_category5.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 4).getCategory()));
 				flower_color5.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 4).getColor()));
@@ -1657,7 +1277,8 @@ public class CatalogController {
 				// select the sixth element in the current window and update the corresponding
 				// UI components (name, price, button, cart button and container) for slot 6.
 				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before_container6, flower_price_before6,
+						flower_price_before_line6, flower_price_after6, flower_promo6);
 				flower_sku6.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 5).getSku()));
 				flower_category6.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 5).getCategory()));
 				flower_color6.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 5).getColor()));
@@ -1673,7 +1294,8 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex == 6)
 			{
 				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
-				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before6, flower_price_after6, flower_promo6);
+				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before_container6, flower_price_before6,
+						flower_price_before_line6, flower_price_after6, flower_promo6);
 				flower_sku6.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 5).getSku()));
 				flower_category6.setText(formatCatalogField("Type", displayProducts.get(CatalogSTARTIndex + 5).getCategory()));
 				flower_color6.setText(formatCatalogField("Color", displayProducts.get(CatalogSTARTIndex + 5).getColor()));
@@ -1828,12 +1450,6 @@ public class CatalogController {
 
 
 	}
-	public void viewAdminGUI(boolean mode)
-	{
-		adminEditCatalog.setVisible(mode);
-		worker_edit.setVisible(mode);
-		CreateCustomItem.setVisible(mode);
-	}
 	int cartPrice = 0;
 	Account currentLoggedAccount;
 	boolean availableProducts = false;
@@ -1891,6 +1507,18 @@ public class CatalogController {
 		assert flower_price_before4 != null : "fx:id=\"flower_price_before4\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_before5 != null : "fx:id=\"flower_price_before5\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_before6 != null : "fx:id=\"flower_price_before6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_container1 != null : "fx:id=\"flower_price_before_container1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_container2 != null : "fx:id=\"flower_price_before_container2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_container3 != null : "fx:id=\"flower_price_before_container3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_container4 != null : "fx:id=\"flower_price_before_container4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_container5 != null : "fx:id=\"flower_price_before_container5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_container6 != null : "fx:id=\"flower_price_before_container6\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_line1 != null : "fx:id=\"flower_price_before_line1\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_line2 != null : "fx:id=\"flower_price_before_line2\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_line3 != null : "fx:id=\"flower_price_before_line3\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_line4 != null : "fx:id=\"flower_price_before_line4\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_line5 != null : "fx:id=\"flower_price_before_line5\" was not injected: check your FXML file 'Catalog.fxml'.";
+		assert flower_price_before_line6 != null : "fx:id=\"flower_price_before_line6\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_after1 != null : "fx:id=\"flower_price_after1\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_after2 != null : "fx:id=\"flower_price_after2\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_after3 != null : "fx:id=\"flower_price_after3\" was not injected: check your FXML file 'Catalog.fxml'.";
@@ -1898,18 +1526,28 @@ public class CatalogController {
 		assert flower_price_after5 != null : "fx:id=\"flower_price_after5\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert flower_price_after6 != null : "fx:id=\"flower_price_after6\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert deliveryButton != null : "fx:id=\"deliveryButton\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert catalogManagementBtn != null : "fx:id=\"catalogManagementBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert catalogAddProductBtn != null : "fx:id=\"catalogAddProductBtn\" was not injected: check your FXML file 'Catalog.fxml'.";
 		assert messageField != null : "fx:id=\"messageField\" was not injected: check your FXML file 'Catalog.fxml'.";
-		assert customError != null : "fx:id=\"customError\" was not injected: check your FXML file 'Catalog.fxml'.";
 
-		customError.setVisible(false);
+		bindManagedToVisible(
+				flower_price_before_container1, flower_price_before_container2, flower_price_before_container3,
+				flower_price_before_container4, flower_price_before_container5, flower_price_before_container6,
+				flower_price_after1, flower_price_after2, flower_price_after3, flower_price_after4,
+				flower_price_after5, flower_price_after6
+		);
+
+		configureOldPriceStrike(flower_price_before_line1);
+		configureOldPriceStrike(flower_price_before_line2);
+		configureOldPriceStrike(flower_price_before_line3);
+		configureOldPriceStrike(flower_price_before_line4);
+		configureOldPriceStrike(flower_price_before_line5);
+		configureOldPriceStrike(flower_price_before_line6);
+
 		messageField.setVisible(false);
 		if (viewMyOrders != null) viewMyOrders.setVisible(false);
 		if (viewMyComplaints != null) viewMyComplaints.setVisible(false);
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
-		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
 		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(false);
 		if (infoo != null) infoo.setVisible(false);
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
@@ -1928,8 +1566,6 @@ public class CatalogController {
 		checkout.setVisible(false);
 		if (cartTextPrice != null) cartTextPrice.setVisible(false);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
-		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(false);
-		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(false);
 		if (CartItemsList != null) CartItemsList.setVisible(false);
 		if (cartTopText != null) cartTopText.setVisible(false);
 		flower1_addCart.setVisible(false);
@@ -1938,9 +1574,6 @@ public class CatalogController {
 		flower4_addCart.setVisible(false);
 		flower5_addCart.setVisible(false);
 		flower6_addCart.setVisible(false);
-		CreateCustomItem.setVisible(false);
-		adminEditCatalog.setVisible(false);
-
 		compln.setVisible(false);
 		customid.setVisible(false);
 
@@ -1961,22 +1594,7 @@ public class CatalogController {
 				break;
 			}
 		}
-		chooseCustomType.setVisible(false);
-		customPrice.setVisible(false);
 		customid.setVisible(false);
-		chooseCustomColor.setVisible(false);
-
-		EditItemType.setVisible(false);
-		EditItemDesc.setVisible(false);
-		EditItemPrice.setVisible(false);
-		EditItemExtra.setVisible(false);
-
-		AddItem.setVisible(false);
-		RemoveItem.setVisible(false);
-		UpdateItem.setVisible(false);
-		//remID.setVisible(false);
-		CancelCustomItem.setVisible(false);
-		FinishCustomItem.setVisible(false);
 
 		flower_button1.setVisible(false);
 		flower_button2.setVisible(false);
@@ -1992,29 +1610,23 @@ public class CatalogController {
 		flower_price5.setVisible(false);
 		flower_price6.setVisible(false);
 		flower_promo1.setVisible(false);
-		flower_promo2.setVisible(false);
-		flower_promo3.setVisible(false);
-		flower_promo4.setVisible(false);
-		flower_promo5.setVisible(false);
-		flower_promo6.setVisible(false);
 		flower_promo1.setManaged(false);
+		flower_promo2.setVisible(false);
 		flower_promo2.setManaged(false);
+		flower_promo3.setVisible(false);
 		flower_promo3.setManaged(false);
+		flower_promo4.setVisible(false);
 		flower_promo4.setManaged(false);
+		flower_promo5.setVisible(false);
 		flower_promo5.setManaged(false);
+		flower_promo6.setVisible(false);
 		flower_promo6.setManaged(false);
-		flower_price_before1.setVisible(false);
-		flower_price_before2.setVisible(false);
-		flower_price_before3.setVisible(false);
-		flower_price_before4.setVisible(false);
-		flower_price_before5.setVisible(false);
-		flower_price_before6.setVisible(false);
-		flower_price_before1.setManaged(false);
-		flower_price_before2.setManaged(false);
-		flower_price_before3.setManaged(false);
-		flower_price_before4.setManaged(false);
-		flower_price_before5.setManaged(false);
-		flower_price_before6.setManaged(false);
+		flower_price_before_container1.setVisible(false);
+		flower_price_before_container2.setVisible(false);
+		flower_price_before_container3.setVisible(false);
+		flower_price_before_container4.setVisible(false);
+		flower_price_before_container5.setVisible(false);
+		flower_price_before_container6.setVisible(false);
 		flower_price_after1.setVisible(false);
 		flower_price_after2.setVisible(false);
 		flower_price_after3.setVisible(false);
@@ -2037,21 +1649,6 @@ public class CatalogController {
 
 		//CartItemsList.setVisible(false);
 
-		adminEditCatalog.getItems().add("Add Item");
-		adminEditCatalog.getItems().add("Remove Item");
-		adminEditCatalog.getItems().add("Edit Item");
-
-		chooseCustomColor.getItems().add("Red");
-		chooseCustomColor.getItems().add("Blue");
-		chooseCustomColor.getItems().add("Yellow");
-		chooseCustomColor.getItems().add("White");
-		chooseCustomColor.getItems().add("Purple");
-
-		chooseCustomType.getItems().add("Arrangement");
-		chooseCustomType.getItems().add("Bloom & Pot");
-		chooseCustomType.getItems().add("Bouquet");
-		chooseCustomType.getItems().add("Colletion");
-
 		worker_edit.getItems().add("Add worker");
 		worker_edit.getItems().add("Remove worker");
 		worker_edit.getItems().add("Edit worker");
@@ -2060,13 +1657,11 @@ public class CatalogController {
 		//cartTopText.setVisible(false);
 		//cartTextPrice.setVisible(false);
 		//cartTextDiscount.setVisible(false);
-		//cartTextPriceDiscount.setVisible(false);
-		//cartTextPriceFinal.setVisible(false);
 
 		// Populate filter combo boxes after data initialisation.  We only have six
 		// products at present; categories and colours are pulled from the Product
 		// objects.  Price ranges are hard coded for illustrative purposes.
-		initializeData();
+		ensureCatalogDataLoaded();
 		// Collect distinct categories and colours from available products
 		java.util.Set<String> categories = new java.util.HashSet<>();
 		java.util.Set<String> colours = new java.util.HashSet<>();
@@ -2108,9 +1703,13 @@ public class CatalogController {
 		}
 		System.out.println("PRINTING FLAG");
 		System.out.println(CatalogFlag.getFlagg());
-		cartTextPrice.setText("0");
-		cartTextDiscount.setText("0");
-		updateCartSummary(0);
+		if (cartTextPrice != null) {
+			cartTextPrice.setText("0");
+		}
+		if (cartTextDiscount != null) {
+			cartTextDiscount.setText("0");
+		}
+		refreshCartDisplay();
 		worker_edit.setVisible(false);
 
 		inboxList.setVisible(false);
@@ -2127,6 +1726,17 @@ public class CatalogController {
 		} catch (IOException e) {
 			System.out.println("Offline mode");
 		}
+	}
+
+	private void ensureCatalogDataLoaded() {
+		if (!allProducts.isEmpty()) {
+			ensureProductMetadata(allProducts);
+			resetFilteredProducts();
+			availableProducts = true;
+			Platform.runLater(() -> updateFields(2));
+			return;
+		}
+		initializeData();
 	}
 
 	@Subscribe
@@ -2187,9 +1797,19 @@ public class CatalogController {
 			System.out.println(" Current Priv : " + currentLoggedAccount.getPrivialge());
 			SimpleClient.setAccount(currentLoggedAccount);
 			applyPrivilegeBasedUI();
+			refreshCatalogView();
 			navigateAfterLogin(currentLoggedAccount);
 		});
 
+	}
+
+	@Subscribe
+	public void handleCatalogRefresh(CatalogRefreshEvent event) {
+		Platform.runLater(() -> {
+			requestCatalogReload();
+			applyPrivilegeBasedUI();
+			refreshCatalogView();
+		});
 	}
 	@Subscribe
 	public void retRieveDatabase(RetrieveDataBaseEvent rtEvent) {
@@ -2386,7 +2006,7 @@ public class CatalogController {
 			}
 			// Price filter
 			if (!"All".equals(selectedPrice)) {
-				double price = p.getPrice();
+				double price = PricingService.calculateDisplayPrice(p, currentLoggedAccount);
 				try {
 					String[] parts = selectedPrice.split("-");
 					double min = Double.parseDouble(parts[0]);
@@ -2409,6 +2029,24 @@ public class CatalogController {
 		updateFields(1);
 	}
 
+	private void refreshCatalogView() {
+		if (filtersApplied) {
+			applyFilters();
+			return;
+		}
+		if (!allProducts.isEmpty()) {
+			updateFields(2);
+		}
+	}
+
+	private void requestCatalogReload() {
+		try {
+			SimpleClient.getClient().sendToServer("first entry");
+		} catch (IOException e) {
+			System.out.println("Offline mode");
+		}
+	}
+
 	private List<Product> getDisplayedProducts() {
 		return filtersApplied ? filteredProducts : allProducts;
 	}
@@ -2419,7 +2057,7 @@ public class CatalogController {
 	}
 
 
-	@FXML // fx:id="RemoveItem"
+	@FXML // fx:id="accbtn"
 	private Button accbtn; // Value injected by FXMLLoader
 
 	@FXML
@@ -2493,27 +2131,47 @@ public class CatalogController {
 		if (viewMyOrders != null) viewMyOrders.setVisible(false);
 		if (viewMyComplaints != null) viewMyComplaints.setVisible(false);
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
-		if (checkout != null) checkout.setVisible(false);
-		if (cartTextPrice != null) cartTextPrice.setVisible(false);
-		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
-		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(false);
-		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(false);
-		if (CartItemsList != null) CartItemsList.setVisible(false);
-		if (cartTopText != null) cartTopText.setVisible(false);
-		if (viewCart != null) viewCart.setVisible(false);
+		showCartPanelForGuest();
 		setAddToCartButtonsVisible(false);
-		if (CreateCustomItem != null) CreateCustomItem.setVisible(false);
 
 		// Worker features
 		if (deliveryButton != null) deliveryButton.setVisible(false);
 		if (openComplaints != null) openComplaints.setVisible(false);
-		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(false);
 		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(false);
 
 		// Manager features
 		if (infoo != null) infoo.setVisible(false);
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
-		if (adminEditCatalog != null) adminEditCatalog.setVisible(false);
+	}
+
+	private void showCartPanelForGuest() {
+		if (cartTopText != null) {
+			cartTopText.setVisible(true);
+			cartTopText.setManaged(true);
+		}
+		if (CartItemsList != null) {
+			CartItemsList.setVisible(true);
+			CartItemsList.setManaged(true);
+			CartItemsList.setItems(FXCollections.observableArrayList());
+		}
+		if (cartTextDiscount != null) {
+			cartTextDiscount.setVisible(true);
+			cartTextDiscount.setManaged(true);
+			cartTextDiscount.setText("0");
+		}
+		if (cartTextPrice != null) {
+			cartTextPrice.setVisible(true);
+			cartTextPrice.setManaged(true);
+			cartTextPrice.setText("0");
+		}
+		if (viewCart != null) {
+			viewCart.setVisible(true);
+			viewCart.setManaged(true);
+		}
+		if (checkout != null) {
+			checkout.setDisable(true);
+		}
+		refreshCartDisplay();
 	}
 
 	/**
@@ -2522,11 +2180,12 @@ public class CatalogController {
 	 */
 	private void enableCustomerFeatures() {
 		// Shopping cart and checkout
-		if (checkout != null) checkout.setVisible(true);
+		if (checkout != null) {
+			checkout.setVisible(true);
+			checkout.setDisable(false);
+		}
 		if (cartTextPrice != null) cartTextPrice.setVisible(true);
 		if (cartTextDiscount != null) cartTextDiscount.setVisible(true);
-		if (cartTextPriceDiscount != null) cartTextPriceDiscount.setVisible(true);
-		if (cartTextPriceFinal != null) cartTextPriceFinal.setVisible(true);
 		if (CartItemsList != null) CartItemsList.setVisible(true);
 		if (cartTopText != null) cartTopText.setVisible(true);
 		if (viewCart != null) viewCart.setVisible(true);
@@ -2543,24 +2202,7 @@ public class CatalogController {
 	}
 
 	private void enableCustomerOnlyFeatures() {
-		boolean showCustomerOnly = shouldShowCustomerOnlyFeatures();
-		if (CreateCustomItem != null) CreateCustomItem.setVisible(showCustomerOnly);
-		if (customError != null) customError.setVisible(false);
-		if (!showCustomerOnly) {
-			hideCustomOrderFields();
-			setSkuLabelsVisible(false);
-		} else {
-			setSkuLabelsVisible(true);
-		}
-	}
-
-	private void hideCustomOrderFields() {
-		if (chooseCustomType != null) chooseCustomType.setVisible(false);
-		if (chooseCustomColor != null) chooseCustomColor.setVisible(false);
-		if (customPrice != null) customPrice.setVisible(false);
-		if (customid != null) customid.setVisible(false);
-		if (FinishCustomItem != null) FinishCustomItem.setVisible(false);
-		if (CancelCustomItem != null) CancelCustomItem.setVisible(false);
+		setSkuLabelsVisible(shouldShowCustomerOnlyFeatures());
 	}
 
 	/**
@@ -2571,7 +2213,6 @@ public class CatalogController {
 		// Worker panel access
 		if (deliveryButton != null) deliveryButton.setVisible(true);
 		if (openComplaints != null) openComplaints.setVisible(true);
-		if (catalogManagementBtn != null) catalogManagementBtn.setVisible(true);
 		if (catalogAddProductBtn != null) catalogAddProductBtn.setVisible(true);
 
 		System.out.println("  \u2713 Worker features enabled");
@@ -2624,19 +2265,7 @@ public class CatalogController {
 	}
 
 	private void syncCartFromService() {
-		if (CartItemsList == null) {
-			return;
-		}
-		CartItemsList.getItems().clear();
-		int basePrice = 0;
-		for (Product product : CartService.getInstance().getItems()) {
-			if (product == null) {
-				continue;
-			}
-			CartItemsList.getItems().add(product.getName());
-			basePrice += (int) Math.round(product.getPrice());
-		}
-		updateCartSummary(basePrice);
+		refreshCartDisplay();
 	}
 
 	private void addProductToCart(Product product) {
@@ -2644,56 +2273,84 @@ public class CatalogController {
 			return;
 		}
 
-		if (CartItemsList != null) {
-			CartItemsList.getItems().add(product.getName());
-		}
 		CartService.getInstance().addProduct(product, 1);
-
-		int basePrice = parseCartTotal();
-		basePrice += (int) Math.round(product.getPrice());
-		updateCartSummary(basePrice);
+		refreshCartDisplay();
 	}
 
-	private int parseCartTotal() {
-		if (cartTextPrice == null) {
-			return 0;
-		}
-		String value = cartTextPrice.getText();
-		if (value == null || value.isBlank()) {
-			return 0;
-		}
-		try {
-			return Integer.parseInt(value.trim());
-		} catch (NumberFormatException ignored) {
-			return 0;
-		}
+	private void refreshCartDisplay() {
+		List<Product> items = CartService.getInstance().getItems();
+		updateCartList(items);
+		recalculateCartTotals(items);
 	}
 
-	private void updateCartSummary(int basePrice) {
-		if (cartTextPrice != null) {
-			cartTextPrice.setText(String.valueOf(basePrice));
+	private void updateCartList(List<Product> items) {
+		if (CartItemsList == null) {
+			return;
 		}
+		CartItemsList.getItems().setAll(buildCartLineLabels(items));
+	}
 
-		boolean discountApplied = hasSubscriptionDiscount() && basePrice > 50;
-		int discountedTotal = discountApplied ? (int) Math.round(basePrice * 0.9) : basePrice;
+	private List<String> buildCartLineLabels(List<Product> items) {
+		List<CartLine> lines = buildCartLines(items);
+		List<String> labels = new ArrayList<>();
+		for (CartLine line : lines) {
+			String label = line.quantity > 1
+					? String.format("%s x%d", line.product.getName(), line.quantity)
+					: line.product.getName();
+			labels.add(label);
+		}
+		return labels;
+	}
+
+	private List<CartLine> buildCartLines(List<Product> items) {
+		Map<String, CartLine> lines = new LinkedHashMap<>();
+		if (items != null) {
+			for (Product product : items) {
+				if (product == null) {
+					continue;
+				}
+				String key = product.getID() + "|" + product.getName() + "|" + product.getPrice();
+				CartLine line = lines.get(key);
+				if (line == null) {
+					line = new CartLine(product, 0);
+					lines.put(key, line);
+				}
+				line.quantity += 1;
+			}
+		}
+		return new ArrayList<>(lines.values());
+	}
+
+	private void recalculateCartTotals(List<Product> items) {
+		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
+		double subtotal = 0.0;
+		for (CartLine line : buildCartLines(items)) {
+			PricingService.PricingResult pricing = PricingService.calculatePricing(line.product, account);
+			subtotal += pricing.getFinalPrice() * line.quantity;
+		}
+		subtotal = PricingService.roundCurrency(subtotal);
+		double total = subtotal;
 
 		if (cartTextDiscount != null) {
-			cartTextDiscount.setText(String.valueOf(discountedTotal));
+			cartTextDiscount.setText(String.format(Locale.US, "%.2f", subtotal));
 		}
-		if (cartTextPriceDiscount != null) {
-			cartTextPriceDiscount.setText(discountApplied ? "Subscriber discount applied" : "No discounts applied");
-		}
-		if (cartTextPriceFinal != null) {
-			cartTextPriceFinal.setText("Final total: " + discountedTotal);
+		if (cartTextPrice != null) {
+			cartTextPrice.setText(String.format(Locale.US, "%.2f", total));
 		}
 	}
 
-	private boolean hasSubscriptionDiscount() {
-		if (currentLoggedAccount != null) {
-			return currentLoggedAccount.isSubscription();
+	private void recalculateCartTotals() {
+		recalculateCartTotals(CartService.getInstance().getItems());
+	}
+
+	private static class CartLine {
+		private final Product product;
+		private int quantity;
+
+		private CartLine(Product product, int quantity) {
+			this.product = product;
+			this.quantity = quantity;
 		}
-		Account account = SimpleClient.getUser();
-		return account != null && account.isSubscription();
 	}
 
 	private PriceRange parsePriceRange(String rawValue) {
@@ -2755,7 +2412,6 @@ public class CatalogController {
 		// Admin dashboard and controls
 		if (infoo != null) infoo.setVisible(true);
 		if (adminControlButtton != null) adminControlButtton.setVisible(true);
-		if (adminEditCatalog != null) adminEditCatalog.setVisible(true);
 
 		System.out.println("  \u2713 Manager features enabled (Admin Dashboard)");
 	}
@@ -2790,8 +2446,41 @@ public class CatalogController {
 			return;
 		}
 		syncProductImageFromCatalog(selected, getImageViewForProduct(selected));
-		ProductDetailsController.setPendingProduct(selected);
-		navigateInShell("ProductDetails");
+		openProductDetailsModal(selected);
+	}
+
+	@FXML
+	void onCustomItemClicked(ActionEvent event) {
+		if (resolveCurrentPrivilegeLevel() < 1) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Login Required");
+			alert.setHeaderText("Login required to start a custom order.");
+			alert.setContentText("Please log in or register to start a custom item.");
+			alert.showAndWait();
+			navigateInShell("Login");
+			return;
+		}
+
+		ensureCatalogDataLoaded();
+		Product customProduct = null;
+		for (Product product : allProducts) {
+			if (product != null && product.isCustomProduct()) {
+				customProduct = product;
+				break;
+			}
+		}
+
+		if (customProduct == null) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setTitle("Custom Item");
+			alert.setHeaderText("No custom items available");
+			alert.setContentText("Custom products are not available at the moment.");
+			alert.showAndWait();
+			return;
+		}
+
+		syncProductImageFromCatalog(customProduct, getImageViewForProduct(customProduct));
+		openProductDetailsModal(customProduct);
 	}
 
 	private ImageView getImageViewForContainer(String containerId) {

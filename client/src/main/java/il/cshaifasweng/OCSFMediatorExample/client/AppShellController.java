@@ -38,7 +38,6 @@ public class AppShellController {
     @FXML private VBox profileContainer;
     @FXML private Button profileButton;
     @FXML private Label profileNameLabel;
-    @FXML private Button cartButton;
     @FXML private Label statusLabel;
     @FXML private StackPane contentPane;
     @FXML private FlowPane navBar;
@@ -77,7 +76,7 @@ public class AppShellController {
         if (profileNameLabel != null) {
             profileNameLabel.setVisible(false);
         }
-        updateLoggedInIndicator();
+        updateAccountIndicator();
         // Attach simple handlers that delegate navigation to the
         // NavigationService.  These may be overridden or extended
         // by individual controllers as needed.
@@ -89,9 +88,6 @@ public class AppShellController {
         }
         if (profileButton != null) {
             profileButton.setOnAction(e -> NavigationService.getInstance().navigate("Profile"));
-        }
-        if (cartButton != null) {
-            cartButton.setOnAction(e -> NavigationService.getInstance().navigate("cart"));
         }
         buildNavigationBar(SimpleClient.getUser());
         updateLoginState(SimpleClient.getUser());
@@ -107,6 +103,10 @@ public class AppShellController {
 
         contentPane.getChildren().setAll(node);
     }
+
+    public boolean isActive() {
+        return contentPane != null && contentPane.getScene() != null;
+    }
     public void handleNavigationChange(String viewName) {
         if (navBar == null) {
             return;
@@ -121,19 +121,8 @@ public class AppShellController {
                 navToggleGroup.selectToggle(null);
             }
         });
-        updateLoggedInIndicator();
+        updateAccountIndicator();
     }
-    /**
-     * Updates the cart button text to show the current item count.
-     *
-     * @param count the number of items in the cart
-     */
-    public void updateCartCount(int count) {
-        if (cartButton != null) {
-            cartButton.setText("Cart (" + count + ")");
-        }
-    }
-
     /**
      * Shows or hides the login and profile buttons based on login state.
      * When the user is logged in, the login button is hidden and the
@@ -154,7 +143,7 @@ public class AppShellController {
             profileNameLabel.setVisible(false);
             profileNameLabel.setText("");
         }
-        updateLoggedInIndicator();
+        updateAccountIndicator();
     }
 
     /**
@@ -180,7 +169,7 @@ public class AppShellController {
             profileNameLabel.setText(fullName != null ? fullName : "");
             profileNameLabel.setVisible(fullName != null && !fullName.isBlank());
         }
-        updateLoggedInIndicator();
+        updateAccountIndicator();
     }
 
     @Subscribe
@@ -217,7 +206,7 @@ public class AppShellController {
             }
 
             profileNameLabel.setText(loggedIn ? displayName : "");
-            updateLoggedInIndicator();
+            updateAccountIndicator();
 
             loginButton.setVisible(!loggedIn);
             loginButton.setManaged(!loggedIn);
@@ -237,26 +226,46 @@ public class AppShellController {
         return value == null || value.isBlank();
     }
 
-    private void updateLoggedInIndicator() {
+    private void updateAccountIndicator() {
         if (loggedInIndicatorLabel == null) {
             return;
         }
         Account account = SimpleClient.getUser();
-        String displayName = account != null
-                ? (isNullOrBlank(account.getFullName()) ? account.getEmail() : account.getFullName())
-                : null;
-        if (isNullOrBlank(displayName)) {
-            loggedInIndicatorLabel.setText("Guest");
-        } else {
-            loggedInIndicatorLabel.setText("Logged in: " + displayName.trim());
+        String indicatorText = buildAccountIndicatorText(account);
+        loggedInIndicatorLabel.setText(indicatorText);
+        loggedInIndicatorLabel.setVisible(true);
+        loggedInIndicatorLabel.setManaged(true);
+    }
+
+    private String buildAccountIndicatorText(Account account) {
+        if (account == null) {
+            return "Guest";
         }
+        String displayName = isNullOrBlank(account.getFullName()) ? account.getEmail() : account.getFullName();
+        if (isNullOrBlank(displayName)) {
+            return "Guest";
+        }
+        String role = formatRole(account.getPrivilegeLevel());
+        return role.isEmpty()
+                ? "Logged in: " + displayName.trim()
+                : "Logged in: " + displayName.trim() + " (" + role + ")";
+    }
+
+    private String formatRole(int privilegeLevel) {
+        return switch (privilegeLevel) {
+            case 1 -> "Customer";
+            case 2 -> "Worker";
+            case 3 -> "Manager";
+            case 4 -> "Chain Manager";
+            default -> "";
+        };
     }
 
     @FXML
     private void handleLogout() {
         SimpleClient.logoutCurrentUser();
         updateLoginState(null);
-        updateLoggedInIndicator();
+        updateAccountIndicator();
         NavigationService.getInstance().navigate("HomePage");
     }
     private void buildNavigationBar() {

@@ -52,12 +52,42 @@ public class SimpleClient extends AbstractClient {
 			return;
 		}
 
+		if (msg instanceof UserUpdateResponse) {
+			UserUpdateResponse response = (UserUpdateResponse) msg;
+			if ("User already logged in".equals(response.getMessage())) {
+				MailChecker mailCheckEvent = new MailChecker(true);
+				mailCheckEvent.setPasswordExists(true);
+				mailCheckEvent.setLoggedIn(true);
+				EventBus.getDefault().post(mailCheckEvent);
+				return;
+			}
+			EventBus.getDefault().post(response);
+			return;
+		}
+
+		if (msg instanceof CancelOrderResponse) {
+			CancelOrderResponse response = (CancelOrderResponse) msg;
+			EventBus.getDefault().post(response);
+			return;
+		}
+
+		if (msg instanceof ReportDataResponse) {
+			ReportDataResponse response = (ReportDataResponse) msg;
+			EventBus.getDefault().post(response);
+			return;
+		}
+
 		// =========================
 		// STRING MESSAGES
 		// =========================
 		if (msg instanceof String) {
 
 			String recievedStr = (String) msg;
+
+			if (recievedStr.equals("Reply sent after 24 hours")) {
+				EventBus.getDefault().post(new WarningEvent(new Warning(recievedStr)));
+				return;
+			}
 
 			if (recievedStr.equals("not found")) {
 				// products table not found - need to init DB
@@ -88,6 +118,14 @@ public class SimpleClient extends AbstractClient {
 				MailChecker mailCheckEvent = new MailChecker(true);
 				mailCheckEvent.setPasswordExists(true);
 				mailCheckEvent.setLoggedIn(true);
+				EventBus.getDefault().post(mailCheckEvent);
+			}
+
+			if (recievedStr.equals("account frozen")) {
+				MailChecker mailCheckEvent = new MailChecker(true);
+				mailCheckEvent.setPasswordExists(true);
+				mailCheckEvent.setLoggedIn(false);
+				mailCheckEvent.setFrozen(true);
 				EventBus.getDefault().post(mailCheckEvent);
 			}
 

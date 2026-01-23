@@ -14,7 +14,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -65,8 +64,7 @@ public class NetworkDashboardController {
     @FXML
     public void initialize() {
         // Check privileges - Chain Manager level required (4)
-        if (!checkChainManagerPrivileges()) {
-            showAccessDenied();
+        if (!AccessGuard.requireMinPrivilege(4)) {
             return;
         }
         
@@ -75,27 +73,6 @@ public class NetworkDashboardController {
         loadNetworkData();
         updateStatistics();
         updateChart();
-    }
-    
-    /**
-     * Check if user has chain manager privileges
-     */
-    private boolean checkChainManagerPrivileges() {
-        // TODO: Get current user privilege from session
-        // return SimpleClient.getCurrentUser().getPrivilege() >= 4;
-        return true;
-    }
-    
-    /**
-     * Show access denied message
-     */
-    private void showAccessDenied() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Access Denied");
-        alert.setHeaderText("Insufficient Privileges");
-        alert.setContentText("You need Chain Manager privileges to access this page.");
-        alert.showAndWait();
-        handleBackToCatalog();
     }
     
     /**
@@ -350,12 +327,7 @@ public class NetworkDashboardController {
      */
     @FXML
     private void handleBackToCatalog() {
-        try {
-            App.setRoot("Catalog");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to catalog.");
-        }
+        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

@@ -62,7 +62,7 @@ public class NavigationService {
      * @param fxml the simple name of the FXML file (without extension)
      */
     public void navigate(String fxml) {
-        if (appShellController == null) {
+        if (appShellController == null || !appShellController.isActive()) {
             // Controller not yet registered; fall back to the legacy scene
             // replacement to keep navigation working in standalone stages.
             try {
@@ -88,7 +88,7 @@ public class NavigationService {
 
     private String resolveViewName(String fxml) {
         if (fxml == null) {
-            return "Catalog";
+            return "HomePage";
         }
         String normalized = fxml.trim();
         if (normalized.equalsIgnoreCase("primary") || normalized.equalsIgnoreCase("catalog")) {

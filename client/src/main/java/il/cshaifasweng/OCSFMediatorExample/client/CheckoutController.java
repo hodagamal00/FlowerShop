@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -353,7 +354,8 @@ public class CheckoutController {
             int yearCheckoutInt = yearCheckout.getSelectionModel().getSelectedItem();
             String OrderedProducts = "";
             for (int i = 0; i < cart.size(); i++) {
-                OrderedProducts = OrderedProducts + "%" + cart.get(i).getName() + " - " + String.valueOf(cart.get(i).getPrice()) + "%";
+                double itemPrice = PricingService.calculateDisplayPrice(cart.get(i), currentUser);
+                OrderedProducts = OrderedProducts + "%" + cart.get(i).getName() + " - " + String.valueOf(itemPrice) + "%";
             }
             int prepareHour = 0;
             int prepareMinute = 0;
@@ -382,20 +384,15 @@ public class CheckoutController {
                 return;
             }
 
-            int totalPrice = 0;
-            for (int z = 0; z < cart.size(); z++) {
-                totalPrice = totalPrice + (int) Math.round(cart.get(z).getPrice());
-            }
-            if (deliveryBox.isSelected())
-                totalPrice = totalPrice + (int) deliveryFee;
-            if (currentUser.isSubscription() == true) {
-                if (totalPrice > 50)
-                    totalPrice = (int) (totalPrice * 0.9);
-            }
+            double totalPrice = PricingService.calculateOrderTotal(
+                    cart,
+                    currentUser,
+                    deliveryBox.isSelected() ? deliveryFee : 0.0
+            );
 
             String paymentMethod = "CREDIT_CARD";
 
-            Order newOrder = new Order(0, pickUp, shopID, greeting, totalPrice, deliveredAddress, currentUser.getAccountID(), gift, false, dayCheckoutInt, monthCheckoutInt, yearCheckoutInt, currentDay, currentMonth, currentYear, creditCardNumber, creditCardMonth, creditCardYear, creditCardCVV, recepName, recepPhone, deliveredAddress, OrderedProducts, currentHour, currentMintue, prepareHour, prepareMinute, deliveryFee, paymentMethod);
+            Order newOrder = new Order(0, pickUp, shopID, greeting, (int) Math.round(totalPrice), deliveredAddress, currentUser.getAccountID(), gift, false, dayCheckoutInt, monthCheckoutInt, yearCheckoutInt, currentDay, currentMonth, currentYear, creditCardNumber, creditCardMonth, creditCardYear, creditCardCVV, recepName, recepPhone, deliveredAddress, OrderedProducts, currentHour, currentMintue, prepareHour, prepareMinute, deliveryFee, paymentMethod);
             System.out.println(newOrder);
             UpdateMessage new_msg2 = new UpdateMessage("order", "add");
             new_msg2.setOrder(newOrder);
@@ -523,6 +520,19 @@ public class CheckoutController {
         applyGreetingVisibility();
         scheduleShopSelectionEnable();
 
+    }
+
+    @Subscribe
+    public void handleUserUpdateResponse(UserUpdateResponse response) {
+        if (response == null || response.isSuccess()) {
+            return;
+        }
+        String message = response.getMessage();
+        if (message == null || message.isBlank()) {
+            message = "Order submission failed. Please try again.";
+        }
+        noDate.setText(message);
+        noDate.setVisible(true);
     }
     List<Product> cart = new ArrayList<>();
     @FXML
@@ -712,19 +722,17 @@ public class CheckoutController {
     }
 
     private void updateOrderSummary() {
-        int subtotal = 0;
+        double subtotal = 0.0;
         for (Product product : cart) {
-            subtotal += (int) Math.round(product.getPrice());
+            subtotal += PricingService.calculateDisplayPrice(product, currentUser);
         }
+        subtotal = PricingService.roundCurrency(subtotal);
         double deliveryFee = deliveryBox.isSelected() ? DELIVERY_FEE : 0.0;
-        int total = subtotal + (int) deliveryFee;
-        if (currentUser != null && currentUser.isSubscription() && total > 50) {
-            total = (int) (total * 0.9);
-        }
+        double total = PricingService.roundCurrency(subtotal + deliveryFee);
 
-        subtotalText.setText(String.format("%d₪", subtotal));
-        deliveryFeeText.setText(deliveryBox.isSelected() ? String.format("%.0f₪", deliveryFee) : "Free");
-        totalText.setText(String.format("%d₪", total));
+        subtotalText.setText(String.format(Locale.US, "%.2f₪", subtotal));
+        deliveryFeeText.setText(deliveryBox.isSelected() ? String.format(Locale.US, "%.2f₪", deliveryFee) : "Free");
+        totalText.setText(String.format(Locale.US, "%.2f₪", total));
 
         String timingLabel = "Select time";
         if (dayCheckout.getSelectionModel().getSelectedIndex() != -1
@@ -766,6 +774,7 @@ public class CheckoutController {
     }
 
     private void navigateToOrderConfirmation(Order order, boolean delivery) {
+        CartService.getInstance().clear();
         OrderConfirmationController.setOrder(order, delivery);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("OrderConfirmation.fxml"));
