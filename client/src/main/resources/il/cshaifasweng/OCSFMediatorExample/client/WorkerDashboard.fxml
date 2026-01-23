@@ -16,11 +16,13 @@
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.WorkerDashboardController"
         stylesheets="@styles.css"
-        fitToWidth="true"
+        fitToWidth="false"
         pannable="true"
+        hbarPolicy="AS_NEEDED"
+        vbarPolicy="AS_NEEDED"
         styleClass="app-scroll-container">
     <content>
-        <AnchorPane maxHeight="800.0" maxWidth="1520.0" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+        <AnchorPane maxHeight="800.0" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
             <children>
                 <!-- Top Navigation Bar -->
                 <AnchorPane styleClass="navbar" layoutY="0.0" maxHeight="70.0" minHeight="70.0" prefHeight="70.0" prefWidth="1520.0">
@@ -41,7 +43,7 @@
                 </AnchorPane>
 
                 <!-- Main Content -->
-                <ScrollPane layoutY="70.0" prefWidth="1520.0" prefHeight="730.0" fitToWidth="true" styleClass="scroll-pane">
+                <ScrollPane layoutY="70.0" prefWidth="1520.0" prefHeight="730.0" fitToWidth="true" hbarPolicy="NEVER" styleClass="scroll-pane">
                     <content>
                         <AnchorPane prefWidth="1480.0" prefHeight="900.0" style="-fx-background-color: #faf8fc;">
                             <children>
