@@ -33,7 +33,7 @@
                         <Font name="System Bold" size="28.0" />
                      </font>
                   </Label>
-                  <Button fx:id="goBack" layoutX="1350.0" layoutY="25.0" mnemonicParsing="false" onAction="#backToCatalog" prefHeight="35.0" prefWidth="150.0" text="← Back to Catalog" style="-fx-font-size: 14px;" />
+                  <Button fx:id="branchOrdersBtn" layoutX="1320.0" layoutY="25.0" mnemonicParsing="false" onAction="#goToBranchOrders" prefHeight="35.0" prefWidth="180.0" text="Branch Orders" style="-fx-font-size: 14px;" />
                </children>
             </AnchorPane>
 

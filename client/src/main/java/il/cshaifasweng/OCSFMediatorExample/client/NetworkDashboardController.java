@@ -26,7 +26,6 @@ import java.util.Random;
 public class NetworkDashboardController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Network Statistics
     @FXML private Label totalBranchesLabel;
@@ -275,12 +274,7 @@ public class NetworkDashboardController {
      */
     @FXML
     private void handleViewReports() {
-        try {
-            App.setRoot("CrossBranchReports");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to load Cross-Branch Reports page.");
-        }
+        NavigationService.getInstance().navigate("CrossBranchReports");
     }
     
     /**
@@ -288,12 +282,7 @@ public class NetworkDashboardController {
      */
     @FXML
     private void handleGlobalSettings() {
-        try {
-            App.setRoot("GlobalSettings");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to load Global Settings page.");
-        }
+        NavigationService.getInstance().navigate("GlobalSettings");
     }
     
     /**
@@ -301,12 +290,7 @@ public class NetworkDashboardController {
      */
     @FXML
     private void handleNetworkPromotions() {
-        try {
-            App.setRoot("NetworkPromotions");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to load Network Promotions page.");
-        }
+        NavigationService.getInstance().navigate("NetworkPromotions");
     }
     
     /**
@@ -314,20 +298,7 @@ public class NetworkDashboardController {
      */
     @FXML
     private void handleRoleManagement() {
-        try {
-            App.setRoot("RoleManagement");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to load Role Management page.");
-        }
-    }
-    
-    /**
-     * Navigate back to catalog
-     */
-    @FXML
-    private void handleBackToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
+        NavigationService.getInstance().navigate("RoleManagement");
     }
     
     /**

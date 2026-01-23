@@ -7,13 +7,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Random;
 
 public class NetworkPromotionsController {
 
-    @FXML private Button backButton;
     @FXML private Label formTitleLabel;
     @FXML private TextField promotionNameField;
     @FXML private TextField discountField;
@@ -187,11 +185,7 @@ public class NetworkPromotionsController {
 
     @FXML
     private void handleBackToDashboard() {
-        try {
-            App.setRoot("NetworkDashboard");
-        } catch (IOException e) {
-            showError("Failed to navigate.");
-        }
+        NavigationService.getInstance().navigate("NetworkDashboard");
     }
 
     private void showError(String msg) {

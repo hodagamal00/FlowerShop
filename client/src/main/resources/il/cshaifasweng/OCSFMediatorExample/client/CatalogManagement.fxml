@@ -29,7 +29,6 @@
                     <children>
                         <HBox spacing="12.0" layoutX="950.0" layoutY="20.0">
                             <Button fx:id="dashboardBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToDashboard" text="Dashboard" prefWidth="120.0" />
-                            <Button fx:id="homeBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToHome" text="Home" prefWidth="100.0" />
                         </HBox>
                     </children>
                 </AnchorPane>

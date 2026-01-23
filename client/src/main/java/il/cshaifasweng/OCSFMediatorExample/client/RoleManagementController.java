@@ -6,12 +6,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import java.io.IOException;
 import java.util.Random;
 
 public class RoleManagementController {
 
-    @FXML private Button backButton;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> roleFilterCombo;
     @FXML private ComboBox<String> branchFilterCombo;
@@ -166,11 +164,7 @@ public class RoleManagementController {
 
     @FXML
     private void handleBackToDashboard() {
-        try {
-            App.setRoot("NetworkDashboard");
-        } catch (IOException e) {
-            showError("Failed to navigate.");
-        }
+        NavigationService.getInstance().navigate("NetworkDashboard");
     }
 
     private void showError(String msg) {

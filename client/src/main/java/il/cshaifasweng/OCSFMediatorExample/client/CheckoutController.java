@@ -121,8 +121,6 @@ public class CheckoutController {
     @FXML
     private Text orderTimingText;
 
-    @FXML
-    private Button back;
 
     @FXML // fx:id="noDate"
     private Text noDate; // Value injected by FXMLLoader
@@ -179,6 +177,18 @@ public class CheckoutController {
 
     @FXML
     void PlaceOrder(ActionEvent event) {
+        Account account = currentUser != null ? currentUser : SimpleClient.getUser();
+        if (account == null) {
+            NavigationService.getInstance().setStatus("Please log in to place an order.");
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
+        if (account.getPrivilegeLevel() != 1) {
+            AccessDeniedController.setAccessInfo(account.getPrivilegeLevel(), 1, "Checkout");
+            AccessDeniedController.setReturnPage("Catalog");
+            NavigationService.getInstance().navigate("AccessDenied");
+            return;
+        }
 
         phone_regex.setVisible(false);
         credit_regex.setVisible(false);
@@ -552,6 +562,18 @@ public class CheckoutController {
     void initialize() throws MalformedURLException
     {
         EventBus.getDefault().register(this);
+        Account account = SimpleClient.getUser();
+        if (account == null) {
+            NavigationService.getInstance().setStatus("Please log in to checkout.");
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
+        if (account.getPrivilegeLevel() != 1) {
+            AccessDeniedController.setAccessInfo(account.getPrivilegeLevel(), 1, "Checkout");
+            AccessDeniedController.setReturnPage("Catalog");
+            NavigationService.getInstance().navigate("AccessDenied");
+            return;
+        }
         assert orderForSomeoneElseBox != null : "fx:id=\"orderForSomeoneElseBox\" was not injected: check your FXML file 'checkout.fxml'.";
         assert deliveryValidationText != null : "fx:id=\"deliveryValidationText\" was not injected: check your FXML file 'checkout.fxml'.";
         assert recipientValidationText != null : "fx:id=\"recipientValidationText\" was not injected: check your FXML file 'checkout.fxml'.";
@@ -561,7 +583,6 @@ public class CheckoutController {
         assert totalText != null : "fx:id=\"totalText\" was not injected: check your FXML file 'checkout.fxml'.";
         assert orderTimingText != null : "fx:id=\"orderTimingText\" was not injected: check your FXML file 'checkout.fxml'.";
         assert anotherMethodBox != null : "fx:id=\"anotherMethodBox\" was not injected: check your FXML file 'checkout.fxml'.";
-        assert back != null : "fx:id=\"back\" was not injected: check your FXML file 'checkout.fxml'.";
         assert chooseShopID != null : "fx:id=\"chooseShopID\" was not injected: check your FXML file 'checkout.fxml'.";
         assert creditNumberField != null : "fx:id=\"creditNumberField\" was not injected: check your FXML file 'checkout.fxml'.";
         assert creditNumberText != null : "fx:id=\"creditNumberText\" was not injected: check your FXML file 'checkout.fxml'.";
@@ -655,7 +676,6 @@ public class CheckoutController {
         applyGreetingVisibility();
 
         placeOrderButton.setDisable(true);
-        back.setDisable(true);
         chooseShopID.setVisible(false);
 
         dayCheckout.setOnAction(event -> updateOrderSummary());
@@ -701,8 +721,6 @@ public class CheckoutController {
                             return;
                         }
                         placeOrderButton.setDisable(false);
-                        back.setDisable(false);
-
                         if(currentUser.getBelongShop() == 0) {
                             chooseShopID.getItems().add("ID 0: - Chain");
                             chooseShopID.getItems().add("ID 1: Tiberias, Big Danilof");

@@ -2,7 +2,6 @@ package il.cshaifasweng.OCSFMediatorExample.client; /**
  * Sample Skeleton for 'log_manager.fxml' Controller Class
  */
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -13,9 +12,6 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.getAllOrdersMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -25,7 +21,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -94,7 +89,7 @@ public class LogManagerController {
     private ComboBox<String> chooseShop; // Value injected by FXMLLoader
 
     @FXML
-    private Button goBack;
+    private Button branchOrdersBtn;
 
     @FXML
     private ComboBox<String> CompareShops;
@@ -106,31 +101,8 @@ public class LogManagerController {
     private Label wait; // Value injected by FXMLLoader
 
     @FXML
-    void backToCatalog(ActionEvent event) throws IOException {
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)goBack.getScene().getWindow();
-        stagee.close();
-
+    void goToBranchOrders(ActionEvent event) {
+        NavigationService.getInstance().navigate("BranchOrders");
     }
     static List<Order> orders = new ArrayList<Order>();
     static List<Complaint> complaints = new ArrayList<>();
@@ -508,6 +480,9 @@ public class LogManagerController {
     List<Complaint> allComplaints ;
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() throws IOException {
+        if (!AccessGuard.requireMinPrivilege(3)) {
+            return;
+        }
         EventBus.getDefault().register(this);
         getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
         SimpleClient.getClient().sendToServer(getOrdersMsg);
@@ -529,7 +504,7 @@ public class LogManagerController {
         assert chooseShop != null : "fx:id=\"chooseShop\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert compareButton != null : "fx:id=\"compareButton\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert fieldsError != null : "fx:id=\"fieldsError\" was not injected: check your FXML file 'log_manager.fxml'.";
-        assert goBack != null : "fx:id=\"goBack\" was not injected: check your FXML file 'log_manager.fxml'.";
+        assert branchOrdersBtn != null : "fx:id=\"branchOrdersBtn\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert logError != null : "fx:id=\"logError\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert shopError != null : "fx:id=\"shopError\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert shopError2 != null : "fx:id=\"shopError2\" was not injected: check your FXML file 'log_manager.fxml'.";
@@ -569,7 +544,7 @@ public class LogManagerController {
         LogType.getItems().add("Complaint Log");
         Day.setAnimated(false);
 
-        goBack.setDisable(true);
+        branchOrdersBtn.setDisable(true);
         LoadLogButton.setDisable(true);
         wait.setVisible(true);
 
@@ -578,7 +553,7 @@ public class LogManagerController {
                     @Override
                     public void run() {
 
-                        goBack.setDisable(false);
+                        branchOrdersBtn.setDisable(false);
                         LoadLogButton.setDisable(false);
                         wait.setVisible(false);
                         switch (currentUser.getBelongShop())

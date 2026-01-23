@@ -5,14 +5,10 @@ import il.cshaifasweng.OCSFMediatorExample.entities.CancelOrderRequest;
 import il.cshaifasweng.OCSFMediatorExample.entities.CancelOrderResponse;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -22,7 +18,6 @@ import java.util.Date;
 
 public class OrderDetailsController {
 
-    @FXML private Button backBtn;
     @FXML private Text orderIdText;
     @FXML private Label statusBadge;
     @FXML private Label orderDateLabel;
@@ -240,21 +235,6 @@ public class OrderDetailsController {
         
         alert.setContentText(trackingInfo);
         alert.showAndWait();
-    }
-
-    @FXML
-    void goBack() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("myorders.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) backBtn.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading my orders page: " + e.getMessage());
-        }
     }
 
     private void showSuccess(String message) {

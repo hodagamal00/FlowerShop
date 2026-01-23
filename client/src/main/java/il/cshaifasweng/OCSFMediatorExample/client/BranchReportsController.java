@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 public class BranchReportsController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Header
     @FXML private Label branchLabel;
@@ -472,17 +471,6 @@ public class BranchReportsController {
         // TODO: Implement PDF export functionality
         // Could use libraries like iText or Apache PDFBox
         showInfo("Export feature will generate a PDF report with all charts and data.");
-    }
-    
-    /**
-     * Navigate back to catalog
-     */
-    @FXML
-    private void handleBackToCatalog() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

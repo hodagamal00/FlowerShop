@@ -24,7 +24,6 @@ import java.util.List;
 public class PromotionsManagementController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Form
     @FXML private Label formTitleLabel;
@@ -372,11 +371,6 @@ public class PromotionsManagementController {
     /**
      * Navigate back to catalog
      */
-    @FXML
-    private void handleBackToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
-    }
-    
     /**
      * Show error alert
      */

@@ -2,7 +2,6 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import java.io.IOException;
 
 /**
  * Controller for Global Settings - Chain Manager view
@@ -11,7 +10,6 @@ import java.io.IOException;
  */
 public class GlobalSettingsController {
 
-    @FXML private Button backButton;
     
     // Company Information
     @FXML private TextField companyNameField;
@@ -126,12 +124,7 @@ public class GlobalSettingsController {
     
     @FXML
     private void handleBackToDashboard() {
-        try {
-            App.setRoot("NetworkDashboard");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to dashboard.");
-        }
+        NavigationService.getInstance().navigate("NetworkDashboard");
     }
     
     private void showError(String message) {

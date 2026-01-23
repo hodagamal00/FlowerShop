@@ -34,7 +34,6 @@ import java.util.UUID;
 public class CrossBranchReportsController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Filters
     @FXML private DatePicker startDatePicker;
@@ -412,12 +411,7 @@ public class CrossBranchReportsController {
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this);
         }
-        try {
-            App.setRoot("NetworkDashboard");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to dashboard.");
-        }
+        NavigationService.getInstance().navigate("NetworkDashboard");
     }
     
     /**

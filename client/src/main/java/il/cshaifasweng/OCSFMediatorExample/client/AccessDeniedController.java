@@ -31,7 +31,6 @@ public class AccessDeniedController {
 
     @FXML private VBox privilegeDetailsBox;
 
-    @FXML private Button backBtn;
     @FXML private Button catalogBtn;
 
     // Access context
@@ -304,14 +303,6 @@ public class AccessDeniedController {
     private void handleLogout(ActionEvent event) {
         SimpleClient.logoutCurrentUser();
         navigateToPage(event, "catalog");
-    }
-
-    /**
-     * Handle go back button - returns to previous page or catalog
-     */
-    @FXML
-    private void handleGoBack(ActionEvent event) {
-        navigateToPage(event, returnPage);
     }
 
     /**

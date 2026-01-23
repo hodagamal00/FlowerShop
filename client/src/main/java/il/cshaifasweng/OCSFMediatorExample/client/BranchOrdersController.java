@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 
 public class BranchOrdersController {
 
-    @FXML private Button dashboardBtn;
-    @FXML private Button homeBtn;
     @FXML private ComboBox<String> statusFilterCombo;
     @FXML private TextField searchField;
     @FXML private Button searchBtn;
@@ -53,6 +51,9 @@ public class BranchOrdersController {
 
     @FXML
     void initialize() {
+        if (!AccessGuard.requireMinPrivilege(2)) {
+            return;
+        }
         EventBus.getDefault().register(this);
         setupStatusFilter();
         setupTable();
@@ -178,16 +179,6 @@ public class BranchOrdersController {
         alert.setContentText(buildReceipt(order));
         alert.showAndWait();
         showSuccess("Receipt preview generated");
-    }
-
-    @FXML
-    void goToDashboard() {
-        NavigationService.getInstance().navigate("WorkerDashboard");
-    }
-
-    @FXML
-    void goToHome() {
-        NavigationService.getInstance().navigate("Catalog");
     }
 
     @Subscribe

@@ -20,8 +20,6 @@
             <HBox spacing="8.0" HBox.hgrow="ALWAYS"/>
             <Button fx:id="changeDetailsButton" text="Change Details"
                     styleClass="pill" visible="false"/>
-            <Button fx:id="backButton" onAction="#openCatalog" text="← Back to Catalog"
-                    styleClass="secondary pill"/>
          </children>
          <padding><Insets left="20.0" right="20.0"/></padding>
       </HBox>

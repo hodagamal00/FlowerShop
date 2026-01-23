@@ -30,7 +30,6 @@
                                 <Font name="System Bold" size="28.0" />
                             </font>
                         </Label>
-                        <Button fx:id="backToHomeBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToHome" text="Home" layoutX="280.0" layoutY="20.0" prefWidth="100.0" />
                         <Button fx:id="viewOrdersBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToMyOrders" text="My Orders" layoutX="400.0" layoutY="20.0" prefWidth="120.0" />
                     </children>
                 </AnchorPane>

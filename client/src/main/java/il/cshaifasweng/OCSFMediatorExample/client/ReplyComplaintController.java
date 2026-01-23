@@ -20,12 +20,8 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Message;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -41,8 +37,6 @@ public class ReplyComplaintController {
     @FXML // fx:id="accountID"
     private TextField accountID; // Value injected by FXMLLoader
 
-    @FXML // fx:id="backButton"
-    private Button backButton; // Value injected by FXMLLoader
 
     @FXML // fx:id="complaintDate"
     private TextField complaintDate; // Value injected by FXMLLoader
@@ -259,33 +253,6 @@ public class ReplyComplaintController {
         }
 
     }
-    @FXML
-    void BackToCatalog(ActionEvent event) throws IOException {
-
-        PassAccountEvent recievedAcc = new PassAccountEvent(currentUser);
-
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)backButton.getScene().getWindow();
-        stagee.close();
-
-    }
-
     Account currentUser;
     List<Complaint> retrievedComplaints = new ArrayList<>();
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -295,7 +262,6 @@ public class ReplyComplaintController {
         }
         EventBus.getDefault().register(this);
         assert accountID != null : "fx:id=\"accountID\" was not injected: check your FXML file 'replycomplaint.fxml'.";
-        assert backButton != null : "fx:id=\"backButton\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert complaintDate != null : "fx:id=\"complaintDate\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert complaintID != null : "fx:id=\"complaintID\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert complaintList != null : "fx:id=\"complaintList\" was not injected: check your FXML file 'replycomplaint.fxml'.";
@@ -321,7 +287,6 @@ public class ReplyComplaintController {
         //Complaint a = new Complaint(0,23,22,false,false,"Fuck you",2,0,false,0,23,2,2004,"");
         refundPercent.setVisible(false);
         loadButton.setDisable(true);
-        backButton.setDisable(true);
         other.setVisible(false);
         wait.setVisible(true);
         sendButton.setVisible(false);
@@ -335,7 +300,6 @@ public class ReplyComplaintController {
                     public void run() {
 
                         loadButton.setDisable(false);
-                        backButton.setDisable(false);
                         other.setVisible(true);
                         wait.setVisible(false);
                     }

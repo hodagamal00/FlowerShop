@@ -9,6 +9,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -183,29 +184,152 @@ public final class DemoDataInitializer {
             return;
         }
 
-        Order pickupOrder = new Order(1, true, 1, "Happy Birthday!", 120,
-                "12 Flower St, Haifa", 1, false, false,
-                10, 5, 2024, 9, 5, 2024, 4111111111111111L, 12, 2026, 123,
-                "Alice Green", 972501112233L, "12 Flower St, Haifa",
-                "Red Rose Bouquet", 14, 30, 16, 0, 0.0, "CREDIT_CARD");
+        LocalDateTime now = LocalDateTime.now();
 
-pickupOrder.setRefundStatus("NONE");
+        Order pickupOrder = createDemoOrder(
+                1,
+                true,
+                1,
+                "Happy Birthday!",
+                120,
+                "12 Flower St, Haifa",
+                1,
+                false,
+                false,
+                now.minusDays(5).withHour(10).withMinute(15),
+                now.minusDays(5).withHour(8).withMinute(30),
+                4111111111111111L,
+                12,
+                2026,
+                123,
+                "Alice Green",
+                972501112233L,
+                "12 Flower St, Haifa",
+                "Red Rose Bouquet",
+                0.0
+        );
+        pickupOrder.setRefundStatus("NONE");
         pickupOrder.setCancelled(false);
         pickupOrder.setRefundAmount(0.0);
 
-        Order deliveryOrder = new Order(2, false, 2, "Congratulations!", 235,
-                "45 Garden Ave, Tel Aviv", 2, true, true,
-                15, 6, 2024, 14, 6, 2024, 4222222222222222L, 11, 2025, 456,
-                "Ben Bloom", 972541234567L, "45 Garden Ave, Tel Aviv",
-                "Sunny Sunflowers, Color Splash", 10, 15, 12, 45, 25.0, "CREDIT_CARD");
+        Order deliveryOrder = createDemoOrder(
+                2,
+                false,
+                2,
+                "Congratulations!",
+                235,
+                "45 Garden Ave, Tel Aviv",
+                2,
+                true,
+                true,
+                now.minusDays(20).withHour(15).withMinute(0),
+                now.minusDays(20).withHour(12).withMinute(30),
+                4222222222222222L,
+                11,
+                2025,
+                456,
+                "Ben Bloom",
+                972541234567L,
+                "45 Garden Ave, Tel Aviv",
+                "Sunny Sunflowers, Color Splash",
+                25.0
+        );
         deliveryOrder.setRefundStatus("FULL");
         deliveryOrder.setRefundAmount(235.0);
         deliveryOrder.setCancelled(false);
         deliveryOrder.setDelivered(true);
 
-        for (Order order : Arrays.asList(pickupOrder, deliveryOrder)) {
+        Order recentDelivery = createDemoOrder(
+                3,
+                false,
+                1,
+                "Welcome home!",
+                180,
+                "78 Bouquet Rd, Jerusalem",
+                1,
+                false,
+                false,
+                now.minusDays(2).withHour(17).withMinute(45),
+                now.minusDays(2).withHour(14).withMinute(15),
+                4111111111111111L,
+                12,
+                2026,
+                123,
+                "Alice Green",
+                972501112233L,
+                "78 Bouquet Rd, Jerusalem",
+                "Orchid Elegance",
+                20.0
+        );
+
+        Order pastPickup = createDemoOrder(
+                4,
+                true,
+                3,
+                "Thank you!",
+                140,
+                "Ramat Aviv",
+                2,
+                false,
+                true,
+                now.minusDays(60).withHour(11).withMinute(0),
+                now.minusDays(60).withHour(9).withMinute(15),
+                4222222222222222L,
+                11,
+                2025,
+                456,
+                "Ben Bloom",
+                972541234567L,
+                "Ramat Aviv",
+                "Color Splash",
+                0.0
+        );
+        pastPickup.setDelivered(true);
+
+        for (Order order : Arrays.asList(pickupOrder, deliveryOrder, recentDelivery, pastPickup)) {
             session.save(order);
         }
+    }
+
+    private static Order createDemoOrder(int id, boolean pickup, int shopId, String greeting, int totalPrice,
+                                         String deliveredAddress, int accountId, boolean gift, boolean delivered,
+                                         LocalDateTime prepareTime, LocalDateTime orderTime,
+                                         long creditCardNumber, int creditCardExpMonth, int creditCardExpYear, int creditCardCVV,
+                                         String recepName, long recepPhone, String recepAddress, String products,
+                                         double deliveryFee) {
+        Order order = new Order(
+                id,
+                pickup,
+                shopId,
+                greeting,
+                totalPrice,
+                deliveredAddress,
+                accountId,
+                gift,
+                delivered,
+                prepareTime.getDayOfMonth(),
+                prepareTime.getMonthValue(),
+                prepareTime.getYear(),
+                orderTime.getDayOfMonth(),
+                orderTime.getMonthValue(),
+                orderTime.getYear(),
+                creditCardNumber,
+                creditCardExpMonth,
+                creditCardExpYear,
+                creditCardCVV,
+                recepName,
+                recepPhone,
+                recepAddress,
+                products,
+                orderTime.getHour(),
+                orderTime.getMinute(),
+                prepareTime.getHour(),
+                prepareTime.getMinute(),
+                deliveryFee,
+                "CREDIT_CARD"
+        );
+        order.setDelivered(delivered);
+        return order;
     }
 
     private static void seedComplaints(Session session) {
@@ -213,14 +337,25 @@ pickupOrder.setRefundStatus("NONE");
             return;
         }
 
+        LocalDateTime now = LocalDateTime.now();
         Complaint complaint = new Complaint(1, 1, 2, false, true,
                 "Flowers arrived later than expected", 2, 2002, true,
-                50, 16, 6, 2024, "We apologize for the delay and refunded 50 ILS");
-        complaint.setCreatedAt(new Date());
-        complaint.setRespondedAt(new Date());
+                50, now.minusDays(12).getDayOfMonth(), now.minusDays(12).getMonthValue(),
+                now.minusDays(12).getYear(), "We apologize for the delay and refunded 50 ILS");
+        complaint.setCreatedAt(java.sql.Timestamp.valueOf(now.minusDays(12)));
+        complaint.setRespondedAt(java.sql.Timestamp.valueOf(now.minusDays(11)));
         complaint.setSlaStatus("RESOLVED_ON_TIME");
         complaint.setCompensationDecision("50% refund approved");
+
+        Complaint openComplaint = new Complaint(2, 2, 3, false, false,
+                "Arrangement missing the greeting card", 1, 0, false,
+                0, now.minusDays(3).getDayOfMonth(), now.minusDays(3).getMonthValue(),
+                now.minusDays(3).getYear(), "");
+        openComplaint.setCreatedAt(java.sql.Timestamp.valueOf(now.minusDays(3)));
+        openComplaint.setSlaStatus("PENDING");
+
         session.save(complaint);
+        session.save(openComplaint);
     }
 
     private static void seedMessages(Session session) {
@@ -230,8 +365,12 @@ pickupOrder.setRefundStatus("NONE");
 
         Message welcome = new Message(1, 1, "Welcome to FlowerShop! Enjoy 10% off your first order.");
         Message promo = new Message(2, 2, "Summer promotion: Sunflowers are now 15% off!");
+        Message reminder = new Message(3, 1, "Reminder: Your delivery is scheduled within the next 24 hours.");
+        Message managerNote = new Message(4, 0, "Branch managers: review pending orders for today.");
         session.save(welcome);
         session.save(promo);
+        session.save(reminder);
+        session.save(managerNote);
     }
 
     private static void seedReports(Session session) {

@@ -400,6 +400,10 @@ private static SessionFactory cachedSessionFactory;
 
 					case "order":
 						if (updateClassFunction.equals("add")) {
+							if (!requirePrivilegeAtLeast(client, 1) || !isCustomer(client)) {
+								sendAuthError(client, "forbidden");
+								break;
+							}
 							System.out.println("arrived to here inside order add");
 							Order recievedOrder = recievedMessage.getOrder();
 							try {

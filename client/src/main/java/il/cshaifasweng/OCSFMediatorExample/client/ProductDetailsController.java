@@ -42,7 +42,6 @@ public class ProductDetailsController {
     @FXML private Button buyNowBtn;
     @FXML private Label successMessage;
     @FXML private Label errorMessage;
-    @FXML private Button backToCatalogBtn;
     @FXML private Button viewCartBtn;
     @FXML private Button closeBtn;
 
@@ -233,11 +232,6 @@ public class ProductDetailsController {
             return;
         }
         NavigationService.getInstance().navigate("cart");
-    }
-
-    @FXML
-    void goBackToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
     }
 
     @FXML

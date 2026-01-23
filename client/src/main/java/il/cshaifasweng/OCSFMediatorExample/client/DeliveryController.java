@@ -11,14 +11,10 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.getAllOrdersMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -45,7 +41,6 @@ public class DeliveryController {
 
 
     @FXML
-    private Button back;
 
     @FXML
     void ApplyDelivery(ActionEvent event) {
@@ -92,34 +87,6 @@ public class DeliveryController {
 
     }
 
-    @FXML
-    void openCatalog(ActionEvent event) throws IOException {
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        System.out.println("Deliver Privilage: " + recievedAcc.getRecievedAccount().getPrivialge());
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)back.getScene().getWindow();
-        // do what you have to do
-        stagee.close();
-    }
-
     Account currentUser;
     static List<Order> Orders = new ArrayList<>();
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -134,7 +101,6 @@ public class DeliveryController {
 
         deliver.setDisable(true);
         listOrders.setDisable(true);
-        back.setDisable(true);
         wait.setVisible(true);
         		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
@@ -142,7 +108,6 @@ public class DeliveryController {
 					public void run() {
                         deliver.setDisable(false);
                         listOrders.setDisable(false);
-                        back.setDisable(false);
                         wait.setVisible(false);
 					}
 				},4500

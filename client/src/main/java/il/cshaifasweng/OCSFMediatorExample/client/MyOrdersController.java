@@ -14,9 +14,6 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -25,7 +22,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -54,8 +50,6 @@ public class MyOrdersController {
     @FXML // fx:id="accountID"
     private TextField accountID; // Value injected by FXMLLoader
 
-    @FXML // fx:id="backToCatalog"
-    private Button backToCatalog; // Value injected by FXMLLoader
 
     @FXML // fx:id="creditCVV"
     private TextField creditCVV; // Value injected by FXMLLoader
@@ -218,34 +212,6 @@ public class MyOrdersController {
     }
 
     int complaint_num = 0;
-    @FXML
-    void GoToCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)backToCatalog.getScene().getWindow();
-        stagee.close();
-
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-
-    }
-
 
     @FXML
     void goToMyComplaints(ActionEvent event) {
@@ -425,7 +391,6 @@ public class MyOrdersController {
         assert RecepName != null : "fx:id=\"RecepName\" was not injected: check your FXML file 'myorders.fxml'.";
         assert RecepNumber != null : "fx:id=\"RecepNumber\" was not injected: check your FXML file 'myorders.fxml'.";
         assert accountID != null : "fx:id=\"accountID\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert backToCatalog != null : "fx:id=\"backToCatalog\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditCVV != null : "fx:id=\"creditCVV\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditExpire != null : "fx:id=\"creditExpire\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditNumber != null : "fx:id=\"creditNumber\" was not injected: check your FXML file 'myorders.fxml'.";
@@ -490,7 +455,6 @@ public class MyOrdersController {
         refundDecisionLabel.setVisible(false);
 
         viewOrder.setDisable(true);
-        backToCatalog.setDisable(true);
 
 
         new java.util.Timer().schedule(
@@ -498,7 +462,6 @@ public class MyOrdersController {
                     @Override
                     public void run() {
                         viewOrder.setDisable(false);
-                        backToCatalog.setDisable(false);
                         wait.setVisible(false);
                     }
                 },4500
