@@ -18,10 +18,10 @@
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReplyComplaintController"
         stylesheets="@styles.css"
-        fitToWidth="true"
+        fitToWidth="false"
         fitToHeight="false"
         pannable="true"
-        hbarPolicy="AS_NEEDED"
+        hbarPolicy="ALWAYS"
         vbarPolicy="AS_NEEDED"
         styleClass="app-scroll-container">
    <content>
@@ -35,7 +35,7 @@
                         <Font name="System Bold" size="28.0" />
                      </font>
                   </Label>
-                  <Button fx:id="backButton" layoutX="1350.0" layoutY="25.0" mnemonicParsing="false" onAction="#backToDashboard" prefHeight="35.0" prefWidth="170.0" text="← Back to Dashboard" style="-fx-font-size: 14px;" />
+                  <Button fx:id="backButton" layoutX="675.0" layoutY="25.0" mnemonicParsing="false" onAction="#backToDashboard" prefHeight="35.0" prefWidth="170.0" text="← Back to Dashboard" style="-fx-font-size: 14px;" />
                </children>
             </AnchorPane>
 
@@ -97,10 +97,6 @@
 
                            <HBox spacing="15.0">
                               <VBox spacing="8.0" prefWidth="250.0">
-                                 <Text text="SLA Status:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                                 <TextField fx:id="slaStatusField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: #c0392b;" />
-                              </VBox>
-                              <VBox spacing="8.0" prefWidth="250.0">
                                  <Text text="Compensation Decision:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
                                  <TextField fx:id="compensationDecisionField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
                               </VBox>
@@ -148,21 +144,6 @@
                            <Button fx:id="sendButton" mnemonicParsing="false" onAction="#SendReply" prefHeight="45.0" prefWidth="200.0" text="Send Response" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
                         </HBox>
                      </VBox>
-                  </VBox>
-
-                  <!-- SLA Warning Section -->
-                  <VBox layoutX="30.0" layoutY="400.0" spacing="10.0" prefWidth="1050.0" style="-fx-padding: 15; -fx-border-color: #e74c3c; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #fadbd8;">
-                     <Text text="⚠ Service Level Agreement (SLA)" fill="#c0392b">
-                        <font>
-                           <Font name="System Bold" size="16.0" />
-                        </font>
-                     </Text>
-                     <Text text="Complaints must be resolved within 24 hours to maintain service quality standards." wrappingWidth="1020.0">
-                        <font><Font size="14.0" /></font>
-                     </Text>
-                     <Text text="Priority complaints (with refund requests) require immediate attention." wrappingWidth="1020.0">
-                        <font><Font size="14.0" /></font>
-                     </Text>
                   </VBox>
 
                   <!-- Loading Indicator -->

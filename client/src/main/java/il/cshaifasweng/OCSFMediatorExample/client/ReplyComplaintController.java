@@ -72,9 +72,6 @@ public class ReplyComplaintController {
     private TextField respondedAtField;
 
     @FXML
-    private TextField slaStatusField;
-
-    @FXML
     private TextField compensationDecisionField;
     @FXML // fx:id="refundCheck"
     private CheckBox refundCheck; // Value injected by FXMLLoader
@@ -211,15 +208,6 @@ public class ReplyComplaintController {
         alert.showAndWait();
     }
 
-    private boolean isLateStatus(String status) {
-        if (status == null) {
-            return false;
-        }
-        return "RESOLVED_LATE".equalsIgnoreCase(status)
-                || "OVERDUE".equalsIgnoreCase(status)
-                || "LATE".equalsIgnoreCase(status);
-    }
-
     Complaint selectedComplaint = new Complaint();
     private boolean awaitingComplaintUpdate = false;
     @FXML
@@ -275,7 +263,6 @@ public class ReplyComplaintController {
         assert other != null : "fx:id=\"other\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert createdAtField != null : "fx:id=\"createdAtField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert respondedAtField != null : "fx:id=\"respondedAtField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
-        assert slaStatusField != null : "fx:id=\"slaStatusField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert compensationDecisionField != null : "fx:id=\"compensationDecisionField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
 
         complaintList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
@@ -352,7 +339,6 @@ public class ReplyComplaintController {
         if (response.getComplaint() != null) {
             selectedComplaint = response.getComplaint();
             respondedAtField.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
-            slaStatusField.setText(selectedComplaint.getSlaStatus());
             compensationDecisionField.setText(selectedComplaint.getCompensationDecision());
         }
         showSuccess(response.getMessage() != null ? response.getMessage() : "Response sent.");
@@ -416,9 +402,6 @@ public class ReplyComplaintController {
         }
         for (Complaint complaint : retrievedComplaints) {
             String entry = "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
-            if (isLateStatus(complaint.getSlaStatus())) {
-                entry = entry + " (Late)";
-            }
             if (complaint.isAccepted()) {
                 entry = entry + " (Resolved)";
             }
@@ -454,7 +437,6 @@ public class ReplyComplaintController {
         complaintText.setText(selectedComplaint.getComplaintText());
         createdAtField.setText(formatTimestamp(selectedComplaint.getCreatedAt()));
         respondedAtField.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
-        slaStatusField.setText(selectedComplaint.getSlaStatus());
         compensationDecisionField.setText(selectedComplaint.getCompensationDecision());
     }
 
