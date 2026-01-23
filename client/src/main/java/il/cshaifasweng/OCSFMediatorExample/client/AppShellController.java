@@ -49,6 +49,7 @@ public class AppShellController {
             NavDestination.forLoggedIn("Cart", "cart", 0),
             NavDestination.forLoggedIn("Checkout", "checkout", 1),
             NavDestination.forLoggedIn("Orders", "myorders", 1),
+            NavDestination.forLoggedIn("Branch Orders", "BranchOrders", 2),
             NavDestination.forLoggedIn("Complaints", "mycomplaints", 1),
             NavDestination.forLoggedIn("My Account", "Profile", 1),
             NavDestination.forGuestsOnly("Login", "Login"),

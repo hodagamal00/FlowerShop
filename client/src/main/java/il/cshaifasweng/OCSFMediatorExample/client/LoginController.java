@@ -41,25 +41,7 @@ public class LoginController {
     private Text logSucc;
 
     @FXML
-    private Button backLog;
-
-    @FXML
     private Text alLog;
-
-
-    @FXML
-    void ReturnFromLogin(ActionEvent event) {
-        logSucc.setVisible(false);
-        OpenCatalogplz.setVisible(false);
-        Email.setVisible(true);
-        Password.setVisible(true);
-        LogIn.setVisible(true);
-        ErrorMsg.setVisible(false);
-        ErrorMsgPass.setVisible(false);
-        backLog.setVisible(false);
-        RegisterTab.setVisible(true);
-        Guest.setVisible(true);
-    }
 
     @FXML
     void gotoCatalog(ActionEvent event) throws IOException {
@@ -74,7 +56,6 @@ public class LoginController {
         LogIn.setVisible(true);
         Email.setVisible(true);
         Password.setVisible(true);
-        backLog.setVisible(true);
     }
 
     @FXML
@@ -93,14 +74,12 @@ public class LoginController {
         assert Password != null : "fx:id=\"Password\" was not injected: check your FXML file 'Login.fxml'.";
         assert RegisterTab != null : "fx:id=\"RegisterTab\" was not injected: check your FXML file 'Login.fxml'.";
         assert alLog != null : "fx:id=\"alLog\" was not injected: check your FXML file 'Login.fxml'.";
-        assert backLog != null : "fx:id=\"backLog\" was not injected: check your FXML file 'Login.fxml'.";
         assert logSucc != null : "fx:id=\"logSucc\" was not injected: check your FXML file 'Login.fxml'.";
 
         logSucc.setVisible(false);
         OpenCatalogplz.setVisible(false);
         ErrorMsg.setVisible(false);
         ErrorMsgPass.setVisible(false);
-        backLog.setVisible(false);
         alLog.setVisible(false);
 
         // חשוב בשביל ה־@Subscribe

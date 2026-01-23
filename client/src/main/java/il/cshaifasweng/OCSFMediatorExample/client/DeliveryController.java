@@ -45,7 +45,6 @@ public class DeliveryController {
 
 
     @FXML
-    private Button back;
 
     @FXML
     void ApplyDelivery(ActionEvent event) {
@@ -92,33 +91,6 @@ public class DeliveryController {
 
     }
 
-    @FXML
-    void openCatalog(ActionEvent event) throws IOException {
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        System.out.println("Deliver Privilage: " + recievedAcc.getRecievedAccount().getPrivialge());
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)back.getScene().getWindow();
-        // do what you have to do
-        stagee.close();
-    }
 
     Account currentUser;
     static List<Order> Orders = new ArrayList<>();
@@ -134,7 +106,6 @@ public class DeliveryController {
 
         deliver.setDisable(true);
         listOrders.setDisable(true);
-        back.setDisable(true);
         wait.setVisible(true);
         		new java.util.Timer().schedule(
 				new java.util.TimerTask() {
@@ -142,7 +113,6 @@ public class DeliveryController {
 					public void run() {
                         deliver.setDisable(false);
                         listOrders.setDisable(false);
-                        back.setDisable(false);
                         wait.setVisible(false);
 					}
 				},4500

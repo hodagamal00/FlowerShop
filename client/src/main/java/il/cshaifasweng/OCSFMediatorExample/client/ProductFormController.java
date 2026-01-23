@@ -55,7 +55,6 @@ public class ProductFormController {
     @FXML private Button approveBtn;
     @FXML private Button cancelBtn;
     @FXML private Button scrollDownBtn;
-    @FXML private Button scrollUpBtn;
     @FXML private ScrollPane formScrollPane;
     @FXML private Label statusLabel;
 
@@ -347,16 +346,6 @@ public class ProductFormController {
     void scrollToBottom() {
         if (formScrollPane != null) {
             formScrollPane.setVvalue(1.0);
-        }
-    }
-
-    /**
-     * Scrolls the view back to the top of the form
-     */
-    @FXML
-    void scrollToTop() {
-        if (formScrollPane != null) {
-            formScrollPane.setVvalue(0.0);
         }
     }
 

@@ -88,12 +88,6 @@
                         onAction="#gotoCatalog"
                         styleClass="btn-outline" />
 
-                <Button fx:id="backLog"
-                        text="← Back"
-                        onAction="#ReturnFromLogin"
-                        visible="false"
-                        styleClass="btn-outline" />
-
                 <!-- Already logged error -->
                 <Text fx:id="alLog" fill="#e57373" />
             </VBox>

@@ -11,7 +11,6 @@ import java.io.IOException;
  */
 public class GlobalSettingsController {
 
-    @FXML private Button backButton;
     
     // Company Information
     @FXML private TextField companyNameField;
@@ -122,16 +121,6 @@ public class GlobalSettingsController {
                 showInfo("Settings reset to last saved values.");
             }
         });
-    }
-    
-    @FXML
-    private void handleBackToDashboard() {
-        try {
-            App.setRoot("NetworkDashboard");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to dashboard.");
-        }
     }
     
     private void showError(String message) {

@@ -34,7 +34,6 @@ import java.util.UUID;
 public class CrossBranchReportsController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Filters
     @FXML private DatePicker startDatePicker;
@@ -411,22 +410,6 @@ public class CrossBranchReportsController {
     private void handleExportReport() {
         // TODO: Implement PDF export functionality
         showInfo("Export feature will generate a comprehensive PDF report with all charts and data tables.");
-    }
-    
-    /**
-     * Navigate back to dashboard
-     */
-    @FXML
-    private void handleBackToDashboard() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-        try {
-            App.setRoot("NetworkDashboard");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to dashboard.");
-        }
     }
     
     /**

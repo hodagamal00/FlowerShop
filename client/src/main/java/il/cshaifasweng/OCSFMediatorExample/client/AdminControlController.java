@@ -31,8 +31,6 @@ public class AdminControlController {
     @FXML // fx:id="address"
     private TextArea address; // Value injected by FXMLLoader
 
-    @FXML // fx:id="backButton"
-    private Button backButton; // Value injected by FXMLLoader
 
     @FXML
     private Button changeDetailsButton;
@@ -178,32 +176,6 @@ public class AdminControlController {
         loadSelectedUserDetails(selection);
     }
 
-    @FXML
-    void openCatalog(ActionEvent event) throws IOException {
-
-        PassAccountEvent recievedAcc = new PassAccountEvent(currentUser);
-
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)backButton.getScene().getWindow();
-        stagee.close();
-
-    }
 
     @FXML
     void selectType(ActionEvent event) {
@@ -222,7 +194,6 @@ public class AdminControlController {
         assert accID != null : "fx:id=\"accID\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert usersTable != null : "fx:id=\"usersTable\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert address != null : "fx:id=\"address\" was not injected: check your FXML file 'admincontrol.fxml'.";
-        assert backButton != null : "fx:id=\"backButton\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert changeDetailsButton != null : "fx:id=\"changeDetailsButton\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert creditexpmonth != null : "fx:id=\"creditexpmonth\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert creditexpyear != null : "fx:id=\"creditexpyear\" was not injected: check your FXML file 'admincontrol.fxml'.";
@@ -292,7 +263,6 @@ public class AdminControlController {
         profileType.setDisable(true);
         loadProfile.setDisable(true);
         Save.setDisable(true);
-        backButton.setDisable(true);
         refreshButton.setDisable(true);
         statusMessage.setVisible(false);
 
@@ -305,7 +275,6 @@ public class AdminControlController {
                         profileType.setDisable(false);
                         loadProfile.setDisable(false);
                         Save.setDisable(false);
-                        backButton.setDisable(false);
                         refreshButton.setDisable(false);
                         wait.setVisible(false);
                     }

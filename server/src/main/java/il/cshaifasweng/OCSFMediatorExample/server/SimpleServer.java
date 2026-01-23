@@ -626,9 +626,15 @@ private static SessionFactory cachedSessionFactory;
 					if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
 						sendAuthError(client, "forbidden");
 					} else {
+						getAllOrdersMessage request = (getAllOrdersMessage) msg;
+						List<Order> orderList = getFilteredOrders(localSession, account, request);
+						if (orderList == null) {
+							sendAuthError(client, "forbidden");
+							tx1.commit();
+							return;
+						}
 						getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
 						System.out.println("arrived to get all orders in simple server ! \n");
-						List<Order> orderList = getScopedOrders(localSession, account);
 						ordersToBeSent.setOrderList(orderList);
 						client.sendToClient(ordersToBeSent);
 					}
@@ -1210,19 +1216,11 @@ private static SessionFactory cachedSessionFactory;
 		try (Session localSession = sessionFactory.openSession()) {
 			Transaction tx = localSession.beginTransaction();
 			try {
-				Map<Integer, Product> productsById = mapProductsById(localSession);
-				Map<String, Product> productsByName = mapProductsByName(localSession);
-				Map<Integer, Integer> quantities = parseProductQuantities(products, productsById, productsByName);
-				if (quantities.isEmpty()) {
-					throw new IllegalArgumentException("Order must include at least one valid product.");
-				}
-
-				for (Map.Entry<Integer, Integer> entry : quantities.entrySet()) {
-					Product product = productsById.get(entry.getKey());
-					if (product == null) {
-						throw new IllegalArgumentException("Unknown product id: " + entry.getKey());
-					}
-					int qty = entry.getValue() != null ? entry.getValue() : 1;
+				Map<Product, Integer> parsedItems = parseOrderProducts(localSession, products);
+				String normalizedProducts = buildProductsSummary(parsedItems);
+				for (Map.Entry<Product, Integer> entry : parsedItems.entrySet()) {
+					Product product = entry.getKey();
+					int quantity = entry.getValue();
 					BigDecimal promoPrice = product.hasActivePromotion()
 							? applyDiscount(BigDecimal.valueOf(product.getPrice()), product.getDiscountPercent())
 							: roundCurrency(BigDecimal.valueOf(product.getPrice()));
@@ -1231,11 +1229,9 @@ private static SessionFactory cachedSessionFactory;
 						finalPrice = applyDiscount(promoPrice, 10.0);
 					}
 					finalPrice = roundCurrency(finalPrice);
-					total = total.add(finalPrice.multiply(BigDecimal.valueOf(qty)));
+					total = total.add(finalPrice.multiply(BigDecimal.valueOf(quantity)));
 				}
-
 				tx.commit();
-				String normalizedProducts = formatProductQuantities(quantities);
 				return new PricingResult(total, normalizedProducts);
 			} catch (Exception ex) {
 				tx.rollback();
@@ -1497,25 +1493,186 @@ private static SessionFactory cachedSessionFactory;
 
 	private Map<String, Integer> queryOrdersByProductType(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
 		List<Order> orders = getOrdersForReport(session, startDate, endDate, branchId);
-		if (orders.isEmpty()) {
-			return new LinkedHashMap<>();
-		}
-		Map<Integer, Product> productsById = mapProductsById(session);
-		Map<String, Product> productsByName = mapProductsByName(session);
-		Map<String, Integer> counts = new TreeMap<>();
-
+		Map<String, Integer> counts = new LinkedHashMap<>();
 		for (Order order : orders) {
-			if (order.isCancelled()) {
+			Map<Product, Integer> parsedItems = parseOrderProducts(session, order.getProducts());
+			for (Map.Entry<Product, Integer> entry : parsedItems.entrySet()) {
+				Product product = entry.getKey();
+				int quantity = entry.getValue();
+				String category = resolveProductCategory(product);
+				counts.put(category, counts.getOrDefault(category, 0) + quantity);
+			}
+		}
+		return counts;
+	}
+
+	private String resolveProductCategory(Product product) {
+		if (product == null) {
+			return "Uncategorized";
+		}
+		String category = product.getCategory();
+		if (category != null && !category.trim().isEmpty()) {
+			return category;
+		}
+		String customType = product.getCustomType();
+		if (customType != null && !customType.trim().isEmpty()) {
+			return customType;
+		}
+		return "Uncategorized";
+	}
+
+	private Map<Product, Integer> parseOrderProducts(Session session, String products) {
+		Map<Product, Integer> items = new LinkedHashMap<>();
+		if (isBlank(products)) {
+			return items;
+		}
+		String trimmed = products.trim();
+		if (trimmed.contains(":")) {
+			for (String token : trimmed.split(",")) {
+				String entry = token.trim();
+				if (entry.isEmpty()) {
+					continue;
+				}
+				String[] parts = entry.split(":");
+				if (parts.length < 2) {
+					continue;
+				}
+				int productId = parsePositiveInt(parts[0]);
+				int quantity = parsePositiveInt(parts[1]);
+				if (productId <= 0 || quantity <= 0) {
+					continue;
+				}
+				Product product = session.get(Product.class, productId);
+				if (product == null) {
+					throw new IllegalArgumentException("Unknown product ID: " + productId);
+				}
+				items.put(product, items.getOrDefault(product, 0) + quantity);
+			}
+			return items;
+		}
+		for (String item : trimmed.split("%")) {
+			String entry = item.trim();
+			if (entry.isEmpty()) {
 				continue;
 			}
-			Map<Integer, Integer> quantities = parseProductQuantities(order.getProducts(), productsById, productsByName);
-			for (Map.Entry<Integer, Integer> entry : quantities.entrySet()) {
-				Product product = productsById.get(entry.getKey());
-				String category = resolveProductCategory(product);
-				counts.merge(category, entry.getValue(), Integer::sum);
+			String[] parts = entry.split(" - ", 2);
+			String productName = parts[0].trim();
+			if (productName.isEmpty()) {
+				continue;
+			}
+			Product product = findProductByName(session, productName);
+			if (product == null) {
+				throw new IllegalArgumentException("Unknown product: " + productName);
+			}
+			items.put(product, items.getOrDefault(product, 0) + 1);
+		}
+		return items;
+	}
+
+	private String buildProductsSummary(Map<Product, Integer> parsedItems) {
+		StringBuilder builder = new StringBuilder();
+		for (Map.Entry<Product, Integer> entry : parsedItems.entrySet()) {
+			if (builder.length() > 0) {
+				builder.append(",");
+			}
+			builder.append(entry.getKey().getID()).append(":").append(entry.getValue());
+		}
+		return builder.toString();
+	}
+
+	private int parsePositiveInt(String value) {
+		try {
+			return Integer.parseInt(value.trim());
+		} catch (NumberFormatException ex) {
+			return 0;
+		}
+	}
+
+	private List<Order> getFilteredOrders(Session session, Account account, getAllOrdersMessage request) {
+		if (account == null) {
+			return Collections.emptyList();
+		}
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Order> query = builder.createQuery(Order.class);
+		Root<Order> root = query.from(Order.class);
+		List<Predicate> predicates = new ArrayList<>();
+		int privilegeLevel = account.getPrivilegeLevel();
+		Integer requestBranchId = request != null ? request.getBranchId() : null;
+		if (privilegeLevel == 1) {
+			predicates.add(builder.equal(root.get("accountID"), account.getAccountID()));
+		} else if (privilegeLevel == 2 || privilegeLevel == 3) {
+			int branchId = resolveBranchId(account);
+			if (branchId <= 0) {
+				return Collections.emptyList();
+			}
+			if (requestBranchId != null && requestBranchId > 0 && requestBranchId != branchId) {
+				return null;
+			}
+			predicates.add(builder.equal(root.get("shopID"), branchId));
+		} else {
+			if (requestBranchId != null && requestBranchId > 0) {
+				predicates.add(builder.equal(root.get("shopID"), requestBranchId));
 			}
 		}
-		return new LinkedHashMap<>(counts);
+		query.where(predicates.toArray(new Predicate[0]));
+		List<Order> orders = session.createQuery(query).getResultList();
+		return applyOrderFilters(orders, request);
+	}
+
+	private List<Order> applyOrderFilters(List<Order> orders, getAllOrdersMessage request) {
+		if (orders == null || request == null) {
+			return orders;
+		}
+		LocalDate fromDate = request.getFromDate();
+		LocalDate toDate = request.getToDate();
+		if (fromDate == null && toDate == null && isBlank(request.getStatus())) {
+			return orders;
+		}
+		LocalDate start = fromDate != null ? fromDate : LocalDate.MIN;
+		LocalDate end = toDate != null ? toDate : LocalDate.MAX;
+		String statusFilter = normalizeStatus(request.getStatus());
+		List<Order> filtered = new ArrayList<>();
+		for (Order order : orders) {
+			LocalDate orderDate = resolveOrderDate(order);
+			if (orderDate == null || !isWithinRange(orderDate, start, end)) {
+				continue;
+			}
+			if (statusFilter != null) {
+				String orderStatus = normalizeStatus(resolveOrderStatus(order));
+				if (orderStatus == null || !orderStatus.equals(statusFilter)) {
+					continue;
+				}
+			}
+			filtered.add(order);
+		}
+		return filtered;
+	}
+
+	private String resolveOrderStatus(Order order) {
+		if (order == null) {
+			return null;
+		}
+		if (order.isCancelled()) {
+			return "Cancelled";
+		}
+		if (order.isDelivered()) {
+			return "Delivered";
+		}
+		return "Pending";
+	}
+
+	private String normalizeStatus(String status) {
+		if (status == null) {
+			return null;
+		}
+		String normalized = status.trim().toLowerCase(Locale.ROOT);
+		if (normalized.isEmpty() || "all".equals(normalized)) {
+			return null;
+		}
+		if ("completed".equals(normalized)) {
+			return "delivered";
+		}
+		return normalized;
 	}
 
 	private Map<LocalDate, Integer> queryComplaintsHistogram(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
@@ -1538,7 +1695,7 @@ private static SessionFactory cachedSessionFactory;
 				.groupBy(dateExpr)
 				.orderBy(builder.asc(dateExpr));
 		List<Object[]> results = session.createQuery(query).getResultList();
-		Map<LocalDate, Integer> histogram = new TreeMap<>();
+		Map<LocalDate, Integer> histogram = new LinkedHashMap<>();
 		for (Object[] row : results) {
 			java.sql.Date date = (java.sql.Date) row[0];
 			Number count = (Number) row[1];
@@ -1546,21 +1703,14 @@ private static SessionFactory cachedSessionFactory;
 				histogram.put(date.toLocalDate(), count != null ? count.intValue() : 0);
 			}
 		}
-		if (startDate != null && endDate != null) {
-			LocalDate cursor = startDate;
-			while (!cursor.isAfter(endDate)) {
-				histogram.putIfAbsent(cursor, 0);
-				cursor = cursor.plusDays(1);
-			}
-		}
-		return new LinkedHashMap<>(histogram);
+		return histogram;
 	}
 
 	private Predicate buildOrderDateRangePredicate(CriteriaBuilder builder, Root<Order> root,
 												  LocalDate startDate, LocalDate endDate) {
-		Path<Integer> yearPath = root.get("prepareYear");
-		Path<Integer> monthPath = root.get("prepareMonth");
-		Path<Integer> dayPath = root.get("prepareDay");
+		Path<Integer> yearPath = root.get("orderYear");
+		Path<Integer> monthPath = root.get("orderMonth");
+		Path<Integer> dayPath = root.get("orderDay");
 
 		Predicate startPredicate = builder.or(
 				builder.greaterThan(yearPath, startDate.getYear()),
@@ -1593,114 +1743,10 @@ private static SessionFactory cachedSessionFactory;
 
 	private LocalDate resolveOrderDate(Order order) {
 		try {
-			return LocalDate.of(order.getPrepareYear(), order.getPrepareMonth(), order.getPrepareDay());
+			return LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
 		} catch (Exception ex) {
 			return null;
 		}
-	}
-
-	private Map<Integer, Product> mapProductsById(Session session) {
-		List<Product> products = getAllProducts(session);
-		Map<Integer, Product> productsById = new LinkedHashMap<>();
-		for (Product product : products) {
-			productsById.put(product.getID(), product);
-		}
-		return productsById;
-	}
-
-	private Map<String, Product> mapProductsByName(Session session) {
-		List<Product> products = getAllProducts(session);
-		Map<String, Product> productsByName = new LinkedHashMap<>();
-		for (Product product : products) {
-			if (product.getName() != null) {
-				productsByName.put(product.getName().toLowerCase(Locale.US), product);
-			}
-		}
-		return productsByName;
-	}
-
-	private Map<Integer, Integer> parseProductQuantities(String products,
-														 Map<Integer, Product> productsById,
-														 Map<String, Product> productsByName) {
-		Map<Integer, Integer> quantities = new LinkedHashMap<>();
-		if (isBlank(products)) {
-			return quantities;
-		}
-		boolean parsed = false;
-		if (products.contains(":")) {
-			String[] tokens = products.split(",");
-			for (String token : tokens) {
-				String trimmed = token.trim();
-				if (trimmed.isEmpty()) {
-					continue;
-				}
-				String[] parts = trimmed.split(":");
-				if (parts.length < 1) {
-					continue;
-				}
-				try {
-					int productId = Integer.parseInt(parts[0].trim());
-					int qty = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 1;
-					if (productsById.containsKey(productId)) {
-						quantities.merge(productId, Math.max(1, qty), Integer::sum);
-						parsed = true;
-					}
-				} catch (NumberFormatException ignored) {
-					// fall back to legacy parsing
-				}
-			}
-		}
-		if (parsed) {
-			return quantities;
-		}
-		if (products.contains("%")) {
-			for (String item : products.split("%")) {
-				String trimmed = item.trim();
-				if (trimmed.isEmpty()) {
-					continue;
-				}
-				String[] parts = trimmed.split(" - ", 2);
-				String productName = parts[0].trim();
-				if (productName.isEmpty()) {
-					continue;
-				}
-				Product product = productsByName.get(productName.toLowerCase(Locale.US));
-				if (product != null) {
-					quantities.merge(product.getID(), 1, Integer::sum);
-				}
-			}
-		}
-		return quantities;
-	}
-
-	private String formatProductQuantities(Map<Integer, Integer> quantities) {
-		if (quantities == null || quantities.isEmpty()) {
-			return "";
-		}
-		StringBuilder builder = new StringBuilder();
-		for (Map.Entry<Integer, Integer> entry : quantities.entrySet()) {
-			if (builder.length() > 0) {
-				builder.append(",");
-			}
-			builder.append(entry.getKey()).append(":").append(entry.getValue());
-		}
-		return builder.toString();
-	}
-
-	private String resolveProductCategory(Product product) {
-		if (product == null) {
-			return "Uncategorized";
-		}
-		if (product.isCustomProduct() && !isBlank(product.getCustomType())) {
-			return product.getCustomType();
-		}
-		if (!isBlank(product.getCategory())) {
-			return product.getCategory();
-		}
-		if (!isBlank(product.getCustomType())) {
-			return product.getCustomType();
-		}
-		return "Uncategorized";
 	}
 
 	private LocalDate resolveComplaintDate(Complaint complaint) {
