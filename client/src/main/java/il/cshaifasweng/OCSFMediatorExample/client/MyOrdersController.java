@@ -39,6 +39,7 @@ public class MyOrdersController {
     private double refundPercent;
     private String refundPercentDisplay;
     private boolean returned;
+    private boolean ordersLoaded = false;
 
 
     Account currentUser;
@@ -293,8 +294,23 @@ public class MyOrdersController {
             alert.showAndWait();
             return;
         }
+        if (!ordersLoaded) {
+            requestOrders();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Your orders are still loading. Please try again in a moment.");
+            alert.showAndWait();
+            return;
+        }
         if (viewOrderMode == 0)
         {
+            if (allOrders.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setHeaderText(null);
+                alert.setContentText("No orders found for your account yet.");
+                alert.showAndWait();
+                return;
+            }
             orderList.getItems().clear();
             for(int i = 0 ; i < allOrders.size(); i ++)
             {
@@ -444,10 +460,6 @@ public class MyOrdersController {
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
         resolveCurrentUser();
-        System.out.println("before sending getAllOrders message !");
-        getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
-        SimpleClient.getClient().sendToServer(getOrdersMsg);
-        System.out.println("after sending getAllOrders message !");
 
         assert RecepAddress != null : "fx:id=\"RecepAddress\" was not injected: check your FXML file 'myorders.fxml'.";
         assert RecepName != null : "fx:id=\"RecepName\" was not injected: check your FXML file 'myorders.fxml'.";
@@ -519,18 +531,7 @@ public class MyOrdersController {
 
         viewOrder.setDisable(true);
         backToCatalog.setDisable(true);
-
-
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        viewOrder.setDisable(false);
-                        backToCatalog.setDisable(false);
-                        wait.setVisible(false);
-                    }
-                },4500
-        );
+        requestOrders();
     }
 
     private Account resolveCurrentUser() {
@@ -538,6 +539,24 @@ public class MyOrdersController {
             currentUser = SimpleClient.getAccount();
         }
         return currentUser;
+    }
+
+    private void requestOrders() {
+        wait.setVisible(true);
+        viewOrder.setDisable(true);
+        backToCatalog.setDisable(true);
+        try {
+            getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
+            SimpleClient.getClient().sendToServer(getOrdersMsg);
+        } catch (IOException e) {
+            wait.setVisible(false);
+            viewOrder.setDisable(false);
+            backToCatalog.setDisable(false);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText(null);
+            alert.setContentText("Failed to load orders. Please try again.");
+            alert.showAndWait();
+        }
     }
     @Subscribe
     public void PassAccountEvent(PassAccountEventOrders passAcc){ // added today
@@ -556,7 +575,13 @@ public class MyOrdersController {
     public void passOrders(PassOrdersFromServer passOrders){ // added 18/7
         System.out.println("arrived to subscriebr of passOrders !");
         List<Order> recievedOrders = passOrders.getRecievedOrders();
-        allOrders = recievedOrders;
+        allOrders = recievedOrders != null ? recievedOrders : new ArrayList<>();
+        ordersLoaded = true;
+        Platform.runLater(() -> {
+            wait.setVisible(false);
+            viewOrder.setDisable(false);
+            backToCatalog.setDisable(false);
+        });
     }
 
     @Subscribe
