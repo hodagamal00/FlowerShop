@@ -1,6 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
+import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -196,20 +198,46 @@ public class OrderConfirmationController {
         orderItemsContainer.getChildren().clear();
         String products = order.getProducts();
         List<Double> itemPrices = new ArrayList<>();
+        Account account = SimpleClient.getAccount();
         if (products != null && !products.isBlank()) {
-            String[] tokens = products.split("%");
-            for (String token : tokens) {
-                if (token == null || token.isBlank()) {
-                    continue;
+            if (products.contains(":")) {
+                String[] tokens = products.split(",");
+                for (String token : tokens) {
+                    if (token == null || token.isBlank()) {
+                        continue;
+                    }
+                    String[] parts = token.trim().split(":");
+                    try {
+                        int productId = Integer.parseInt(parts[0].trim());
+                        int qty = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 1;
+                        Product product = SimpleClient.findCachedProductById(productId);
+                        String name = product != null ? product.getName() : "Product #" + productId;
+                        double unitPrice = product != null
+                                ? PricingService.calculateDisplayPrice(product, account)
+                                : 0.0;
+                        double linePrice = unitPrice * Math.max(1, qty);
+                        itemPrices.add(linePrice);
+                        orderItemsContainer.getChildren().add(buildItemRow(name + " x" + qty, linePrice));
+                    } catch (NumberFormatException ignored) {
+                        // fallback to legacy parsing below
+                    }
                 }
-                String[] parts = token.split(" - ");
-                String name = parts[0].trim();
-                double price = 0.0;
-                if (parts.length > 1) {
-                    price = parsePrice(parts[1]);
+            }
+            if (itemPrices.isEmpty()) {
+                String[] tokens = products.split("%");
+                for (String token : tokens) {
+                    if (token == null || token.isBlank()) {
+                        continue;
+                    }
+                    String[] parts = token.split(" - ");
+                    String name = parts[0].trim();
+                    double price = 0.0;
+                    if (parts.length > 1) {
+                        price = parsePrice(parts[1]);
+                    }
+                    itemPrices.add(price);
+                    orderItemsContainer.getChildren().add(buildItemRow(name, price));
                 }
-                itemPrices.add(price);
-                orderItemsContainer.getChildren().add(buildItemRow(name, price));
             }
         }
 

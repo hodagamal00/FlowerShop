@@ -20,6 +20,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -56,9 +57,6 @@ public class MyOrdersController {
     @FXML // fx:id="backToCatalog"
     private Button backToCatalog; // Value injected by FXMLLoader
 
-    @FXML // fx:id="complaintText"
-    private TextField complaintText; // Value injected by FXMLLoader
-
     @FXML // fx:id="creditCVV"
     private TextField creditCVV; // Value injected by FXMLLoader
 
@@ -86,8 +84,8 @@ public class MyOrdersController {
     @FXML // fx:id="greetingText"
     private TextField greetingText; // Value injected by FXMLLoader
 
-    @FXML // fx:id="openComplaint"
-    private Button openComplaint; // Value injected by FXMLLoader
+    @FXML // fx:id="submitComplaint"
+    private Button submitComplaint; // Value injected by FXMLLoader
 
     @FXML // fx:id="orderID"
     private TextField orderID; // Value injected by FXMLLoader
@@ -97,9 +95,6 @@ public class MyOrdersController {
 
     @FXML // fx:id="refresh"
     private Button refresh; // Value injected by FXMLLoader
-
-    @FXML // fx:id="sendComplaint"
-    private Button sendComplaint; // Value injected by FXMLLoader
 
     @FXML // fx:id="shopID"
     private TextField shopID; // Value injected by FXMLLoader
@@ -253,52 +248,35 @@ public class MyOrdersController {
 
 
     @FXML
-    void openOrderComplaint(ActionEvent event)
-    {
-        complaintText.setVisible(true);
-        sendComplaint.setVisible(true);
-    }
+    void goToMyComplaints(ActionEvent event) {
+        if (SelectedOrder == null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Please select an order before submitting a complaint.");
+            alert.showAndWait();
+            return;
+        }
+        NavigationService.getInstance().navigate("mycomplaints");
 
-    @FXML
-    void sendOrderComplaint(ActionEvent event)
-    {
-        Calendar calle = Calendar.getInstance();
-        int currentYear = calle.get(Calendar.YEAR);
-        int currentMonth = calle.get(Calendar.MONTH);
-        currentMonth++;
-        int currentHour = calle.get(Calendar.HOUR_OF_DAY);
-        int currentMintue = calle.get(Calendar.MINUTE);
-        int currentDay = calle.get(Calendar.DAY_OF_MONTH);
+        PassAccountEventComplaints recievedAcc = new PassAccountEventComplaints(currentUser, SelectedOrder.getOrderID());
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        EventBus.getDefault().post(recievedAcc);
+                        System.out.println("the server sent me the account , NICE 4 !!");
+                    }
+                },4000
+        );
 
-        Complaint newComplaint = new Complaint();
-        newComplaint.setComplaintID(0); // 0 - Will be changed later
-        newComplaint.setCustomerID(currentUser.getAccountID());
-        newComplaint.setOrderID(SelectedOrder.getOrderID());
-        newComplaint.setAccepted(false);
-        newComplaint.setIn24Hours(false);
-        newComplaint.setComplaintText(complaintText.getText());
-        newComplaint.setShopID(SelectedOrder.getShopID());
-        newComplaint.setAnswerworkerID(0);
-        newComplaint.setReturnedMoney(false);
-        newComplaint.setReturnedmoneyvalue(0);
-        newComplaint.setDay(currentDay);
-        newComplaint.setMonth(currentMonth);
-        newComplaint.setYear(currentYear);
-        newComplaint.setReplyText("");
-        sendComplaint.setVisible(false);
-        complaintText.setVisible(false);
-        UpdateMessage new_msg=new UpdateMessage("complaint","add");
-        new_msg.setComplaint(newComplaint);
+        GetAllComplaints allComplaints = new GetAllComplaints();
+        System.out.println("send request for complaints !!");
         try {
-            System.out.println("before sending updateMessage to server ");
-            SimpleClient.getClient().sendToServer(new_msg); // sends the updated product to the server class
-            System.out.println("afater sending updateMessage to server ");
+            System.out.println("before sending the getAllComplaints " );
+            SimpleClient.getClient().sendToServer(allComplaints);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-
     }
 
     Order retrievedOrder = new Order();  // This is the order with theID
@@ -351,7 +329,7 @@ public class MyOrdersController {
 
             viewOrder.setVisible(true);  // Value injected by FXMLLoader
 
-            openComplaint.setVisible(true);  // Value injected by FXMLLoader
+            submitComplaint.setVisible(true);  // Value injected by FXMLLoader
 
             orderProducts.setVisible(true);
 
@@ -370,24 +348,8 @@ public class MyOrdersController {
                 }
             }
             SelectedOrder = retrievedOrder;
-            String currentProduct = "";
-            String MyProducts = retrievedOrder.getProducts();
-            orderProducts.getItems().clear();
-            for(int i = 0 ; i < MyProducts.length() ; i++)
-            {
-                if(MyProducts.charAt(i) != 37)
-                {
-                    currentProduct = currentProduct + Character.toString(MyProducts.charAt(i));
-                }
-                else if(currentProduct != "")
-                {
-                    orderProducts.getItems().add(currentProduct);
-                    currentProduct = "";
-                }
-                else
-                    currentProduct = "";
-            }
-            openComplaint.setVisible(true);
+            populateOrderProductsList(retrievedOrder);
+            submitComplaint.setVisible(true);
             orderID.setText(String.valueOf(retrievedOrder.getOrderID()));
             accountID.setText(String.valueOf(currentUser.getAccountID()));
             creditNumber.setText(String.valueOf(retrievedOrder.getCreditCardNumber()));
@@ -433,6 +395,55 @@ public class MyOrdersController {
     int currentOrderShopID;
     List<Order> allOrders = new ArrayList<Order>();
 
+    private void populateOrderProductsList(Order order) {
+        orderProducts.getItems().clear();
+        if (order == null) {
+            return;
+        }
+        String products = order.getProducts();
+        if (products == null || products.isBlank()) {
+            return;
+        }
+        List<String> formatted = formatProductsForDisplay(products);
+        orderProducts.getItems().addAll(formatted);
+    }
+
+    private List<String> formatProductsForDisplay(String products) {
+        List<String> items = new ArrayList<>();
+        if (products == null || products.isBlank()) {
+            return items;
+        }
+        if (products.contains(":")) {
+            String[] tokens = products.split(",");
+            for (String token : tokens) {
+                String trimmed = token.trim();
+                if (trimmed.isEmpty()) {
+                    continue;
+                }
+                String[] parts = trimmed.split(":");
+                try {
+                    int productId = Integer.parseInt(parts[0].trim());
+                    int qty = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 1;
+                    Product product = SimpleClient.findCachedProductById(productId);
+                    String name = product != null ? product.getName() : "Product #" + productId;
+                    items.add(name + " x" + qty);
+                } catch (NumberFormatException ignored) {
+                    // fallback handled below
+                }
+            }
+            if (!items.isEmpty()) {
+                return items;
+            }
+        }
+        for (String token : products.split("%")) {
+            String trimmed = token.trim();
+            if (!trimmed.isEmpty()) {
+                items.add(trimmed);
+            }
+        }
+        return items;
+    }
+
 
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -448,7 +459,6 @@ public class MyOrdersController {
         assert RecepNumber != null : "fx:id=\"RecepNumber\" was not injected: check your FXML file 'myorders.fxml'.";
         assert accountID != null : "fx:id=\"accountID\" was not injected: check your FXML file 'myorders.fxml'.";
         assert backToCatalog != null : "fx:id=\"backToCatalog\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert complaintText != null : "fx:id=\"complaintText\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditCVV != null : "fx:id=\"creditCVV\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditExpire != null : "fx:id=\"creditExpire\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditNumber != null : "fx:id=\"creditNumber\" was not injected: check your FXML file 'myorders.fxml'.";
@@ -458,11 +468,10 @@ public class MyOrdersController {
         assert deliverStatus != null : "fx:id=\"deliverStatus\" was not injected: check your FXML file 'myorders.fxml'.";
         assert gift != null : "fx:id=\"gift\" was not injected: check your FXML file 'myorders.fxml'.";
         assert greetingText != null : "fx:id=\"greetingText\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert openComplaint != null : "fx:id=\"openComplaint\" was not injected: check your FXML file 'myorders.fxml'.";
         assert orderID != null : "fx:id=\"orderID\" was not injected: check your FXML file 'myorders.fxml'.";
         assert orderList != null : "fx:id=\"orderList\" was not injected: check your FXML file 'myorders.fxml'.";
         assert refresh != null : "fx:id=\"refresh\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert sendComplaint != null : "fx:id=\"sendComplaint\" was not injected: check your FXML file 'myorders.fxml'.";
+        assert submitComplaint != null : "fx:id=\"submitComplaint\" was not injected: check your FXML file 'myorders.fxml'.";
         assert shopID != null : "fx:id=\"shopID\" was not injected: check your FXML file 'myorders.fxml'.";
         assert text1 != null : "fx:id=\"text1\" was not injected: check your FXML file 'myorders.fxml'.";
         assert text10 != null : "fx:id=\"text10\" was not injected: check your FXML file 'myorders.fxml'.";
@@ -488,8 +497,6 @@ public class MyOrdersController {
 
 
         wait.setVisible(true);
-        complaintText.setVisible(false);
-        sendComplaint.setVisible(false);
         cancelButton.setVisible(false);
 
         viewOrder.setText("Load Orders");
@@ -511,8 +518,7 @@ public class MyOrdersController {
         orderID.setVisible(false);  // Value injected by FXMLLoader
         shopID.setVisible(false);  // Value injected by FXMLLoader
         totalPrice.setVisible(false);  // Value injected by FXMLLoader
-        complaintText.setVisible(false);  // Value injected by FXMLLoader
-        openComplaint.setVisible(false);  // Value injected by FXMLLoader
+        submitComplaint.setVisible(false);  // Value injected by FXMLLoader
         orderProducts.setVisible(false);
         refundDecisionLabel.setVisible(false);
 

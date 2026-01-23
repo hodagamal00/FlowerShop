@@ -152,6 +152,11 @@
                            </HBox>
                         </VBox>
                      </HBox>
+
+                     <HBox spacing="20.0" alignment="CENTER_LEFT">
+                        <Label fx:id="currentPeriodLabel" text="Period A: -" textFill="#666666" />
+                        <Label fx:id="previousPeriodLabel" text="Period B: -" textFill="#666666" />
+                     </HBox>
                   </VBox>
 
                   <!-- Revenue Comparison Chart -->
