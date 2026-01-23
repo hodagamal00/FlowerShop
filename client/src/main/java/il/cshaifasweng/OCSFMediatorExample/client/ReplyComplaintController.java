@@ -244,12 +244,11 @@ public class ReplyComplaintController {
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("WorkerDashboard.fxml"));
         Parent roott = loader.load();
-        Stage stage = new Stage();
+        Stage stage = (Stage) backButton.getScene().getWindow();
         stage.setScene(new Scene(roott));
         stage.setTitle("Worker Dashboard");
+        stage.setMaximized(true);
         stage.show();
-        Stage stagee = (Stage)backButton.getScene().getWindow();
-        stagee.close();
 
     }
 
