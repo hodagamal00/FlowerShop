@@ -1335,11 +1335,6 @@ private static SessionFactory cachedSessionFactory;
 			int privilegeLevel = account.getPrivilegeLevel();
 			if (privilegeLevel == 1) {
 				query.where(builder.equal(root.get("CustomerID"), account.getAccountID()));
-			} else if (privilegeLevel >= 2 && privilegeLevel < 4) {
-				int branchId = resolveBranchId(account);
-				if (branchId > 0) {
-					query.where(builder.equal(root.get("shopID"), branchId));
-				}
 			}
 		}
 		List<Complaint> result = session.createQuery(query).getResultList();
