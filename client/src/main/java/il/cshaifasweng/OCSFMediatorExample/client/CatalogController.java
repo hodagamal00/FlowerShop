@@ -16,13 +16,10 @@ import javafx.scene.layout.VBox;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 // Added for detailed product navigation
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.Node;
@@ -30,8 +27,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -611,11 +606,7 @@ public class CatalogController {
 			button.setText("Edit");
 			button.setOnAction(event -> {
 				setCurrent_button(product);
-				try {
-					App.setRoot("secondary");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				NavigationService.getInstance().navigate("CatalogManagement");
 			});
 		} else {
 			button.setText("Add to Cart");
@@ -1357,21 +1348,11 @@ public class CatalogController {
 	}
 
 	private void openProductDetailsModal(Product product) {
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("ProductDetailsModal.fxml"));
-			Parent root = loader.load();
-			ProductDetailsController controller = loader.getController();
-			controller.setProduct(product);
-
-			Stage stage = new Stage();
-			stage.initModality(Modality.APPLICATION_MODAL);
-			stage.setTitle(product.getName());
-			stage.setScene(new Scene(root));
-			stage.setResizable(false);
-			stage.showAndWait();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (product == null) {
+			return;
 		}
+		ProductDetailsController.setPendingProduct(product);
+		NavigationService.getInstance().navigate("ProductDetails");
 	}
 
 

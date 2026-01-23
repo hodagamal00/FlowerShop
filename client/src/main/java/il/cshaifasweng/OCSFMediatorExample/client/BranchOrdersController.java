@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 
 public class BranchOrdersController {
 
-    @FXML private Button dashboardBtn;
-    @FXML private Button homeBtn;
     @FXML private ComboBox<String> statusFilterCombo;
     @FXML private TextField searchField;
     @FXML private Button searchBtn;
@@ -53,6 +51,9 @@ public class BranchOrdersController {
 
     @FXML
     void initialize() {
+        if (!AccessGuard.requireMinPrivilege(2)) {
+            return;
+        }
         EventBus.getDefault().register(this);
         setupStatusFilter();
         setupTable();
@@ -112,7 +113,9 @@ public class BranchOrdersController {
 
     private void requestOrders() {
         try {
-            SimpleClient.getClient().sendToServer(new getAllOrdersMessage());
+            getAllOrdersMessage message = new getAllOrdersMessage();
+            message.setBranchId(currentBranchId);
+            SimpleClient.getClient().sendToServer(message);
         } catch (IOException e) {
             showError("Unable to load orders. Please try again.");
         }
@@ -180,16 +183,6 @@ public class BranchOrdersController {
         showSuccess("Receipt preview generated");
     }
 
-    @FXML
-    void goToDashboard() {
-        NavigationService.getInstance().navigate("WorkerDashboard");
-    }
-
-    @FXML
-    void goToHome() {
-        NavigationService.getInstance().navigate("Catalog");
-    }
-
     @Subscribe
     public void passOrders(PassOrdersFromServer passOrders) {
         List<Order> receivedOrders = passOrders.getRecievedOrders();
@@ -248,7 +241,15 @@ public class BranchOrdersController {
             .collect(Collectors.toList());
 
         filteredOrders.setAll(filtered);
-        orderCountLabel.setText(String.format("(%d total)", filteredOrders.size()));
+        int count = filteredOrders.size();
+        orderCountLabel.setText(String.format("(%d total)", count));
+        if (count == 0) {
+            errorMessage.setText("No orders found.");
+            errorMessage.setVisible(true);
+            successMessage.setVisible(false);
+        } else if (errorMessage.isVisible() && "No orders found.".equals(errorMessage.getText())) {
+            errorMessage.setVisible(false);
+        }
     }
 
     private boolean matchesSearch(OrderRow order, String searchTerm) {

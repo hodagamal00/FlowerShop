@@ -10,7 +10,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 
@@ -42,9 +41,6 @@ public class ProductDetailsController {
     @FXML private Button buyNowBtn;
     @FXML private Label successMessage;
     @FXML private Label errorMessage;
-    @FXML private Button backToCatalogBtn;
-    @FXML private Button viewCartBtn;
-    @FXML private Button closeBtn;
 
     private static Product pendingProduct;
     private Product currentProduct;
@@ -152,10 +148,6 @@ public class ProductDetailsController {
             return;
         }
 
-        if (!ensureLoggedIn("add items to cart")) {
-            return;
-        }
-
         // Validate custom product fields if applicable
         if (currentProduct.isCustomProduct()) {
             if (customPriceField.getText().isEmpty()) {
@@ -227,27 +219,6 @@ public class ProductDetailsController {
         );
     }
 
-    @FXML
-    void viewCart() {
-        if (!ensureLoggedIn("view the cart")) {
-            return;
-        }
-        NavigationService.getInstance().navigate("cart");
-    }
-
-    @FXML
-    void goBackToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
-    }
-
-    @FXML
-    void closeModal() {
-        Stage stage = getCurrentStage();
-        if (stage != null) {
-            stage.close();
-        }
-    }
-
     private void setProductImage(Product product) {
         Image image = null;
         String imagePath = product.getImage();
@@ -286,16 +257,6 @@ public class ProductDetailsController {
         if (image != null && productImage != null) {
             productImage.setImage(image);
         }
-    }
-
-    private Stage getCurrentStage() {
-        if (discountedPriceText != null && discountedPriceText.getScene() != null) {
-            return (Stage) discountedPriceText.getScene().getWindow();
-        }
-        if (productNameText != null && productNameText.getScene() != null) {
-            return (Stage) productNameText.getScene().getWindow();
-        }
-        return null;
     }
 
     private boolean ensureLoggedIn(String actionLabel) {

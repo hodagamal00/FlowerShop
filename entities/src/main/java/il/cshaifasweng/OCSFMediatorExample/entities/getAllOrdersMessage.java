@@ -10,6 +10,7 @@ import java.util.List;
 public class getAllOrdersMessage implements Serializable { // added 18/7
 
     List<Order> orderList ;
+    private int branchId;
     public getAllOrdersMessage(){
 
     }
@@ -18,5 +19,13 @@ public class getAllOrdersMessage implements Serializable { // added 18/7
     }
     public List<Order> getOrderList(){
         return orderList;
+    }
+
+    public int getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(int branchId) {
+        this.branchId = branchId;
     }
 }

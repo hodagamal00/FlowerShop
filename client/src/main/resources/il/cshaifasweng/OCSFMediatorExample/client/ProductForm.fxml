@@ -24,39 +24,13 @@
 
             <children>
 
-                <!-- Header -->
-                <AnchorPane styleClass="navbar"
-                            layoutY="0.0"
-                            prefHeight="60.0" prefWidth="600.0">
-                    <children>
-                        <Label fx:id="formTitleLabel"
-                               text="Add New Product"
-                               textFill="WHITE"
-                               layoutX="30.0" layoutY="15.0">
-                            <font>
-                                <Font name="System Bold" size="24.0"/>
-                            </font>
-                        </Label>
-
-                        <!-- Scroll down button -->
-                        <Button fx:id="scrollDownBtn"
-                                layoutX="430.0" layoutY="12.0"
-                                mnemonicParsing="false"
-                                onAction="#scrollToBottom"
-                                prefHeight="36.0" prefWidth="140.0"
-                                styleClass="btn-secondary"
-                                text="⇩ Scroll Down">
-                            <font>
-                                <Font name="System Bold" size="13.0"/>
-                            </font>
-                        </Button>
-                    </children>
-                </AnchorPane>
-
                 <!-- Form Content -->
                 <VBox spacing="18.0"
-                      layoutX="30.0" layoutY="80.0"
+                      layoutX="30.0" layoutY="20.0"
                       prefWidth="540.0">
+                    <Label fx:id="formTitleLabel"
+                           text="Add New Product"
+                           styleClass="page-title"/>
 
                     <!-- Product Image Section -->
                     <VBox spacing="12.0"
@@ -270,17 +244,6 @@
                            textFill="#e57373"
                            visible="false"
                            style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
-
-                    <!-- Scroll to Top Button -->
-                    <HBox alignment="CENTER"
-                          style="-fx-padding: 0 0 20 0;">
-                        <Button fx:id="scrollUpBtn"
-                                mnemonicParsing="false"
-                                onAction="#scrollToTop"
-                                prefWidth="200.0" prefHeight="36.0"
-                                styleClass="btn-secondary"
-                                text="⇧ Back to Top"/>
-                    </HBox>
 
                 </VBox>
             </children>

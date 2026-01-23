@@ -13,7 +13,6 @@ import java.util.Random;
 
 public class NetworkPromotionsController {
 
-    @FXML private Button backButton;
     @FXML private Label formTitleLabel;
     @FXML private TextField promotionNameField;
     @FXML private TextField discountField;
@@ -183,15 +182,6 @@ public class NetworkPromotionsController {
         productsOnSaleLabel.setText(String.valueOf(active * 50));
         Random r = new Random();
         salesIncreaseLabel.setText(String.format("+%.1f%%", 10 + r.nextDouble() * 15));
-    }
-
-    @FXML
-    private void handleBackToDashboard() {
-        try {
-            App.setRoot("NetworkDashboard");
-        } catch (IOException e) {
-            showError("Failed to navigate.");
-        }
     }
 
     private void showError(String msg) {

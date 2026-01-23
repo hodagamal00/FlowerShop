@@ -11,28 +11,13 @@
             fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AdminControlController"
             stylesheets="@styles.css">
 
-   <!-- Sticky Header -->
-   <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="64.0" spacing="20.0"
-            styleClass="app-navbar elevated">
-         <children>
-            <Label text="Admin Control Panel" styleClass="page-title"/>
-            <HBox spacing="8.0" HBox.hgrow="ALWAYS"/>
-            <Button fx:id="changeDetailsButton" text="Change Details"
-                    styleClass="pill" visible="false"/>
-            <Button fx:id="backButton" onAction="#openCatalog" text="← Back to Catalog"
-                    styleClass="secondary pill"/>
-         </children>
-         <padding><Insets left="20.0" right="20.0"/></padding>
-      </HBox>
-   </top>
-
    <!-- Scrollable center -->
    <center>
       <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" pannable="true"
                   styleClass="app-scroll-container">
          <content>
             <VBox alignment="TOP_CENTER" spacing="20.0">
+               <Label text="Admin Control Panel" styleClass="page-title"/>
                <!-- Two-column admin layout -->
                <HBox spacing="20.0" maxWidth="1200.0">
                   <!-- Left: Accounts -->

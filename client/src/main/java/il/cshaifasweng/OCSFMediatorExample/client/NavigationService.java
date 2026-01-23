@@ -63,15 +63,9 @@ public class NavigationService {
      */
     public void navigate(String fxml) {
         if (appShellController == null || !appShellController.isActive()) {
-            // Controller not yet registered; fall back to the legacy scene
-            // replacement to keep navigation working in standalone stages.
-            try {
-                App.setRoot(resolveViewName(fxml));
-            } catch (IOException e) {
-                // If we cannot swap roots yet, remember the request so it can be
-                // executed once the shell is ready.
-                pendingView = fxml;
-            }
+            // Controller not yet registered; remember the request so it can be
+            // executed once the shell is ready.
+            pendingView = fxml;
             return;
         }
         try {

@@ -15,20 +15,8 @@
    <content>
       <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
          <children>
-            <!-- Header -->
-            <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="80.0" prefWidth="1520.0" style="-fx-background-color: #2c3e50;">
-               <children>
-                  <Label layoutX="20.0" layoutY="25.0" text="My Orders" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="28.0" />
-                     </font>
-                  </Label>
-                  <Button fx:id="backToCatalog" layoutX="1350.0" layoutY="25.0" mnemonicParsing="false" onAction="#GoToCatalog" prefHeight="35.0" prefWidth="150.0" style="-fx-font-size: 14px;" text="← Back to Catalog" />
-               </children>
-            </AnchorPane>
-
             <!-- Left Panel - Orders List -->
-            <AnchorPane layoutX="20.0" layoutY="100.0" prefHeight="680.0" prefWidth="350.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
+            <AnchorPane layoutX="20.0" layoutY="20.0" prefHeight="740.0" prefWidth="350.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
                <children>
                   <VBox layoutX="15.0" layoutY="15.0" prefWidth="320.0" spacing="15.0">
                      <Text fill="#2c3e50" strokeType="OUTSIDE" text="Your Orders">
@@ -45,7 +33,7 @@
             </AnchorPane>
 
             <!-- Right Panel - Order Details -->
-            <AnchorPane layoutX="390.0" layoutY="100.0" prefHeight="680.0" prefWidth="1110.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
+            <AnchorPane layoutX="390.0" layoutY="20.0" prefHeight="740.0" prefWidth="1110.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
                <children>
                   <!-- General Information Section -->
                   <VBox layoutX="30.0" layoutY="20.0" prefWidth="500.0" spacing="15.0">

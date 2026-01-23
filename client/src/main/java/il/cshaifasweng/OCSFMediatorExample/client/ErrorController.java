@@ -7,7 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
@@ -22,20 +21,11 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Account;
  */
 public class ErrorController {
 
-    @FXML private Label usernameLabel;
-    @FXML private Button logoutBtn;
-    
-    @FXML private Hyperlink catalogLink;
-    @FXML private Hyperlink ordersLink;
-    @FXML private Hyperlink complaintsLink;
-    @FXML private Hyperlink accountLink;
-    
     @FXML private Label errorTitleLabel;
     @FXML private Label errorMessageLabel;
     @FXML private Label errorCodeLabel;
     @FXML private Label errorDetailsLabel;
     
-    @FXML private Button backBtn;
     @FXML private Button homeBtn;
     @FXML private Button retryBtn;
 
@@ -75,37 +65,8 @@ public class ErrorController {
 
     @FXML
     private void initialize() {
-        // Load current user information
-        loadUserInfo();
-        
         // Load error information
         loadErrorInfo();
-        
-        // Configure navigation visibility based on user role
-        configureNavigationByRole();
-    }
-
-    /**
-     * Load current user information
-     */
-    private void loadUserInfo() {
-        try {
-            Account currentUser = SimpleClient.getAccount();
-            if (currentUser != null) {
-                String displayName = currentUser.getFullName();
-                if (displayName == null || displayName.isBlank()) {
-                    displayName = currentUser.getEmail();
-                }
-                if (displayName == null || displayName.isBlank()) {
-                    displayName = "User";
-                }
-                usernameLabel.setText(displayName);
-            } else {
-                usernameLabel.setText("Guest");
-            }
-        } catch (Exception e) {
-            usernameLabel.setText("Guest");
-        }
     }
 
     /**
@@ -118,81 +79,6 @@ public class ErrorController {
         errorDetailsLabel.setText(lastErrorDetails);
     }
 
-    /**
-     * Configure navigation links based on user role/privilege
-     */
-    private void configureNavigationByRole() {
-        // Get current user privilege level
-        int privilegeLevel = getPrivilegeLevel();
-        
-        // Show/hide links based on privilege
-        if (privilegeLevel < 1) { // Guest
-            ordersLink.setVisible(false);
-            complaintsLink.setVisible(false);
-            accountLink.setVisible(false);
-            logoutBtn.setVisible(false);
-        }
-    }
-
-    /**
-     * Handle navigation to catalog
-     */
-    @FXML
-    private void handleCatalog(ActionEvent event) {
-        navigateToPage(event, "catalog");
-    }
-
-    /**
-     * Handle navigation to orders
-     */
-    @FXML
-    private void handleOrders(ActionEvent event) {
-        if (SimpleClient.getUser() == null) {
-            NavigationService.getInstance().navigate("Login");
-            return;
-        }
-        navigateToPage(event, "orders");
-    }
-
-    /**
-     * Handle navigation to complaints
-     */
-    @FXML
-    private void handleComplaints(ActionEvent event) {
-        if (SimpleClient.getUser() == null) {
-            NavigationService.getInstance().navigate("Login");
-            return;
-        }
-        navigateToPage(event, "complaints");
-    }
-
-    /**
-     * Handle navigation to account
-     */
-    @FXML
-    private void handleAccount(ActionEvent event) {
-        if (SimpleClient.getUser() == null) {
-            NavigationService.getInstance().navigate("Login");
-            return;
-        }
-        navigateToPage(event, "account");
-    }
-
-    /**
-     * Handle logout
-     */
-    @FXML
-    private void handleLogout(ActionEvent event) {
-        SimpleClient.logoutCurrentUser();
-        navigateToPage(event, "catalog");
-    }
-
-    /**
-     * Handle go back button - returns to previous page or catalog
-     */
-    private void handleGoBack(ActionEvent event) {
-        navigateToPage(event, lastPage);
-    }
 
     /**
      * Handle go home button - returns to catalog

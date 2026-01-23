@@ -7,14 +7,10 @@ import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -47,7 +43,6 @@ public class LogInSecondary {
     private Button LogIn;
 
     @FXML
-    private Button bak;
 
     @FXML
     private TextField Password;
@@ -72,7 +67,6 @@ public class LogInSecondary {
         assert Employee_login != null : "fx:id=\"Employee_login\" was not injected: check your FXML file 'LogInSecond.fxml'.";
         Customer_login.setVisible(true);
         Employee_login.setVisible(true);
-        bak.setVisible(true);
         Email.setVisible(false);
         Password.setVisible(false);
         LogIn.setVisible(false);
@@ -168,12 +162,6 @@ public class LogInSecondary {
     }
 
     @FXML
-    void backkk(ActionEvent event) throws IOException {
-        // Navigate back to the primary login screen inside the AppShell.
-        NavigationService.getInstance().navigate("Login");
-    }
-
-    @FXML
     public void LogIn(javafx.event.ActionEvent actionEvent) throws IOException {
         CheckMail checkMailRequest  = new CheckMail(Email.getText(),login_flag,Password.getText()); // check if employee's/customer's email exists
         try
@@ -243,15 +231,7 @@ public class LogInSecondary {
         System.out.println("Checking Mail IN DB");
         if(checkEmailPass.getexists()==true)
         {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-            Parent roott = loader.load();
-            CatalogController cc = loader.getController();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(roott));
-            stage.setTitle("Catalog");
-            stage.show();
-            Stage stagee = (Stage)LogIn.getScene().getWindow();
-            stagee.close();
+            NavigationService.getInstance().navigate("Catalog");
         }
         else{
             ErrorMsgPass.setVisible(true);

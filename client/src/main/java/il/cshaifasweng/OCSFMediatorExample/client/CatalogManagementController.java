@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
 
 public class CatalogManagementController {
 
-    @FXML private Button dashboardBtn;
-    @FXML private Button homeBtn;
     @FXML private Button addProductBtn;
     @FXML private TextField searchField;
     @FXML private Button searchBtn;
@@ -68,6 +66,9 @@ public class CatalogManagementController {
 
     @FXML
     void initialize() {
+        if (!AccessGuard.requireMinPrivilege(2)) {
+            return;
+        }
         // Register this controller with EventBus to receive updates from the server
         EventBus.getDefault().register(this);
 
@@ -476,30 +477,6 @@ public class CatalogManagementController {
         colorFilter.getSelectionModel().clearSelection();
         applyFilters();
         showSuccess("Filters cleared");
-    }
-
-    @FXML
-    void goToDashboard() {
-        loadScene("WorkerDashboard.fxml", dashboardBtn);
-    }
-
-    @FXML
-    void goToHome() {
-        loadScene("Catalog.fxml", homeBtn);
-    }
-
-    private void loadScene(String fxml, Button sourceButton) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
-            Parent root = loader.load();
-            Stage stage = (Stage) sourceButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Error loading page: " + e.getMessage());
-        }
     }
 
     private void showSuccess(String message) {

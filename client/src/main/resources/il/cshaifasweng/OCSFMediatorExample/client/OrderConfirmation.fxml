@@ -22,21 +22,8 @@
     <content>
         <AnchorPane maxHeight="800.0" maxWidth="1520.0" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
             <children>
-                <!-- Top Navigation Bar -->
-                <AnchorPane styleClass="navbar" layoutY="0.0" maxHeight="70.0" minHeight="70.0" prefHeight="70.0" prefWidth="1520.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <children>
-                        <Label text="FlowerShop" textFill="WHITE" layoutX="30.0" layoutY="20.0" styleClass="header-title">
-                            <font>
-                                <Font name="System Bold" size="28.0" />
-                            </font>
-                        </Label>
-                        <Button fx:id="backToHomeBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToHome" text="Home" layoutX="280.0" layoutY="20.0" prefWidth="100.0" />
-                        <Button fx:id="viewOrdersBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToMyOrders" text="My Orders" layoutX="400.0" layoutY="20.0" prefWidth="120.0" />
-                    </children>
-                </AnchorPane>
-
                 <!-- Main Content Area -->
-                <ScrollPane layoutY="70.0" prefWidth="1520.0" prefHeight="730.0" fitToWidth="true" styleClass="scroll-pane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0" AnchorPane.bottomAnchor="0.0">
+                <ScrollPane layoutY="0.0" prefWidth="1520.0" prefHeight="800.0" fitToWidth="true" styleClass="scroll-pane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0">
                     <content>
                         <AnchorPane prefWidth="1480.0" prefHeight="900.0" style="-fx-background-color: #faf8fc;">
                             <children>
@@ -308,11 +295,6 @@
                                         <!-- Action Buttons -->
                                         <HBox spacing="20.0" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
                                             <Button fx:id="viewOrderDetailsBtn" styleClass="btn-primary" mnemonicParsing="false" onAction="#viewOrderDetails" text="View Order Details" prefWidth="200.0" prefHeight="45.0">
-                                                <font>
-                                                    <Font name="System Bold" size="14.0" />
-                                                </font>
-                                            </Button>
-                                            <Button fx:id="continueshoppingBtn" styleClass="btn-secondary" mnemonicParsing="false" onAction="#goToHome" text="Shop More" prefWidth="200.0" prefHeight="45.0">
                                                 <font>
                                                     <Font name="System Bold" size="14.0" />
                                                 </font>

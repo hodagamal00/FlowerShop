@@ -32,39 +32,10 @@
       >
 
          <!-- Navigation Bar -->
-         <HBox alignment="CENTER_LEFT" layoutY="0.0" prefHeight="70.0" prefWidth="1200.0"
-               spacing="20.0" styleClass="navbar" AnchorPane.leftAnchor="0.0"
-               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <padding>
-               <Insets left="20.0" right="20.0" />
-            </padding>
-
-            <Label text="FlowerShop Network" styleClass="navbar-brand">
-               <font>
-                  <Font name="System Bold" size="24.0" />
-               </font>
-            </Label>
-
-            <Label text="Network Promotions" styleClass="navbar-title">
-               <font>
-                  <Font name="System Bold" size="18.0" />
-               </font>
-            </Label>
-
-            <HBox HBox.hgrow="ALWAYS" />
-
-            <Button fx:id="backButton" onAction="#handleBackToDashboard"
-                    styleClass="btn-secondary" text="← Back to Dashboard">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Button>
-         </HBox>
-
          <!-- Main Content Area -->
-         <ScrollPane fitToWidth="true" layoutY="70.0" prefHeight="730.0" prefWidth="1200.0"
+         <ScrollPane fitToWidth="true" layoutY="0.0" prefHeight="800.0" prefWidth="1200.0"
                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
+                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <content>
                <VBox spacing="25.0" styleClass="content-container">
                   <padding>

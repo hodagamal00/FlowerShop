@@ -4,12 +4,8 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -121,8 +117,6 @@ public class CheckoutController {
     @FXML
     private Text orderTimingText;
 
-    @FXML
-    private Button back;
 
     @FXML // fx:id="noDate"
     private Text noDate; // Value injected by FXMLLoader
@@ -151,25 +145,6 @@ public class CheckoutController {
     private static final double DELIVERY_FEE = 20.0;
 
 
-    @FXML
-    void openCatalog(ActionEvent event) throws IOException {
-        NavigationService.getInstance().navigate("Catalog");
-
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-
-    }
     //String email_regex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)*(\\\\.[A-Za-z]{2,})$";
     String creditCard_regex = "^\\d{16}$";
     String CVV_regex = "^\\d{3}$";
@@ -561,7 +536,6 @@ public class CheckoutController {
         assert totalText != null : "fx:id=\"totalText\" was not injected: check your FXML file 'checkout.fxml'.";
         assert orderTimingText != null : "fx:id=\"orderTimingText\" was not injected: check your FXML file 'checkout.fxml'.";
         assert anotherMethodBox != null : "fx:id=\"anotherMethodBox\" was not injected: check your FXML file 'checkout.fxml'.";
-        assert back != null : "fx:id=\"back\" was not injected: check your FXML file 'checkout.fxml'.";
         assert chooseShopID != null : "fx:id=\"chooseShopID\" was not injected: check your FXML file 'checkout.fxml'.";
         assert creditNumberField != null : "fx:id=\"creditNumberField\" was not injected: check your FXML file 'checkout.fxml'.";
         assert creditNumberText != null : "fx:id=\"creditNumberText\" was not injected: check your FXML file 'checkout.fxml'.";
@@ -655,7 +629,6 @@ public class CheckoutController {
         applyGreetingVisibility();
 
         placeOrderButton.setDisable(true);
-        back.setDisable(true);
         chooseShopID.setVisible(false);
 
         dayCheckout.setOnAction(event -> updateOrderSummary());
@@ -701,8 +674,6 @@ public class CheckoutController {
                             return;
                         }
                         placeOrderButton.setDisable(false);
-                        back.setDisable(false);
-
                         if(currentUser.getBelongShop() == 0) {
                             chooseShopID.getItems().add("ID 0: - Chain");
                             chooseShopID.getItems().add("ID 1: Tiberias, Big Danilof");
@@ -788,15 +759,6 @@ public class CheckoutController {
 
     private void navigateToOrderConfirmation(Order order, boolean delivery) {
         OrderConfirmationController.setOrder(order, delivery);
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("OrderConfirmation.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) placeOrderButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        NavigationService.getInstance().navigate("OrderConfirmation");
     }
 }

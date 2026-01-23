@@ -3,11 +3,9 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 
 import java.util.List;
 
@@ -17,21 +15,12 @@ import java.util.List;
  */
 public class AccessDeniedController {
 
-    @FXML private Label usernameLabel;
-    @FXML private Button logoutBtn;
-    
-    @FXML private Hyperlink catalogLink;
-    @FXML private Hyperlink ordersLink;
-    @FXML private Hyperlink complaintsLink;
-    @FXML private Hyperlink accountLink;
-    
     @FXML private Label deniedMessageLabel;
     @FXML private Label currentRoleLabel;
     @FXML private Label requiredRoleLabel;
 
     @FXML private VBox privilegeDetailsBox;
 
-    @FXML private Button backBtn;
     @FXML private Button catalogBtn;
 
     // Access context
@@ -133,39 +122,10 @@ public class AccessDeniedController {
 
     @FXML
     private void initialize() {
-        // Load current user information
-        loadUserInfo();
-        
         // Load access denial information
         loadAccessInfo();
-        
-        // Configure navigation visibility based on user role
-        configureNavigationByRole();
         // Build privilege breakdown
         populatePrivilegeDetails();
-    }
-
-    /**
-     * Load current user information
-     */
-    private void loadUserInfo() {
-        try {
-            Account currentUser = SimpleClient.getUser();
-            if (currentUser != null) {
-                String displayName = currentUser.getFullName();
-                if (displayName == null || displayName.isBlank()) {
-                    displayName = currentUser.getEmail();
-                }
-                if (displayName == null || displayName.isBlank()) {
-                    displayName = "User";
-                }
-                usernameLabel.setText(displayName);
-            } else {
-                usernameLabel.setText("Guest");
-            }
-        } catch (Exception e) {
-            usernameLabel.setText("Guest");
-        }
     }
 
     /**
@@ -192,32 +152,6 @@ public class AccessDeniedController {
             message = "You don't have permission to access the " + attemptedPage + " page.";
         }
         deniedMessageLabel.setText(message);
-    }
-
-    /**
-     * Configure navigation links based on user role/privilege
-     */
-    private void configureNavigationByRole() {
-        // Get current user privilege level
-        int privilegeLevel = currentPrivilegeLevel;
-
-        boolean loggedIn = privilegeLevel >= 1;
-
-        setLinkVisibility(ordersLink, loggedIn);
-        setLinkVisibility(complaintsLink, loggedIn);
-        setLinkVisibility(accountLink, loggedIn);
-
-        if (logoutBtn != null) {
-            logoutBtn.setVisible(loggedIn);
-            logoutBtn.setManaged(loggedIn);
-        }
-    }
-
-    private void setLinkVisibility(Hyperlink link, boolean visible) {
-        if (link != null) {
-            link.setVisible(visible);
-            link.setManaged(visible);
-        }
     }
 
     private void populatePrivilegeDetails() {
@@ -259,59 +193,6 @@ public class AccessDeniedController {
     @FXML
     private void handleCatalog(ActionEvent event) {
         navigateToPage(event, "catalog");
-    }
-
-    /**
-     * Handle navigation to orders
-     */
-    @FXML
-    private void handleOrders(ActionEvent event) {
-        if (SimpleClient.getUser() == null) {
-            NavigationService.getInstance().navigate("Login");
-            return;
-        }
-        navigateToPage(event, "orders");
-    }
-
-    /**
-     * Handle navigation to complaints
-     */
-    @FXML
-    private void handleComplaints(ActionEvent event) {
-        if (SimpleClient.getUser() == null) {
-            NavigationService.getInstance().navigate("Login");
-            return;
-        }
-        navigateToPage(event, "complaints");
-    }
-
-    /**
-     * Handle navigation to account
-     */
-    @FXML
-    private void handleAccount(ActionEvent event) {
-        if (SimpleClient.getUser() == null) {
-            NavigationService.getInstance().navigate("Login");
-            return;
-        }
-        navigateToPage(event, "account");
-    }
-
-    /**
-     * Handle logout
-     */
-    @FXML
-    private void handleLogout(ActionEvent event) {
-        SimpleClient.logoutCurrentUser();
-        navigateToPage(event, "catalog");
-    }
-
-    /**
-     * Handle go back button - returns to previous page or catalog
-     */
-    @FXML
-    private void handleGoBack(ActionEvent event) {
-        navigateToPage(event, returnPage);
     }
 
     /**

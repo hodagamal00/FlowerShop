@@ -23,20 +23,8 @@
     <content>
         <AnchorPane maxHeight="800.0" maxWidth="1520.0" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
             <children>
-                <!-- Top Navigation Bar -->
-                <AnchorPane styleClass="navbar" layoutY="0.0" maxHeight="70.0" minHeight="70.0" prefHeight="70.0" prefWidth="1520.0">
-                    <children>
-                        <Label text="FlowerShop" textFill="WHITE" layoutX="30.0" layoutY="20.0" styleClass="header-title">
-                            <font>
-                                <Font name="System Bold" size="28.0" />
-                            </font>
-                        </Label>
-                        <Button fx:id="backBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goBack" text="← Back to Orders" layoutX="280.0" layoutY="20.0" prefWidth="150.0" />
-                    </children>
-                </AnchorPane>
-
                 <!-- Main Content -->
-                <ScrollPane layoutY="70.0" prefWidth="1520.0" prefHeight="730.0" fitToWidth="true" styleClass="scroll-pane">
+                <ScrollPane layoutY="0.0" prefWidth="1520.0" prefHeight="800.0" fitToWidth="true" styleClass="scroll-pane">
                     <content>
                         <AnchorPane prefWidth="1480.0" prefHeight="1000.0" style="-fx-background-color: #faf8fc;">
                             <children>

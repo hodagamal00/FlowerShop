@@ -18,7 +18,6 @@ import java.util.List;
 public class BranchSettingsController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Branch Information
     @FXML private TextField branchNameField;
@@ -312,41 +311,12 @@ public class BranchSettingsController {
     }
     
     /**
-     * Navigate back to catalog
-     */
-    @FXML
-    private void handleBackToCatalog() {
-        // Check for unsaved changes
-        if (hasUnsavedChanges()) {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Unsaved Changes");
-            confirm.setHeaderText("You have unsaved changes");
-            confirm.setContentText("Do you want to leave without saving?");
-            
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    navigateToCatalog();
-                }
-            });
-        } else {
-            navigateToCatalog();
-        }
-    }
-    
-    /**
      * Check if there are unsaved changes
      */
     private boolean hasUnsavedChanges() {
         // TODO: Implement proper change detection
         // Compare current form values with originalSettings
         return false;
-    }
-    
-    /**
-     * Navigate to catalog page
-     */
-    private void navigateToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

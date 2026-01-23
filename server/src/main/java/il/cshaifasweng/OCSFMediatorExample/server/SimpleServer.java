@@ -400,6 +400,10 @@ private static SessionFactory cachedSessionFactory;
 
 					case "order":
 						if (updateClassFunction.equals("add")) {
+							if (!requirePrivilegeAtLeast(client, 1) || !isCustomer(client)) {
+								sendAuthError(client, "forbidden");
+								break;
+							}
 							System.out.println("arrived to here inside order add");
 							Order recievedOrder = recievedMessage.getOrder();
 							try {
@@ -621,17 +625,21 @@ private static SessionFactory cachedSessionFactory;
 			try {
 				localSession = sessionFactory.openSession();
 				tx1 = localSession.beginTransaction();
-				if (requirePrivilegeAtLeast(client, 1)) {
-					Account account = getClientAccount(client);
-					if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
-						sendAuthError(client, "forbidden");
-					} else {
-						getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
-						System.out.println("arrived to get all orders in simple server ! \n");
-						List<Order> orderList = getScopedOrders(localSession, account);
-						ordersToBeSent.setOrderList(orderList);
-						client.sendToClient(ordersToBeSent);
-					}
+				Account account = getClientAccount(client);
+				if (account == null) {
+					sendAuthError(client, "Access denied");
+				} else if (account.getPrivilegeLevel() < 1) {
+					sendAuthError(client, "Access denied");
+				} else if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
+					sendAuthError(client, "forbidden");
+				} else {
+					getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
+					System.out.println("arrived to get all orders in simple server ! \n");
+					getAllOrdersMessage request = (getAllOrdersMessage) msg;
+					int requestedBranchId = request != null ? request.getBranchId() : 0;
+					List<Order> orderList = getScopedOrders(localSession, account, requestedBranchId);
+					ordersToBeSent.setOrderList(orderList);
+					client.sendToClient(ordersToBeSent);
 				}
 				tx1.commit();
 			} catch (Exception ex) {
@@ -1637,7 +1645,7 @@ private static SessionFactory cachedSessionFactory;
 				&& (date.isEqual(endDate) || date.isBefore(endDate));
 	}
 
-	private static List<Order> getScopedOrders(Session session, Account account) {
+	private static List<Order> getScopedOrders(Session session, Account account, int requestedBranchId) {
 		System.out.println("Arrived to getScopedOrders 1");
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Order> query = builder.createQuery(Order.class);
@@ -1653,6 +1661,8 @@ private static SessionFactory cachedSessionFactory;
 				} else {
 					return Collections.emptyList();
 				}
+			} else if (privilegeLevel >= 4 && requestedBranchId > 0) {
+				query.where(builder.equal(root.get("shopID"), requestedBranchId));
 			}
 		}
 		List<Order> result = session.createQuery(query).getResultList();

@@ -12,11 +12,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import il.cshaifasweng.OCSFMediatorExample.client.SimpleClient;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -54,7 +50,6 @@ public class RegisterController {
     private Button RegisterButton;
 
     @FXML
-    private Button backk;
 
 
     @FXML
@@ -375,19 +370,6 @@ public class RegisterController {
             ErrorMsg.setText(event.getMessage());
             ErrorMsg.setVisible(true);
         });
-    }
-    @FXML
-    void backkk(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
-        Parent roott = loader.load();
-        LoginController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Login");
-        stage.show();
-        Stage stagee = (Stage) backk.getScene().getWindow();
-        // do what you have to do
-        stagee.close();
     }
     public LinkedList<String> getRegisteredAccounts(){
         return RegisteredAccounts;

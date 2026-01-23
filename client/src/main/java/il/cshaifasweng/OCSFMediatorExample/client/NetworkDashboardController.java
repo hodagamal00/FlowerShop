@@ -26,7 +26,6 @@ import java.util.Random;
 public class NetworkDashboardController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Network Statistics
     @FXML private Label totalBranchesLabel;
@@ -276,7 +275,7 @@ public class NetworkDashboardController {
     @FXML
     private void handleViewReports() {
         try {
-            App.setRoot("CrossBranchReports");
+            NavigationService.getInstance().navigate("CrossBranchReports");
         } catch (IOException e) {
             e.printStackTrace();
             showError("Failed to load Cross-Branch Reports page.");
@@ -289,7 +288,7 @@ public class NetworkDashboardController {
     @FXML
     private void handleGlobalSettings() {
         try {
-            App.setRoot("GlobalSettings");
+            NavigationService.getInstance().navigate("GlobalSettings");
         } catch (IOException e) {
             e.printStackTrace();
             showError("Failed to load Global Settings page.");
@@ -302,7 +301,7 @@ public class NetworkDashboardController {
     @FXML
     private void handleNetworkPromotions() {
         try {
-            App.setRoot("NetworkPromotions");
+            NavigationService.getInstance().navigate("NetworkPromotions");
         } catch (IOException e) {
             e.printStackTrace();
             showError("Failed to load Network Promotions page.");
@@ -315,19 +314,11 @@ public class NetworkDashboardController {
     @FXML
     private void handleRoleManagement() {
         try {
-            App.setRoot("RoleManagement");
+            NavigationService.getInstance().navigate("RoleManagement");
         } catch (IOException e) {
             e.printStackTrace();
             showError("Failed to load Role Management page.");
         }
-    }
-    
-    /**
-     * Navigate back to catalog
-     */
-    @FXML
-    private void handleBackToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**
