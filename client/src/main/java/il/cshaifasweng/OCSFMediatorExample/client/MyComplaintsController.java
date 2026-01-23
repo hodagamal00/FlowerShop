@@ -41,6 +41,9 @@ public class MyComplaintsController {
     @FXML // fx:id="complaintText"
     private TextArea complaintText; // Value injected by FXMLLoader
 
+    @FXML
+    private TextArea responseText;
+
     @FXML // fx:id="loadButton"
     private Button loadButton; // Value injected by FXMLLoader
 
@@ -149,6 +152,7 @@ public class MyComplaintsController {
         assert complaintID != null : "fx:id=\"complaintID\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintList != null : "fx:id=\"complaintList\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintText != null : "fx:id=\"complaintText\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert responseText != null : "fx:id=\"responseText\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert loadButton != null : "fx:id=\"loadButton\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert orderID != null : "fx:id=\"orderID\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert submitComplaint != null : "fx:id=\"submitComplaint\" was not injected: check your FXML file 'mycomplaints.fxml'.";
@@ -325,6 +329,7 @@ public class MyComplaintsController {
             refundMoney.setText("0");
         }
         complaintText.setText(selectedComplaint.getComplaintText());
+        responseText.setText(defaultIfBlank(selectedComplaint.getReplyText()));
         respondedAt.setText(formatDate(selectedComplaint.getRespondedAt()));
         compensationDecision.setText(defaultIfBlank(selectedComplaint.getCompensationDecision()));
         selectedOrderId = selectedComplaint.getOrderID();

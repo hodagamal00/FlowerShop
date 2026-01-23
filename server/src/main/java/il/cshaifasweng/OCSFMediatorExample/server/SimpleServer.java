@@ -432,13 +432,16 @@ private static SessionFactory cachedSessionFactory;
 							ComplaintUpdateManager.addComplaint(recievedComp);
 						} else if (updateClassFunction.equals("edit")) {
 							if (!requirePrivilegeAtLeast(client, 2)) {
+								client.sendToClient(new ComplaintUpdateResponse(false, "Access denied.", null));
 								break;
 							}
 							System.out.println("arrived to here inside complaint edit");
 							Complaint recievedComp = recievedMessage.getComplaint();
-							boolean replyLate = ComplaintUpdateManager.editComplaint(recievedComp);
-							if (replyLate) {
-								client.sendToClient("Reply sent after 24 hours");
+							try {
+								ComplaintUpdateResponse response = ComplaintUpdateManager.editComplaint(recievedComp);
+								client.sendToClient(response);
+							} catch (Exception ex) {
+								client.sendToClient(new ComplaintUpdateResponse(false, "Failed to update complaint response.", null));
 							}
 						}
 					break;
