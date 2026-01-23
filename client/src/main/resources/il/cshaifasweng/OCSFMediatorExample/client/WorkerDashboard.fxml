@@ -32,7 +32,8 @@
                                 <Font name="System Bold" size="28.0" />
                             </font>
                         </Label>
-                        <HBox spacing="12.0" layoutX="800.0" layoutY="20.0">
+                        <HBox spacing="12.0" layoutX="760.0" layoutY="20.0">
+                            <Button fx:id="dashboardBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToDashboard" text="Dashboard" prefWidth="120.0" />
                             <Button fx:id="homeBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToHome" text="Home" prefWidth="100.0" />
                             <Button fx:id="ordersBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToOrders" text="Branch Orders" prefWidth="130.0" />
                             <Button fx:id="catalogBtn" styleClass="nav-button" mnemonicParsing="false" onAction="#goToCatalog" text="Catalog Mgmt" prefWidth="130.0" />

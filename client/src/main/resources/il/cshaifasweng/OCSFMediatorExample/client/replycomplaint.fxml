@@ -32,6 +32,7 @@
                         <Font name="System Bold" size="28.0" />
                      </font>
                   </Label>
+                  <Button fx:id="backButton" layoutX="1350.0" layoutY="25.0" mnemonicParsing="false" onAction="#backToDashboard" prefHeight="35.0" prefWidth="170.0" text="← Back to Dashboard" style="-fx-font-size: 14px;" />
                </children>
             </AnchorPane>
 
