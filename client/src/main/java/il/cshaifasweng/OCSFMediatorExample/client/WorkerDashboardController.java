@@ -14,6 +14,7 @@ import java.io.IOException;
 
 public class WorkerDashboardController {
 
+    @FXML private Button dashboardBtn;
     @FXML private Button homeBtn;
     @FXML private Button ordersBtn;
     @FXML private Button catalogBtn;
@@ -60,6 +61,11 @@ public class WorkerDashboardController {
     @FXML
     void goToHome() {
         loadScene("Catalog.fxml", homeBtn);
+    }
+
+    @FXML
+    void goToDashboard() {
+        loadScene("WorkerDashboard.fxml", dashboardBtn);
     }
 
     @FXML

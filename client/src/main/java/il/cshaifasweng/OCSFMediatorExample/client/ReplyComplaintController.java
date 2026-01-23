@@ -228,7 +228,7 @@ public class ReplyComplaintController {
         requestAllComplaints();
     }
     @FXML
-    void BackToCatalog(ActionEvent event) throws IOException {
+    void backToDashboard(ActionEvent event) throws IOException {
 
         PassAccountEvent recievedAcc = new PassAccountEvent(currentUser);
 
@@ -242,12 +242,11 @@ public class ReplyComplaintController {
                 },4000
         );
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("WorkerDashboard.fxml"));
         Parent roott = loader.load();
-        CatalogController cc = loader.getController();
         Stage stage = new Stage();
         stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
+        stage.setTitle("Worker Dashboard");
         stage.show();
         Stage stagee = (Stage)backButton.getScene().getWindow();
         stagee.close();
