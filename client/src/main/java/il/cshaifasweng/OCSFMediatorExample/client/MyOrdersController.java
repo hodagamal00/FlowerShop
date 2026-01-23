@@ -285,11 +285,20 @@ public class MyOrdersController {
     @FXML
     void openOrder(ActionEvent event)
     {
+        Account activeAccount = resolveCurrentUser();
+        if (activeAccount == null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Please log in before loading your orders.");
+            alert.showAndWait();
+            return;
+        }
         if (viewOrderMode == 0)
         {
+            orderList.getItems().clear();
             for(int i = 0 ; i < allOrders.size(); i ++)
             {
-                if (allOrders.get(i).getAccountID() == currentUser.getAccountID())
+                if (allOrders.get(i).getAccountID() == activeAccount.getAccountID())
                 {
                     System.out.println("We are In !!!");
                     String orderString = "";
@@ -338,7 +347,25 @@ public class MyOrdersController {
         {
             cancelButton.setVisible(true);
 
-            int selected = orderList.getSelectionModel().getSelectedItem().charAt(0) - 48;
+            String selectedItem = orderList.getSelectionModel().getSelectedItem();
+            if (selectedItem == null || selectedItem.isBlank()) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setHeaderText(null);
+                alert.setContentText("Please select an order to view its details.");
+                alert.showAndWait();
+                return;
+            }
+            int selected;
+            try {
+                String idPart = selectedItem.split(" - ")[0].replace("#", "").trim();
+                selected = Integer.parseInt(idPart);
+            } catch (NumberFormatException ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setContentText("Unable to read the selected order. Please try again.");
+                alert.showAndWait();
+                return;
+            }
             System.out.println("Selected is " + selected);
             //int theID = Integer.parseInt(enterID.getText());
             for (int i = 0; i < allOrders.size(); i++) {
@@ -387,9 +414,9 @@ public class MyOrdersController {
             else
                 deliverService.setText("Delivery");
             if (retrievedOrder.isDelivered() == true)
-                deliverService.setText("Delivered/Picked Up");
+                deliverStatus.setText("Delivered/Picked Up");
             else
-                deliverService.setText("Not Delivered/Picked Up");
+                deliverStatus.setText("Not Delivered/Picked Up");
             RecepName.setText(retrievedOrder.getRecepName());
             RecepAddress.setText(retrievedOrder.getRecepAddress());
             RecepNumber.setText(String.valueOf(retrievedOrder.getRecepPhone()));
@@ -416,6 +443,7 @@ public class MyOrdersController {
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
+        resolveCurrentUser();
         System.out.println("before sending getAllOrders message !");
         getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
         SimpleClient.getClient().sendToServer(getOrdersMsg);
@@ -503,6 +531,13 @@ public class MyOrdersController {
                     }
                 },4500
         );
+    }
+
+    private Account resolveCurrentUser() {
+        if (currentUser == null) {
+            currentUser = SimpleClient.getAccount();
+        }
+        return currentUser;
     }
     @Subscribe
     public void PassAccountEvent(PassAccountEventOrders passAcc){ // added today
