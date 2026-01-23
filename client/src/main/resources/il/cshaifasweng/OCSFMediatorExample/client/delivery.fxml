@@ -15,8 +15,11 @@
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.DeliveryController"
         stylesheets="@styles.css"
-        fitToWidth="true"
+        fitToWidth="false"
+        fitToHeight="false"
         pannable="true"
+        hbarPolicy="AS_NEEDED"
+        vbarPolicy="AS_NEEDED"
         styleClass="app-scroll-container">
    <content>
       <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
