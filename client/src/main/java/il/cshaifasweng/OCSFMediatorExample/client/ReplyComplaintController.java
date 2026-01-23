@@ -97,6 +97,9 @@ public class ReplyComplaintController {
     void SendReply(ActionEvent event)
     {
         if (currentUser == null) {
+            currentUser = SimpleClient.getAccount();
+        }
+        if (currentUser == null) {
             showError("You must be logged in to send a response.");
             return;
         }
@@ -248,6 +251,7 @@ public class ReplyComplaintController {
             return;
         }
         EventBus.getDefault().register(this);
+        currentUser = SimpleClient.getAccount();
         assert accountID != null : "fx:id=\"accountID\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert backButton != null : "fx:id=\"backButton\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert complaintDate != null : "fx:id=\"complaintDate\" was not injected: check your FXML file 'replycomplaint.fxml'.";
