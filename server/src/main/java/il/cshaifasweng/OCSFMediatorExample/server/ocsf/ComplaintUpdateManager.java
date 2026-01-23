@@ -54,6 +54,12 @@ public class ComplaintUpdateManager {
             Transaction tx = session.beginTransaction();
             try {
                 System.out.println("inside additemTocatalog8");
+                if (recievedComplaint.getShopID() <= 0 && recievedComplaint.getOrderID() > 0) {
+                    Order order = session.get(Order.class, recievedComplaint.getOrderID());
+                    if (order != null) {
+                        recievedComplaint.setShopID(order.getShopID());
+                    }
+                }
                 int incomingId = recievedComplaint.getComplaintID();
                 if (incomingId <= 0) {
                     int generatedComplaintId = reserveNextComplaintId(session);
