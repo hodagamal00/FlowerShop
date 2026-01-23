@@ -352,11 +352,18 @@ public class CheckoutController {
             int dayCheckoutInt = dayCheckout.getSelectionModel().getSelectedItem();
             int monthCheckoutInt = monthCheckout.getSelectionModel().getSelectedItem();
             int yearCheckoutInt = yearCheckout.getSelectionModel().getSelectedItem();
-            String OrderedProducts = "";
-            for (int i = 0; i < cart.size(); i++) {
-                double itemPrice = PricingService.calculateDisplayPrice(cart.get(i), currentUser);
-                OrderedProducts = OrderedProducts + "%" + cart.get(i).getName() + " - " + String.valueOf(itemPrice) + "%";
+            java.util.Map<Integer, Integer> productQuantities = new java.util.LinkedHashMap<>();
+            for (Product product : cart) {
+                productQuantities.merge(product.getID(), 1, Integer::sum);
             }
+            StringBuilder orderedProductsBuilder = new StringBuilder();
+            for (java.util.Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
+                if (orderedProductsBuilder.length() > 0) {
+                    orderedProductsBuilder.append(",");
+                }
+                orderedProductsBuilder.append(entry.getKey()).append(":").append(entry.getValue());
+            }
+            String OrderedProducts = orderedProductsBuilder.toString();
             int prepareHour = 0;
             int prepareMinute = 0;
             String TempString = "";

@@ -348,23 +348,7 @@ public class MyOrdersController {
                 }
             }
             SelectedOrder = retrievedOrder;
-            String currentProduct = "";
-            String MyProducts = retrievedOrder.getProducts();
-            orderProducts.getItems().clear();
-            for(int i = 0 ; i < MyProducts.length() ; i++)
-            {
-                if(MyProducts.charAt(i) != 37)
-                {
-                    currentProduct = currentProduct + Character.toString(MyProducts.charAt(i));
-                }
-                else if(currentProduct != "")
-                {
-                    orderProducts.getItems().add(currentProduct);
-                    currentProduct = "";
-                }
-                else
-                    currentProduct = "";
-            }
+            populateOrderProductsList(retrievedOrder);
             submitComplaint.setVisible(true);
             orderID.setText(String.valueOf(retrievedOrder.getOrderID()));
             accountID.setText(String.valueOf(currentUser.getAccountID()));
@@ -410,6 +394,55 @@ public class MyOrdersController {
     }
     int currentOrderShopID;
     List<Order> allOrders = new ArrayList<Order>();
+
+    private void populateOrderProductsList(Order order) {
+        orderProducts.getItems().clear();
+        if (order == null) {
+            return;
+        }
+        String products = order.getProducts();
+        if (products == null || products.isBlank()) {
+            return;
+        }
+        List<String> formatted = formatProductsForDisplay(products);
+        orderProducts.getItems().addAll(formatted);
+    }
+
+    private List<String> formatProductsForDisplay(String products) {
+        List<String> items = new ArrayList<>();
+        if (products == null || products.isBlank()) {
+            return items;
+        }
+        if (products.contains(":")) {
+            String[] tokens = products.split(",");
+            for (String token : tokens) {
+                String trimmed = token.trim();
+                if (trimmed.isEmpty()) {
+                    continue;
+                }
+                String[] parts = trimmed.split(":");
+                try {
+                    int productId = Integer.parseInt(parts[0].trim());
+                    int qty = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 1;
+                    Product product = SimpleClient.findCachedProductById(productId);
+                    String name = product != null ? product.getName() : "Product #" + productId;
+                    items.add(name + " x" + qty);
+                } catch (NumberFormatException ignored) {
+                    // fallback handled below
+                }
+            }
+            if (!items.isEmpty()) {
+                return items;
+            }
+        }
+        for (String token : products.split("%")) {
+            String trimmed = token.trim();
+            if (!trimmed.isEmpty()) {
+                items.add(trimmed);
+            }
+        }
+        return items;
+    }
 
 
 
