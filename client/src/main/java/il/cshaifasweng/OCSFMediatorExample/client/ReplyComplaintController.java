@@ -312,13 +312,14 @@ public class ReplyComplaintController {
             return;
         }
         for (Complaint complaint : retrievedComplaints) {
-            if (!complaint.isAccepted()) {
-                String entry = "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
-                if (isLateStatus(complaint.getSlaStatus())) {
-                    entry = entry + " (Late)";
-                }
-                complaintList.getItems().add(entry);
+            String entry = "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
+            if (isLateStatus(complaint.getSlaStatus())) {
+                entry = entry + " (Late)";
             }
+            if (complaint.isAccepted()) {
+                entry = entry + " (Resolved)";
+            }
+            complaintList.getItems().add(entry);
         }
     }
 
