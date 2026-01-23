@@ -2,7 +2,6 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import java.io.IOException;
 
 /**
  * Controller for Global Settings - Chain Manager view
@@ -121,6 +120,11 @@ public class GlobalSettingsController {
                 showInfo("Settings reset to last saved values.");
             }
         });
+    }
+    
+    @FXML
+    private void handleBackToDashboard() {
+        NavigationService.getInstance().navigate("NetworkDashboard");
     }
     
     private void showError(String message) {

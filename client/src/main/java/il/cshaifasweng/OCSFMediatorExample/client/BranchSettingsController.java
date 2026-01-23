@@ -310,6 +310,7 @@ public class BranchSettingsController {
         });
     }
     
+    
     /**
      * Check if there are unsaved changes
      */
@@ -317,13 +318,6 @@ public class BranchSettingsController {
         // TODO: Implement proper change detection
         // Compare current form values with originalSettings
         return false;
-    }
-    
-    /**
-     * Navigate to catalog page
-     */
-    private void navigateToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

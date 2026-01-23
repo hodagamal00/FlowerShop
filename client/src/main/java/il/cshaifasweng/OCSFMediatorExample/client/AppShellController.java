@@ -46,7 +46,7 @@ public class AppShellController {
     private static final List<NavDestination> NAV_LINKS = List.of(
             NavDestination.forAllUsers("Home", "HomePage"),
             NavDestination.forAllUsers("Catalog", "Catalog"),
-            NavDestination.forLoggedIn("Cart", "cart", 0),
+            NavDestination.forLoggedIn("Cart", "cart", 1),
             NavDestination.forLoggedIn("Checkout", "checkout", 1),
             NavDestination.forLoggedIn("Orders", "myorders", 1),
             NavDestination.forLoggedIn("Branch Orders", "BranchOrders", 2),
@@ -56,6 +56,7 @@ public class AppShellController {
             NavDestination.forGuestsOnly("Register", "register"),
             NavDestination.forLoggedIn("Admin Panel", "admincontrol", 3),
             NavDestination.forLoggedIn("Deliveries", "delivery", 2),
+            NavDestination.forLoggedIn("Branch Orders", "BranchOrders", 2),
             NavDestination.forLoggedIn("Reports", "BranchReports", 3)
     );
     /**
@@ -288,12 +289,17 @@ public class AppShellController {
 
         int privilege = account != null ? account.getPrivilegeLevel() : 0;
         boolean loggedIn = account != null;
+        boolean isCustomer = privilege == 1;
 
         for (NavDestination destination : NAV_LINKS) {
             if (!destination.isVisibleFor(privilege, loggedIn)) {
                 continue;
             }
-            if ("Profile".equalsIgnoreCase(destination.getViewName()) && privilege != 1) {
+            String viewName = destination.getViewName();
+            if ("Profile".equalsIgnoreCase(viewName) && privilege != 1) {
+                continue;
+            }
+            if (isCustomerOnlyView(viewName) && !isCustomer) {
                 continue;
             }
             ToggleButton button = new ToggleButton(destination.getLabel());
@@ -308,6 +314,18 @@ public class AppShellController {
         }
         selectCurrentNavButton();
 
+    }
+
+    private boolean isCustomerOnlyView(String viewName) {
+        if (viewName == null) {
+            return false;
+        }
+        String normalized = normalizeViewName(viewName);
+        return normalized.equals("cart")
+                || normalized.equals("checkout")
+                || normalized.equals("myorders")
+                || normalized.equals("mycomplaints")
+                || normalized.equals("profile");
     }
 
     private String normalizeViewName(String viewName) {

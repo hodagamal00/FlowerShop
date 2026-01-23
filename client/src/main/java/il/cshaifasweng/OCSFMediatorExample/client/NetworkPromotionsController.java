@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Random;
 
@@ -182,6 +181,11 @@ public class NetworkPromotionsController {
         productsOnSaleLabel.setText(String.valueOf(active * 50));
         Random r = new Random();
         salesIncreaseLabel.setText(String.format("+%.1f%%", 10 + r.nextDouble() * 15));
+    }
+
+    @FXML
+    private void handleBackToDashboard() {
+        NavigationService.getInstance().navigate("NetworkDashboard");
     }
 
     private void showError(String msg) {

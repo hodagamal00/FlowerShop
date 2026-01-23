@@ -6,7 +6,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import java.io.IOException;
 import java.util.Random;
 
 public class RoleManagementController {
@@ -161,6 +160,11 @@ public class RoleManagementController {
         customersLabel.setText(String.valueOf(customers));
         workersLabel.setText(String.valueOf(workers));
         managersLabel.setText(String.valueOf(managers));
+    }
+
+    @FXML
+    private void handleBackToDashboard() {
+        NavigationService.getInstance().navigate("NetworkDashboard");
     }
 
     private void showError(String msg) {

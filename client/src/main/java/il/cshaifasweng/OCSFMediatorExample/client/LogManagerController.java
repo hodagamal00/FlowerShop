@@ -2,7 +2,6 @@ package il.cshaifasweng.OCSFMediatorExample.client; /**
  * Sample Skeleton for 'log_manager.fxml' Controller Class
  */
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -13,9 +12,6 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.getAllOrdersMessage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -25,7 +21,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -93,6 +88,8 @@ public class LogManagerController {
     @FXML // fx:id="chooseShop"
     private ComboBox<String> chooseShop; // Value injected by FXMLLoader
 
+    @FXML
+    private Button branchOrdersBtn;
 
     @FXML
     private ComboBox<String> CompareShops;
@@ -103,6 +100,10 @@ public class LogManagerController {
     @FXML // fx:id="wait"
     private Label wait; // Value injected by FXMLLoader
 
+    @FXML
+    void goToBranchOrders(ActionEvent event) {
+        NavigationService.getInstance().navigate("BranchOrders");
+    }
     static List<Order> orders = new ArrayList<Order>();
     static List<Complaint> complaints = new ArrayList<>();
 
@@ -479,6 +480,9 @@ public class LogManagerController {
     List<Complaint> allComplaints ;
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() throws IOException {
+        if (!AccessGuard.requireMinPrivilege(3)) {
+            return;
+        }
         EventBus.getDefault().register(this);
         getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
         SimpleClient.getClient().sendToServer(getOrdersMsg);
@@ -500,6 +504,7 @@ public class LogManagerController {
         assert chooseShop != null : "fx:id=\"chooseShop\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert compareButton != null : "fx:id=\"compareButton\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert fieldsError != null : "fx:id=\"fieldsError\" was not injected: check your FXML file 'log_manager.fxml'.";
+        assert branchOrdersBtn != null : "fx:id=\"branchOrdersBtn\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert logError != null : "fx:id=\"logError\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert shopError != null : "fx:id=\"shopError\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert shopError2 != null : "fx:id=\"shopError2\" was not injected: check your FXML file 'log_manager.fxml'.";
@@ -539,6 +544,7 @@ public class LogManagerController {
         LogType.getItems().add("Complaint Log");
         Day.setAnimated(false);
 
+        branchOrdersBtn.setDisable(true);
         LoadLogButton.setDisable(true);
         wait.setVisible(true);
 
@@ -547,6 +553,7 @@ public class LogManagerController {
                     @Override
                     public void run() {
 
+                        branchOrdersBtn.setDisable(false);
                         LoadLogButton.setDisable(false);
                         wait.setVisible(false);
                         switch (currentUser.getBelongShop())

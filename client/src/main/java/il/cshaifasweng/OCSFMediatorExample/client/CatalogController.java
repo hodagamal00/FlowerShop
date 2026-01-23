@@ -607,19 +607,15 @@ public class CatalogController {
 
 		Product product = displayProducts.get(CatalogSTARTIndex + offset);
 
-		if (canEdit) {
-			button.setText("Edit");
-			button.setOnAction(event -> {
-				setCurrent_button(product);
-				try {
-					App.setRoot("secondary");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
-		} else {
-			button.setText("Add to Cart");
-			button.setOnAction(event -> addProductToCartByIndex(offset));
+        if (canEdit) {
+            button.setText("Edit");
+            button.setOnAction(event -> {
+                setCurrent_button(product);
+                NavigationService.getInstance().navigate("secondary");
+            });
+        } else {
+            button.setText("Add to Cart");
+            button.setOnAction(event -> addProductToCartByIndex(offset));
 		}
 	}
 	@FXML

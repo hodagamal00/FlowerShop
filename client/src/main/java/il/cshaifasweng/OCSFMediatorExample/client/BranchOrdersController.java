@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 public class BranchOrdersController {
 
-    @FXML private Button dashboardBtn;
-    @FXML private Button homeBtn;
     @FXML private ComboBox<String> statusFilterCombo;
     @FXML private ComboBox<String> branchFilterCombo;
     @FXML private javafx.scene.control.DatePicker fromDatePicker;
@@ -56,6 +54,9 @@ public class BranchOrdersController {
 
     @FXML
     void initialize() {
+        if (!AccessGuard.requireMinPrivilege(2)) {
+            return;
+        }
         EventBus.getDefault().register(this);
         setupStatusFilter();
         setupDateFilters();
@@ -238,16 +239,6 @@ public class BranchOrdersController {
         alert.setContentText(buildReceipt(order));
         alert.showAndWait();
         showSuccess("Receipt preview generated");
-    }
-
-    @FXML
-    void goToDashboard() {
-        NavigationService.getInstance().navigate("WorkerDashboard");
-    }
-
-    @FXML
-    void goToHome() {
-        NavigationService.getInstance().navigate("Catalog");
     }
 
     @Subscribe

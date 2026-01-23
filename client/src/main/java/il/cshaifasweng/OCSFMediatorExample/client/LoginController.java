@@ -40,8 +40,10 @@ public class LoginController {
     @FXML
     private Text logSucc;
 
+
     @FXML
     private Text alLog;
+
 
     @FXML
     void gotoCatalog(ActionEvent event) throws IOException {

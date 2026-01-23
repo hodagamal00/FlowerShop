@@ -41,8 +41,6 @@ public class CrossBranchReportsController {
     @FXML private CheckBox selectAllBranchesCheckbox;
     @FXML private Button generateButton;
     @FXML private Button exportButton;
-    @FXML private Label currentPeriodLabel;
-    @FXML private Label previousPeriodLabel;
     
     // Revenue Comparison
     @FXML private BarChart<String, Number> revenueComparisonChart;
@@ -154,13 +152,6 @@ public class CrossBranchReportsController {
         long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
         LocalDate previousEnd = startDate.minusDays(1);
         LocalDate previousStart = previousEnd.minusDays(Math.max(0, days - 1));
-
-        if (currentPeriodLabel != null) {
-            currentPeriodLabel.setText("Period A: " + startDate + " → " + endDate);
-        }
-        if (previousPeriodLabel != null) {
-            previousPeriodLabel.setText("Period B: " + previousStart + " → " + previousEnd);
-        }
 
         currentRequestId = UUID.randomUUID().toString();
         previousRequestId = UUID.randomUUID().toString();
@@ -284,7 +275,7 @@ public class CrossBranchReportsController {
 
         for (Order order : currentOrders) {
             try {
-                LocalDate date = LocalDate.of(order.getPrepareYear(), order.getPrepareMonth(), order.getPrepareDay());
+                LocalDate date = LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
                 int weekIndex = (int) (ChronoUnit.DAYS.between(currentStart, date) / 7) + 1;
                 weekIndex = Math.max(1, Math.min(weeks, weekIndex));
                 weeklyCounts
@@ -410,6 +401,17 @@ public class CrossBranchReportsController {
     private void handleExportReport() {
         // TODO: Implement PDF export functionality
         showInfo("Export feature will generate a comprehensive PDF report with all charts and data tables.");
+    }
+    
+    /**
+     * Navigate back to dashboard
+     */
+    @FXML
+    private void handleBackToDashboard() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
+        NavigationService.getInstance().navigate("NetworkDashboard");
     }
     
     /**

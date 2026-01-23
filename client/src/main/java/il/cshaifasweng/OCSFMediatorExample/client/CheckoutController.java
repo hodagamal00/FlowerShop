@@ -121,6 +121,7 @@ public class CheckoutController {
     @FXML
     private Text orderTimingText;
 
+
     @FXML // fx:id="noDate"
     private Text noDate; // Value injected by FXMLLoader
 
@@ -148,6 +149,25 @@ public class CheckoutController {
     private static final double DELIVERY_FEE = 20.0;
 
 
+    @FXML
+    void openCatalog(ActionEvent event) throws IOException {
+        NavigationService.getInstance().navigate("Catalog");
+
+        Account recAcc = currentUser;
+        System.out.println("the server sent me the account , NICE 2 !!");
+        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
+        System.out.println("the server sent me the account , NICE 3 !!");
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        EventBus.getDefault().post(recievedAcc);
+                        System.out.println("the server sent me the account , NICE 4 !!");
+                    }
+                },4000
+        );
+
+    }
     //String email_regex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)*(\\\\.[A-Za-z]{2,})$";
     String creditCard_regex = "^\\d{16}$";
     String CVV_regex = "^\\d{3}$";
@@ -157,6 +177,18 @@ public class CheckoutController {
 
     @FXML
     void PlaceOrder(ActionEvent event) {
+        Account account = currentUser != null ? currentUser : SimpleClient.getUser();
+        if (account == null) {
+            NavigationService.getInstance().setStatus("Please log in to place an order.");
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
+        if (account.getPrivilegeLevel() != 1) {
+            AccessDeniedController.setAccessInfo(account.getPrivilegeLevel(), 1, "Checkout");
+            AccessDeniedController.setReturnPage("Catalog");
+            NavigationService.getInstance().navigate("AccessDenied");
+            return;
+        }
 
         phone_regex.setVisible(false);
         credit_regex.setVisible(false);
@@ -330,7 +362,11 @@ public class CheckoutController {
             int dayCheckoutInt = dayCheckout.getSelectionModel().getSelectedItem();
             int monthCheckoutInt = monthCheckout.getSelectionModel().getSelectedItem();
             int yearCheckoutInt = yearCheckout.getSelectionModel().getSelectedItem();
-            String OrderedProducts = OrderProductParser.buildProductsSummary(cart);
+            String OrderedProducts = "";
+            for (int i = 0; i < cart.size(); i++) {
+                double itemPrice = PricingService.calculateDisplayPrice(cart.get(i), currentUser);
+                OrderedProducts = OrderedProducts + "%" + cart.get(i).getName() + " - " + String.valueOf(itemPrice) + "%";
+            }
             int prepareHour = 0;
             int prepareMinute = 0;
             String TempString = "";
@@ -526,6 +562,18 @@ public class CheckoutController {
     void initialize() throws MalformedURLException
     {
         EventBus.getDefault().register(this);
+        Account account = SimpleClient.getUser();
+        if (account == null) {
+            NavigationService.getInstance().setStatus("Please log in to checkout.");
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
+        if (account.getPrivilegeLevel() != 1) {
+            AccessDeniedController.setAccessInfo(account.getPrivilegeLevel(), 1, "Checkout");
+            AccessDeniedController.setReturnPage("Catalog");
+            NavigationService.getInstance().navigate("AccessDenied");
+            return;
+        }
         assert orderForSomeoneElseBox != null : "fx:id=\"orderForSomeoneElseBox\" was not injected: check your FXML file 'checkout.fxml'.";
         assert deliveryValidationText != null : "fx:id=\"deliveryValidationText\" was not injected: check your FXML file 'checkout.fxml'.";
         assert recipientValidationText != null : "fx:id=\"recipientValidationText\" was not injected: check your FXML file 'checkout.fxml'.";
@@ -673,7 +721,6 @@ public class CheckoutController {
                             return;
                         }
                         placeOrderButton.setDisable(false);
-
                         if(currentUser.getBelongShop() == 0) {
                             chooseShopID.getItems().add("ID 0: - Chain");
                             chooseShopID.getItems().add("ID 1: Tiberias, Big Danilof");

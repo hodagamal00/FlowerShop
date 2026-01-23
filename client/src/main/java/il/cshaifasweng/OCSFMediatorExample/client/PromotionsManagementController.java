@@ -369,6 +369,9 @@ public class PromotionsManagementController {
     }
     
     /**
+     * Navigate back to catalog
+     */
+    /**
      * Show error alert
      */
     private void showError(String message) {

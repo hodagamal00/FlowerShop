@@ -7,14 +7,10 @@ import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -235,15 +231,7 @@ public class LogInSecondary {
         System.out.println("Checking Mail IN DB");
         if(checkEmailPass.getexists()==true)
         {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-            Parent roott = loader.load();
-            CatalogController cc = loader.getController();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(roott));
-            stage.setTitle("Catalog");
-            stage.show();
-            Stage stagee = (Stage)LogIn.getScene().getWindow();
-            stagee.close();
+            NavigationService.getInstance().navigate("Catalog");
         }
         else{
             ErrorMsgPass.setVisible(true);
