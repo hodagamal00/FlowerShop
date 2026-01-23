@@ -16,7 +16,7 @@
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CheckoutController"
-        stylesheets="@mycsss.css"
+        stylesheets="@styles.css"
         fitToWidth="true"
         pannable="true"
         styleClass="app-scroll-container">
@@ -78,16 +78,19 @@
                               </Text>
                               <CheckBox fx:id="deliverToHome" mnemonicParsing="false" onAction="#DeliverToMyHome" text="Store Pickup (Free)" style="-fx-font-size: 14px;" />
                               <CheckBox fx:id="deliveryBox" mnemonicParsing="false" onAction="#deliverySomeone" text="Delivery Service (20₪)" style="-fx-font-size: 14px;" />
+                              <CheckBox fx:id="orderForSomeoneElseBox" mnemonicParsing="false" onAction="#toggleOrderForSomeoneElse" text="Order is for someone else" style="-fx-font-size: 14px;" />
+                              <Text fx:id="deliveryValidationText" fill="RED" text="" wrappingWidth="480.0" />
 
                               <VBox spacing="10.0" style="-fx-padding: 0 0 0 25;">
                                  <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                    <Text text="Recipient Name:" strokeType="OUTSIDE" prefWidth="130.0">
+                                    <Text text="Recipient Name:" strokeType="OUTSIDE" wrappingWidth="130.0">
                                        <font><Font size="14.0" /></font>
                                     </Text>
                                     <TextField fx:id="recepNameField" prefWidth="300.0" />
                                  </HBox>
+                                 <Text fx:id="recipientValidationText" fill="RED" text="" wrappingWidth="430.0" />
                                  <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                    <Text text="Phone Number:" strokeType="OUTSIDE" prefWidth="130.0">
+                                    <Text text="Phone Number:" strokeType="OUTSIDE" wrappingWidth="130.0">
                                        <font><Font size="14.0" /></font>
                                     </Text>
                                     <TextField fx:id="recepPhoneField" prefWidth="300.0" />
@@ -99,6 +102,7 @@
                                     </Text>
                                     <TextField fx:id="recepAddressField" prefHeight="60.0" prefWidth="450.0" />
                                  </VBox>
+                                 <Text fx:id="addressValidationText" fill="RED" text="" wrappingWidth="430.0" />
                               </VBox>
                            </VBox>
 
@@ -121,7 +125,7 @@
 
                            <VBox spacing="15.0" style="-fx-padding: 10; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-color: #f9f9f9;">
                               <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                 <Text text="Card Number:" strokeType="OUTSIDE" prefWidth="130.0">
+                                 <Text text="Card Number:" strokeType="OUTSIDE" wrappingWidth="130.0">
                                     <font><Font size="14.0" /></font>
                                  </Text>
                                  <TextField fx:id="creditNumberField" prefWidth="280.0" promptText="16 digits" />
@@ -129,7 +133,7 @@
                               <Label fx:id="credit_regex" text="" textFill="RED" />
 
                               <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                 <Text text="Expiry Date:" strokeType="OUTSIDE" prefWidth="130.0">
+                                 <Text text="Expiry Date:" strokeType="OUTSIDE" wrappingWidth="130.0">
                                     <font><Font size="14.0" /></font>
                                  </Text>
                                  <ComboBox fx:id="expiryMonth" prefHeight="35.0" prefWidth="120.0" promptText="Month" />
@@ -138,7 +142,7 @@
                               <Text fx:id="noDateTwo" fill="RED" text="" wrappingWidth="450.0" />
 
                               <HBox spacing="10.0" alignment="CENTER_LEFT">
-                                 <Text text="CVV:" strokeType="OUTSIDE" prefWidth="130.0">
+                                 <Text text="CVV:" strokeType="OUTSIDE" wrappingWidth="130.0">
                                     <font><Font size="14.0" /></font>
                                  </Text>
                                  <TextField fx:id="cvvField" prefWidth="80.0" promptText="3 digits" />
@@ -154,16 +158,20 @@
                                  </font>
                               </Text>
                               <HBox spacing="10.0">
-                                 <Text text="Subtotal:" prefWidth="150.0"><font><Font size="14.0" /></font></Text>
-                                 <Text text="---" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
+                                 <Text text="Subtotal:" wrappingWidth="150.0"><font><Font size="14.0" /></font></Text>
+                                 <Text fx:id="subtotalText" text="---" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
                               </HBox>
                               <HBox spacing="10.0">
-                                 <Text text="Delivery:" prefWidth="150.0"><font><Font size="14.0" /></font></Text>
-                                 <Text text="20₪" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
+                                 <Text text="Delivery:" wrappingWidth="150.0"><font><Font size="14.0" /></font></Text>
+                                 <Text fx:id="deliveryFeeText" text="---" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
                               </HBox>
                               <HBox spacing="10.0">
-                                 <Text text="Total:" prefWidth="150.0" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
-                                 <Text text="---" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
+                                 <Text text="Timing:" wrappingWidth="150.0"><font><Font size="14.0" /></font></Text>
+                                 <Text fx:id="orderTimingText" text="---" style="-fx-font-weight: bold;"><font><Font size="14.0" /></font></Text>
+                              </HBox>
+                              <HBox spacing="10.0">
+                                 <Text text="Total:" wrappingWidth="150.0" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
+                                 <Text fx:id="totalText" text="---" style="-fx-font-weight: bold;"><font><Font size="16.0" /></font></Text>
                               </HBox>
                            </VBox>
                         </VBox>

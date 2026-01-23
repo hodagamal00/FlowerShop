@@ -18,6 +18,14 @@ public class Manager extends Account {
         super(fullName, email, password, accountID);
     }
 
+    public boolean isFrozen() {
+        return super.getFrozen();
+    }
+
+    public void setFrozen(boolean frozen) {
+        super.setFrozen(frozen);
+    }
+
     public void setShopID(int shopID) {
         ShopID = shopID;
     }

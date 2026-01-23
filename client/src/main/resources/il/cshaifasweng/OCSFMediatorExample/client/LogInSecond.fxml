@@ -14,7 +14,7 @@
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.LogInSecondary"
-        stylesheets="@mycsss.css"
+        stylesheets="@styles.css"
         fitToWidth="true"
         pannable="true"
         styleClass="app-scroll-container">
@@ -61,7 +61,7 @@
 
                     <Text fx:id="logSucc" text="" fill="#27ae60" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="300.0" textAlignment="CENTER" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
 
-                    <Button fx:id="OpenCatalogplz" mnemonicParsing="false" onAction="#openCatalogFunc" prefHeight="40.0" prefWidth="300.0" text="Continue to Catalog" visible="false" style="-fx-font-size: 14px; -fx-background-color: #27ae60; -fx-text-fill: white;" />
+                    <Button fx:id="OpenCatalogplz" mnemonicParsing="false" onAction="#openCatalogFunc" prefHeight="40.0" prefWidth="300.0" text="Go to Catalog" visible="false" style="-fx-font-size: 14px; -fx-background-color: #27ae60; -fx-text-fill: white;" />
 
                     <Button fx:id="bak" mnemonicParsing="false" onAction="#backkk" prefHeight="35.0" prefWidth="150.0" text="← Back" style="-fx-font-size: 13px;" />
                 </VBox>

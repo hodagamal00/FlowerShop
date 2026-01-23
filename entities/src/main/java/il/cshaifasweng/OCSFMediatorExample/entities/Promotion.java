@@ -3,6 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * Promotion Entity
@@ -70,8 +71,8 @@ public class Promotion implements Serializable {
         this.isActive = true;
     }
 
-    public Promotion(String promotionName, String description, double discountPercent, 
-                    Date startDate, Date endDate, boolean isNetworkWide, Integer branchId) {
+    public Promotion(String promotionName, String description, double discountPercent,
+                     Date startDate, Date endDate, boolean isNetworkWide, Integer branchId) {
         this();
         this.promotionName = promotionName;
         this.description = description;
@@ -81,6 +82,16 @@ public class Promotion implements Serializable {
         this.isNetworkWide = isNetworkWide;
         this.branchId = branchId;
     }
+
+    public Promotion(String promotionName, String description, double discountPercent,
+                     LocalDate startDate, LocalDate endDate, boolean isNetworkWide, Integer branchId) {
+        this(promotionName, description, discountPercent,
+                startDate != null ? java.sql.Date.valueOf(startDate) : null,
+                endDate != null ? java.sql.Date.valueOf(endDate) : null,
+                isNetworkWide, branchId);
+    }
+
+
 
     // Getters and Setters
     public int getPromotionId() {

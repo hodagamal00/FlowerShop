@@ -12,6 +12,9 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
+import il.cshaifasweng.OCSFMediatorExample.client.App;
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 
 /**
  * Controller for the Error page
@@ -86,16 +89,20 @@ public class ErrorController {
      * Load current user information
      */
     private void loadUserInfo() {
-        // Get current user from session/client
-        // For now, using placeholder
         try {
-            // Account currentUser = SimpleClient.getClient().getCurrentUser();
-            // if (currentUser != null) {
-            //     usernameLabel.setText(currentUser.getUserName());
-            // } else {
-            //     usernameLabel.setText("Guest");
-            // }
-            usernameLabel.setText("Guest");
+            Account currentUser = SimpleClient.getAccount();
+            if (currentUser != null) {
+                String displayName = currentUser.getFullName();
+                if (displayName == null || displayName.isBlank()) {
+                    displayName = currentUser.getEmail();
+                }
+                if (displayName == null || displayName.isBlank()) {
+                    displayName = "User";
+                }
+                usernameLabel.setText(displayName);
+            } else {
+                usernameLabel.setText("Guest");
+            }
         } catch (Exception e) {
             usernameLabel.setText("Guest");
         }
@@ -116,8 +123,7 @@ public class ErrorController {
      */
     private void configureNavigationByRole() {
         // Get current user privilege level
-        // int privilegeLevel = getPrivilegeLevel();
-        int privilegeLevel = 0; // Guest by default
+        int privilegeLevel = getPrivilegeLevel();
         
         // Show/hide links based on privilege
         if (privilegeLevel < 1) { // Guest
@@ -141,6 +147,10 @@ public class ErrorController {
      */
     @FXML
     private void handleOrders(ActionEvent event) {
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
         navigateToPage(event, "orders");
     }
 
@@ -149,6 +159,10 @@ public class ErrorController {
      */
     @FXML
     private void handleComplaints(ActionEvent event) {
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
         navigateToPage(event, "complaints");
     }
 
@@ -157,6 +171,10 @@ public class ErrorController {
      */
     @FXML
     private void handleAccount(ActionEvent event) {
+        if (SimpleClient.getUser() == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
         navigateToPage(event, "account");
     }
 
@@ -165,15 +183,13 @@ public class ErrorController {
      */
     @FXML
     private void handleLogout(ActionEvent event) {
-        // Perform logout
-        // SimpleClient.getClient().logout();
+        SimpleClient.logoutCurrentUser();
         navigateToPage(event, "catalog");
     }
 
     /**
      * Handle go back button - returns to previous page or catalog
      */
-    @FXML
     private void handleGoBack(ActionEvent event) {
         navigateToPage(event, lastPage);
     }
@@ -199,38 +215,47 @@ public class ErrorController {
      */
     private void navigateToPage(ActionEvent event, String page) {
         try {
-            Parent root = null;
-            
-            switch (page.toLowerCase()) {
-                case "catalog":
-                    root = FXMLLoader.load(getClass().getResource("primary.fxml"));
-                    break;
-                case "orders":
-                    root = FXMLLoader.load(getClass().getResource("orders.fxml"));
-                    break;
-                case "complaints":
-                    root = FXMLLoader.load(getClass().getResource("complaints.fxml"));
-                    break;
-                case "account":
-                    root = FXMLLoader.load(getClass().getResource("account.fxml"));
-                    break;
-                default:
-                    root = FXMLLoader.load(getClass().getResource("primary.fxml"));
-                    break;
-            }
-            
-            if (root != null) {
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                Scene scene = new Scene(root);
+            String view = resolveViewName(page);
+            FXMLLoader shellLoader = new FXMLLoader(App.class.getResource("AppShell.fxml"));
+            Parent shellRoot = shellLoader.load();
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = stage.getScene();
+
+            if (scene == null) {
+                scene = new Scene(shellRoot, 1520, 800);
                 stage.setScene(scene);
-                stage.show();
+            } else {
+                scene.setRoot(shellRoot);
             }
-            
+
+            stage.setMaximized(true);
+            NavigationService.getInstance().navigate(view);
+
         } catch (IOException e) {
             System.err.println("Error navigating to page: " + page);
             e.printStackTrace();
             // If navigation fails, show error in console
             showErrorAlert("Navigation Error", "Failed to navigate to " + page);
+        }
+    }
+
+    private String resolveViewName(String page) {
+        if (page == null) {
+            return "Catalog";
+        }
+
+        switch (page.toLowerCase()) {
+            case "catalog":
+                return "Catalog";
+            case "orders":
+                return "myorders";
+            case "complaints":
+                return "mycomplaints";
+            case "account":
+                return "Profile";
+            default:
+                return page;
         }
     }
 
@@ -247,9 +272,8 @@ public class ErrorController {
      */
     private int getPrivilegeLevel() {
         try {
-            // Account currentUser = SimpleClient.getClient().getCurrentUser();
-            // return currentUser != null ? currentUser.getPrivilegeLevel() : 0;
-            return 0; // Guest
+            Account currentUser = SimpleClient.getAccount();
+            return currentUser != null ? currentUser.getPrivilegeLevel() : 0;
         } catch (Exception e) {
             return 0; // Guest on error
         }

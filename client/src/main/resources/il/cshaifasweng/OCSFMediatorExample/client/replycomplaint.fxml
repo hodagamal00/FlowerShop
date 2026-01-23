@@ -17,7 +17,7 @@
         xmlns="http://javafx.com/javafx/17"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReplyComplaintController"
-        stylesheets="@mycsss.css"
+        stylesheets="@styles.css"
         fitToWidth="true"
         pannable="true"
         styleClass="app-scroll-container">
@@ -70,17 +70,38 @@
                         <VBox spacing="8.0" prefWidth="250.0">
                            <Text text="Account ID:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
                            <TextField fx:id="accountID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                        </VBox>
-                     </HBox>
+                           <HBox spacing="15.0">
+                              <VBox spacing="8.0" prefWidth="250.0">
+                                 <Text text="Related Order ID:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                                 <TextField fx:id="orderID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                              </VBox>
+                              <VBox spacing="8.0" prefWidth="250.0">
+                                 <Text text="Date Received:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                                 <TextField fx:id="complaintDate" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                              </VBox>
+                           </HBox>
 
-                     <HBox spacing="15.0">
-                        <VBox spacing="8.0" prefWidth="250.0">
-                           <Text text="Related Order ID:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                           <TextField fx:id="orderID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                        </VBox>
-                        <VBox spacing="8.0" prefWidth="250.0">
-                           <Text text="Date Received:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                           <TextField fx:id="complaintDate" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                           <HBox spacing="15.0">
+                              <VBox spacing="8.0" prefWidth="250.0">
+                                 <Text text="Created At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                                 <TextField fx:id="createdAtField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                              </VBox>
+                              <VBox spacing="8.0" prefWidth="250.0">
+                                 <Text text="Responded At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                                 <TextField fx:id="respondedAtField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                              </VBox>
+                           </HBox>
+
+                           <HBox spacing="15.0">
+                              <VBox spacing="8.0" prefWidth="250.0">
+                                 <Text text="SLA Status:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                                 <TextField fx:id="slaStatusField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: #c0392b;" />
+                              </VBox>
+                              <VBox spacing="8.0" prefWidth="250.0">
+                                 <Text text="Compensation Decision:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
+                                 <TextField fx:id="compensationDecisionField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
+                              </VBox>
+                           </HBox>
                         </VBox>
                      </HBox>
 
@@ -147,11 +168,11 @@
                         <Font size="72.0" />
                      </font>
                   </Label>
+                  <Text fx:id="other" visible="false" />
                </children>
             </AnchorPane>
 
             <!-- Hidden Elements -->
-            <Text fx:id="other" visible="false" />
          </children>
       </AnchorPane>
    </content>

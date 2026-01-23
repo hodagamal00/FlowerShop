@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ProductDetailsController"
+            stylesheets="@styles.css"
+            prefWidth="980.0" prefHeight="720.0"
+            styleClass="product-details-surface">
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="card modal-header">
+            <Text text="Product Details" styleClass="card-header" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="closeBtn" text="Close" styleClass="btn-outline" onAction="#closeModal" />
+        </HBox>
+    </top>
+    <center>
+        <VBox spacing="20.0">
+            <padding>
+                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0" />
+            </padding>
+            <HBox spacing="30.0" alignment="TOP_LEFT">
+                <VBox spacing="12.0" prefWidth="420.0" alignment="TOP_CENTER">
+                    <ImageView fx:id="productImage" fitWidth="380.0" fitHeight="380.0" preserveRatio="true" styleClass="product-image-large" />
+                </VBox>
+                <VBox spacing="14.0" prefWidth="500.0">
+                    <Text fx:id="productNameText" text="Product Name" styleClass="product-title">
+                        <font>
+                            <Font name="System Bold" size="28.0" />
+                        </font>
+                    </Text>
+
+                    <HBox spacing="10.0">
+                        <Label text="ID:" styleClass="label-bold" />
+                        <Label fx:id="idLabel" text="0" />
+                    </HBox>
+
+                    <HBox spacing="10.0">
+                        <Label text="SKU:" styleClass="label-bold" />
+                        <Label fx:id="skuLabel" text="SKU-12345" />
+                    </HBox>
+
+                    <HBox spacing="10.0">
+                        <Label text="Category:" styleClass="label-bold" />
+                        <Label fx:id="categoryLabel" text="Bouquet" />
+                    </HBox>
+
+                    <HBox spacing="10.0">
+                        <Label text="Color:" styleClass="label-bold" />
+                        <Label fx:id="colorLabel" text="Red" />
+                    </HBox>
+
+                    <VBox spacing="8.0" styleClass="card product-details-price-card">
+                        <HBox spacing="12.0" alignment="CENTER_LEFT">
+                            <Text fx:id="originalPriceText" text="\\$49.99" strikethrough="true" fill="#7b1fa2" visible="false">
+                                <font>
+                                    <Font size="18.0" />
+                                </font>
+                            </Text>
+                            <Text fx:id="discountedPriceText" text="\\$39.99" fill="#4a148c">
+                                <font>
+                                    <Font name="System Bold" size="26.0" />
+                                </font>
+                            </Text>
+                            <VBox spacing="2.0" alignment="CENTER">
+                                <Label fx:id="saleLabel" text="SALE" styleClass="sale-badge" visible="false" />
+                                <Region fx:id="saleUnderline" styleClass="sale-underline" visible="false" />
+                            </VBox>
+                            <Label fx:id="discountBadge" text="20% OFF" styleClass="badge badge-success discount-badge" visible="false" />
+                        </HBox>
+                        <Label fx:id="priceRangeLabel" text="Price Range: $30 - $100" visible="false" styleClass="price-range-label" />
+                    </VBox>
+
+                    <VBox spacing="8.0">
+                        <Label text="Description:" styleClass="label-bold" />
+                        <Text fx:id="descriptionText" text="Beautiful fresh flowers arranged with care..." wrappingWidth="460.0" styleClass="product-description" />
+                    </VBox>
+
+                    <VBox fx:id="customOptionsContainer" spacing="12.0" visible="false" managed="false" styleClass="card product-details-custom-card">
+                        <Label text="Customize Your Order:" styleClass="label-bold" />
+                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                            <Label text="Color Preference:" />
+                            <TextField fx:id="customColorField" promptText="e.g., White, Pink" prefWidth="200.0" />
+                        </HBox>
+                        <HBox spacing="10.0" alignment="CENTER_LEFT">
+                            <Label text="Desired Price:" />
+                            <TextField fx:id="customPriceField" promptText="Enter amount" prefWidth="150.0" />
+                        </HBox>
+                        <VBox spacing="5.0">
+                            <Label text="Greeting Card Message:" />
+                            <TextArea fx:id="greetingCardArea" promptText="Enter your message (optional)" prefRowCount="3" prefWidth="460.0" wrapText="true" />
+                        </VBox>
+                    </VBox>
+
+                    <HBox spacing="12.0" alignment="CENTER_LEFT">
+                        <Label text="Quantity:" styleClass="label-bold" />
+                        <Spinner fx:id="quantitySpinner" prefWidth="90.0" editable="true" />
+                    </HBox>
+
+                    <HBox spacing="14.0" alignment="CENTER_LEFT">
+                        <Button fx:id="addToCartBtn" styleClass="btn-primary" mnemonicParsing="false" onAction="#addToCart" text="Add to Cart" prefWidth="180.0" />
+                        <Button fx:id="buyNowBtn" styleClass="btn-success" mnemonicParsing="false" onAction="#buyNow" text="Buy Now" prefWidth="140.0" />
+                    </HBox>
+
+                    <Label fx:id="successMessage" text="✓ Added to cart successfully!" textFill="#81c784" visible="false" />
+                    <Label fx:id="errorMessage" text="Please login to add items to cart" textFill="#e57373" visible="false" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

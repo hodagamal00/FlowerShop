@@ -1,11 +1,14 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Order;
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import il.cshaifasweng.OCSFMediatorExample.entities.BranchSettings;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
+import il.cshaifasweng.OCSFMediatorExample.entities.Order;
+import il.cshaifasweng.OCSFMediatorExample.entities.ReportDataRequest;
+import il.cshaifasweng.OCSFMediatorExample.entities.ReportDataResponse;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -16,11 +19,15 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -66,6 +73,9 @@ public class BranchReportsController {
     @FXML private VBox complaintsReportCard;
     @FXML private Label totalComplaintsLabel;
     @FXML private PieChart complaintsPieChart;
+    @FXML private BarChart<String, Number> complaintsHistogramChart;
+    @FXML private CategoryAxis complaintsHistogramXAxis;
+    @FXML private NumberAxis complaintsHistogramYAxis;
     @FXML private TableView<ComplaintData> complaintsTable;
     @FXML private TableColumn<ComplaintData, String> complaintStatusCol;
     @FXML private TableColumn<ComplaintData, Integer> complaintCountCol;
@@ -75,25 +85,22 @@ public class BranchReportsController {
     // Data storage
     private List<Order> branchOrders = new ArrayList<>();
     private List<Complaint> branchComplaints = new ArrayList<>();
-    private int currentBranchId = 1; // Default branch, should be loaded from logged-in user
-
-    // Map to track sample order types when generating sample data.  In a real implementation,
-    // the server would return order details including product types.  Here we assign random
-    // types for demonstration purposes.
-    private Map<Integer, String> orderTypeMap = new HashMap<>();
-
-    // Summary strings for orders by type and complaints by date, displayed alongside totals.
-    private String ordersByTypeSummary = "";
-    private String complaintsByDateSummary = "";
+    private Map<LocalDate, Integer> complaintsHistogram = new java.util.HashMap<>();
+    private int currentBranchId = 1;
+    private String pendingRequestId;
+    private String lastReportType;
     
     @FXML
     public void initialize() {
         // Check privileges - Manager level required (3+)
-        if (!checkManagerPrivileges()) {
-            showAccessDenied();
+        if (!AccessGuard.requireMinPrivilege(3)) {
             return;
         }
-        
+
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+
         setupReportTypes();
         setupTableColumns();
         setDefaultDates();
@@ -101,28 +108,6 @@ public class BranchReportsController {
         
         // Auto-generate initial report
         Platform.runLater(this::handleGenerateReport);
-    }
-    
-    /**
-     * Check if user has manager privileges
-     */
-    private boolean checkManagerPrivileges() {
-        // TODO: Get current user privilege from session
-        // For now, assume user is manager
-        // In production: return SimpleClient.getCurrentUser().getPrivilege() >= 3;
-        return true;
-    }
-    
-    /**
-     * Show access denied message and navigate back
-     */
-    private void showAccessDenied() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Access Denied");
-        alert.setHeaderText("Insufficient Privileges");
-        alert.setContentText("You need Manager privileges to access this page.");
-        alert.showAndWait();
-        handleBackToCatalog();
     }
     
     /**
@@ -168,9 +153,18 @@ public class BranchReportsController {
      * Load branch information
      */
     private void loadBranchInfo() {
-        // TODO: Get branch info from server based on currentBranchId
-        // For now, use placeholder
-        branchLabel.setText("Branch: Main Street Branch (ID: " + currentBranchId + ")");
+        Account account = SimpleClient.getAccount();
+        if (account != null) {
+            if (account.getBelongShop() > 0) {
+                currentBranchId = account.getBelongShop();
+            } else if (account instanceof il.cshaifasweng.OCSFMediatorExample.entities.Manager) {
+                int managerShop = ((il.cshaifasweng.OCSFMediatorExample.entities.Manager) account).getShopID();
+                if (managerShop > 0) {
+                    currentBranchId = managerShop;
+                }
+            }
+        }
+        branchLabel.setText("Branch: ID " + currentBranchId);
     }
     
     /**
@@ -181,6 +175,7 @@ public class BranchReportsController {
         String reportType = reportTypeCombo.getValue();
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
+        lastReportType = reportType;
         
         // Validate dates
         if (startDate == null || endDate == null) {
@@ -193,10 +188,70 @@ public class BranchReportsController {
             return;
         }
         
-        // Load data from server
-        loadReportData(startDate, endDate);
-        
-        // Generate selected reports
+        requestReportData(startDate, endDate);
+    }
+    
+    /**
+     * Load report data from server
+     */
+    private void requestReportData(LocalDate startDate, LocalDate endDate) {
+        Account account = SimpleClient.getAccount();
+        if (account == null) {
+            showError("Please log in to generate reports.");
+            return;
+        }
+        if (account.getBelongShop() > 0) {
+            currentBranchId = account.getBelongShop();
+        } else if (account instanceof il.cshaifasweng.OCSFMediatorExample.entities.Manager) {
+            int managerShop = ((il.cshaifasweng.OCSFMediatorExample.entities.Manager) account).getShopID();
+            if (managerShop > 0) {
+                currentBranchId = managerShop;
+            }
+        }
+        pendingRequestId = UUID.randomUUID().toString();
+        ReportDataRequest request = new ReportDataRequest(pendingRequestId, startDate, endDate, currentBranchId, "CURRENT");
+        try {
+            SimpleClient.getClient().sendToServer(request);
+        } catch (IOException e) {
+            showError("Failed to request report data.");
+        }
+    }
+
+    @Subscribe
+    public void onReportDataResponse(ReportDataResponse response) {
+        if (response == null || response.getRequestId() == null || !response.getRequestId().equals(pendingRequestId)) {
+            return;
+        }
+        Platform.runLater(() -> {
+            if (!response.isSuccess()) {
+                showError(response.getErrorMessage() != null ? response.getErrorMessage() : "Failed to load report data.");
+                return;
+            }
+
+            branchOrders = response.getOrders() != null ? response.getOrders() : new ArrayList<>();
+            branchComplaints = response.getComplaints() != null ? response.getComplaints() : new ArrayList<>();
+            complaintsHistogram = response.getComplaintsHistogram() != null
+                    ? response.getComplaintsHistogram()
+                    : new java.util.HashMap<>();
+            updateBranchLabel(response.getBranches());
+            refreshReports(lastReportType);
+        });
+    }
+
+    private void updateBranchLabel(List<BranchSettings> branches) {
+        if (branches != null && !branches.isEmpty()) {
+            BranchSettings branch = branches.get(0);
+            String name = branch.getBranchName() != null ? branch.getBranchName() : ("ID " + branch.getBranchId());
+            branchLabel.setText("Branch: " + name + " (ID: " + branch.getBranchId() + ")");
+            return;
+        }
+        branchLabel.setText("Branch: ID " + currentBranchId);
+    }
+
+    private void refreshReports(String reportType) {
+        if (reportType == null) {
+            reportType = "All Reports";
+        }
         switch (reportType) {
             case "Income Report":
                 generateIncomeReport();
@@ -229,68 +284,6 @@ public class BranchReportsController {
     }
     
     /**
-     * Load report data from server
-     */
-    private void loadReportData(LocalDate startDate, LocalDate endDate) {
-        // TODO: Send request to server to get orders and complaints for this branch and date range
-        // Message format: new GetBranchReportData(currentBranchId, startDate, endDate)
-        // SimpleClient.getClient().sendToServer(message);
-        
-        // For now, generate sample data
-        generateSampleData(startDate, endDate);
-    }
-    
-    /**
-     * Generate sample data for demonstration
-     */
-    private void generateSampleData(LocalDate startDate, LocalDate endDate) {
-        branchOrders = new ArrayList<>();
-        branchComplaints = new ArrayList<>();
-        orderTypeMap.clear();
-        
-        Random random = new Random();
-        
-        // Generate sample orders
-        for (int i = 0; i < 50; i++) {
-            Order order = new Order();
-            order.setId(i + 1);
-            order.setTotalPrice((int)(50.0 + random.nextDouble() * 200.0));
-            
-            // Random date within range
-            long daysBetween = endDate.toEpochDay() - startDate.toEpochDay();
-            LocalDate orderDate = startDate.plusDays(random.nextInt((int) daysBetween + 1));
-            order.setOrderDate(orderDate.atStartOfDay());
-            
-            // Random status
-            String[] statuses = {"Completed", "Pending", "In Progress", "Cancelled"};
-            order.setStatus(statuses[random.nextInt(statuses.length)]);
-            
-            branchOrders.add(order);
-
-            // Assign a random product type for this order.  In a real scenario this would
-            // come from the order's product list.  Types include Bouquet, Plant, Accessory.
-            String[] types = {"Bouquet", "Plant", "Accessory"};
-            String type = types[random.nextInt(types.length)];
-            orderTypeMap.put(order.getId(), type);
-        }
-        
-        // Generate sample complaints
-        for (int i = 0; i < 15; i++) {
-            Complaint complaint = new Complaint();
-            complaint.setId(i + 1);
-            
-            // Random status
-            String[] statuses = {"Pending", "In Progress", "Resolved", "Rejected"};
-            complaint.setStatus(statuses[random.nextInt(statuses.length)]);
-            
-            // Random response time (in hours)
-            complaint.setResponseTime(random.nextInt(24) + 1);
-            
-            branchComplaints.add(complaint);
-        }
-    }
-    
-    /**
      * Generate income report with BarChart
      */
     private void generateIncomeReport() {
@@ -299,7 +292,7 @@ public class BranchReportsController {
         
         // Group orders by week
         Map<String, List<Order>> ordersByWeek = branchOrders.stream()
-            .filter(o -> "Completed".equals(o.getStatus()))
+            .filter(o -> "Delivered".equals(o.getStatus()))
             .collect(Collectors.groupingBy(order -> {
                 LocalDate orderDate = order.getOrderDate().toLocalDate();
                 int weekOfYear = orderDate.getDayOfYear() / 7;
@@ -338,7 +331,7 @@ public class BranchReportsController {
      * Generate orders report with statistics
      */
     private void generateOrdersReport() {
-        int completed = (int) branchOrders.stream().filter(o -> "Completed".equals(o.getStatus())).count();
+        int completed = (int) branchOrders.stream().filter(o -> "Delivered".equals(o.getStatus())).count();
         int pending = (int) branchOrders.stream().filter(o -> "Pending".equals(o.getStatus()) || "In Progress".equals(o.getStatus())).count();
         int cancelled = (int) branchOrders.stream().filter(o -> "Cancelled".equals(o.getStatus())).count();
         
@@ -346,31 +339,6 @@ public class BranchReportsController {
         completedOrdersLabel.setText(String.valueOf(completed));
         pendingOrdersLabel.setText(String.valueOf(pending));
         cancelledOrdersLabel.setText(String.valueOf(cancelled));
-
-        // Also compute and display distribution by product type.
-        generateOrdersByTypeSummary();
-        if (!ordersByTypeSummary.isEmpty()) {
-            totalOrdersLabel.setText("Total Orders: " + branchOrders.size() + " (" + ordersByTypeSummary + ")");
-        }
-    }
-
-    /**
-     * Compute a summary of orders grouped by product type.  For sample data we use the
-     * orderTypeMap populated in generateSampleData().  In a real implementation, this
-     * information would come from the server or from the Order entity itself.
-     */
-    private void generateOrdersByTypeSummary() {
-        Map<String, Long> counts = new LinkedHashMap<>();
-        for (Order o : branchOrders) {
-            String type = orderTypeMap.getOrDefault(o.getId(), "Unknown");
-            counts.put(type, counts.getOrDefault(type, 0L) + 1);
-        }
-        StringBuilder sb = new StringBuilder();
-        counts.forEach((type, count) -> {
-            if (sb.length() > 0) sb.append(", ");
-            sb.append(type).append(": ").append(count);
-        });
-        ordersByTypeSummary = sb.toString();
     }
     
     /**
@@ -382,12 +350,14 @@ public class BranchReportsController {
         
         // Group complaints by status
         Map<String, Long> complaintsByStatus = branchComplaints.stream()
-            .collect(Collectors.groupingBy(Complaint::getStatus, Collectors.counting()));
+                .collect(Collectors.groupingBy(this::resolveStatusLabel, Collectors.counting()));
         
         // Calculate total complaints
         int totalComplaints = branchComplaints.size();
-        totalComplaintsLabel.setText("Total: " + totalComplaints);
-        
+        long overdueCount = complaintsByStatus.getOrDefault("OVERDUE", 0L);
+        totalComplaintsLabel.setText(overdueCount > 0
+                ? "Total: " + totalComplaints + " (" + overdueCount + " overdue)"
+                : "Total: " + totalComplaints);
         // Create pie chart data
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
         ObservableList<ComplaintData> complaintDataList = FXCollections.observableArrayList();
@@ -399,7 +369,7 @@ public class BranchReportsController {
             
             // Calculate average response time for this status
             double avgResponseTime = branchComplaints.stream()
-                .filter(c -> status.equals(c.getStatus()))
+                    .filter(c -> status.equals(resolveStatusLabel(c)))
                 .mapToInt(Complaint::getResponseTime)
                 .average()
                 .orElse(0.0);
@@ -418,41 +388,17 @@ public class BranchReportsController {
         
         // Apply colors to pie chart segments
         applyPieChartColors();
+        updateComplaintsHistogramChart(complaintsHistogram);
 
-        // Also compute complaints histogram by date and append to total label
-        generateComplaintsByDateSummary();
-        if (!complaintsByDateSummary.isEmpty()) {
-            int totalComplaintsCount = branchComplaints.size();
-            totalComplaintsLabel.setText("Total: " + totalComplaintsCount + " (" + complaintsByDateSummary + ")");
+    }
+    private String resolveStatusLabel(Complaint complaint) {
+        String status = complaint.getSlaStatus();
+        if (status == null || status.isEmpty()) {
+            status = complaint.getStatus();
         }
+        return status != null ? status : "Pending";
     }
 
-    /**
-     * Compute a summary of complaints grouped by date (day/month).  For each unique
-     * day-month combination we count the number of complaints.  In a real implementation,
-     * you could populate a bar chart for histogram visualization.
-     */
-    private void generateComplaintsByDateSummary() {
-        Map<String, Long> counts = new LinkedHashMap<>();
-        for (Complaint c : branchComplaints) {
-            // For sample data we don't set day/month/year; generate random if zero
-            int day = c.getDay();
-            int month = c.getMonth();
-            if (day == 0) {
-                day = (int)(Math.random() * 28) + 1;
-                month = (int)(Math.random() * 12) + 1;
-            }
-            String key = String.format("%02d/%02d", day, month);
-            counts.put(key, counts.getOrDefault(key, 0L) + 1);
-        }
-        StringBuilder sb = new StringBuilder();
-        counts.forEach((date, count) -> {
-            if (sb.length() > 0) sb.append(", ");
-            sb.append(date).append(": ").append(count);
-        });
-        complaintsByDateSummary = sb.toString();
-    }
-    
     /**
      * Apply custom colors to pie chart segments
      */
@@ -472,6 +418,51 @@ public class BranchReportsController {
             });
         });
     }
+
+    private void updateComplaintsHistogramChart(Map<LocalDate, Integer> histogram) {
+        if (histogram == null || histogram.isEmpty()) {
+            if (complaintsHistogramChart != null) {
+                complaintsHistogramChart.getData().clear();
+            }
+            return;
+        }
+        BarChart<String, Number> chart = ensureComplaintsHistogramChart();
+        chart.getData().clear();
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Complaints");
+
+        histogram.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> series.getData().add(
+                        new XYChart.Data<>(entry.getKey().toString(), entry.getValue())));
+
+        chart.getData().add(series);
+    }
+
+    private BarChart<String, Number> ensureComplaintsHistogramChart() {
+        if (complaintsHistogramChart != null) {
+            return complaintsHistogramChart;
+        }
+        CategoryAxis xAxis = complaintsHistogramXAxis != null ? complaintsHistogramXAxis : new CategoryAxis();
+        NumberAxis yAxis = complaintsHistogramYAxis != null ? complaintsHistogramYAxis : new NumberAxis();
+        if (complaintsHistogramXAxis == null) {
+            xAxis.setLabel("Date");
+            complaintsHistogramXAxis = xAxis;
+        }
+        if (complaintsHistogramYAxis == null) {
+            yAxis.setLabel("Complaints");
+            complaintsHistogramYAxis = yAxis;
+        }
+        BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
+        chart.setTitle("Complaints by Day");
+        chart.setLegendVisible(false);
+        complaintsHistogramChart = chart;
+        if (complaintsReportCard != null && !complaintsReportCard.getChildren().contains(chart)) {
+            complaintsReportCard.getChildren().add(chart);
+        }
+        return chart;
+    }
     
     /**
      * Export report to PDF
@@ -488,12 +479,10 @@ public class BranchReportsController {
      */
     @FXML
     private void handleBackToCatalog() {
-        try {
-            App.setRoot("primary");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Failed to navigate to catalog.");
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
         }
+        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

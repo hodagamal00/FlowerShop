@@ -3,7 +3,6 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Date;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
@@ -12,12 +11,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import il.cshaifasweng.OCSFMediatorExample.client.NavigationService;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -111,7 +108,7 @@ public class LogInSecondary {
 
         // When using the AppShell, navigate to the catalog view by replacing
         // the centre content instead of opening a new window.
-        NavigationService.getInstance().navigate("primary");
+        NavigationService.getInstance().navigate("Catalog");
     }
 
 
@@ -218,6 +215,11 @@ public class LogInSecondary {
                 e.printStackTrace();
             }*/
         }
+        else if(checkML.isFrozen())
+        {
+            ErrorMsgPass.setText("This account is frozen.");
+            ErrorMsgPass.setVisible(true);
+        }
         else if(checkML.getExistsPassword() == false)
         { // case email found but the password is incorrect
             System.out.println("arrived to case incorrect password  succesfully");
@@ -241,9 +243,9 @@ public class LogInSecondary {
         System.out.println("Checking Mail IN DB");
         if(checkEmailPass.getexists()==true)
         {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
             Parent roott = loader.load();
-            PrimaryController cc = loader.getController();
+            CatalogController cc = loader.getController();
             Stage stage = new Stage();
             stage.setScene(new Scene(roott));
             stage.setTitle("Catalog");

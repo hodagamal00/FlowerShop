@@ -3,15 +3,28 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.BranchSettings;
+import il.cshaifasweng.OCSFMediatorExample.entities.Order;
+import il.cshaifasweng.OCSFMediatorExample.entities.ReportDataRequest;
+import il.cshaifasweng.OCSFMediatorExample.entities.ReportDataResponse;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.*;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Controller for Cross-Branch Reports - Chain Manager view
@@ -56,16 +69,25 @@ public class CrossBranchReportsController {
     @FXML private Label networkGrowthLabel;
     
     // Data
-    private List<String> branchNames = Arrays.asList(
-        "Main Street", "Downtown", "Shopping Mall", "Airport", "University"
-    );
+    private final Map<Integer, String> branchNames = new LinkedHashMap<>();
+    private final Map<Integer, BranchMetrics> currentMetrics = new LinkedHashMap<>();
+    private final Map<Integer, BranchMetrics> previousMetrics = new LinkedHashMap<>();
+    private List<Order> currentOrders = new ArrayList<>();
+    private List<Order> previousOrders = new ArrayList<>();
+    private LocalDate currentStart;
+    private LocalDate currentEnd;
+    private String currentRequestId;
+    private String previousRequestId;
     
     @FXML
     public void initialize() {
         // Check privileges - Chain Manager level required (4)
-        if (!checkChainManagerPrivileges()) {
-            showAccessDenied();
+        if (!AccessGuard.requireMinPrivilege(4)) {
             return;
+        }
+
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
         }
         
         setupTableColumns();
@@ -73,27 +95,6 @@ public class CrossBranchReportsController {
         
         // Auto-generate initial report
         Platform.runLater(this::handleGenerateReport);
-    }
-    
-    /**
-     * Check if user has chain manager privileges
-     */
-    private boolean checkChainManagerPrivileges() {
-        // TODO: Get current user privilege from session
-        // return SimpleClient.getCurrentUser().getPrivilege() >= 4;
-        return true;
-    }
-    
-    /**
-     * Show access denied message
-     */
-    private void showAccessDenied() {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Access Denied");
-        alert.setHeaderText("Insufficient Privileges");
-        alert.setContentText("You need Chain Manager privileges to access this page.");
-        alert.showAndWait();
-        handleBackToDashboard();
     }
     
     /**
@@ -143,11 +144,80 @@ public class CrossBranchReportsController {
             return;
         }
         
-        // Load data and generate all charts
-        generateRevenueComparison();
-        generateOrderTrends();
-        generateMarketShare();
-        updateKPIs();
+        requestReportData(startDate, endDate);
+    }
+
+    private void requestReportData(LocalDate startDate, LocalDate endDate) {
+        currentStart = startDate;
+        currentEnd = endDate;
+        long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        LocalDate previousEnd = startDate.minusDays(1);
+        LocalDate previousStart = previousEnd.minusDays(Math.max(0, days - 1));
+
+        currentRequestId = UUID.randomUUID().toString();
+        previousRequestId = UUID.randomUUID().toString();
+
+        try {
+            SimpleClient.getClient().sendToServer(
+                new ReportDataRequest(currentRequestId, startDate, endDate, 0, "CURRENT")
+            );
+            SimpleClient.getClient().sendToServer(
+                new ReportDataRequest(previousRequestId, previousStart, previousEnd, 0, "PREVIOUS")
+            );
+        } catch (IOException e) {
+            showError("Failed to request report data.");
+        }
+    }
+
+    @Subscribe
+    public void onReportDataResponse(ReportDataResponse response) {
+        if (response == null || response.getRequestId() == null) {
+            return;
+        }
+        Platform.runLater(() -> {
+            if (!response.isSuccess()) {
+                showError(response.getErrorMessage() != null ? response.getErrorMessage() : "Failed to load report data.");
+                return;
+            }
+
+            if (response.getRequestId().equals(currentRequestId)) {
+                currentOrders = response.getOrders() != null ? response.getOrders() : new ArrayList<>();
+                updateBranchNames(response.getBranches());
+                buildMetrics(currentOrders, currentMetrics);
+            } else if (response.getRequestId().equals(previousRequestId)) {
+                previousOrders = response.getOrders() != null ? response.getOrders() : new ArrayList<>();
+                buildMetrics(previousOrders, previousMetrics);
+            } else {
+                return;
+            }
+
+            if (!currentMetrics.isEmpty() && currentStart != null) {
+                generateRevenueComparison();
+                generateOrderTrends();
+                generateMarketShare();
+                updateKPIs();
+            }
+        });
+    }
+
+    private void updateBranchNames(List<BranchSettings> branches) {
+        branchNames.clear();
+        if (branches != null) {
+            for (BranchSettings settings : branches) {
+                branchNames.put(settings.getBranchId(),
+                        settings.getBranchName() != null ? settings.getBranchName() : ("Branch " + settings.getBranchId()));
+            }
+        }
+    }
+
+    private void buildMetrics(List<Order> orders, Map<Integer, BranchMetrics> metricsMap) {
+        metricsMap.clear();
+        for (Order order : orders) {
+            int branchId = order.getShopID();
+            BranchMetrics metrics = metricsMap.computeIfAbsent(branchId, id -> new BranchMetrics());
+            metrics.totalOrders += 1;
+            metrics.totalRevenue += order.getTotalPrice();
+        }
     }
     
     /**
@@ -163,24 +233,28 @@ public class CrossBranchReportsController {
         previousSeries.setName("Previous Period");
         
         ObservableList<RevenueData> revenueDataList = FXCollections.observableArrayList();
-        Random random = new Random();
-        
-        for (String branch : branchNames) {
-            double currentRevenue = 15000 + random.nextDouble() * 15000;
-            double previousRevenue = 12000 + random.nextDouble() * 13000;
-            int orders = 90 + random.nextInt(110);
-            double avgOrderValue = currentRevenue / orders;
-            double growth = ((currentRevenue - previousRevenue) / previousRevenue) * 100;
-            
+        List<Integer> branchIds = new ArrayList<>(branchNames.keySet());
+        branchIds.sort(Comparator.naturalOrder());
+
+        for (Integer branchId : branchIds) {
+            String branch = branchNames.get(branchId);
+            BranchMetrics current = currentMetrics.getOrDefault(branchId, new BranchMetrics());
+            BranchMetrics previous = previousMetrics.getOrDefault(branchId, new BranchMetrics());
+            double currentRevenue = current.totalRevenue;
+            double previousRevenue = previous.totalRevenue;
+            int orders = current.totalOrders;
+            double avgOrderValue = orders > 0 ? currentRevenue / orders : 0.0;
+            double growth = previousRevenue > 0 ? ((currentRevenue - previousRevenue) / previousRevenue) * 100 : 0.0;
+
             currentSeries.getData().add(new XYChart.Data<>(branch, currentRevenue));
             previousSeries.getData().add(new XYChart.Data<>(branch, previousRevenue));
-            
+
             revenueDataList.add(new RevenueData(
                 branch,
                 orders,
                 currentRevenue,
                 avgOrderValue,
-                String.format("%.1f%%", growth)
+                previousRevenue > 0 ? String.format("%.1f%%", growth) : "N/A"
             ));
         }
         
@@ -193,20 +267,36 @@ public class CrossBranchReportsController {
      */
     private void generateOrderTrends() {
         orderTrendsChart.getData().clear();
-        
-        Random random = new Random();
-        
-        // Create a series for each branch
-        for (String branch : branchNames) {
+
+        if (currentStart == null || currentEnd == null) {
+            return;
+        }
+        int weeks = (int) Math.max(1, ChronoUnit.DAYS.between(currentStart, currentEnd) / 7 + 1);
+        Map<Integer, Map<Integer, Integer>> weeklyCounts = new HashMap<>();
+
+        for (Order order : currentOrders) {
+            try {
+                LocalDate date = LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
+                int weekIndex = (int) (ChronoUnit.DAYS.between(currentStart, date) / 7) + 1;
+                weekIndex = Math.max(1, Math.min(weeks, weekIndex));
+                weeklyCounts
+                    .computeIfAbsent(order.getShopID(), id -> new HashMap<>())
+                    .merge(weekIndex, 1, Integer::sum);
+            } catch (Exception ignored) {
+                // Skip invalid dates
+            }
+        }
+
+        List<Integer> branchIds = new ArrayList<>(branchNames.keySet());
+        branchIds.sort(Comparator.naturalOrder());
+        for (Integer branchId : branchIds) {
             XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName(branch);
-            
-            // Generate weekly data
-            for (int week = 1; week <= 4; week++) {
-                int orders = 20 + random.nextInt(30);
+            series.setName(branchNames.get(branchId));
+            Map<Integer, Integer> counts = weeklyCounts.getOrDefault(branchId, new HashMap<>());
+            for (int week = 1; week <= weeks; week++) {
+                int orders = counts.getOrDefault(week, 0);
                 series.getData().add(new XYChart.Data<>("Week " + week, orders));
             }
-            
             orderTrendsChart.getData().add(series);
         }
     }
@@ -217,49 +307,32 @@ public class CrossBranchReportsController {
     private void generateMarketShare() {
         revenueSharePieChart.getData().clear();
         orderSharePieChart.getData().clear();
-        
-        Random random = new Random();
-        
-        // Revenue share
+
         ObservableList<PieChart.Data> revenueShareData = FXCollections.observableArrayList();
-        double totalRevenue = 0;
-        Map<String, Double> branchRevenues = new HashMap<>();
-        
-        for (String branch : branchNames) {
-            double revenue = 15000 + random.nextDouble() * 15000;
-            branchRevenues.put(branch, revenue);
-            totalRevenue += revenue;
-        }
-        
-        for (Map.Entry<String, Double> entry : branchRevenues.entrySet()) {
-            double percentage = (entry.getValue() / totalRevenue) * 100;
-            revenueShareData.add(new PieChart.Data(
-                entry.getKey() + String.format(" (%.1f%%)", percentage),
-                entry.getValue()
-            ));
-        }
-        
-        revenueSharePieChart.setData(revenueShareData);
-        
-        // Order share
         ObservableList<PieChart.Data> orderShareData = FXCollections.observableArrayList();
-        int totalOrders = 0;
-        Map<String, Integer> branchOrders = new HashMap<>();
-        
-        for (String branch : branchNames) {
-            int orders = 90 + random.nextInt(110);
-            branchOrders.put(branch, orders);
-            totalOrders += orders;
-        }
-        
-        for (Map.Entry<String, Integer> entry : branchOrders.entrySet()) {
-            double percentage = (entry.getValue() * 100.0) / totalOrders;
+        double totalRevenue = currentMetrics.values().stream().mapToDouble(m -> m.totalRevenue).sum();
+        int totalOrders = currentMetrics.values().stream().mapToInt(m -> m.totalOrders).sum();
+
+        for (Map.Entry<Integer, String> entry : branchNames.entrySet()) {
+            int branchId = entry.getKey();
+            String branch = entry.getValue();
+            BranchMetrics metrics = currentMetrics.getOrDefault(branchId, new BranchMetrics());
+            double revenue = metrics.totalRevenue;
+            int orders = metrics.totalOrders;
+            double revenuePercent = totalRevenue > 0 ? (revenue / totalRevenue) * 100 : 0;
+            double orderPercent = totalOrders > 0 ? (orders * 100.0) / totalOrders : 0;
+
+            revenueShareData.add(new PieChart.Data(
+                branch + String.format(" (%.1f%%)", revenuePercent),
+                revenue
+            ));
             orderShareData.add(new PieChart.Data(
-                entry.getKey() + String.format(" (%.1f%%)", percentage),
-                entry.getValue()
+                branch + String.format(" (%.1f%%)", orderPercent),
+                orders
             ));
         }
-        
+
+        revenueSharePieChart.setData(revenueShareData);
         orderSharePieChart.setData(orderShareData);
         
         // Apply colors to pie charts
@@ -311,10 +384,14 @@ public class CrossBranchReportsController {
                 .orElse(0.0);
             avgRevenueLabel.setText(String.format("₪%.2f", avgRevenue));
             
-            // Calculate network growth (sample)
-            Random random = new Random();
-            double growth = 5.0 + random.nextDouble() * 15.0;
-            networkGrowthLabel.setText(String.format("+%.1f%%", growth));
+            double totalCurrent = currentMetrics.values().stream().mapToDouble(m -> m.totalRevenue).sum();
+            double totalPrevious = previousMetrics.values().stream().mapToDouble(m -> m.totalRevenue).sum();
+            if (totalPrevious > 0) {
+                double growth = ((totalCurrent - totalPrevious) / totalPrevious) * 100;
+                networkGrowthLabel.setText(String.format("%+.1f%%", growth));
+            } else {
+                networkGrowthLabel.setText("N/A");
+            }
         }
     }
     
@@ -332,6 +409,9 @@ public class CrossBranchReportsController {
      */
     @FXML
     private void handleBackToDashboard() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
         try {
             App.setRoot("NetworkDashboard");
         } catch (IOException e) {
@@ -386,5 +466,10 @@ public class CrossBranchReportsController {
         public double getTotalRevenue() { return totalRevenue; }
         public double getAvgOrderValue() { return avgOrderValue; }
         public String getGrowthPercent() { return growthPercent; }
+    }
+
+    private static class BranchMetrics {
+        private int totalOrders;
+        private double totalRevenue;
     }
 }

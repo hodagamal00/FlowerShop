@@ -1,15 +1,15 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.LinkedList;
-import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import il.cshaifasweng.OCSFMediatorExample.entities.RegistrationResultEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
+import il.cshaifasweng.OCSFMediatorExample.client.SimpleClient;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,13 +31,7 @@ public class RegisterController {
     private Label shopError; // Value injected by FXMLLoader
 
     @FXML
-    private ResourceBundle resources;
-
-    @FXML
     private ComboBox<String> selectChain;
-    @FXML
-    private URL location;
-
     @FXML
     private TextField CVV;
 
@@ -65,9 +59,6 @@ public class RegisterController {
 
     @FXML
     private TextField Street_Address;
-
-    @FXML
-    private TextField Validity;
 
     @FXML
     private TextField userID;
@@ -354,6 +345,10 @@ public class RegisterController {
         registrationPending = false;
         pendingEmail = null;
         RegisteredAccounts.add(createdAccount.getEmail());
+        // Persist the newly created account so other controllers (like the
+        // PrimaryController) can immediately apply privilege-based UI logic
+        // after navigation without waiting for another PassAccountEvent.
+        SimpleClient.setAccount(createdAccount);
 
         Platform.runLater(() -> {
             RegisterButton.setDisable(false);
@@ -363,7 +358,7 @@ public class RegisterController {
             alert.setHeaderText("Welcome to FlowerShop!");
             alert.setContentText("Your account has been created and you're now signed in.");
             alert.showAndWait();
-            NavigationService.getInstance().navigate("primary");
+            NavigationService.getInstance().navigate("Catalog");
         });
     }
 

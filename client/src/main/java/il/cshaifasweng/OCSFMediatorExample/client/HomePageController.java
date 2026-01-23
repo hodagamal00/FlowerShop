@@ -1,0 +1,105 @@
+package il.cshaifasweng.OCSFMediatorExample.client;
+
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+
+/**
+ * Controller for the HomePage view. Wires the primary call-to-action
+ * buttons to the {@link NavigationService} so visitors can jump to the
+ * catalog, orders, cart, or login screens from the landing page.
+ */
+public class HomePageController {
+
+    @FXML private Button browseCatalogButton;
+    @FXML private Button complaintsButton;
+    @FXML private Button loginButton;
+    @FXML private Button createAccountButton;
+    @FXML private Button trackOrdersButton;
+    @FXML private Button openCatalogButton;
+    @FXML private Button startCustomButton;
+    @FXML private Button viewOrdersButton;
+    @FXML private Button viewAllButton;
+
+    @FXML
+    private void initialize() {
+        // Wire buttons defensively so the landing page always navigates, even
+        // if the onAction attributes are removed during scene editor tweaks.
+        attachHandler(browseCatalogButton, this::handleBrowseCatalog);
+        attachHandler(complaintsButton, this::handleComplaints);
+        attachHandler(loginButton, this::handleLogin);
+        attachHandler(createAccountButton, this::handleCreateAccount);
+        attachHandler(openCatalogButton, this::handleOpenCatalog);
+        attachHandler(viewAllButton, this::handleViewAll);
+        attachHandler(trackOrdersButton, this::handleTrackOrders);
+        attachHandler(viewOrdersButton, this::handleTrackOrders);
+        attachHandler(startCustomButton, this::handleStartCustom);
+    }
+
+    @FXML
+    private void handleBrowseCatalog(ActionEvent event) {
+        CatalogFlag.setFlagg(0);
+        NavigationService.getInstance().navigate("Catalog");
+    }
+
+    @FXML
+    private void handleComplaints(ActionEvent event) {
+        if (requireLogin("submit a complaint")) {
+            NavigationService.getInstance().navigate("mycomplaints");
+        }
+    }
+
+    @FXML
+    private void handleLogin(ActionEvent event) {
+        NavigationService.getInstance().navigate("Login");
+    }
+
+    @FXML
+    private void handleCreateAccount(ActionEvent event) {
+        NavigationService.getInstance().navigate("register");
+    }
+
+    @FXML
+    private void handleOpenCatalog(ActionEvent event) {
+        handleBrowseCatalog(event);
+    }
+
+    @FXML
+    private void handleViewAll(ActionEvent event) {
+        handleBrowseCatalog(event);
+    }
+
+    @FXML
+    private void handleTrackOrders(ActionEvent event) {
+        if (requireLogin("track your orders")) {
+            NavigationService.getInstance().navigate("myorders");
+        }
+    }
+
+    @FXML
+    private void handleStartCustom(ActionEvent event) {
+        if (requireLogin("start a custom order")) {
+            NavigationService.getInstance().navigate("Catalog");
+        }
+    }
+
+    private void attachHandler(Button button, EventHandler<ActionEvent> handler) {
+        if (button != null && handler != null) {
+            button.setOnAction(handler);
+        }
+    }
+
+    private boolean isLoggedIn() {
+        return SimpleClient.getUser() != null;
+    }
+
+    private boolean requireLogin(String actionLabel) {
+        if (isLoggedIn()) {
+            return true;
+        }
+        NavigationService.getInstance().setStatus("Please log in to " + actionLabel + ".");
+        NavigationService.getInstance().navigate("Login");
+        return false;
+    }
+}

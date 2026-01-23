@@ -4,6 +4,7 @@ public class MailChecker {
     private boolean mailExists = true;
     private boolean passwordExists = true;
     private boolean loggedIn = true;
+    private boolean frozen = false;
 
     public MailChecker(boolean existsMail){
         this.mailExists = existsMail;
@@ -16,6 +17,14 @@ public class MailChecker {
 
     public void setLoggedIn(boolean loggedIn) {
         this.loggedIn = loggedIn;
+    }
+
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
     }
 
     public boolean getExistsMail(){

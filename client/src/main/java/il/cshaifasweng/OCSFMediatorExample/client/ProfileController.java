@@ -1,16 +1,17 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserUpdateResponse;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class ProfileController {
 
@@ -40,16 +41,24 @@ public class ProfileController {
     @FXML private Button cancelBtn;
 
     private Account currentAccount;
+    private boolean awaitingUpdateResponse = false;
+    private String pendingSuccessMessage = "";
 
     @FXML
     void initialize() {
-        // Load current account data
-        currentAccount = SimpleClient.getAccount();
-        if (currentAccount != null) {
-            loadAccountData();
-        } else {
-            showError("No account logged in");
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
         }
+        currentAccount = SimpleClient.getAccount();
+        if (currentAccount == null) {
+            NavigationService.getInstance().navigate("Login");
+            return;
+        }
+        if (currentAccount.getPrivilegeLevel() != 1) {
+            NavigationService.getInstance().navigate("AccessDenied");
+            return;
+        }
+        loadAccountData();
     }
 
     /**
@@ -150,11 +159,7 @@ public class ProfileController {
                 return;
             }
 
-            // TODO: Send update to server via SimpleClient
-            // For now, just update the local account
-            SimpleClient.setAccount(currentAccount);
-
-            showSuccess("Profile updated successfully!");
+            sendAccountUpdate("Profile updated successfully!");
 
         } catch (Exception e) {
             showError("Error updating profile: " + e.getMessage());
@@ -192,16 +197,8 @@ public class ProfileController {
 
         // Update password
         currentAccount.setPassword(newPasswordField.getText());
-        
-        // TODO: Send password update to server
-        SimpleClient.setAccount(currentAccount);
 
-        // Clear password fields
-        currentPasswordField.clear();
-        newPasswordField.clear();
-        confirmPasswordField.clear();
-
-        showSuccess("Password changed successfully!");
+        sendAccountUpdate("Password changed successfully!");
     }
 
     @FXML
@@ -217,10 +214,7 @@ public class ProfileController {
             
             if (alert.showAndWait().get() == ButtonType.OK) {
                 currentAccount.setSubscription(false);
-                // TODO: Send update to server
-                SimpleClient.setAccount(currentAccount);
-                loadAccountData(); // Refresh display
-                showSuccess("Subscription cancelled");
+                sendAccountUpdate("Subscription cancelled");
             }
         } else {
             // Activate subscription
@@ -231,10 +225,7 @@ public class ProfileController {
             
             if (alert.showAndWait().get() == ButtonType.OK) {
                 currentAccount.setSubscription(true);
-                // TODO: Send update to server
-                SimpleClient.setAccount(currentAccount);
-                loadAccountData(); // Refresh display
-                showSuccess("Subscription activated!");
+                sendAccountUpdate("Subscription activated!");
             }
         }
     }
@@ -248,16 +239,39 @@ public class ProfileController {
 
     @FXML
     void goBack() {
+        NavigationService.getInstance().navigate("Catalog");
+    }
+
+    @Subscribe
+    public void handleUserUpdateResponse(UserUpdateResponse response) {
+        if (!awaitingUpdateResponse) {
+            return;
+        }
+        awaitingUpdateResponse = false;
+        if (response == null || !response.isSuccess()) {
+            String message = response != null ? response.getMessage() : null;
+            if (message == null || message.isBlank()) {
+                message = "Failed to update profile. Please try again.";
+            }
+            showError(message);
+            return;
+        }
+        SimpleClient.setAccount(currentAccount);
+        EventBus.getDefault().post(new PassAccountEvent(currentAccount));
+        loadAccountData();
+        showSuccess(pendingSuccessMessage.isBlank() ? "Profile updated successfully!" : pendingSuccessMessage);
+    }
+
+    private void sendAccountUpdate(String successMessage) {
+        UpdateMessage update = new UpdateMessage("account", "edit");
+        update.setAccount(currentAccount);
+        awaitingUpdateResponse = true;
+        pendingSuccessMessage = Optional.ofNullable(successMessage).orElse("");
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) backBtn.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
+            SimpleClient.getClient().sendToServer(update);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading home page: " + e.getMessage());
+            awaitingUpdateResponse = false;
+            showError("Unable to reach the server. Please try again.");
         }
     }
 

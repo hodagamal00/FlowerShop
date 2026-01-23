@@ -1,30 +1,35 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Product;
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductDetailsController {
 
-    @FXML private Button backToCatalogBtn;
-    @FXML private Button viewCartBtn;
     @FXML private ImageView productImage;
     @FXML private Text productNameText;
+    @FXML private Label idLabel;
     @FXML private Label skuLabel;
     @FXML private Label categoryLabel;
     @FXML private Label colorLabel;
     @FXML private Text originalPriceText;
-    @FXML private Text priceText;
+    @FXML private Text discountedPriceText;
+    @FXML private Label saleLabel;
+    @FXML private javafx.scene.layout.Region saleUnderline;
     @FXML private Label discountBadge;
     @FXML private Label priceRangeLabel;
     @FXML private Text descriptionText;
@@ -37,28 +42,42 @@ public class ProductDetailsController {
     @FXML private Button buyNowBtn;
     @FXML private Label successMessage;
     @FXML private Label errorMessage;
+    @FXML private Button backToCatalogBtn;
+    @FXML private Button viewCartBtn;
+    @FXML private Button closeBtn;
 
+    private static Product pendingProduct;
     private Product currentProduct;
-    private static Product selectedProduct;
+    private Product selectedProduct;
 
     @FXML
     void initialize() {
-        // Initialize quantity spinner
-        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
-        quantitySpinner.setValueFactory(valueFactory);
+        if (quantitySpinner != null) {
+            SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 99, 1);
+            quantitySpinner.setValueFactory(valueFactory);
+        }
+        bindManagedToVisible(originalPriceText, discountedPriceText, saleLabel, saleUnderline);
+        if (selectedProduct == null && pendingProduct != null) {
+            setProduct(pendingProduct);
+            pendingProduct = null;
+        } else if (selectedProduct == null) {
+            showMissingProductState();
+        }
+    }
 
-        // Load product details if a product was selected
+    /**
+     * Instance method to set the product to display
+     * Call this after loading the ProductDetails.fxml scene
+     */
+    public void setProduct(Product product) {
+        selectedProduct = product;
         if (selectedProduct != null) {
             loadProductDetails(selectedProduct);
         }
     }
 
-    /**
-     * Static method to set the product to display
-     * Call this before loading the ProductDetails.fxml scene
-     */
-    public static void setProduct(Product product) {
-        selectedProduct = product;
+    public static void setPendingProduct(Product product) {
+        pendingProduct = product;
     }
 
     /**
@@ -69,46 +88,53 @@ public class ProductDetailsController {
 
         // Basic information
         productNameText.setText(product.getName());
+        idLabel.setText(String.valueOf(product.getID()));
         skuLabel.setText(product.getSku() != null ? product.getSku() : "N/A");
         categoryLabel.setText(product.getCategory() != null ? product.getCategory() : "General");
         colorLabel.setText(product.getColor() != null ? product.getColor() : "Mixed");
-        descriptionText.setText(product.getDetails() != null ? product.getDetails() : "No description available");
+        String details = product.getDetails();
+        descriptionText.setText(details != null && !details.isBlank() ? details : "No description available");
 
-        // Load product image
-        if (product.getImage() != null && !product.getImage().isEmpty()) {
-            try {
-                Image img = new Image(getClass().getResourceAsStream(product.getImage()));
-                productImage.setImage(img);
-            } catch (Exception e) {
-                System.out.println("Could not load product image: " + product.getImage());
-                // Use placeholder if image not found
-            }
-        }
+        // Load product image (or fallback to placeholder)
+        setProductImage(product);
 
         // Handle pricing
+        priceRangeLabel.setVisible(false);
+        priceRangeLabel.setManaged(false);
+        originalPriceText.setVisible(false);
+        saleLabel.setVisible(false);
+        saleUnderline.setVisible(false);
+        discountBadge.setVisible(false);
+        customOptionsContainer.setVisible(false);
+        customOptionsContainer.setManaged(false);
+
         if (product.isCustomProduct()) {
             // Show price range for custom products
             priceRangeLabel.setVisible(true);
             priceRangeLabel.setManaged(true);
             priceRangeLabel.setText(String.format("Price Range: $%.2f - $%.2f", 
                 product.getPriceRangeMin(), product.getPriceRangeMax()));
-            priceText.setText("Custom Price");
+            discountedPriceText.setText("Custom Price");
             
             // Show custom options
             customOptionsContainer.setVisible(true);
             customOptionsContainer.setManaged(true);
         } else {
             // Regular product pricing
-            double actualPrice = product.getActualPrice();
-            priceText.setText(String.format("$%.2f", actualPrice));
+            PricingService.PricingResult pricing = PricingService.calculatePricing(product, SimpleClient.getAccount());
+            double actualPrice = pricing.getFinalPrice();
+            discountedPriceText.setText(String.format("$%.2f", actualPrice));
 
             // Show discount information if on promotion
-            if (product.isPromotion() && product.getDiscountPercent() > 0) {
-                double originalPrice = product.getPrice();
+            if (pricing.isPromotionApplied()) {
+                double originalPrice = pricing.getBasePrice();
                 originalPriceText.setText(String.format("$%.2f", originalPrice));
                 originalPriceText.setVisible(true);
+
+                saleLabel.setVisible(true);
+                saleUnderline.setVisible(true);
                 
-                discountBadge.setText(String.format("%.0f%% OFF", product.getDiscountPercent()));
+                discountBadge.setText(String.format("%.0f%% OFF", product.getNormalizedDiscountPercent()));
                 discountBadge.setVisible(true);
             }
         }
@@ -120,10 +146,13 @@ public class ProductDetailsController {
         successMessage.setVisible(false);
         errorMessage.setVisible(false);
 
-        // Check if user is logged in
-        if (SimpleClient.getAccount() == null) {
-            errorMessage.setText("Please login to add items to cart");
+        if (currentProduct == null) {
+            errorMessage.setText("Product details are not available.");
             errorMessage.setVisible(true);
+            return;
+        }
+
+        if (!ensureLoggedIn("add items to cart")) {
             return;
         }
 
@@ -152,68 +181,157 @@ public class ProductDetailsController {
 
         // Get quantity
         int quantity = quantitySpinner.getValue();
+        CartService.getInstance().addProduct(currentProduct, quantity);
 
-        // Add to cart logic here
-        // TODO: Implement cart addition via SimpleClient
-        // For now, just show success message
-        
         successMessage.setText(String.format("✓ Added %d item(s) to cart successfully!", quantity));
         successMessage.setVisible(true);
 
-        // Auto-hide success message after 3 seconds
-        new Thread(() -> {
-            try {
-                Thread.sleep(3000);
-                javafx.application.Platform.runLater(() -> successMessage.setVisible(false));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        pause.setOnFinished(event -> successMessage.setVisible(false));
+        pause.play();
     }
 
     @FXML
     void buyNow() {
-        // Add to cart first
-        addToCart();
-        
-        // If successful, navigate to checkout
-        if (successMessage.isVisible()) {
-            try {
-                Thread.sleep(500); // Brief pause to show success message
-                viewCart(); // Go to cart/checkout
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        errorMessage.setVisible(false);
+        successMessage.setVisible(false);
+
+        if (currentProduct == null) {
+            errorMessage.setText("Product details are not available.");
+            errorMessage.setVisible(true);
+            return;
         }
+
+        if (!ensureLoggedIn("buy items")) {
+            return;
+        }
+
+        int quantity = quantitySpinner.getValue();
+        List<Product> checkoutItems = new ArrayList<>();
+        for (int i = 0; i < quantity; i++) {
+            checkoutItems.add(currentProduct);
+        }
+
+        Account account = SimpleClient.getAccount();
+        PassAccountEventCheckout checkoutEvent = new PassAccountEventCheckout(account);
+        checkoutEvent.productsToCheckout = checkoutItems;
+
+        NavigationService.getInstance().navigate("checkout");
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        EventBus.getDefault().post(checkoutEvent);
+                    }
+                }, 500
+        );
     }
 
     @FXML
     void viewCart() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) viewCartBtn.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading cart page: " + e.getMessage());
+        if (!ensureLoggedIn("view the cart")) {
+            return;
         }
+        NavigationService.getInstance().navigate("cart");
     }
 
     @FXML
     void goBackToCatalog() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("primary.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) backToCatalogBtn.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading catalog page: " + e.getMessage());
+        NavigationService.getInstance().navigate("Catalog");
+    }
+
+    @FXML
+    void closeModal() {
+        Stage stage = getCurrentStage();
+        if (stage != null) {
+            stage.close();
+        }
+    }
+
+    private void setProductImage(Product product) {
+        Image image = null;
+        String imagePath = product.getImage();
+        if (imagePath != null && !imagePath.isEmpty()) {
+            try {
+                java.net.URL resourceUrl = getClass().getResource(imagePath);
+                if (resourceUrl == null && !imagePath.startsWith("/")) {
+                    resourceUrl = getClass().getResource("/" + imagePath);
+                }
+                if (resourceUrl != null) {
+                    image = new Image(resourceUrl.toExternalForm());
+                } else if (imagePath.startsWith("http://")
+                        || imagePath.startsWith("https://")
+                        || imagePath.startsWith("file:")
+                        || imagePath.startsWith("jar:")
+                        || imagePath.startsWith("jrt:")) {
+                    image = new Image(imagePath);
+                }
+            } catch (Exception e) {
+                System.out.println("Could not load product image: " + imagePath);
+            }
+        }
+        if (image == null) {
+            try {
+                java.net.URL placeholderUrl = getClass().getResource("placeholder.png");
+                if (placeholderUrl == null) {
+                    placeholderUrl = getClass().getResource("/placeholder.png");
+                }
+                if (placeholderUrl != null) {
+                    image = new Image(placeholderUrl.toExternalForm());
+                }
+            } catch (Exception e) {
+                System.out.println("Placeholder image not found.");
+            }
+        }
+        if (image != null && productImage != null) {
+            productImage.setImage(image);
+        }
+    }
+
+    private Stage getCurrentStage() {
+        if (discountedPriceText != null && discountedPriceText.getScene() != null) {
+            return (Stage) discountedPriceText.getScene().getWindow();
+        }
+        if (productNameText != null && productNameText.getScene() != null) {
+            return (Stage) productNameText.getScene().getWindow();
+        }
+        return null;
+    }
+
+    private boolean ensureLoggedIn(String actionLabel) {
+        if (SimpleClient.getAccount() != null) {
+            return true;
+        }
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Login Required");
+        alert.setHeaderText("Please log in to continue.");
+        alert.setContentText("Guests can browse products, but you need an account to " + actionLabel + ".");
+        alert.showAndWait();
+        NavigationService.getInstance().navigate("Login");
+        return false;
+    }
+
+    private void bindManagedToVisible(Node... nodes) {
+        for (Node node : nodes) {
+            if (node == null) {
+                continue;
+            }
+            node.managedProperty().bind(node.visibleProperty());
+        }
+    }
+
+    private void showMissingProductState() {
+        if (productNameText != null) {
+            productNameText.setText("Product details unavailable");
+        }
+        if (descriptionText != null) {
+            descriptionText.setText("Please return to the catalog and select a product.");
+        }
+        if (addToCartBtn != null) {
+            addToCartBtn.setDisable(true);
+        }
+        if (buyNowBtn != null) {
+            buyNowBtn.setDisable(true);
         }
     }
 }
