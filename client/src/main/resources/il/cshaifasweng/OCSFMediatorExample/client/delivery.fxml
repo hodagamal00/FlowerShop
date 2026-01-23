@@ -29,7 +29,6 @@
                         <Font name="System Bold" size="28.0" />
                      </font>
                   </Label>
-                  <Button fx:id="back" layoutX="1350.0" layoutY="25.0" mnemonicParsing="false" onAction="#openCatalog" prefHeight="35.0" prefWidth="150.0" text="← Back to Catalog" style="-fx-font-size: 14px;" />
                </children>
             </AnchorPane>
 

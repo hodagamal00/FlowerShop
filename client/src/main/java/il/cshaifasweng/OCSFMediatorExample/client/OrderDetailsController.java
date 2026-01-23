@@ -5,34 +5,30 @@ import il.cshaifasweng.OCSFMediatorExample.entities.CancelOrderRequest;
 import il.cshaifasweng.OCSFMediatorExample.entities.CancelOrderResponse;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class OrderDetailsController {
 
-    @FXML private Button backBtn;
     @FXML private Text orderIdText;
     @FXML private Label statusBadge;
     @FXML private Label orderDateLabel;
     @FXML private Label deliveryTimeLabel;
     @FXML private Label orderTypeLabel;
-    @FXML private TableView<?> itemsTable;
-    @FXML private TableColumn<?, ?> productNameCol;
-    @FXML private TableColumn<?, ?> quantityCol;
-    @FXML private TableColumn<?, ?> priceCol;
-    @FXML private TableColumn<?, ?> subtotalCol;
+    @FXML private TableView<OrderItemRow> itemsTable;
+    @FXML private TableColumn<OrderItemRow, String> productNameCol;
+    @FXML private TableColumn<OrderItemRow, Integer> quantityCol;
+    @FXML private TableColumn<OrderItemRow, String> priceCol;
+    @FXML private TableColumn<OrderItemRow, String> subtotalCol;
     @FXML private Text deliveryInfoTitle;
     @FXML private VBox deliveryInfoContainer;
     @FXML private Label deliveryAddressLabel;
@@ -59,6 +55,7 @@ public class OrderDetailsController {
     @FXML
     void initialize() {
         EventBus.getDefault().register(this);
+        setupItemsTable();
         if (selectedOrder != null) {
             loadOrderDetails(selectedOrder, selectedStatus);
         }
@@ -88,8 +85,12 @@ public class OrderDetailsController {
 
         // Dates
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd, hh:mm a");
-        orderDateLabel.setText(dateFormat.format(new Date()));
-        deliveryTimeLabel.setText(order.getDelivery_time() != null ? 
+        if (order.getOrderDate() != null) {
+            orderDateLabel.setText(dateFormat.format(java.sql.Timestamp.valueOf(order.getOrderDate())));
+        } else {
+            orderDateLabel.setText(dateFormat.format(new Date()));
+        }
+        deliveryTimeLabel.setText(order.getDelivery_time() != null ?
             order.getDelivery_time().toString() : "TBD");
 
         // Order type
@@ -105,8 +106,9 @@ public class OrderDetailsController {
             pickupInfoContainer.setManaged(false);
             
             deliveryAddressLabel.setText(order.getAddress());
-            deliveryFeeLabel.setText("$9.99");
-            feeLabel.setText("$9.99");
+            double deliveryFee = order.getDeliveryFee();
+            deliveryFeeLabel.setText(String.format("$%.2f", deliveryFee));
+            feeLabel.setText(String.format("$%.2f", deliveryFee));
         } else {
             deliveryInfoTitle.setText("Pickup Information");
             deliveryInfoContainer.setVisible(false);
@@ -118,9 +120,12 @@ public class OrderDetailsController {
             feeLabel.setText("$0.00");
         }
 
+        // Items summary
+        loadItems(order);
+
         // Price summary
         double orderPrice = order.getPrice();
-        double deliveryFee = isDelivery ? 9.99 : 0.0;
+        double deliveryFee = isDelivery ? order.getDeliveryFee() : 0.0;
         double subtotal = orderPrice - deliveryFee;
         
         subtotalLabel.setText(String.format("$%.2f", subtotal));
@@ -194,6 +199,29 @@ public class OrderDetailsController {
         refundAmountText.setText(String.format("$%.2f (%.0f%%)", refundAmount, refundPercent));
     }
 
+    private void setupItemsTable() {
+        if (itemsTable == null) {
+            return;
+        }
+        productNameCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("name"));
+        quantityCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("quantity"));
+        priceCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("unitPrice"));
+        subtotalCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("lineTotal"));
+    }
+
+    private void loadItems(Order order) {
+        if (order == null || itemsTable == null) {
+            return;
+        }
+        List<OrderItemRow> rows = new java.util.ArrayList<>();
+        List<OrderProductParser.OrderItem> items = OrderProductParser.parseItems(
+                order.getProducts(), ProductCatalogCache.snapshot());
+        for (OrderProductParser.OrderItem item : items) {
+            rows.add(new OrderItemRow(item.getName(), item.getQuantity(), item.getUnitPrice(), item.getLineTotal()));
+        }
+        itemsTable.getItems().setAll(rows);
+    }
+
     @FXML
     void cancelOrder() {
         if (currentOrder == null || cancelInProgress) {
@@ -242,21 +270,6 @@ public class OrderDetailsController {
         alert.showAndWait();
     }
 
-    @FXML
-    void goBack() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("myorders.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) backBtn.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading my orders page: " + e.getMessage());
-        }
-    }
-
     private void showSuccess(String message) {
         successMessage.setText("✓ " + message);
         successMessage.setVisible(true);
@@ -291,5 +304,35 @@ public class OrderDetailsController {
                 showError(response.getMessage());
             }
         });
+    }
+
+    public static class OrderItemRow {
+        private final String name;
+        private final int quantity;
+        private final String unitPrice;
+        private final String lineTotal;
+
+        public OrderItemRow(String name, int quantity, double unitPrice, double lineTotal) {
+            this.name = name;
+            this.quantity = quantity;
+            this.unitPrice = String.format("$%.2f", unitPrice);
+            this.lineTotal = String.format("$%.2f", lineTotal);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public String getUnitPrice() {
+            return unitPrice;
+        }
+
+        public String getLineTotal() {
+            return lineTotal;
+        }
     }
 }

@@ -271,17 +271,6 @@
                            visible="false"
                            style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
 
-                    <!-- Scroll to Top Button -->
-                    <HBox alignment="CENTER"
-                          style="-fx-padding: 0 0 20 0;">
-                        <Button fx:id="scrollUpBtn"
-                                mnemonicParsing="false"
-                                onAction="#scrollToTop"
-                                prefWidth="200.0" prefHeight="36.0"
-                                styleClass="btn-secondary"
-                                text="⇧ Back to Top"/>
-                    </HBox>
-
                 </VBox>
             </children>
         </AnchorPane>

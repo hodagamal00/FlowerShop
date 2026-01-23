@@ -23,7 +23,6 @@
                         <Font name="System Bold" size="28.0" />
                      </font>
                   </Label>
-                  <Button fx:id="backToCatalog" layoutX="1350.0" layoutY="25.0" mnemonicParsing="false" onAction="#GoToCatalog" prefHeight="35.0" prefWidth="150.0" style="-fx-font-size: 14px;" text="← Back to Catalog" />
                </children>
             </AnchorPane>
 

@@ -35,7 +35,6 @@ public class ErrorController {
     @FXML private Label errorCodeLabel;
     @FXML private Label errorDetailsLabel;
     
-    @FXML private Button backBtn;
     @FXML private Button homeBtn;
     @FXML private Button retryBtn;
 
@@ -185,13 +184,6 @@ public class ErrorController {
     private void handleLogout(ActionEvent event) {
         SimpleClient.logoutCurrentUser();
         navigateToPage(event, "catalog");
-    }
-
-    /**
-     * Handle go back button - returns to previous page or catalog
-     */
-    private void handleGoBack(ActionEvent event) {
-        navigateToPage(event, lastPage);
     }
 
     /**

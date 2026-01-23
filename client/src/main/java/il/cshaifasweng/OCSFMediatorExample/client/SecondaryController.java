@@ -17,7 +17,6 @@ public class SecondaryController {
 
     @FXML private Button apply_changes;
     @FXML private Button edit_product;
-    @FXML private Button back_button;
 
     @FXML private DialogPane flower_details;
     @FXML private DialogPane flower_name;
@@ -62,12 +61,6 @@ public class SecondaryController {
     //----------------------------------------------------------------//
     // EVENT HANDLERS
     //----------------------------------------------------------------//
-
-    @FXML
-    void returnWindow(ActionEvent event) {
-        CatalogController.setReturnedFromSecondaryController(true);
-        NavigationService.getInstance().navigate("Catalog");
-    }
 
     @FXML
     void edit_product(ActionEvent event) {

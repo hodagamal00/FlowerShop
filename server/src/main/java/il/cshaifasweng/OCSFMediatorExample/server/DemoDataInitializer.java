@@ -9,9 +9,14 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Seeds the database with demo data so the application can be used immediately
@@ -80,8 +85,11 @@ public final class DemoDataInitializer {
                 createProduct(4, "btnMix", "Color Splash", "Mixed seasonal flowers", 140.0,
                         "MIX-004", "Bouquet", "Mixed", true, 10, false, null, 0.0, 0.0,
                         "Perfect for birthdays and anniversaries"),
-                createProduct(5, "btnCustom", "Custom Bridal Bouquet", "Tailored bridal bouquet design", 350.0,
-                        "CUS-005", "Custom", "Varies", false, 0, true, "Bridal Bouquet", 250.0, 600.0,
+                createProduct(5, "btnTulip", "Tulip Charm", "Soft tulips arranged for spring", 110.0,
+                        "TUL-005", "Seasonal", "Pink", false, 0, false, null, 0.0, 0.0,
+                        "Fresh tulips to brighten any room"),
+                createProduct(6, "btnCustom", "Custom Bridal Bouquet", "Tailored bridal bouquet design", 350.0,
+                        "CUS-006", "Custom", "Varies", false, 0, true, "Bridal Bouquet", 250.0, 600.0,
                         "Work with our designers to craft your dream bouquet")
         );
 
@@ -124,12 +132,12 @@ public final class DemoDataInitializer {
                 11, 2025, 456, false, 2, false);
         ben.setPrivialge(1);
 
-        Account chloe = new Account(3, "Chloe Petal", 1003, "78 Bouquet Rd, Jerusalem",
-                "chloe@example.com", "chloe123", 972552223344L, 4333333333333333L,
-                10, 2027, 789, false, 0, true);
-        chloe.setPrivialge(4);
+        Account dana = new Account(3, "Dana Bloom", 1003, "78 Bouquet Rd, Jerusalem",
+                "dana@example.com", "dana123", 972552223344L, 4333333333333333L,
+                10, 2027, 789, false, 1, true);
+        dana.setPrivialge(1);
 
-        for (Account account : Arrays.asList(alice, ben, chloe)) {
+        for (Account account : Arrays.asList(alice, ben, dana)) {
             session.save(account);
         }
     }
@@ -151,8 +159,15 @@ public final class DemoDataInitializer {
         liam.setPrivialge(2);
         liam.setLoggedIn(false);
 
+        Worker noa = new Worker("Noa Petal", "noa@flowershop.com", "noaPass", 12);
+        noa.setPersonID(2003);
+        noa.setBelongShop(1);
+        noa.setPrivialge(2);
+        noa.setLoggedIn(false);
+
         session.save(emma);
         session.save(liam);
+        session.save(noa);
     }
 
     private static void seedManagers(Session session) {
@@ -167,14 +182,22 @@ public final class DemoDataInitializer {
         maya.setBelongShop(1);
         maya.setLoggedIn(false);
 
-        Manager noam = new Manager("Noam Garden", "noam@flowershop.com", "noamPass", 21);
-        noam.setPersonID(3002);
+        Manager amit = new Manager("Amit Bloom", "amit@flowershop.com", "amitPass", 21);
+        amit.setPersonID(3002);
+        amit.setPrivialge(3);
+        amit.setShopID(2);
+        amit.setBelongShop(2);
+        amit.setLoggedIn(false);
+
+        Manager noam = new Manager("Noam Garden", "noam@flowershop.com", "noamPass", 22);
+        noam.setPersonID(3003);
         noam.setPrivialge(4);
         noam.setShopID(0); // Chain manager
         noam.setBelongShop(0);
         noam.setLoggedIn(false);
 
         session.save(maya);
+        session.save(amit);
         session.save(noam);
     }
 
@@ -183,27 +206,61 @@ public final class DemoDataInitializer {
             return;
         }
 
-        Order pickupOrder = new Order(1, true, 1, "Happy Birthday!", 120,
-                "12 Flower St, Haifa", 1, false, false,
-                10, 5, 2024, 9, 5, 2024, 4111111111111111L, 12, 2026, 123,
-                "Alice Green", 972501112233L, "12 Flower St, Haifa",
-                "Red Rose Bouquet", 14, 30, 16, 0, 0.0, "CREDIT_CARD");
+        List<Product> products = session.createQuery("from Product", Product.class).getResultList();
+        if (products.isEmpty()) {
+            return;
+        }
+        List<Account> customers = session.createQuery("from Account", Account.class).getResultList();
+        if (customers.isEmpty()) {
+            return;
+        }
 
-pickupOrder.setRefundStatus("NONE");
-        pickupOrder.setCancelled(false);
-        pickupOrder.setRefundAmount(0.0);
+        Random random = new Random(42);
+        int orderId = 1;
+        List<Order> seededOrders = new ArrayList<>();
+        int[] branches = new int[]{1, 2};
+        for (int branchId : branches) {
+            int orderCount = 40 + random.nextInt(41);
+            for (int i = 0; i < orderCount; i++) {
+                Account customer = customers.get(random.nextInt(customers.size()));
+                LocalDateTime orderTime = LocalDateTime.now()
+                        .minusDays(random.nextInt(90))
+                        .withHour(8 + random.nextInt(10))
+                        .withMinute(random.nextInt(60));
+                LocalDateTime prepareTime = orderTime.plusDays(random.nextInt(4)).plusHours(random.nextInt(6));
+                boolean pickUp = random.nextBoolean();
+                boolean delivered = random.nextDouble() < 0.6;
+                boolean cancelled = !delivered && random.nextDouble() < 0.25;
 
-        Order deliveryOrder = new Order(2, false, 2, "Congratulations!", 235,
-                "45 Garden Ave, Tel Aviv", 2, true, true,
-                15, 6, 2024, 14, 6, 2024, 4222222222222222L, 11, 2025, 456,
-                "Ben Bloom", 972541234567L, "45 Garden Ave, Tel Aviv",
-                "Sunny Sunflowers, Color Splash", 10, 15, 12, 45, 25.0, "CREDIT_CARD");
-        deliveryOrder.setRefundStatus("FULL");
-        deliveryOrder.setRefundAmount(235.0);
-        deliveryOrder.setCancelled(false);
-        deliveryOrder.setDelivered(true);
+                Map<Product, Integer> itemQuantities = buildRandomItems(products, random);
+                String productSummary = buildProductsSummary(itemQuantities);
+                int totalPrice = calculateOrderTotal(itemQuantities, pickUp);
 
-        for (Order order : Arrays.asList(pickupOrder, deliveryOrder)) {
+                String deliveredAddress = pickUp ? "" : customer.getAddress();
+                Order order = new Order(orderId++, pickUp, branchId, "Enjoy your blooms!", totalPrice,
+                        deliveredAddress, customer.getAccountID(), random.nextBoolean(), delivered,
+                        prepareTime.getDayOfMonth(), prepareTime.getMonthValue(), prepareTime.getYear(),
+                        orderTime.getDayOfMonth(), orderTime.getMonthValue(), orderTime.getYear(),
+                        customer.getCreditCardNumber(), customer.getCreditMonthExpire(),
+                        customer.getCreditYearExpire(), customer.getCcv(),
+                        customer.getFullName(), customer.getPhoneNumber(), deliveredAddress,
+                        productSummary, orderTime.getHour(), orderTime.getMinute(),
+                        prepareTime.getHour(), prepareTime.getMinute(),
+                        pickUp ? 0.0 : 20.0, "CREDIT_CARD");
+                order.setCancelled(cancelled);
+                order.setDelivered(delivered && !cancelled);
+                if (cancelled) {
+                    order.setRefundStatus("FULL");
+                    order.setRefundAmount(totalPrice);
+                } else {
+                    order.setRefundStatus("NONE");
+                    order.setRefundAmount(0.0);
+                }
+                seededOrders.add(order);
+            }
+        }
+
+        for (Order order : seededOrders) {
             session.save(order);
         }
     }
@@ -212,15 +269,33 @@ pickupOrder.setRefundStatus("NONE");
         if (count(session, Complaint.class) > 0) {
             return;
         }
-
-        Complaint complaint = new Complaint(1, 1, 2, false, true,
-                "Flowers arrived later than expected", 2, 2002, true,
-                50, 16, 6, 2024, "We apologize for the delay and refunded 50 ILS");
-        complaint.setCreatedAt(new Date());
-        complaint.setRespondedAt(new Date());
-        complaint.setSlaStatus("RESOLVED_ON_TIME");
-        complaint.setCompensationDecision("50% refund approved");
-        session.save(complaint);
+        List<Order> orders = session.createQuery("from Order", Order.class).getResultList();
+        if (orders.isEmpty()) {
+            return;
+        }
+        Random random = new Random(24);
+        int complaintCount = 10 + random.nextInt(11);
+        for (int i = 0; i < complaintCount; i++) {
+            Order order = orders.get(random.nextInt(orders.size()));
+            LocalDate orderDate = LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
+            LocalDate complaintDate = orderDate.plusDays(random.nextInt(5));
+            Complaint complaint = new Complaint(i + 1, order.getAccountID(), order.getOrderID(), false, true,
+                    "Delivery issue reported for order #" + order.getOrderID(), order.getShopID(),
+                    2001, random.nextBoolean(), random.nextInt(120),
+                    complaintDate.getDayOfMonth(), complaintDate.getMonthValue(),
+                    complaintDate.getYear(), "We are reviewing your complaint.");
+            Date createdAt = Date.from(complaintDate.atStartOfDay().atZone(java.time.ZoneId.systemDefault()).toInstant());
+            complaint.setCreatedAt(createdAt);
+            if (random.nextBoolean()) {
+                complaint.setRespondedAt(Date.from(complaintDate.plusDays(1).atStartOfDay()
+                        .atZone(java.time.ZoneId.systemDefault()).toInstant()));
+                complaint.setSlaStatus("RESOLVED_ON_TIME");
+                complaint.setCompensationDecision("Store credit issued");
+            } else {
+                complaint.setSlaStatus("PENDING");
+            }
+            session.save(complaint);
+        }
     }
 
     private static void seedMessages(Session session) {
@@ -246,6 +321,39 @@ pickupOrder.setRefundStatus("NONE");
         incomeReport.setTotalOrders(87);
         incomeReport.setTotalComplaints(3);
         session.save(incomeReport);
+    }
+
+    private static Map<Product, Integer> buildRandomItems(List<Product> products, Random random) {
+        Map<Product, Integer> items = new LinkedHashMap<>();
+        int itemCount = 2 + random.nextInt(3);
+        for (int i = 0; i < itemCount; i++) {
+            Product product = products.get(random.nextInt(products.size()));
+            int quantity = 1 + random.nextInt(3);
+            items.put(product, items.getOrDefault(product, 0) + quantity);
+        }
+        return items;
+    }
+
+    private static String buildProductsSummary(Map<Product, Integer> items) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<Product, Integer> entry : items.entrySet()) {
+            if (builder.length() > 0) {
+                builder.append(",");
+            }
+            builder.append(entry.getKey().getID()).append(":").append(entry.getValue());
+        }
+        return builder.toString();
+    }
+
+    private static int calculateOrderTotal(Map<Product, Integer> items, boolean pickUp) {
+        double total = 0.0;
+        for (Map.Entry<Product, Integer> entry : items.entrySet()) {
+            total += entry.getKey().getPrice() * entry.getValue();
+        }
+        if (!pickUp) {
+            total += 20.0;
+        }
+        return (int) Math.round(total);
     }
 
     private static void seedPromotions(Session session) {

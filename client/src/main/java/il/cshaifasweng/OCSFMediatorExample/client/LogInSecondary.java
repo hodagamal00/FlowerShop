@@ -47,7 +47,6 @@ public class LogInSecondary {
     private Button LogIn;
 
     @FXML
-    private Button bak;
 
     @FXML
     private TextField Password;
@@ -72,7 +71,6 @@ public class LogInSecondary {
         assert Employee_login != null : "fx:id=\"Employee_login\" was not injected: check your FXML file 'LogInSecond.fxml'.";
         Customer_login.setVisible(true);
         Employee_login.setVisible(true);
-        bak.setVisible(true);
         Email.setVisible(false);
         Password.setVisible(false);
         LogIn.setVisible(false);
@@ -165,12 +163,6 @@ public class LogInSecondary {
         ErrorMsg.setVisible(false);
       //  bak.setVisible(true);
         ErrorMsgPass.setVisible(false);
-    }
-
-    @FXML
-    void backkk(ActionEvent event) throws IOException {
-        // Navigate back to the primary login screen inside the AppShell.
-        NavigationService.getInstance().navigate("Login");
     }
 
     @FXML

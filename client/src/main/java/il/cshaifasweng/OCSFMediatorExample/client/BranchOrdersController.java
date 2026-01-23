@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,6 +27,9 @@ public class BranchOrdersController {
     @FXML private Button dashboardBtn;
     @FXML private Button homeBtn;
     @FXML private ComboBox<String> statusFilterCombo;
+    @FXML private ComboBox<String> branchFilterCombo;
+    @FXML private javafx.scene.control.DatePicker fromDatePicker;
+    @FXML private javafx.scene.control.DatePicker toDatePicker;
     @FXML private TextField searchField;
     @FXML private Button searchBtn;
     @FXML private Button refreshBtn;
@@ -46,6 +48,7 @@ public class BranchOrdersController {
     @FXML private Button printBtn;
     @FXML private Label successMessage;
     @FXML private Label errorMessage;
+    @FXML private Label emptyStateLabel;
 
     private final ObservableList<OrderRow> allOrders = FXCollections.observableArrayList();
     private final ObservableList<OrderRow> filteredOrders = FXCollections.observableArrayList();
@@ -55,6 +58,8 @@ public class BranchOrdersController {
     void initialize() {
         EventBus.getDefault().register(this);
         setupStatusFilter();
+        setupDateFilters();
+        setupBranchFilter();
         setupTable();
         resolveCurrentBranch();
         requestOrders();
@@ -62,10 +67,39 @@ public class BranchOrdersController {
 
     private void setupStatusFilter() {
         statusFilterCombo.setItems(FXCollections.observableArrayList(
-            "All", "Pending", "Confirmed", "Preparing", "Ready", "In Delivery", "Completed", "Cancelled"
+            "All", "Pending", "Delivered", "Cancelled"
         ));
         statusFilterCombo.setValue("All");
-        statusFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> applyFilters());
+        statusFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> requestOrders());
+    }
+
+    private void setupDateFilters() {
+        if (fromDatePicker != null) {
+            fromDatePicker.setValue(java.time.LocalDate.now().minusDays(30));
+            fromDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> requestOrders());
+        }
+        if (toDatePicker != null) {
+            toDatePicker.setValue(java.time.LocalDate.now());
+            toDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> requestOrders());
+        }
+    }
+
+    private void setupBranchFilter() {
+        if (branchFilterCombo == null) {
+            return;
+        }
+        branchFilterCombo.setItems(FXCollections.observableArrayList(
+            "My Branch", "All Branches", "Branch 1", "Branch 2"
+        ));
+        branchFilterCombo.setValue("My Branch");
+        branchFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> requestOrders());
+        Account account = SimpleClient.getAccount();
+        boolean isChainManager = account != null && account.getPrivilegeLevel() >= 4;
+        if (isChainManager) {
+            branchFilterCombo.setValue("All Branches");
+        }
+        branchFilterCombo.setVisible(isChainManager);
+        branchFilterCombo.setManaged(isChainManager);
     }
 
     private void setupTable() {
@@ -112,10 +146,36 @@ public class BranchOrdersController {
 
     private void requestOrders() {
         try {
-            SimpleClient.getClient().sendToServer(new getAllOrdersMessage());
+            getAllOrdersMessage request = new getAllOrdersMessage();
+            request.setBranchId(resolveRequestedBranchId());
+            request.setFromDate(fromDatePicker != null ? fromDatePicker.getValue() : null);
+            request.setToDate(toDatePicker != null ? toDatePicker.getValue() : null);
+            String status = statusFilterCombo != null ? statusFilterCombo.getValue() : null;
+            request.setStatus(status);
+            SimpleClient.getClient().sendToServer(request);
         } catch (IOException e) {
             showError("Unable to load orders. Please try again.");
         }
+    }
+
+    private Integer resolveRequestedBranchId() {
+        Account account = SimpleClient.getAccount();
+        if (account == null) {
+            return null;
+        }
+        if (account.getPrivilegeLevel() >= 4 && branchFilterCombo != null) {
+            String selection = branchFilterCombo.getValue();
+            if ("All Branches".equalsIgnoreCase(selection)) {
+                return 0;
+            }
+            if ("Branch 1".equalsIgnoreCase(selection)) {
+                return 1;
+            }
+            if ("Branch 2".equalsIgnoreCase(selection)) {
+                return 2;
+            }
+        }
+        return currentBranchId > 0 ? currentBranchId : null;
     }
 
     @FXML
@@ -151,7 +211,7 @@ public class BranchOrdersController {
         }
 
         ChoiceDialog<String> dialog = new ChoiceDialog<>(selected.getStatus(),
-            "Pending", "Confirmed", "Preparing", "Ready", "In Delivery", "Completed", "Cancelled");
+            "Pending", "Delivered", "Cancelled");
         dialog.setTitle("Update Order Status");
         dialog.setHeaderText("Select new status");
         dialog.setContentText("New status:");
@@ -193,20 +253,10 @@ public class BranchOrdersController {
     @Subscribe
     public void passOrders(PassOrdersFromServer passOrders) {
         List<Order> receivedOrders = passOrders.getRecievedOrders();
-        List<Order> branchOrders = filterOrdersForBranch(receivedOrders);
-        allOrders.setAll(branchOrders.stream()
+        allOrders.setAll(receivedOrders.stream()
             .map(this::buildRow)
             .collect(Collectors.toList()));
         applyFilters();
-    }
-
-    private List<Order> filterOrdersForBranch(List<Order> orders) {
-        if (currentBranchId <= 0) {
-            return orders;
-        }
-        return orders.stream()
-            .filter(order -> order.getShopID() == currentBranchId)
-            .collect(Collectors.toList());
     }
 
     private OrderRow buildRow(Order order) {
@@ -216,7 +266,11 @@ public class BranchOrdersController {
         LocalDateTime deliveryDate = safeDate(order.getDelivery_time());
 
         String status = deriveInitialStatus(order);
-        String type = order.isPickUp() ? "Pickup" : "Delivery";
+        String type = order.isPickUp()
+            ? "Pickup"
+            : (order.getDeliveredAddress() != null && !order.getDeliveredAddress().isBlank()
+                ? order.getDeliveredAddress()
+                : "Delivery");
         String customer = "Account #" + order.getAccountID();
         String orderDateText = orderDate != null ? orderDate.format(dateFormatter) : "-";
         String deliveryText = deliveryDate != null ? deliveryDate.format(timeFormatter) : "-";
@@ -233,22 +287,25 @@ public class BranchOrdersController {
             return "Cancelled";
         }
         if (order.isDelivered()) {
-            return "Completed";
+            return "Delivered";
         }
         return "Pending";
     }
 
     private void applyFilters() {
         String searchTerm = Optional.ofNullable(searchField.getText()).orElse("").trim().toLowerCase(Locale.US);
-        String statusFilter = Optional.ofNullable(statusFilterCombo.getValue()).orElse("All");
 
         List<OrderRow> filtered = allOrders.stream()
             .filter(order -> matchesSearch(order, searchTerm))
-            .filter(order -> matchesStatus(order, statusFilter))
             .collect(Collectors.toList());
 
         filteredOrders.setAll(filtered);
         orderCountLabel.setText(String.format("(%d total)", filteredOrders.size()));
+        if (emptyStateLabel != null) {
+            boolean empty = filteredOrders.isEmpty();
+            emptyStateLabel.setVisible(empty);
+            emptyStateLabel.setManaged(empty);
+        }
     }
 
     private boolean matchesSearch(OrderRow order, String searchTerm) {
@@ -260,20 +317,13 @@ public class BranchOrdersController {
             || String.valueOf(order.getOrderId()).contains(searchTerm);
     }
 
-    private boolean matchesStatus(OrderRow order, String statusFilter) {
-        if (statusFilter == null || "All".equalsIgnoreCase(statusFilter)) {
-            return true;
-        }
-        return Objects.equals(order.getStatus(), statusFilter);
-    }
-
     private void updateOrderStatus(OrderRow row, String status) {
         row.setStatus(status);
         Order order = row.getOrder();
         if ("Cancelled".equalsIgnoreCase(status)) {
             order.setCancelled(true);
             order.setDelivered(false);
-        } else if ("Completed".equalsIgnoreCase(status) || "Delivered".equalsIgnoreCase(status)) {
+        } else if ("Delivered".equalsIgnoreCase(status)) {
             order.setDelivered(true);
             order.setCancelled(false);
             sendDeliveryUpdate(order);

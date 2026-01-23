@@ -37,6 +37,7 @@ public class SimpleClient extends AbstractClient {
 		if (msg instanceof List) {
 			System.out.println("arrived to msg instanceof LIST in simple client");
 			List<Product> listt = (List<Product>) msg;
+			ProductCatalogCache.update(listt);
 
 			for (Product p : listt) {
 				System.out.println(p.getName());
@@ -153,6 +154,7 @@ public class SimpleClient extends AbstractClient {
 				EventBus.getDefault().post(ft);
 			} else {
 				List<Product> ftList = ft.getRecievedProducts();
+				ProductCatalogCache.update(ftList);
 				RetrieveDataBaseEvent retEvent = new RetrieveDataBaseEvent(ftList);
 				EventBus.getDefault().post(retEvent);
 			}

@@ -171,8 +171,8 @@ public class OrderConfirmationController {
         paymentStatusLabel.setText("Payment recorded at placement");
 
         orderItemsContainer.getChildren().clear();
-        orderItemsContainer.getChildren().add(buildItemRow("Red Roses Bouquet", 89.99));
-        orderItemsContainer.getChildren().add(buildItemRow("Greeting Card", 9.99));
+        orderItemsContainer.getChildren().add(buildItemRow("Red Roses Bouquet", 1, 89.99));
+        orderItemsContainer.getChildren().add(buildItemRow("Greeting Card", 1, 9.99));
         subtotalLabel.setText("$99.98");
         deliveryFeeSummaryLabel.setText("$9.99");
         discountRow.setVisible(true);
@@ -194,23 +194,12 @@ public class OrderConfirmationController {
 
     private void renderOrderSummary(Order order, boolean delivery) {
         orderItemsContainer.getChildren().clear();
-        String products = order.getProducts();
+        List<OrderProductParser.OrderItem> items = OrderProductParser.parseItems(
+                order.getProducts(), ProductCatalogCache.snapshot());
         List<Double> itemPrices = new ArrayList<>();
-        if (products != null && !products.isBlank()) {
-            String[] tokens = products.split("%");
-            for (String token : tokens) {
-                if (token == null || token.isBlank()) {
-                    continue;
-                }
-                String[] parts = token.split(" - ");
-                String name = parts[0].trim();
-                double price = 0.0;
-                if (parts.length > 1) {
-                    price = parsePrice(parts[1]);
-                }
-                itemPrices.add(price);
-                orderItemsContainer.getChildren().add(buildItemRow(name, price));
-            }
+        for (OrderProductParser.OrderItem item : items) {
+            itemPrices.add(item.getLineTotal());
+            orderItemsContainer.getChildren().add(buildItemRow(item.getName(), item.getQuantity(), item.getUnitPrice()));
         }
 
         double subtotal = PricingService.calculateSubtotal(itemPrices);
@@ -231,8 +220,8 @@ public class OrderConfirmationController {
         orderTotalSummaryText.setText(formatCurrency(total));
     }
 
-    private HBox buildItemRow(String name, double price) {
-        Label nameLabel = new Label(name);
+    private HBox buildItemRow(String name, int quantity, double price) {
+        Label nameLabel = new Label(String.format("%s x%d", name, quantity));
         nameLabel.setPrefWidth(420);
         Label priceLabel = new Label(formatCurrency(price));
         HBox row = new HBox(10, nameLabel, priceLabel);
