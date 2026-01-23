@@ -1242,7 +1242,6 @@ private static SessionFactory cachedSessionFactory;
 				throw ex;
 			}
 		}
-		return new PricingResult(total, "");
 	}
 
 	private static BigDecimal applyDiscount(BigDecimal basePrice, double discountPercent) {
