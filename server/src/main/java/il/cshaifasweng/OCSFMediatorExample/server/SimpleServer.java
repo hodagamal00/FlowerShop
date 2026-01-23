@@ -276,7 +276,11 @@ private static SessionFactory cachedSessionFactory;
 
 			switch (updateClassName) {
 				case "product":
-					if (!requirePrivilegeAtLeast(client, 3)) {
+					if ("edit".equals(updateClassFunction)) {
+						if (!requirePrivilegeAtLeast(client, 2)) {
+							break;
+						}
+					} else if (!requirePrivilegeAtLeast(client, 3)) {
 						break;
 					}
 					if (updateClassFunction.equals("add")) {

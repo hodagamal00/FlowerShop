@@ -27,11 +27,11 @@
             styleClass="catalog-root">
     <top>
         <HBox alignment="CENTER_LEFT" styleClass="page-header" spacing="12.0">
-            <Label text="Catalog" styleClass="page-title" />
+            <Label fx:id="catalogTitle" text="Catalog" styleClass="page-title" />
         </HBox>
     </top>
     <left>
-        <VBox spacing="16.0" styleClass="catalog-sidebar card">
+        <VBox fx:id="cartSidebar" spacing="16.0" styleClass="catalog-sidebar card">
             <Text fx:id="cartTopText" text="Shopping Cart" styleClass="card-header">
                 <font>
                     <Font name="System Bold" size="20.0"/>

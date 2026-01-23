@@ -59,6 +59,14 @@ public class CatalogController {
 	@FXML // fx:id="logout"
 	private Button logout; // Value injected by FXMLLoader
 
+	@FXML
+	private Label catalogTitle;
+
+	@FXML
+	private VBox cartSidebar;
+
+	@FXML
+	private Button btnCustomItem;
 
 
 	@FXML
@@ -475,7 +483,7 @@ public class CatalogController {
 	void goLogOut(ActionEvent event) throws IOException {
 		currentLoggedAccount = null;
 		SimpleClient.logoutCurrentUser();
-		applyPrivilegeBasedUI();
+		applyRoleUI();
 		navigateInShell("Login");
 	}
 
@@ -587,9 +595,7 @@ public class CatalogController {
 
 
 	private void configureProductCardActions() {
-		Account account = SimpleClient.getUser();
-		int privilege = account != null ? account.getPrivilegeLevel() : 0;
-		boolean canEdit = privilege >= 2;
+		boolean canEdit = isWorkerOrHigher();
 
 		configureSingleProductAction(flower1_addCart, 0, canEdit);
 		configureSingleProductAction(flower2_addCart, 1, canEdit);
@@ -1003,24 +1009,71 @@ public class CatalogController {
 		String formattedBase = formatPrice(basePrice);
 		String formattedFinal = formatPrice(finalPrice);
 
-		priceBadge.setText(formattedFinal);
-		priceAfter.setText(formattedFinal);
-		priceBefore.setText(formattedBase);
-		if (oldPriceContainer != null) {
-			oldPriceContainer.setVisible(hasDiscount);
-			if (!oldPriceContainer.managedProperty().isBound()) {
-				oldPriceContainer.setManaged(hasDiscount);
+		boolean workerView = isWorkerOrHigher();
+		if (workerView) {
+			if (priceBadge != null) {
+				priceBadge.setVisible(false);
+				priceBadge.setManaged(false);
+			}
+			if (priceBefore != null) {
+				priceBefore.setText("Base: " + formattedBase);
+				priceBefore.setVisible(true);
+				priceBefore.setManaged(true);
+			}
+			if (priceAfter != null) {
+				priceAfter.setText("Current: " + formattedFinal);
+				priceAfter.setVisible(true);
+				priceAfter.setManaged(true);
+			}
+			if (oldPriceContainer != null) {
+				oldPriceContainer.setVisible(true);
+				oldPriceContainer.setManaged(true);
+			}
+			if (oldPriceStrike != null) {
+				oldPriceStrike.setVisible(false);
+			}
+			if (promoBadge != null) {
+				if (hasDiscount) {
+					double discountPercent = basePrice > 0
+							? (1 - (finalPrice / basePrice)) * 100
+							: 0;
+					promoBadge.setText(String.format(Locale.US, "Discount: %.0f%%", discountPercent));
+					promoBadge.setVisible(true);
+					promoBadge.setManaged(true);
+				} else {
+					promoBadge.setVisible(false);
+					promoBadge.setManaged(false);
+				}
+			}
+		} else {
+			if (priceBadge != null) {
+				priceBadge.setText(formattedFinal);
+				priceBadge.setVisible(true);
+				priceBadge.setManaged(true);
+			}
+			if (priceAfter != null) {
+				priceAfter.setText(formattedFinal);
+				priceAfter.setVisible(hasDiscount);
+			}
+			if (priceBefore != null) {
+				priceBefore.setText(formattedBase);
+			}
+			if (oldPriceContainer != null) {
+				oldPriceContainer.setVisible(hasDiscount);
+				if (!oldPriceContainer.managedProperty().isBound()) {
+					oldPriceContainer.setManaged(hasDiscount);
+				}
+			}
+			if (oldPriceStrike != null) {
+				oldPriceStrike.setVisible(hasDiscount);
+				oldPriceStrike.toFront();
+			}
+			if (promoBadge != null) {
+				promoBadge.setText("SALE");
+				promoBadge.setVisible(hasDiscount);
+				promoBadge.setManaged(hasDiscount);
 			}
 		}
-		if (oldPriceStrike != null) {
-			oldPriceStrike.setVisible(hasDiscount);
-			oldPriceStrike.toFront();
-		}
-
-		promoBadge.setText("SALE");
-		promoBadge.setVisible(hasDiscount);
-		promoBadge.setManaged(hasDiscount);
-		priceAfter.setVisible(hasDiscount);
 	}
 
 	private void bindManagedToVisible(Node... nodes) {
@@ -1543,7 +1596,7 @@ public class CatalogController {
 		Account persistedAccount = SimpleClient.getUser();
 		if (persistedAccount != null) {
 			currentLoggedAccount = persistedAccount;
-			applyPrivilegeBasedUI();
+			applyRoleUI();
 		}
 		checkout.setVisible(false);
 		if (cartTextPrice != null) cartTextPrice.setVisible(false);
@@ -1698,7 +1751,7 @@ public class CatalogController {
 
 		inboxList.setVisible(false);
 		openMessage.setVisible(false);
-		applyPrivilegeBasedUI();
+		applyRoleUI();
 
 	}
 
@@ -1780,7 +1833,7 @@ public class CatalogController {
 			currentLoggedAccount = recvAccount;
 			System.out.println(" Current Priv : " + currentLoggedAccount.getPrivialge());
 			SimpleClient.setAccount(currentLoggedAccount);
-			applyPrivilegeBasedUI();
+			applyRoleUI();
 			refreshCatalogView();
 			navigateAfterLogin(currentLoggedAccount);
 		});
@@ -1791,7 +1844,7 @@ public class CatalogController {
 	public void handleCatalogRefresh(CatalogRefreshEvent event) {
 		Platform.runLater(() -> {
 			requestCatalogReload();
-			applyPrivilegeBasedUI();
+			applyRoleUI();
 			refreshCatalogView();
 		});
 	}
@@ -2062,48 +2115,43 @@ public class CatalogController {
 	 * Privilege 4 (Chain Manager): + Network-wide access
 	 */
 	private void applyPrivilegeBasedUI() {
-		// If no account is logged in yet (e.g., user opens catalog as guest),
-		// default to privilege 0 to avoid NullPointerExceptions.  This ensures
-		// the catalog can still be browsed without requiring authentication.
-		Account account = SimpleClient.getUser();
-		if (account == null) {
-			hideAllPrivilegedFeatures();
-			configureProductCardActions();
-			System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
-			return;
-		}
-		currentLoggedAccount = account;
-		int privilege = account.getPrivilegeLevel();
-		System.out.println("=== Applying UI for privilege level: " + privilege + " ===");
+		applyRoleUI();
+	}
 
-		// GUEST (0): Can only browse catalog - all interactive features hidden
-		if (privilege == 0) {
-			hideAllPrivilegedFeatures();
-			System.out.println("Guest mode: Browse-only access");
-			return;
+	private void applyRoleUI() {
+		Account account = resolveCurrentAccount();
+		int privilege = account != null ? account.getPrivilegeLevel() : 0;
+		boolean isGuest = account == null || privilege == 0;
+		boolean isCustomer = privilege == 1;
+		boolean isWorkerOrHigher = privilege >= 2;
+
+		if (catalogTitle != null) {
+			catalogTitle.setText(isWorkerOrHigher ? "Catalog Management" : "Catalog");
 		}
 
-		// CUSTOMER (1): Can browse + checkout + manage own orders/complaints
-		enableCustomerFeatures();
-		enableCustomerOnlyFeatures();
-		System.out.println("Customer mode: Shopping and account management enabled");
+		setVisibleManaged(cartSidebar, !isWorkerOrHigher);
+		setCartPanelVisible(!isWorkerOrHigher);
+		setVisibleManaged(btnCustomItem, isCustomer);
+		setVisibleManaged(checkout, !isWorkerOrHigher);
+		setVisibleManaged(btnClearCart, !isWorkerOrHigher);
 
-		if (privilege >= 2) {
-			// WORKER (2): Customer features + worker panel
-			enableWorkerFeatures();
-			System.out.println("Worker mode: Customer + Worker panel enabled");
-		}
-		if (privilege >= 3) {
-			// MANAGER (3): Worker features + admin dashboard + reports
-			enableManagerFeatures();
-			System.out.println("Manager mode: Full branch admin access enabled");
-		}
-		if (privilege >= 4) {
-			// CHAIN MANAGER (4): All features + network-wide access
-			enableChainManagerFeatures();
-			System.out.println("Chain Manager mode: Network-wide admin access enabled");
+		setVisibleManaged(viewMyOrders, isCustomer);
+		setVisibleManaged(viewMyComplaints, isCustomer);
+		setVisibleManaged(viewInboxPlz, isCustomer);
+		setVisibleManaged(openComplaints, isWorkerOrHigher);
+		setVisibleManaged(deliveryButton, isWorkerOrHigher);
+		setVisibleManaged(catalogAddProductBtn, isWorkerOrHigher);
+
+		setVisibleManaged(adminControlButtton, privilege >= 3);
+		setVisibleManaged(infoo, privilege >= 3);
+
+		setVisibleManaged(logout, false);
+
+		if (isGuest) {
+			setCartPanelVisible(true);
 		}
 
+		setSkuLabelsVisible(shouldShowSku());
 		configureProductCardActions();
 	}
 
@@ -2129,34 +2177,44 @@ public class CatalogController {
 	}
 
 	private void showCartPanelForGuest() {
+		setCartPanelVisible(true);
+		refreshCartDisplay();
+	}
+
+	private void setCartPanelVisible(boolean visible) {
 		if (cartTopText != null) {
-			cartTopText.setVisible(true);
-			cartTopText.setManaged(true);
+			cartTopText.setVisible(visible);
+			cartTopText.setManaged(visible);
 		}
 		if (CartItemsList != null) {
-			CartItemsList.setVisible(true);
-			CartItemsList.setManaged(true);
+			CartItemsList.setVisible(visible);
+			CartItemsList.setManaged(visible);
 		}
 		if (cartTextDiscount != null) {
-			cartTextDiscount.setVisible(true);
-			cartTextDiscount.setManaged(true);
-			cartTextDiscount.setText("0");
+			cartTextDiscount.setVisible(visible);
+			cartTextDiscount.setManaged(visible);
+			if (visible) {
+				cartTextDiscount.setText("0");
+			}
 		}
 		if (cartTextPrice != null) {
-			cartTextPrice.setVisible(true);
-			cartTextPrice.setManaged(true);
-			cartTextPrice.setText("0");
+			cartTextPrice.setVisible(visible);
+			cartTextPrice.setManaged(visible);
+			if (visible) {
+				cartTextPrice.setText("0");
+			}
 		}
 		if (checkout != null) {
-			checkout.setVisible(true);
-			checkout.setManaged(true);
-			checkout.setDisable(false);
+			checkout.setVisible(visible);
+			checkout.setManaged(visible);
+			if (visible) {
+				checkout.setDisable(false);
+			}
 		}
 		if (btnClearCart != null) {
-			btnClearCart.setVisible(true);
-			btnClearCart.setManaged(true);
+			btnClearCart.setVisible(visible);
+			btnClearCart.setManaged(visible);
 		}
-		refreshCartDisplay();
 	}
 
 	/**
@@ -2246,7 +2304,30 @@ public class CatalogController {
 	}
 
 	private boolean shouldShowSku() {
-		return shouldShowCustomerOnlyFeatures();
+		return resolveCurrentPrivilegeLevel() >= 1;
+	}
+
+	private boolean isWorkerOrHigher() {
+		return resolveCurrentPrivilegeLevel() >= 2;
+	}
+
+	private Account resolveCurrentAccount() {
+		if (currentLoggedAccount != null) {
+			return currentLoggedAccount;
+		}
+		Account account = SimpleClient.getUser();
+		if (account != null) {
+			currentLoggedAccount = account;
+		}
+		return account;
+	}
+
+	private void setVisibleManaged(Node node, boolean visible) {
+		if (node == null) {
+			return;
+		}
+		node.setVisible(visible);
+		node.setManaged(visible);
 	}
 
 	private void addProductToCart(Product product) {

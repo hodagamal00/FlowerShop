@@ -56,7 +56,6 @@ public class AppShellController {
             NavDestination.forGuestsOnly("Register", "register"),
             NavDestination.forLoggedIn("Admin Panel", "admincontrol", 3),
             NavDestination.forLoggedIn("Deliveries", "delivery", 2),
-            NavDestination.forLoggedIn("Branch Orders", "BranchOrders", 2),
             NavDestination.forLoggedIn("Reports", "BranchReports", 3)
     );
     /**
