@@ -99,7 +99,7 @@ public class  ComplaintController{
         String topic = topictxt.getText() != null ? topictxt.getText().trim() : "";
         String details = comptxt.getText() != null ? comptxt.getText().trim() : "";
         newComplaint.setComplaintText(topic + "\n" + details);
-        newComplaint.setShopID(0);
+        newComplaint.setShopID(currentUser.getBelongShop());
         newComplaint.setAnswerworkerID(0);
         newComplaint.setReturnedMoney(false);
         newComplaint.setReturnedmoneyvalue(0);
