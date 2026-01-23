@@ -54,8 +54,6 @@ public class MyOrdersController {
     @FXML // fx:id="accountID"
     private TextField accountID; // Value injected by FXMLLoader
 
-    @FXML // fx:id="backToCatalog"
-    private Button backToCatalog; // Value injected by FXMLLoader
 
     @FXML // fx:id="creditCVV"
     private TextField creditCVV; // Value injected by FXMLLoader
@@ -218,34 +216,6 @@ public class MyOrdersController {
     }
 
     int complaint_num = 0;
-    @FXML
-    void GoToCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)backToCatalog.getScene().getWindow();
-        stagee.close();
-
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-
-    }
-
 
     @FXML
     void goToMyComplaints(ActionEvent event) {
@@ -348,7 +318,12 @@ public class MyOrdersController {
                 }
             }
             SelectedOrder = retrievedOrder;
-            populateOrderProductsList(retrievedOrder);
+            orderProducts.getItems().clear();
+            List<OrderProductParser.OrderItem> items = OrderProductParser.parseItems(
+                    retrievedOrder.getProducts(), ProductCatalogCache.snapshot());
+            for (OrderProductParser.OrderItem item : items) {
+                orderProducts.getItems().add(item.formatLine());
+            }
             submitComplaint.setVisible(true);
             orderID.setText(String.valueOf(retrievedOrder.getOrderID()));
             accountID.setText(String.valueOf(currentUser.getAccountID()));
@@ -395,55 +370,6 @@ public class MyOrdersController {
     int currentOrderShopID;
     List<Order> allOrders = new ArrayList<Order>();
 
-    private void populateOrderProductsList(Order order) {
-        orderProducts.getItems().clear();
-        if (order == null) {
-            return;
-        }
-        String products = order.getProducts();
-        if (products == null || products.isBlank()) {
-            return;
-        }
-        List<String> formatted = formatProductsForDisplay(products);
-        orderProducts.getItems().addAll(formatted);
-    }
-
-    private List<String> formatProductsForDisplay(String products) {
-        List<String> items = new ArrayList<>();
-        if (products == null || products.isBlank()) {
-            return items;
-        }
-        if (products.contains(":")) {
-            String[] tokens = products.split(",");
-            for (String token : tokens) {
-                String trimmed = token.trim();
-                if (trimmed.isEmpty()) {
-                    continue;
-                }
-                String[] parts = trimmed.split(":");
-                try {
-                    int productId = Integer.parseInt(parts[0].trim());
-                    int qty = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 1;
-                    Product product = SimpleClient.findCachedProductById(productId);
-                    String name = product != null ? product.getName() : "Product #" + productId;
-                    items.add(name + " x" + qty);
-                } catch (NumberFormatException ignored) {
-                    // fallback handled below
-                }
-            }
-            if (!items.isEmpty()) {
-                return items;
-            }
-        }
-        for (String token : products.split("%")) {
-            String trimmed = token.trim();
-            if (!trimmed.isEmpty()) {
-                items.add(trimmed);
-            }
-        }
-        return items;
-    }
-
 
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -458,7 +384,6 @@ public class MyOrdersController {
         assert RecepName != null : "fx:id=\"RecepName\" was not injected: check your FXML file 'myorders.fxml'.";
         assert RecepNumber != null : "fx:id=\"RecepNumber\" was not injected: check your FXML file 'myorders.fxml'.";
         assert accountID != null : "fx:id=\"accountID\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert backToCatalog != null : "fx:id=\"backToCatalog\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditCVV != null : "fx:id=\"creditCVV\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditExpire != null : "fx:id=\"creditExpire\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditNumber != null : "fx:id=\"creditNumber\" was not injected: check your FXML file 'myorders.fxml'.";
@@ -523,7 +448,6 @@ public class MyOrdersController {
         refundDecisionLabel.setVisible(false);
 
         viewOrder.setDisable(true);
-        backToCatalog.setDisable(true);
 
 
         new java.util.Timer().schedule(
@@ -531,7 +455,6 @@ public class MyOrdersController {
                     @Override
                     public void run() {
                         viewOrder.setDisable(false);
-                        backToCatalog.setDisable(false);
                         wait.setVisible(false);
                     }
                 },4500

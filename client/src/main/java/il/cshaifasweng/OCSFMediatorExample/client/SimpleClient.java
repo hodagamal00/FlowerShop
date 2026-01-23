@@ -13,7 +13,6 @@ public class SimpleClient extends AbstractClient {
 
 	// Global current user (Account / Manager / Worker)
 	private static Account currentUser = null;
-	private static List<Product> cachedProducts = new java.util.ArrayList<>();
 
 	private SimpleClient(String host, int port) {
 		super(host, port);
@@ -38,7 +37,7 @@ public class SimpleClient extends AbstractClient {
 		if (msg instanceof List) {
 			System.out.println("arrived to msg instanceof LIST in simple client");
 			List<Product> listt = (List<Product>) msg;
-			cachedProducts = new java.util.ArrayList<>(listt);
+			ProductCatalogCache.update(listt);
 
 			for (Product p : listt) {
 				System.out.println(p.getName());
@@ -155,6 +154,7 @@ public class SimpleClient extends AbstractClient {
 				EventBus.getDefault().post(ft);
 			} else {
 				List<Product> ftList = ft.getRecievedProducts();
+				ProductCatalogCache.update(ftList);
 				RetrieveDataBaseEvent retEvent = new RetrieveDataBaseEvent(ftList);
 				EventBus.getDefault().post(retEvent);
 			}
@@ -352,34 +352,5 @@ public class SimpleClient extends AbstractClient {
 			}
 		}
 		currentUser = null;
-	}
-
-	public static List<Product> getCachedProducts() {
-		return cachedProducts != null ? new java.util.ArrayList<>(cachedProducts) : new java.util.ArrayList<>();
-	}
-
-	public static Product findCachedProductById(int productId) {
-		if (cachedProducts == null) {
-			return null;
-		}
-		for (Product product : cachedProducts) {
-			if (product.getID() == productId) {
-				return product;
-			}
-		}
-		return null;
-	}
-
-	public static Product findCachedProductByName(String name) {
-		if (cachedProducts == null || name == null) {
-			return null;
-		}
-		String normalized = name.trim().toLowerCase(java.util.Locale.US);
-		for (Product product : cachedProducts) {
-			if (product.getName() != null && product.getName().trim().toLowerCase(java.util.Locale.US).equals(normalized)) {
-				return product;
-			}
-		}
-		return null;
 	}
 }

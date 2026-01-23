@@ -63,7 +63,6 @@
 
                     <Button fx:id="OpenCatalogplz" mnemonicParsing="false" onAction="#openCatalogFunc" prefHeight="40.0" prefWidth="300.0" text="Go to Catalog" visible="false" style="-fx-font-size: 14px; -fx-background-color: #27ae60; -fx-text-fill: white;" />
 
-                    <Button fx:id="bak" mnemonicParsing="false" onAction="#backkk" prefHeight="35.0" prefWidth="150.0" text="← Back" style="-fx-font-size: 13px;" />
                 </VBox>
             </children>
         </AnchorPane>

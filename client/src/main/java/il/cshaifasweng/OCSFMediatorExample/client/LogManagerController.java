@@ -93,8 +93,6 @@ public class LogManagerController {
     @FXML // fx:id="chooseShop"
     private ComboBox<String> chooseShop; // Value injected by FXMLLoader
 
-    @FXML
-    private Button goBack;
 
     @FXML
     private ComboBox<String> CompareShops;
@@ -105,33 +103,6 @@ public class LogManagerController {
     @FXML // fx:id="wait"
     private Label wait; // Value injected by FXMLLoader
 
-    @FXML
-    void backToCatalog(ActionEvent event) throws IOException {
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)goBack.getScene().getWindow();
-        stagee.close();
-
-    }
     static List<Order> orders = new ArrayList<Order>();
     static List<Complaint> complaints = new ArrayList<>();
 
@@ -529,7 +500,6 @@ public class LogManagerController {
         assert chooseShop != null : "fx:id=\"chooseShop\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert compareButton != null : "fx:id=\"compareButton\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert fieldsError != null : "fx:id=\"fieldsError\" was not injected: check your FXML file 'log_manager.fxml'.";
-        assert goBack != null : "fx:id=\"goBack\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert logError != null : "fx:id=\"logError\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert shopError != null : "fx:id=\"shopError\" was not injected: check your FXML file 'log_manager.fxml'.";
         assert shopError2 != null : "fx:id=\"shopError2\" was not injected: check your FXML file 'log_manager.fxml'.";
@@ -569,7 +539,6 @@ public class LogManagerController {
         LogType.getItems().add("Complaint Log");
         Day.setAnimated(false);
 
-        goBack.setDisable(true);
         LoadLogButton.setDisable(true);
         wait.setVisible(true);
 
@@ -578,7 +547,6 @@ public class LogManagerController {
                     @Override
                     public void run() {
 
-                        goBack.setDisable(false);
                         LoadLogButton.setDisable(false);
                         wait.setVisible(false);
                         switch (currentUser.getBelongShop())

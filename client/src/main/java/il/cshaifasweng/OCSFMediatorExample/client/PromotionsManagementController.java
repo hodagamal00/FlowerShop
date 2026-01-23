@@ -24,7 +24,6 @@ import java.util.List;
 public class PromotionsManagementController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Form
     @FXML private Label formTitleLabel;
@@ -367,14 +366,6 @@ public class PromotionsManagementController {
         activePromotionsLabel.setText(String.valueOf(activeCount));
         productsOnSaleLabel.setText(String.valueOf(productsOnSale));
         avgDiscountLabel.setText(String.format("%.1f%%", avgDiscount));
-    }
-    
-    /**
-     * Navigate back to catalog
-     */
-    @FXML
-    private void handleBackToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

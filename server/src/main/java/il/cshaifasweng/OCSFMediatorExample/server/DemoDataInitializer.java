@@ -10,7 +10,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -86,21 +85,12 @@ public final class DemoDataInitializer {
                 createProduct(4, "btnMix", "Color Splash", "Mixed seasonal flowers", 140.0,
                         "MIX-004", "Bouquet", "Mixed", true, 10, false, null, 0.0, 0.0,
                         "Perfect for birthdays and anniversaries"),
-                createProduct(5, "btnCustom", "Custom Bridal Bouquet", "Tailored bridal bouquet design", 350.0,
-                        "CUS-005", "Custom", "Varies", false, 0, true, "Bridal Bouquet", 250.0, 600.0,
-                        "Work with our designers to craft your dream bouquet"),
-                createProduct(6, "btnTulip", "Spring Tulip Basket", "Colorful tulips in a woven basket", 110.0,
-                        "TUL-006", "Basket", "Pink", false, 0, false, null, 0.0, 0.0,
-                        "A cheerful tulip basket"),
-                createProduct(7, "btnSucculent", "Succulent Garden", "Low-maintenance succulent arrangement", 85.0,
-                        "SUC-007", "Plants", "Green", false, 0, false, null, 0.0, 0.0,
-                        "Perfect desk companion"),
-                createProduct(8, "btnWreath", "Evergreen Wreath", "Seasonal wreath for your door", 160.0,
-                        "WRE-008", "Wreath", "Green", false, 0, false, null, 0.0, 0.0,
-                        "Festive evergreen wreath"),
-                createProduct(9, "btnChoco", "Chocolate Box", "Premium assorted chocolates", 75.0,
-                        "GFT-009", "Gifts", "Brown", false, 0, false, null, 0.0, 0.0,
-                        "Sweet add-on gift")
+                createProduct(5, "btnTulip", "Tulip Charm", "Soft tulips arranged for spring", 110.0,
+                        "TUL-005", "Seasonal", "Pink", false, 0, false, null, 0.0, 0.0,
+                        "Fresh tulips to brighten any room"),
+                createProduct(6, "btnCustom", "Custom Bridal Bouquet", "Tailored bridal bouquet design", 350.0,
+                        "CUS-006", "Custom", "Varies", false, 0, true, "Bridal Bouquet", 250.0, 600.0,
+                        "Work with our designers to craft your dream bouquet")
         );
 
         for (Product product : products) {
@@ -142,12 +132,12 @@ public final class DemoDataInitializer {
                 11, 2025, 456, false, 2, false);
         ben.setPrivialge(1);
 
-        Account chloe = new Account(3, "Chloe Petal", 1003, "78 Bouquet Rd, Jerusalem",
-                "chloe@example.com", "chloe123", 972552223344L, 4333333333333333L,
-                10, 2027, 789, false, 0, true);
-        chloe.setPrivialge(4);
+        Account dana = new Account(3, "Dana Bloom", 1003, "78 Bouquet Rd, Jerusalem",
+                "dana@example.com", "dana123", 972552223344L, 4333333333333333L,
+                10, 2027, 789, false, 1, true);
+        dana.setPrivialge(1);
 
-        for (Account account : Arrays.asList(alice, ben, chloe)) {
+        for (Account account : Arrays.asList(alice, ben, dana)) {
             session.save(account);
         }
     }
@@ -169,8 +159,15 @@ public final class DemoDataInitializer {
         liam.setPrivialge(2);
         liam.setLoggedIn(false);
 
+        Worker noa = new Worker("Noa Petal", "noa@flowershop.com", "noaPass", 12);
+        noa.setPersonID(2003);
+        noa.setBelongShop(1);
+        noa.setPrivialge(2);
+        noa.setLoggedIn(false);
+
         session.save(emma);
         session.save(liam);
+        session.save(noa);
     }
 
     private static void seedManagers(Session session) {
@@ -185,14 +182,22 @@ public final class DemoDataInitializer {
         maya.setBelongShop(1);
         maya.setLoggedIn(false);
 
-        Manager noam = new Manager("Noam Garden", "noam@flowershop.com", "noamPass", 21);
-        noam.setPersonID(3002);
+        Manager amit = new Manager("Amit Bloom", "amit@flowershop.com", "amitPass", 21);
+        amit.setPersonID(3002);
+        amit.setPrivialge(3);
+        amit.setShopID(2);
+        amit.setBelongShop(2);
+        amit.setLoggedIn(false);
+
+        Manager noam = new Manager("Noam Garden", "noam@flowershop.com", "noamPass", 22);
+        noam.setPersonID(3003);
         noam.setPrivialge(4);
         noam.setShopID(0); // Chain manager
         noam.setBelongShop(0);
         noam.setLoggedIn(false);
 
         session.save(maya);
+        session.save(amit);
         session.save(noam);
     }
 
@@ -200,73 +205,63 @@ public final class DemoDataInitializer {
         if (count(session, Order.class) > 0) {
             return;
         }
+
         List<Product> products = session.createQuery("from Product", Product.class).getResultList();
         if (products.isEmpty()) {
             return;
         }
+        List<Account> customers = session.createQuery("from Account", Account.class).getResultList();
+        if (customers.isEmpty()) {
+            return;
+        }
 
-        Random random = new Random();
-        LocalDate today = LocalDate.now();
-        List<Integer> accountIds = Arrays.asList(1, 2);
+        Random random = new Random(42);
         int orderId = 1;
-
-        for (int branchId : Arrays.asList(1, 2)) {
-            int ordersCount = 40 + random.nextInt(41); // 40-80 orders per branch
-            for (int i = 0; i < ordersCount; i++) {
-                LocalDate orderDate = today.minusDays(random.nextInt(90));
-                int prepareHour = 9 + random.nextInt(9);
-                int prepareMinute = random.nextBoolean() ? 0 : 30;
-                int orderHour = Math.max(0, prepareHour - random.nextInt(3));
-                int orderMinute = random.nextBoolean() ? 0 : 30;
-
-                int accountId = accountIds.get(random.nextInt(accountIds.size()));
+        List<Order> seededOrders = new ArrayList<>();
+        int[] branches = new int[]{1, 2};
+        for (int branchId : branches) {
+            int orderCount = 40 + random.nextInt(41);
+            for (int i = 0; i < orderCount; i++) {
+                Account customer = customers.get(random.nextInt(customers.size()));
+                LocalDateTime orderTime = LocalDateTime.now()
+                        .minusDays(random.nextInt(90))
+                        .withHour(8 + random.nextInt(10))
+                        .withMinute(random.nextInt(60));
+                LocalDateTime prepareTime = orderTime.plusDays(random.nextInt(4)).plusHours(random.nextInt(6));
                 boolean pickUp = random.nextBoolean();
-                boolean gift = random.nextBoolean();
-                double deliveryFee = pickUp ? 0.0 : (branchId == 1 ? 20.0 : 25.0);
+                boolean delivered = random.nextDouble() < 0.6;
+                boolean cancelled = !delivered && random.nextDouble() < 0.25;
 
-                Map<Integer, Integer> quantities = new LinkedHashMap<>();
-                int itemCount = 1 + random.nextInt(4);
-                for (int j = 0; j < itemCount; j++) {
-                    Product product = products.get(random.nextInt(products.size()));
-                    int qty = 1 + random.nextInt(2);
-                    quantities.merge(product.getID(), qty, Integer::sum);
+                Map<Product, Integer> itemQuantities = buildRandomItems(products, random);
+                String productSummary = buildProductsSummary(itemQuantities);
+                int totalPrice = calculateOrderTotal(itemQuantities, pickUp);
+
+                String deliveredAddress = pickUp ? "" : customer.getAddress();
+                Order order = new Order(orderId++, pickUp, branchId, "Enjoy your blooms!", totalPrice,
+                        deliveredAddress, customer.getAccountID(), random.nextBoolean(), delivered,
+                        prepareTime.getDayOfMonth(), prepareTime.getMonthValue(), prepareTime.getYear(),
+                        orderTime.getDayOfMonth(), orderTime.getMonthValue(), orderTime.getYear(),
+                        customer.getCreditCardNumber(), customer.getCreditMonthExpire(),
+                        customer.getCreditYearExpire(), customer.getCcv(),
+                        customer.getFullName(), customer.getPhoneNumber(), deliveredAddress,
+                        productSummary, orderTime.getHour(), orderTime.getMinute(),
+                        prepareTime.getHour(), prepareTime.getMinute(),
+                        pickUp ? 0.0 : 20.0, "CREDIT_CARD");
+                order.setCancelled(cancelled);
+                order.setDelivered(delivered && !cancelled);
+                if (cancelled) {
+                    order.setRefundStatus("FULL");
+                    order.setRefundAmount(totalPrice);
+                } else {
+                    order.setRefundStatus("NONE");
+                    order.setRefundAmount(0.0);
                 }
-
-                int totalPrice = 0;
-                for (Map.Entry<Integer, Integer> entry : quantities.entrySet()) {
-                    Product product = products.stream()
-                            .filter(p -> p.getID() == entry.getKey())
-                            .findFirst()
-                            .orElse(null);
-                    if (product != null) {
-                        totalPrice += (int) Math.round(product.getPrice() * entry.getValue());
-                    }
-                }
-                totalPrice += (int) Math.round(deliveryFee);
-
-                StringBuilder productsSummary = new StringBuilder();
-                for (Map.Entry<Integer, Integer> entry : quantities.entrySet()) {
-                    if (productsSummary.length() > 0) {
-                        productsSummary.append(",");
-                    }
-                    productsSummary.append(entry.getKey()).append(":").append(entry.getValue());
-                }
-
-                Order order = new Order(orderId++, pickUp, branchId, gift ? "Enjoy your gift!" : "Thank you!",
-                        totalPrice, pickUp ? "Pickup at branch " + branchId : "Delivery address " + branchId,
-                        accountId, gift, orderDate.isBefore(today),
-                        orderDate.getDayOfMonth(), orderDate.getMonthValue(), orderDate.getYear(),
-                        orderDate.getDayOfMonth(), orderDate.getMonthValue(), orderDate.getYear(),
-                        4111111111111111L, 12, 2026, 123,
-                        "Recipient " + orderId, 972501112233L,
-                        "Delivery address " + branchId, productsSummary.toString(),
-                        orderHour, orderMinute, prepareHour, prepareMinute, deliveryFee, "CREDIT_CARD");
-
-                order.setCancelled(false);
-                order.setRefundStatus("NONE");
-                order.setRefundAmount(0.0);
-                session.save(order);
+                seededOrders.add(order);
             }
+        }
+
+        for (Order order : seededOrders) {
+            session.save(order);
         }
     }
 
@@ -278,44 +273,27 @@ public final class DemoDataInitializer {
         if (orders.isEmpty()) {
             return;
         }
-
-        Random random = new Random();
-        LocalDate today = LocalDate.now();
-        int complaintsCount = 10 + random.nextInt(11);
-
-        for (int i = 0; i < complaintsCount; i++) {
+        Random random = new Random(24);
+        int complaintCount = 10 + random.nextInt(11);
+        for (int i = 0; i < complaintCount; i++) {
             Order order = orders.get(random.nextInt(orders.size()));
-            LocalDate complaintDate = today.minusDays(random.nextInt(90));
-            LocalDateTime createdAt = complaintDate.atTime(9 + random.nextInt(8), random.nextBoolean() ? 0 : 30);
-            int responseHours = 2 + random.nextInt(30);
-            LocalDateTime respondedAt = createdAt.plusHours(responseHours);
-
-            boolean accepted = random.nextBoolean();
-            boolean compensation = accepted && random.nextBoolean();
-            int compensationAmount = compensation ? 30 + random.nextInt(70) : 0;
-
-            Complaint complaint = new Complaint(
-                    i + 1,
-                    order.getAccountID(),
-                    order.getOrderID(),
-                    accepted,
-                    responseHours <= 24,
-                    "Issue with order #" + order.getOrderID(),
-                    order.getShopID(),
-                    order.getShopID() == 1 ? 2001 : 2002,
-                    compensation,
-                    compensationAmount,
-                    complaintDate.getDayOfMonth(),
-                    complaintDate.getMonthValue(),
-                    complaintDate.getYear(),
-                    accepted ? "Resolved with care" : "Under review"
-            );
-            complaint.setCreatedAt(Date.from(createdAt.atZone(ZoneId.systemDefault()).toInstant()));
-            complaint.setRespondedAt(Date.from(respondedAt.atZone(ZoneId.systemDefault()).toInstant()));
-            complaint.setSlaStatus(responseHours <= 24 ? "RESOLVED_ON_TIME" : "LATE");
-            complaint.setCompensationDecision(compensation
-                    ? compensationAmount + "₪ compensation approved"
-                    : "No compensation");
+            LocalDate orderDate = LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
+            LocalDate complaintDate = orderDate.plusDays(random.nextInt(5));
+            Complaint complaint = new Complaint(i + 1, order.getAccountID(), order.getOrderID(), false, true,
+                    "Delivery issue reported for order #" + order.getOrderID(), order.getShopID(),
+                    2001, random.nextBoolean(), random.nextInt(120),
+                    complaintDate.getDayOfMonth(), complaintDate.getMonthValue(),
+                    complaintDate.getYear(), "We are reviewing your complaint.");
+            Date createdAt = Date.from(complaintDate.atStartOfDay().atZone(java.time.ZoneId.systemDefault()).toInstant());
+            complaint.setCreatedAt(createdAt);
+            if (random.nextBoolean()) {
+                complaint.setRespondedAt(Date.from(complaintDate.plusDays(1).atStartOfDay()
+                        .atZone(java.time.ZoneId.systemDefault()).toInstant()));
+                complaint.setSlaStatus("RESOLVED_ON_TIME");
+                complaint.setCompensationDecision("Store credit issued");
+            } else {
+                complaint.setSlaStatus("PENDING");
+            }
             session.save(complaint);
         }
     }
@@ -343,6 +321,39 @@ public final class DemoDataInitializer {
         incomeReport.setTotalOrders(87);
         incomeReport.setTotalComplaints(3);
         session.save(incomeReport);
+    }
+
+    private static Map<Product, Integer> buildRandomItems(List<Product> products, Random random) {
+        Map<Product, Integer> items = new LinkedHashMap<>();
+        int itemCount = 2 + random.nextInt(3);
+        for (int i = 0; i < itemCount; i++) {
+            Product product = products.get(random.nextInt(products.size()));
+            int quantity = 1 + random.nextInt(3);
+            items.put(product, items.getOrDefault(product, 0) + quantity);
+        }
+        return items;
+    }
+
+    private static String buildProductsSummary(Map<Product, Integer> items) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<Product, Integer> entry : items.entrySet()) {
+            if (builder.length() > 0) {
+                builder.append(",");
+            }
+            builder.append(entry.getKey().getID()).append(":").append(entry.getValue());
+        }
+        return builder.toString();
+    }
+
+    private static int calculateOrderTotal(Map<Product, Integer> items, boolean pickUp) {
+        double total = 0.0;
+        for (Map.Entry<Product, Integer> entry : items.entrySet()) {
+            total += entry.getKey().getPrice() * entry.getValue();
+        }
+        if (!pickUp) {
+            total += 20.0;
+        }
+        return (int) Math.round(total);
     }
 
     private static void seedPromotions(Session session) {

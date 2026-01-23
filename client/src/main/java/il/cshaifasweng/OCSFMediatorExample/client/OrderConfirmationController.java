@@ -1,8 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
-import il.cshaifasweng.OCSFMediatorExample.entities.Product;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -173,8 +171,8 @@ public class OrderConfirmationController {
         paymentStatusLabel.setText("Payment recorded at placement");
 
         orderItemsContainer.getChildren().clear();
-        orderItemsContainer.getChildren().add(buildItemRow("Red Roses Bouquet", 89.99));
-        orderItemsContainer.getChildren().add(buildItemRow("Greeting Card", 9.99));
+        orderItemsContainer.getChildren().add(buildItemRow("Red Roses Bouquet", 1, 89.99));
+        orderItemsContainer.getChildren().add(buildItemRow("Greeting Card", 1, 9.99));
         subtotalLabel.setText("$99.98");
         deliveryFeeSummaryLabel.setText("$9.99");
         discountRow.setVisible(true);
@@ -196,49 +194,12 @@ public class OrderConfirmationController {
 
     private void renderOrderSummary(Order order, boolean delivery) {
         orderItemsContainer.getChildren().clear();
-        String products = order.getProducts();
+        List<OrderProductParser.OrderItem> items = OrderProductParser.parseItems(
+                order.getProducts(), ProductCatalogCache.snapshot());
         List<Double> itemPrices = new ArrayList<>();
-        Account account = SimpleClient.getAccount();
-        if (products != null && !products.isBlank()) {
-            if (products.contains(":")) {
-                String[] tokens = products.split(",");
-                for (String token : tokens) {
-                    if (token == null || token.isBlank()) {
-                        continue;
-                    }
-                    String[] parts = token.trim().split(":");
-                    try {
-                        int productId = Integer.parseInt(parts[0].trim());
-                        int qty = parts.length > 1 ? Integer.parseInt(parts[1].trim()) : 1;
-                        Product product = SimpleClient.findCachedProductById(productId);
-                        String name = product != null ? product.getName() : "Product #" + productId;
-                        double unitPrice = product != null
-                                ? PricingService.calculateDisplayPrice(product, account)
-                                : 0.0;
-                        double linePrice = unitPrice * Math.max(1, qty);
-                        itemPrices.add(linePrice);
-                        orderItemsContainer.getChildren().add(buildItemRow(name + " x" + qty, linePrice));
-                    } catch (NumberFormatException ignored) {
-                        // fallback to legacy parsing below
-                    }
-                }
-            }
-            if (itemPrices.isEmpty()) {
-                String[] tokens = products.split("%");
-                for (String token : tokens) {
-                    if (token == null || token.isBlank()) {
-                        continue;
-                    }
-                    String[] parts = token.split(" - ");
-                    String name = parts[0].trim();
-                    double price = 0.0;
-                    if (parts.length > 1) {
-                        price = parsePrice(parts[1]);
-                    }
-                    itemPrices.add(price);
-                    orderItemsContainer.getChildren().add(buildItemRow(name, price));
-                }
-            }
+        for (OrderProductParser.OrderItem item : items) {
+            itemPrices.add(item.getLineTotal());
+            orderItemsContainer.getChildren().add(buildItemRow(item.getName(), item.getQuantity(), item.getUnitPrice()));
         }
 
         double subtotal = PricingService.calculateSubtotal(itemPrices);
@@ -259,8 +220,8 @@ public class OrderConfirmationController {
         orderTotalSummaryText.setText(formatCurrency(total));
     }
 
-    private HBox buildItemRow(String name, double price) {
-        Label nameLabel = new Label(name);
+    private HBox buildItemRow(String name, int quantity, double price) {
+        Label nameLabel = new Label(String.format("%s x%d", name, quantity));
         nameLabel.setPrefWidth(420);
         Label priceLabel = new Label(formatCurrency(price));
         HBox row = new HBox(10, nameLabel, priceLabel);

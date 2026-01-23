@@ -30,7 +30,6 @@
                                 <Font name="System Bold" size="28.0" />
                             </font>
                         </Text>
-                        <Button fx:id="back_button" layoutX="20.0" layoutY="25.0" mnemonicParsing="false" onAction="#returnWindow" prefHeight="35.0" prefWidth="100.0" text="← Back" style="-fx-font-size: 14px;" />
                         <Button fx:id="edit_product" layoutX="770.0" layoutY="25.0" mnemonicParsing="false" onAction="#edit_product" prefHeight="35.0" prefWidth="100.0" text="Edit Product" style="-fx-font-size: 14px;" />
                     </children>
                 </AnchorPane>

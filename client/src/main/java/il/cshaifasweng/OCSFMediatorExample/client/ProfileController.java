@@ -15,7 +15,6 @@ import java.util.Optional;
 
 public class ProfileController {
 
-    @FXML private Button backBtn;
     @FXML private Text accountTypeText;
     @FXML private Label accountIdLabel;
     @FXML private Label userIdLabel;
@@ -235,11 +234,6 @@ public class ProfileController {
         // Reload original data
         loadAccountData();
         hideMessages();
-    }
-
-    @FXML
-    void goBack() {
-        NavigationService.getInstance().navigate("Catalog");
     }
 
     @Subscribe
