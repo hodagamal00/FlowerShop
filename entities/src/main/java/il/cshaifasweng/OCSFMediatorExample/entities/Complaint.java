@@ -75,7 +75,6 @@ public class Complaint implements Serializable {
     }
 
     public  Complaint() {
-        this.createdAt = new Date();
         this.slaStatus = "PENDING";
         this.compensationDecision = "";
     }
@@ -322,5 +321,19 @@ public class Complaint implements Serializable {
         }
         LocalDate legacyDate = LocalDate.of(year, month, day);
         return Date.from(legacyDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
+    @PostLoad
+    private void populateCreatedAtFromLegacyDate() {
+        if (this.createdAt == null) {
+            this.createdAt = buildCreatedAtFromLegacyDate(day, month, year);
+        }
+    }
+
+    @PrePersist
+    private void ensureCreatedAtBeforePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = new Date();
+        }
     }
 }
