@@ -32,9 +32,6 @@ public class MyComplaintsController {
     @FXML // fx:id="answerBool"
     private TextField answerBool; // Value injected by FXMLLoader
 
-    @FXML // fx:id="complaintID"
-    private TextField complaintID; // Value injected by FXMLLoader
-
     @FXML // fx:id="complaintList"
     private ListView<String> complaintList; // Value injected by FXMLLoader
 
@@ -47,9 +44,8 @@ public class MyComplaintsController {
     @FXML // fx:id="loadButton"
     private Button loadButton; // Value injected by FXMLLoader
 
-    @FXML // fx:id="orderID"
-    private TextField orderID; // Value injected by FXMLLoader
-
+    @FXML
+    private TextField complaintDateTime;
     @FXML
     private Button submitComplaint; // Value injected by FXMLLoader
 
@@ -112,6 +108,9 @@ public class MyComplaintsController {
         newComplaint.setMonth(cal.get(Calendar.MONTH) + 1);
         newComplaint.setYear(cal.get(Calendar.YEAR));
         newComplaint.setReplyText("");
+        newComplaint.setCreatedAt(new Date());
+        newComplaint.setSlaStatus("IN_PROGRESS");
+        newComplaint.setCompensationDecision("Pending review");
 
         UpdateMessage msg = new UpdateMessage("complaint", "add");
         msg.setComplaint(newComplaint);
@@ -149,25 +148,22 @@ public class MyComplaintsController {
     void initialize() {
         EventBus.getDefault().register(this);
         assert answerBool != null : "fx:id=\"answerBool\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert complaintID != null : "fx:id=\"complaintID\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintList != null : "fx:id=\"complaintList\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert complaintText != null : "fx:id=\"complaintText\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert responseText != null : "fx:id=\"responseText\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert loadButton != null : "fx:id=\"loadButton\" was not injected: check your FXML file 'mycomplaints.fxml'.";
-        assert orderID != null : "fx:id=\"orderID\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert submitComplaint != null : "fx:id=\"submitComplaint\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert refundMoney != null : "fx:id=\"refundMoney\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert respondedAt != null : "fx:id=\"respondedAt\" was not injected: check your FXML file 'mycomplaints.fxml'.";
         assert compensationDecision != null : "fx:id=\"compensationDecision\" was not injected: check your FXML file 'mycomplaints.fxml'.";
+        assert complaintDateTime != null : "fx:id=\"complaintDateTime\" was not injected: check your FXML file 'mycomplaints.fxml'.";
 
         loadButton.setDisable(true);
         resolveCurrentUser();
-        complaintList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                Complaint selected = findComplaintByListEntry(newValue);
-                if (selected != null) {
-                    showComplaintDetails(selected);
-                }
+        complaintList.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            int index = newValue == null ? -1 : newValue.intValue();
+            if (index >= 0 && index < displayedComplaints.size()) {
+                showComplaintDetails(displayedComplaints.get(index));
             }
         });
 
@@ -196,9 +192,6 @@ public class MyComplaintsController {
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
         selectedOrderId = passAcc.getOrderId();
-        if (selectedOrderId != null && complaintList.getSelectionModel().getSelectedItem() == null) {
-            orderID.setText(Integer.toString(selectedOrderId));
-        }
         refreshComplaintList();
         requestAllComplaints();
         requestNextComplaintId();
@@ -217,12 +210,6 @@ public class MyComplaintsController {
     @Subscribe
     public void handleNextComplaintId(NextComplaintIdEvent event) {
         nextComplaintId = event.getComplaintId();
-        if (complaintList.getSelectionModel().getSelectedItem() == null && complaintID != null) {
-            complaintID.setText(Integer.toString(nextComplaintId));
-            if (selectedOrderId != null) {
-                orderID.setText(Integer.toString(selectedOrderId));
-            }
-        }
     }
 
     private void requestNextComplaintId() {
@@ -245,70 +232,36 @@ public class MyComplaintsController {
         Platform.runLater(() -> {
             resolveCurrentUser();
             complaintList.getItems().clear();
+            displayedComplaints.clear();
             if (allComplaints == null || currentUser == null) {
                 return;
             }
 
             allComplaints.stream()
                     .filter(c -> c.getCustomerID() == currentUser.getAccountID())
-                    .sorted((a, b) -> Integer.compare(a.getComplaintID(), b.getComplaintID()))
-                    .forEach(c -> complaintList.getItems().add(formatListEntry(c)));
+                    .sorted((a, b) -> compareByCreatedAt(a, b))
+                    .forEach(c -> {
+                        displayedComplaints.add(c);
+                        complaintList.getItems().add(formatListEntry(c));
+                    });
         });
     }
 
     private void selectComplaint(int complaintId) {
-        String entry = null;
-        for (String item : complaintList.getItems()) {
-            if (parseComplaintId(item) == complaintId) {
-                entry = item;
+        for (int i = 0; i < displayedComplaints.size(); i++) {
+            if (displayedComplaints.get(i).getComplaintID() == complaintId) {
+                complaintList.getSelectionModel().select(i);
+                showComplaintDetails(displayedComplaints.get(i));
                 break;
             }
-        }
-        if (entry != null) {
-            complaintList.getSelectionModel().select(entry);
-            Complaint selected = findComplaintByListEntry(entry);
-            if (selected != null) {
-                showComplaintDetails(selected);
-            }
-        }
-    }
-
-    private Complaint findComplaintByListEntry(String listEntry) {
-        int id = parseComplaintId(listEntry);
-        if (id == -1 || allComplaints == null) {
-            return null;
-        }
-        for (Complaint complaint : allComplaints) {
-            if (complaint.getComplaintID() == id) {
-                return complaint;
-            }
-        }
-        return null;
-    }
-
-    private int parseComplaintId(String listEntry) {
-        if (listEntry == null || listEntry.length() < 2) {
-            return -1;
-        }
-        StringBuilder idBuilder = new StringBuilder();
-        for (int i = 1; i < listEntry.length(); i++) {
-            char c = listEntry.charAt(i);
-            if (Character.isDigit(c)) {
-                idBuilder.append(c);
-            } else {
-                break;
-            }
-        }
-        try {
-            return Integer.parseInt(idBuilder.toString());
-        } catch (NumberFormatException ex) {
-            return -1;
         }
     }
 
     private String formatListEntry(Complaint complaint) {
-        String entry = "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
-        if (isLateStatus(complaint.getSlaStatus())) {
+        String entry = "Complaint – " + formatComplaintTimestamp(complaint);
+        if (isResponded(complaint)) {
+            entry += " (Resolved)";
+        } else if (isLateStatus(complaint.getSlaStatus())) {
             entry += " (Late)";
         }
         return entry;
@@ -318,16 +271,9 @@ public class MyComplaintsController {
         if (selectedComplaint == null) {
             return;
         }
-        complaintID.setText(Integer.toString(selectedComplaint.getComplaintID()));
-        orderID.setText(Integer.toString(selectedComplaint.getOrderID()));
-        if(selectedComplaint.isAccepted()) {
-            answerBool.setText("Yes");
-            refundMoney.setText(Integer.toString(selectedComplaint.getReturnedmoneyvalue()));
-        }
-        else {
-            answerBool.setText("No");
-            refundMoney.setText("0");
-        }
+        complaintDateTime.setText(formatComplaintTimestamp(selectedComplaint));
+        answerBool.setText(resolveResponseStatus(selectedComplaint));
+        refundMoney.setText(formatCompensationAmount(selectedComplaint));
         complaintText.setText(selectedComplaint.getComplaintText());
         responseText.setText(defaultIfBlank(selectedComplaint.getReplyText()));
         respondedAt.setText(formatDate(selectedComplaint.getRespondedAt()));
@@ -339,7 +285,7 @@ public class MyComplaintsController {
         if (date == null) {
             return "—";
         }
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy - HH:mm");
         return formatter.format(date);
     }
 
@@ -359,6 +305,47 @@ public class MyComplaintsController {
                 || "LATE".equalsIgnoreCase(status);
     }
 
+    private boolean isResponded(Complaint complaint) {
+        if (complaint == null) {
+            return false;
+        }
+        return complaint.getRespondedAt() != null
+                || (complaint.getReplyText() != null && !complaint.getReplyText().isBlank())
+                || complaint.isAccepted();
+    }
+
+    private String resolveResponseStatus(Complaint complaint) {
+        return isResponded(complaint) ? "Responded" : "In Progress";
+    }
+
+    private String formatCompensationAmount(Complaint complaint) {
+        int amount = complaint.getReturnedmoneyvalue();
+        return amount + " ₪";
+    }
+
+    private int compareByCreatedAt(Complaint a, Complaint b) {
+        Date first = a.getCreatedAt();
+        Date second = b.getCreatedAt();
+        if (first == null && second == null) {
+            return Integer.compare(a.getComplaintID(), b.getComplaintID());
+        }
+        if (first == null) {
+            return 1;
+        }
+        if (second == null) {
+            return -1;
+        }
+        return first.compareTo(second);
+    }
+
+    private String formatComplaintTimestamp(Complaint complaint) {
+        Date createdAt = complaint.getCreatedAt();
+        if (createdAt != null) {
+            return formatDate(createdAt);
+        }
+        return String.format("%02d/%02d/%04d - --:--", complaint.getDay(), complaint.getMonth(), complaint.getYear());
+    }
+
     private void showAlert(String message) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setHeaderText(null);
@@ -371,5 +358,7 @@ public class MyComplaintsController {
             currentUser = SimpleClient.getAccount();
         }
     }
+
+    private final List<Complaint> displayedComplaints = new ArrayList<>();
 
 }

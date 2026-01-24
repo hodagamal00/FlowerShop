@@ -76,8 +76,8 @@ public class ReplyComplaintController {
     @FXML // fx:id="refundCheck"
     private CheckBox refundCheck; // Value injected by FXMLLoader
 
-    @FXML // fx:id="refundPercent"
-    private ComboBox<String> refundPercent; // Value injected by FXMLLoader
+    @FXML
+    private TextField refundAmountField;
 
     @FXML // fx:id="sendButton"
     private Button sendButton; // Value injected by FXMLLoader
@@ -113,7 +113,7 @@ public class ReplyComplaintController {
             return;
         }
         int compensationAmount = 0;
-        boolean willReturnMoney=  false;
+        boolean willReturnMoney = false;
         selectedComplaint.setAccepted(true);
         selectedComplaint.setAnswerworkerID(currentUser.getAccountID());
         selectedComplaint.setReplyText(replyBody);
@@ -121,17 +121,17 @@ public class ReplyComplaintController {
         if(refundCheck.isSelected())
         {
             willReturnMoney = true;
-            String selection = refundPercent.getSelectionModel().getSelectedItem();
-            if (selection == null || selection.isBlank()) {
-                showAlert("Please select a compensation amount.");
+            String amountText = refundAmountField.getText() == null ? "" : refundAmountField.getText().trim();
+            if (amountText.isEmpty()) {
+                showAlert("Please enter a compensation amount.");
                 return;
             }
-            compensationAmount = parseCompensationAmount(selection);
-            if (compensationAmount < 0) {
-                showAlert("Compensation amount must be a positive number.");
+            compensationAmount = parseCompensationAmount(amountText);
+            if (compensationAmount <= 0) {
+                showAlert("Compensation amount must be greater than zero.");
                 return;
             }
-            selectedComplaint.setCompensationDecision(compensationAmount + "₪ compensation approved");
+            selectedComplaint.setCompensationDecision("Compensation approved");
         }
         else {
             selectedComplaint.setCompensationDecision("No compensation");
@@ -162,12 +162,12 @@ public class ReplyComplaintController {
     @FXML
     void addRefund(ActionEvent event)
     {
-        if(refundCheck.isSelected())
-        {
-            refundPercent.setVisible(true);
+        if (refundCheck.isSelected()) {
+            refundAmountField.setVisible(true);
+        } else {
+            refundAmountField.setVisible(false);
+            refundAmountField.clear();
         }
-        else
-            refundPercent.setVisible(false);
     }
 
     @FXML
@@ -261,7 +261,7 @@ public class ReplyComplaintController {
         assert loadButton != null : "fx:id=\"loadButton\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert orderID != null : "fx:id=\"orderID\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert refundCheck != null : "fx:id=\"refundCheck\" was not injected: check your FXML file 'replycomplaint.fxml'.";
-        assert refundPercent != null : "fx:id=\"refundPercent\" was not injected: check your FXML file 'replycomplaint.fxml'.";
+        assert refundAmountField != null : "fx:id=\"refundAmountField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert sendButton != null : "fx:id=\"sendButton\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert other != null : "fx:id=\"other\" was not injected: check your FXML file 'replycomplaint.fxml'.";
@@ -273,13 +273,8 @@ public class ReplyComplaintController {
             loadSelectedComplaint(newValue);
         });
 
-        refundPercent.getItems().add("25₪");
-        refundPercent.getItems().add("50₪");
-        refundPercent.getItems().add("75₪");
-        refundPercent.getItems().add("100₪");
-
         //Complaint a = new Complaint(0,23,22,false,false,"Fuck you",2,0,false,0,23,2,2004,"");
-        refundPercent.setVisible(false);
+        refundAmountField.setVisible(false);
         loadButton.setDisable(true);
         backButton.setDisable(true);
         other.setVisible(false);
@@ -388,7 +383,7 @@ public class ReplyComplaintController {
         if (date == null) {
             return "-";
         }
-        return new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date);
+        return new SimpleDateFormat("dd/MM/yyyy - HH:mm").format(date);
     }
 
     private void requestAllComplaints() {
@@ -404,35 +399,19 @@ public class ReplyComplaintController {
         if (retrievedComplaints == null) {
             return;
         }
+        displayedComplaints.clear();
         for (Complaint complaint : retrievedComplaints) {
-            String entry = "#" + complaint.getComplaintID() + " - " + complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
-            if (complaint.isAccepted()) {
-                entry = entry + " (Resolved)";
-            }
-            complaintList.getItems().add(entry);
+            displayedComplaints.add(complaint);
+            complaintList.getItems().add(formatListEntry(complaint));
         }
     }
 
     private void loadSelectedComplaint(String selectedEntry) {
-        if (selectedEntry == null || selectedEntry.isBlank()) {
+        int selectedIndex = complaintList.getSelectionModel().getSelectedIndex();
+        if (selectedIndex < 0 || selectedIndex >= displayedComplaints.size()) {
             return;
         }
-        if (retrievedComplaints == null) {
-            return;
-        }
-        int selectedId = parseComplaintId(selectedEntry);
-        if (selectedId == -1) {
-            return;
-        }
-        for (Complaint complaint : retrievedComplaints) {
-            if (complaint.getComplaintID() == selectedId) {
-                selectedComplaint = complaint;
-                break;
-            }
-        }
-        if (selectedComplaint == null) {
-            return;
-        }
+        selectedComplaint = displayedComplaints.get(selectedIndex);
         sendButton.setVisible(true);
         complaintID.setText(String.valueOf(selectedComplaint.getComplaintID()));
         accountID.setText(String.valueOf(selectedComplaint.getCustomerID()));
@@ -444,17 +423,22 @@ public class ReplyComplaintController {
         compensationDecisionField.setText(selectedComplaint.getCompensationDecision());
     }
 
-    private int parseComplaintId(String selectedEntry) {
-        int spaceIndex = selectedEntry.indexOf(' ');
-        if (spaceIndex <= 1) {
-            return -1;
+    private String formatListEntry(Complaint complaint) {
+        String entry = "Complaint – " + formatListTimestamp(complaint);
+        if (complaint.getRespondedAt() != null || complaint.isAccepted()) {
+            entry += " (Resolved)";
         }
-        String idPart = selectedEntry.substring(1, spaceIndex);
-        try {
-            return Integer.parseInt(idPart);
-        } catch (NumberFormatException ex) {
-            return -1;
-        }
+        return entry;
     }
+
+    private String formatListTimestamp(Complaint complaint) {
+        Date createdAt = complaint.getCreatedAt();
+        if (createdAt != null) {
+            return formatTimestamp(createdAt);
+        }
+        return String.format("%02d/%02d/%04d - --:--", complaint.getDay(), complaint.getMonth(), complaint.getYear());
+    }
+
+    private final List<Complaint> displayedComplaints = new ArrayList<>();
 
 }
