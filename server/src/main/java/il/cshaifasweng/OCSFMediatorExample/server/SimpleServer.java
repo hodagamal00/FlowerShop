@@ -440,6 +440,7 @@ private static SessionFactory cachedSessionFactory;
 							try {
 								ComplaintUpdateResponse response = ComplaintUpdateManager.editComplaint(recievedComp);
 								client.sendToClient(response);
+								notifyComplaintUpdate(response, client);
 							} catch (Exception ex) {
 								client.sendToClient(new ComplaintUpdateResponse(false, "Failed to update complaint response.", null));
 							}
@@ -966,6 +967,31 @@ private static SessionFactory cachedSessionFactory;
 			} catch (Exception ex) {
 				tx.rollback();
 				throw ex;
+			}
+		}
+	}
+
+	private void notifyComplaintUpdate(ComplaintUpdateResponse response, ConnectionToClient sourceClient) {
+		if (response == null || response.getComplaint() == null) {
+			return;
+		}
+		int customerId = response.getComplaint().getCustomerID();
+		Thread[] clientThreads = getClientConnections();
+		for (Thread thread : clientThreads) {
+			if (!(thread instanceof ConnectionToClient)) {
+				continue;
+			}
+			ConnectionToClient target = (ConnectionToClient) thread;
+			if (target == sourceClient) {
+				continue;
+			}
+			Account account = (Account) target.getInfo("account");
+			if (account == null || account.getAccountID() != customerId) {
+				continue;
+			}
+			try {
+				target.sendToClient(response);
+			} catch (IOException ignored) {
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
+import il.cshaifasweng.OCSFMediatorExample.entities.ComplaintUpdateResponse;
 import il.cshaifasweng.OCSFMediatorExample.entities.GetAllComplaints;
 import il.cshaifasweng.OCSFMediatorExample.entities.Message;
 import il.cshaifasweng.OCSFMediatorExample.entities.NextComplaintIdMessage;
@@ -208,6 +209,37 @@ public class MyComplaintsController {
     }
 
     @Subscribe
+    public void handleComplaintUpdateResponse(ComplaintUpdateResponse response) {
+        if (response == null || !response.isSuccess() || response.getComplaint() == null) {
+            return;
+        }
+        resolveCurrentUser();
+        if (currentUser == null) {
+            return;
+        }
+        Complaint updatedComplaint = response.getComplaint();
+        if (updatedComplaint.getCustomerID() != currentUser.getAccountID()) {
+            return;
+        }
+        if (allComplaints == null) {
+            allComplaints = new ArrayList<>();
+        }
+        boolean updatedExisting = false;
+        for (int i = 0; i < allComplaints.size(); i++) {
+            if (allComplaints.get(i).getComplaintID() == updatedComplaint.getComplaintID()) {
+                allComplaints.set(i, updatedComplaint);
+                updatedExisting = true;
+                break;
+            }
+        }
+        if (!updatedExisting) {
+            allComplaints.add(updatedComplaint);
+        }
+        refreshComplaintList();
+        selectComplaint(updatedComplaint.getComplaintID());
+    }
+
+    @Subscribe
     public void handleNextComplaintId(NextComplaintIdEvent event) {
         nextComplaintId = event.getComplaintId();
     }
@@ -272,7 +304,7 @@ public class MyComplaintsController {
             return;
         }
         complaintDateTime.setText(formatComplaintTimestamp(selectedComplaint));
-        answerBool.setText(resolveResponseStatus(selectedComplaint));
+        updateResponseStatus(selectedComplaint);
         refundMoney.setText(formatCompensationAmount(selectedComplaint));
         complaintText.setText(selectedComplaint.getComplaintText());
         responseText.setText(defaultIfBlank(selectedComplaint.getReplyText()));
@@ -314,12 +346,24 @@ public class MyComplaintsController {
                 || complaint.isAccepted();
     }
 
-    private String resolveResponseStatus(Complaint complaint) {
-        return isResponded(complaint) ? "Responded" : "In Progress";
+    private void updateResponseStatus(Complaint complaint) {
+        boolean responded = isResponded(complaint);
+        answerBool.setText(responded ? "Resolved" : "In Progress");
+        if (responded) {
+            answerBool.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
+        } else {
+            answerBool.setStyle("-fx-text-fill: #7f8c8d;");
+        }
     }
 
     private String formatCompensationAmount(Complaint complaint) {
+        if (complaint == null) {
+            return "—";
+        }
         int amount = complaint.getReturnedmoneyvalue();
+        if (!complaint.isReturnedMoney() || amount <= 0) {
+            return "—";
+        }
         return amount + " ₪";
     }
 
