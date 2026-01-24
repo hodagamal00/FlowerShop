@@ -5,6 +5,7 @@ import org.greenrobot.eventbus.EventBus;
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SimpleClient extends AbstractClient {
@@ -13,6 +14,7 @@ public class SimpleClient extends AbstractClient {
 
 	// Global current user (Account / Manager / Worker)
 	private static Account currentUser = null;
+	private static List<Complaint> cachedComplaints = new ArrayList<>();
 
 	private SimpleClient(String host, int port) {
 		super(host, port);
@@ -247,9 +249,13 @@ public class SimpleClient extends AbstractClient {
 			System.out.println("Get Complaints Test 2");
 			PassAllComplaintsEvent complaintsEvent = new PassAllComplaintsEvent();
 			System.out.println("Get Complaints Test 3");
-			complaintsEvent.setComplaintsToPass(recievedComps.getComplaintsList());
+			List<Complaint> incomingComplaints = recievedComps.getComplaintsList();
+			cachedComplaints = incomingComplaints != null
+					? new ArrayList<>(incomingComplaints)
+					: new ArrayList<>();
+			complaintsEvent.setComplaintsToPass(cachedComplaints);
 
-			System.out.println("Comp List Size = " + recievedComps.getComplaintsList().size());
+			System.out.println("Comp List Size = " + cachedComplaints.size());
 			System.out.println("Get Complaints Test 4");
 			EventBus.getDefault().post(complaintsEvent);
 			System.out.println("Get Complaints Test 5");
@@ -323,6 +329,10 @@ public class SimpleClient extends AbstractClient {
 	 */
 	public static Account getAccount() {
 		return currentUser;
+	}
+
+	public static List<Complaint> getCachedComplaints() {
+		return new ArrayList<>(cachedComplaints);
 	}
 
 	/**

@@ -161,6 +161,13 @@ public class MyComplaintsController {
 
         loadButton.setDisable(true);
         resolveCurrentUser();
+        if (allComplaints == null) {
+            List<Complaint> cachedComplaints = SimpleClient.getCachedComplaints();
+            if (!cachedComplaints.isEmpty()) {
+                allComplaints = new ArrayList<>(cachedComplaints);
+                refreshComplaintList();
+            }
+        }
         complaintList.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
             int index = newValue == null ? -1 : newValue.intValue();
             if (index >= 0 && index < displayedComplaints.size()) {
@@ -201,9 +208,9 @@ public class MyComplaintsController {
     public void complaintEvent(PassAllComplaintsEvent allComps){ // added new 30/7
         System.out.println("arrived to complaintEvent Subscriber in my complaints!!!!!");
         List<Complaint> recievedComplaints = allComps.getComplaintsToPass();
-        allComplaints = allComps.getComplaintsToPass();
-        for(int i=0;i<recievedComplaints.size();i++){
-            System.out.println(recievedComplaints.get(i).getDay());
+        allComplaints = recievedComplaints != null ? new ArrayList<>(recievedComplaints) : new ArrayList<>();
+        for (int i = 0; i < allComplaints.size(); i++) {
+            System.out.println(allComplaints.get(i).getDay());
         }
         refreshComplaintList();
     }
