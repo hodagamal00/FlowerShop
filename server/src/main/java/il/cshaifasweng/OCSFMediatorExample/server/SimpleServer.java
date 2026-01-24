@@ -432,13 +432,17 @@ private static SessionFactory cachedSessionFactory;
 							ComplaintUpdateManager.addComplaint(recievedComp);
 						} else if (updateClassFunction.equals("edit")) {
 							if (!requirePrivilegeAtLeast(client, 2)) {
+								client.sendToClient(new ComplaintUpdateResponse(false, "Access denied.", null));
 								break;
 							}
 							System.out.println("arrived to here inside complaint edit");
 							Complaint recievedComp = recievedMessage.getComplaint();
-							boolean replyLate = ComplaintUpdateManager.editComplaint(recievedComp);
-							if (replyLate) {
-								client.sendToClient("Reply sent after 24 hours");
+							try {
+								ComplaintUpdateResponse response = ComplaintUpdateManager.editComplaint(recievedComp);
+								client.sendToClient(response);
+								notifyComplaintUpdate(response, client);
+							} catch (Exception ex) {
+								client.sendToClient(new ComplaintUpdateResponse(false, "Failed to update complaint response.", null));
 							}
 						}
 					break;
@@ -973,6 +977,31 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
+	private void notifyComplaintUpdate(ComplaintUpdateResponse response, ConnectionToClient sourceClient) {
+		if (response == null || response.getComplaint() == null) {
+			return;
+		}
+		int customerId = response.getComplaint().getCustomerID();
+		Thread[] clientThreads = getClientConnections();
+		for (Thread thread : clientThreads) {
+			if (!(thread instanceof ConnectionToClient)) {
+				continue;
+			}
+			ConnectionToClient target = (ConnectionToClient) thread;
+			if (target == sourceClient) {
+				continue;
+			}
+			Account account = (Account) target.getInfo("account");
+			if (account == null || account.getAccountID() != customerId) {
+				continue;
+			}
+			try {
+				target.sendToClient(response);
+			} catch (IOException ignored) {
+			}
+		}
+	}
+
 	private void sendAuthError(ConnectionToClient client, String message) throws IOException {
 		client.sendToClient(new UserUpdateResponse(false, message));
 	}
@@ -1325,11 +1354,6 @@ private static SessionFactory cachedSessionFactory;
 			int privilegeLevel = account.getPrivilegeLevel();
 			if (privilegeLevel == 1) {
 				query.where(builder.equal(root.get("CustomerID"), account.getAccountID()));
-			} else if (privilegeLevel >= 2 && privilegeLevel < 4) {
-				int branchId = resolveBranchId(account);
-				if (branchId > 0) {
-					query.where(builder.equal(root.get("shopID"), branchId));
-				}
 			}
 		}
 		List<Complaint> result = session.createQuery(query).getResultList();

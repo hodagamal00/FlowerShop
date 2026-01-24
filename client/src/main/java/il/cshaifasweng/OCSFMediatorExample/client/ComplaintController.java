@@ -52,9 +52,6 @@ public class  ComplaintController{
     private Button submitcomp;
 
     @FXML
-    private TextField complaintIdField;
-
-    @FXML
     private Label submissionStatusLabel;
 
     @FXML
@@ -99,7 +96,7 @@ public class  ComplaintController{
         String topic = topictxt.getText() != null ? topictxt.getText().trim() : "";
         String details = comptxt.getText() != null ? comptxt.getText().trim() : "";
         newComplaint.setComplaintText(topic + "\n" + details);
-        newComplaint.setShopID(0);
+        newComplaint.setShopID(currentUser.getBelongShop());
         newComplaint.setAnswerworkerID(0);
         newComplaint.setReturnedMoney(false);
         newComplaint.setReturnedmoneyvalue(0);
@@ -166,9 +163,6 @@ public class  ComplaintController{
     @Subscribe
     public void handleNextComplaintId(NextComplaintIdEvent event) {
         reservedComplaintId = event.getComplaintId();
-        if (complaintIdField != null) {
-            complaintIdField.setText(Integer.toString(reservedComplaintId));
-        }
     }
 
     private void requestNextComplaintId() {
