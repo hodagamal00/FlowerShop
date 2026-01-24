@@ -488,7 +488,7 @@ public class MyOrdersController {
         refundDecisionLabel.setVisible(false);
 
         viewOrder.setDisable(true);
-        backToCatalog.setDisable(true);
+    }
 
     private Account resolveCurrentUser() {
         if (currentUser == null) {
@@ -500,14 +500,12 @@ public class MyOrdersController {
     private void requestOrders() {
         wait.setVisible(true);
         viewOrder.setDisable(true);
-        backToCatalog.setDisable(true);
         try {
             getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
             SimpleClient.getClient().sendToServer(getOrdersMsg);
         } catch (IOException e) {
             wait.setVisible(false);
             viewOrder.setDisable(false);
-            backToCatalog.setDisable(false);
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
             alert.setContentText("Failed to load orders. Please try again.");
@@ -545,7 +543,6 @@ public class MyOrdersController {
         Platform.runLater(() -> {
             wait.setVisible(false);
             viewOrder.setDisable(false);
-            backToCatalog.setDisable(false);
         });
     }
 
