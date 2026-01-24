@@ -353,7 +353,14 @@ public class ReplyComplaintController {
 
     private void requestComplaints() {
         try {
-            SimpleClient.getClient().sendToServer(new GetAllComplaints());
+            GetAllComplaints request = new GetAllComplaints();
+            int privilege = SimpleClient.getPrivilegeLevel();
+            if (privilege >= 4) {
+                request.setScope("NETWORK");
+            } else {
+                request.setScope("BRANCH");
+            }
+            SimpleClient.getClient().sendToServer(request);
         } catch (IOException e) {
             e.printStackTrace();
         }

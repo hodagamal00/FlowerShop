@@ -667,6 +667,8 @@ public class CatalogController {
 		}
 
 		GetAllComplaints allComplaints = new GetAllComplaints();
+		int privilege = resolveCurrentPrivilegeLevel();
+		allComplaints.setScope(privilege >= 4 ? "NETWORK" : "BRANCH");
 		System.out.println("send request for complaints !!");
 		try {
 			System.out.println("before sending the getAllComplaints " );
@@ -788,6 +790,7 @@ public class CatalogController {
 
 		// added new 30/7
 		GetAllComplaints allComplaints = new GetAllComplaints();
+		allComplaints.setScope("CUSTOMER");
 		System.out.println("send request for complaints !!");
 		try {
 			System.out.println("before sending the getAllComplaints " );
@@ -2292,7 +2295,7 @@ public class CatalogController {
 		if (currentLoggedAccount != null) {
 			return currentLoggedAccount.getPrivialge();
 		}
-		Account sessionAccount = SimpleClient.getUser();
+		Account sessionAccount = SimpleClient.getCurrentUser();
 		if (sessionAccount != null) {
 			return sessionAccount.getPrivilegeLevel();
 		}
@@ -2315,7 +2318,7 @@ public class CatalogController {
 		if (currentLoggedAccount != null) {
 			return currentLoggedAccount;
 		}
-		Account account = SimpleClient.getUser();
+		Account account = SimpleClient.getCurrentUser();
 		if (account != null) {
 			currentLoggedAccount = account;
 		}
@@ -2632,7 +2635,8 @@ public class CatalogController {
 	@FXML
 	void openWorkerDashboard(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 2) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 2) {
 			openAccessDenied(event, 2, "Worker Dashboard");
 			return;
 		}
@@ -2647,7 +2651,8 @@ public class CatalogController {
 	@FXML
 	void openBranchOrders(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 2) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 2) {
 			openAccessDenied(event, 2, "Branch Orders");
 			return;
 		}
@@ -2661,7 +2666,8 @@ public class CatalogController {
 	@FXML
 	void openCatalogManagement(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 2) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 2) {
 			openAccessDenied(event, 2, "Catalog Management");
 			return;
 		}
@@ -2675,7 +2681,8 @@ public class CatalogController {
 	@FXML
 	void openBranchReports(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 3) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 3) {
 			openAccessDenied(event, 3, "Branch Reports");
 			return;
 		}
@@ -2691,7 +2698,8 @@ public class CatalogController {
 	@FXML
 	void openPromotionsManagement(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 3) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 3) {
 			openAccessDenied(event, 3, "Promotions Management");
 			return;
 		}
@@ -2707,7 +2715,8 @@ public class CatalogController {
 	@FXML
 	void openBranchSettings(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 3) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 3) {
 			openAccessDenied(event, 3, "Branch Settings");
 			return;
 		}
@@ -2723,7 +2732,8 @@ public class CatalogController {
 	@FXML
 	void openNetworkDashboard(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 4) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 4) {
 			openAccessDenied(event, 4, "Network Dashboard");
 			return;
 		}
@@ -2739,7 +2749,8 @@ public class CatalogController {
 	@FXML
 	void openCrossBranchReports(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 4) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 4) {
 			openAccessDenied(event, 4, "Cross-Branch Reports");
 			return;
 		}
@@ -2755,7 +2766,8 @@ public class CatalogController {
 	@FXML
 	void openGlobalSettings(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 4) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 4) {
 			openAccessDenied(event, 4, "Global Settings");
 			return;
 		}
@@ -2771,7 +2783,8 @@ public class CatalogController {
 	@FXML
 	void openNetworkPromotions(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 4) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 4) {
 			openAccessDenied(event, 4, "Network Promotions");
 			return;
 		}
@@ -2787,7 +2800,8 @@ public class CatalogController {
 	@FXML
 	void openRoleManagement(ActionEvent event) throws IOException {
 		// Check privilege level
-		if (SimpleClient.getClient().getUser() == null || SimpleClient.getClient().getUser().getPrivilegeLevel() < 4) {
+		Account currentUser = SimpleClient.getCurrentUser();
+		if (currentUser == null || currentUser.getPrivilegeLevel() < 4) {
 			openAccessDenied(event, 4, "Role Management");
 			return;
 		}

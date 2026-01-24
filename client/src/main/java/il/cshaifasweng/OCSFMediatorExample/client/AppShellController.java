@@ -88,8 +88,8 @@ public class AppShellController {
         if (profileButton != null) {
             profileButton.setOnAction(e -> NavigationService.getInstance().navigate("Profile"));
         }
-        buildNavigationBar(SimpleClient.getUser());
-        updateLoginState(SimpleClient.getUser());
+        buildNavigationBar(SimpleClient.getCurrentUser());
+        updateLoginState(SimpleClient.getCurrentUser());
 
     }
 
@@ -279,7 +279,7 @@ public class AppShellController {
         NavigationService.getInstance().navigate("HomePage");
     }
     private void buildNavigationBar() {
-        buildNavigationBar(SimpleClient.getUser());
+        buildNavigationBar(SimpleClient.getCurrentUser());
     }
 
     private void buildNavigationBar(Account account) {

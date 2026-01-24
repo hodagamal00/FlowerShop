@@ -730,13 +730,23 @@ private static SessionFactory cachedSessionFactory;
 
 				System.out.println("arrived to getAllComplaints in server !");
 				Account account = getClientAccount(client);
+				GetAllComplaints request = (GetAllComplaints) msg;
+				String scope = request.getScope();
 				if (account == null || account.getPrivilegeLevel() < 1) {
+					sendAuthError(client, "Access denied");
+				} else if ("NETWORK".equalsIgnoreCase(scope) && account.getPrivilegeLevel() < 4) {
+					sendAuthError(client, "Access denied");
+				} else if ("CUSTOMER".equalsIgnoreCase(scope) && account.getPrivilegeLevel() != 1) {
+					sendAuthError(client, "Access denied");
+				} else if ("BRANCH".equalsIgnoreCase(scope) && account.getPrivilegeLevel() < 2) {
 					sendAuthError(client, "Access denied");
 				} else if (account.getPrivilegeLevel() >= 2 && requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
 					sendAuthError(client, "Access denied");
 				} else {
 					GetAllComplaints complaintsToClient = new GetAllComplaints();
-					List<Complaint> recievedComplaints = getScopedComplaints(localSession, account);
+					List<Complaint> recievedComplaints = "NETWORK".equalsIgnoreCase(scope)
+							? getAllComplaints(localSession)
+							: getScopedComplaints(localSession, account);
 					complaintsToClient.setComplaintsList(recievedComplaints);
 					client.sendToClient(complaintsToClient);
 				}

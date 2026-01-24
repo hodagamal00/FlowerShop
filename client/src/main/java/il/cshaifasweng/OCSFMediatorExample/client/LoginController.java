@@ -100,7 +100,11 @@ public class LoginController {
         // Send current email to server for message retrieval
         try {
             SimpleClient.getClient().sendToServer(new MailClass(theEmail));
-            SimpleClient.getClient().sendToServer(new GetAllComplaints());
+            if (SimpleClient.getPrivilegeLevel() >= 1) {
+                GetAllComplaints complaintsRequest = new GetAllComplaints();
+                complaintsRequest.setScope(SimpleClient.getPrivilegeLevel() >= 4 ? "NETWORK" : "CUSTOMER");
+                SimpleClient.getClient().sendToServer(complaintsRequest);
+            }
             SimpleClient.getClient().sendToServer(new GetAllMessages());
         } catch (IOException e) {
             e.printStackTrace();

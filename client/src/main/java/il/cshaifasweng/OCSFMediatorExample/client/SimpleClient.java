@@ -322,6 +322,21 @@ public class SimpleClient extends AbstractClient {
 	}
 
 	/**
+	 * Canonical accessor for the current logged-in account.
+	 */
+	public static Account getCurrentUser() {
+		return currentUser;
+	}
+
+	/**
+	 * Convenience helper for privilege level (0 when no session user).
+	 */
+	public static int getPrivilegeLevel() {
+		Account account = currentUser;
+		return account != null ? account.getPrivilegeLevel() : 0;
+	}
+
+	/**
 	 * Set the current logged-in account (used by controllers مثل PrimaryController).
 	 */
 	public static void setAccount(Account user) {

@@ -41,6 +41,22 @@
                     <Region HBox.hgrow="ALWAYS" />
                 </HBox>
 
+                <VBox fx:id="managerActionsBox" spacing="12.0" styleClass="card">
+                    <Label text="Manager Quick Links" styleClass="card-header" />
+                    <HBox spacing="10.0">
+                        <Button fx:id="managerCatalogButton" text="Manage Catalog" styleClass="btn-secondary"
+                                onAction="#handleManageCatalog" />
+                        <Button fx:id="managerDashboardButton" text="Network Dashboard" styleClass="btn-secondary"
+                                onAction="#handleManagerDashboard" />
+                        <Button fx:id="managerOrdersButton" text="Branch Orders" styleClass="btn-secondary"
+                                onAction="#handleBranchOrders" />
+                        <Button fx:id="managerReportsButton" text="Cross-Branch Reports" styleClass="btn-secondary"
+                                onAction="#handleManagerReports" />
+                        <Button fx:id="managerPanelButton" text="Manager Panel" styleClass="btn-secondary"
+                                onAction="#handleManagerPanel" />
+                    </HBox>
+                </VBox>
+
                 <!-- Quick actions -->
                 <GridPane hgap="14.0" vgap="14.0" alignment="CENTER" styleClass="card-grid">
                     <columnConstraints>
@@ -52,17 +68,17 @@
                         <RowConstraints minHeight="140" />
                     </rowConstraints>
                     <children>
-                        <VBox spacing="8.0" styleClass="quick-card" GridPane.columnIndex="0">
+                        <VBox fx:id="catalogCard" spacing="8.0" styleClass="quick-card" GridPane.columnIndex="0">
                             <Label text="Browse Catalog" styleClass="card-header" />
                             <Text text="See seasonal bouquets, plants, and accessories with fast add-to-cart." styleClass="muted-text" wrappingWidth="220" />
                             <Button fx:id="openCatalogButton" text="Open Catalog" styleClass="btn-secondary" onAction="#handleOpenCatalog" />
                         </VBox>
-                        <VBox spacing="8.0" styleClass="quick-card" GridPane.columnIndex="1">
+                        <VBox fx:id="customCard" spacing="8.0" styleClass="quick-card" GridPane.columnIndex="1">
                             <Label text="Create Custom" styleClass="card-header" />
                             <Text text="Mix stems, pick colors, and add a note for your perfect bundle." styleClass="muted-text" wrappingWidth="220" />
                             <Button fx:id="startCustomButton" text="Start a Custom" styleClass="btn-secondary" onAction="#handleStartCustom" />
                         </VBox>
-                        <VBox spacing="8.0" styleClass="quick-card" GridPane.columnIndex="2">
+                        <VBox fx:id="ordersCard" spacing="8.0" styleClass="quick-card" GridPane.columnIndex="2">
                             <Label text="Track Orders" styleClass="card-header" />
                             <Text text="Stay updated on preparation, delivery, and pickup windows." styleClass="muted-text" wrappingWidth="220" />
                             <Button fx:id="viewOrdersButton" text="View My Orders" styleClass="btn-secondary" onAction="#handleTrackOrders" />

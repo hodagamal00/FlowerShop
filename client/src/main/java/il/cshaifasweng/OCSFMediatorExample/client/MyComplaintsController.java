@@ -229,7 +229,9 @@ public class MyComplaintsController {
 
     private void requestAllComplaints() {
         try {
-            SimpleClient.getClient().sendToServer(new GetAllComplaints());
+            GetAllComplaints request = new GetAllComplaints();
+            request.setScope("CUSTOMER");
+            SimpleClient.getClient().sendToServer(request);
         } catch (IOException e) {
             e.printStackTrace();
         }

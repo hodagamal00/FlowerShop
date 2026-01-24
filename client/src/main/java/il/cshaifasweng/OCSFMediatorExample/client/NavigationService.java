@@ -82,7 +82,18 @@ public class NavigationService {
             appShellController.setContent(content);
             appShellController.handleNavigationChange(resolvedView);
         } catch (IOException e) {
-            e.printStackTrace();
+            ErrorController.setErrorInfo(
+                    "Unable to Load Page",
+                    "We couldn't open the requested page. Please try again.",
+                    "ERR_NAVIGATION",
+                    e != null ? e.getMessage() : "Unknown error"
+            );
+            ErrorController.setReturnPage("Catalog");
+            try {
+                App.setRoot("Error");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

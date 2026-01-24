@@ -6,6 +6,7 @@ import java.util.List;
 public class GetAllComplaints implements Serializable { // added new 21/7
 
     List<Complaint> complaintsList;
+    private String scope;
 
     public GetAllComplaints(){
 
@@ -17,6 +18,14 @@ public class GetAllComplaints implements Serializable { // added new 21/7
 
     public List<Complaint> getComplaintsList(){
         return complaintsList;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
 }

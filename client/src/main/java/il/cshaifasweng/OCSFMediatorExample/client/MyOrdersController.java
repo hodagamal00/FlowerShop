@@ -236,6 +236,7 @@ public class MyOrdersController {
         );
 
         GetAllComplaints allComplaints = new GetAllComplaints();
+        allComplaints.setScope("CUSTOMER");
         System.out.println("send request for complaints !!");
         try {
             System.out.println("before sending the getAllComplaints " );

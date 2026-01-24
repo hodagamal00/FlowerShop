@@ -185,6 +185,9 @@
                 <TableColumn fx:id="branchActionsCol" prefWidth="120.0" text="Actions" />
             </columns>
         </TableView>
+        <Label fx:id="emptyStateLabel" text="No branch data available for the selected period."
+               textFill="#9e9e9e" visible="false" managed="false" />
+        <Label fx:id="dashboardStatusLabel" text=" " textFill="#7b1fa2" visible="false" managed="false" />
     </VBox>
 
     <VBox spacing="15.0" styleClass="card">

@@ -89,15 +89,18 @@ public class LogInSecondary {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        GetAllComplaints allComplaints = new GetAllComplaints();
-        System.out.println("send request for complaints !!");
-        try {
-            System.out.println("before sending the getAllComplaints " );
-            SimpleClient.getClient().sendToServer(allComplaints);
+        if (SimpleClient.getPrivilegeLevel() >= 1) {
+            GetAllComplaints allComplaints = new GetAllComplaints();
+            allComplaints.setScope(SimpleClient.getPrivilegeLevel() >= 4 ? "NETWORK" : "CUSTOMER");
+            System.out.println("send request for complaints !!");
+            try {
+                System.out.println("before sending the getAllComplaints " );
+                SimpleClient.getClient().sendToServer(allComplaints);
 
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
         // When using the AppShell, navigate to the catalog view by replacing

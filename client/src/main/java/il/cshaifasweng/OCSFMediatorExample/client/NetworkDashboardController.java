@@ -14,6 +14,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.BranchSettings;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.ReportDataRequest;
 import il.cshaifasweng.OCSFMediatorExample.entities.ReportDataResponse;
+import javafx.scene.paint.Color;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -62,6 +63,8 @@ public class NetworkDashboardController {
     @FXML private TableColumn<BranchData, Void> branchActionsCol;
     @FXML private Button refreshButton;
     @FXML private Button viewReportsButton;
+    @FXML private Label emptyStateLabel;
+    @FXML private Label dashboardStatusLabel;
     
     // Quick Actions
     @FXML private Button globalSettingsButton;
@@ -76,6 +79,7 @@ public class NetworkDashboardController {
     private String currentRequestId;
     private LocalDate rangeStart;
     private LocalDate rangeEnd;
+    private boolean refreshRequested;
     
     @FXML
     public void initialize() {
@@ -234,8 +238,8 @@ public class NetworkDashboardController {
      */
     @FXML
     private void handleRefresh() {
+        refreshRequested = true;
         requestNetworkData();
-        showInfo("Network data refreshed successfully.");
     }
     
     /**
@@ -292,22 +296,24 @@ public class NetworkDashboardController {
      * Show error alert
      */
     private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        if (dashboardStatusLabel != null) {
+            dashboardStatusLabel.setText(message);
+            dashboardStatusLabel.setTextFill(Color.web("#e57373"));
+            dashboardStatusLabel.setVisible(true);
+            dashboardStatusLabel.setManaged(true);
+        }
     }
     
     /**
      * Show info alert
      */
     private void showInfo(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        if (dashboardStatusLabel != null) {
+            dashboardStatusLabel.setText(message);
+            dashboardStatusLabel.setTextFill(Color.web("#7b1fa2"));
+            dashboardStatusLabel.setVisible(true);
+            dashboardStatusLabel.setManaged(true);
+        }
     }
 
     @Subscribe
@@ -327,6 +333,14 @@ public class NetworkDashboardController {
             updateBranchTable();
             updateStatistics();
             updateChart();
+            if (refreshRequested) {
+                if (branchesList.isEmpty()) {
+                    showError("No branch data available for the selected period.");
+                } else {
+                    showInfo("Network data refreshed successfully.");
+                }
+                refreshRequested = false;
+            }
         });
     }
 
@@ -371,6 +385,11 @@ public class NetworkDashboardController {
                 status,
                 metrics.revenue
             ));
+        }
+        boolean empty = branchesList.isEmpty();
+        if (emptyStateLabel != null) {
+            emptyStateLabel.setVisible(empty);
+            emptyStateLabel.setManaged(empty);
         }
     }
 
