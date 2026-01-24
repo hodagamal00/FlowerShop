@@ -52,9 +52,6 @@ public class  ComplaintController{
     private Button submitcomp;
 
     @FXML
-    private TextField complaintIdField;
-
-    @FXML
     private Label submissionStatusLabel;
 
     @FXML
@@ -166,9 +163,6 @@ public class  ComplaintController{
     @Subscribe
     public void handleNextComplaintId(NextComplaintIdEvent event) {
         reservedComplaintId = event.getComplaintId();
-        if (complaintIdField != null) {
-            complaintIdField.setText(Integer.toString(reservedComplaintId));
-        }
     }
 
     private void requestNextComplaintId() {

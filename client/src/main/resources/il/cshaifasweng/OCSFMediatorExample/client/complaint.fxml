@@ -39,15 +39,6 @@
                   </font>
                </Text>
                <VBox spacing="10.0">
-                  <Label text="Complaint ID:" textFill="#333">
-                     <font>
-                        <Font name="System Bold" size="14.0" />
-                     </font>
-                  </Label>
-                  <TextField fx:id="complaintIdField" editable="false" focusTraversable="false" prefHeight="40.0" prefWidth="600.0" promptText="Fetching next complaint ID..." style="-fx-font-size: 14px;" />
-               </VBox>
-
-               <VBox spacing="10.0">
                   <Label text="Your Name:" textFill="#333">
                      <font>
                         <Font name="System Bold" size="14.0" />
