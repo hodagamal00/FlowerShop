@@ -83,6 +83,12 @@ public class ManagerUpdateManager {
         int castedId = (int) numOfRowsManager;
         int newManagerId = castedId + 1;
         recievedManager.setPersonID(newManagerId);
+        if (recievedManager.getAccountID() <= 0) {
+            recievedManager.setAccountID(newManagerId);
+        }
+        if (recievedManager.getLoggedIn() == null) {
+            recievedManager.setLoggedIn(false);
+        }
         System.out.println("inside additemTocatalog2");
         String recievedManagerName = recievedManager.getFullName();
         System.out.println("inside additemTocatalog3");

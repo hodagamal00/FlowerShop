@@ -50,13 +50,16 @@ public class AppShellController {
             NavDestination.forLoggedIn("Checkout", "checkout", 1),
             NavDestination.forLoggedIn("Orders", "myorders", 1),
             NavDestination.forLoggedIn("Branch Orders", "BranchOrders", 2),
+            NavDestination.forLoggedIn("Complaints", "replycomplaint", 2),
             NavDestination.forLoggedIn("Complaints", "mycomplaints", 1),
             NavDestination.forLoggedIn("My Account", "Profile", 1),
             NavDestination.forGuestsOnly("Login", "Login"),
             NavDestination.forGuestsOnly("Register", "register"),
-            NavDestination.forLoggedIn("Admin Panel", "admincontrol", 3),
+            NavDestination.forLoggedIn("Manager Panel", "admincontrol", 3),
             NavDestination.forLoggedIn("Deliveries", "delivery", 2),
-            NavDestination.forLoggedIn("Reports", "BranchReports", 3)
+            NavDestination.forLoggedIn("Branch Reports", "BranchReports", 3),
+            NavDestination.forLoggedIn("Network Dashboard", "NetworkDashboard", 4),
+            NavDestination.forLoggedIn("Reports", "CrossBranchReports", 4)
     );
     /**
      * Called by the FXML loader after the fields have been injected.
@@ -296,6 +299,9 @@ public class AppShellController {
             }
             String viewName = destination.getViewName();
             if ("Profile".equalsIgnoreCase(viewName) && privilege != 1) {
+                continue;
+            }
+            if (privilege >= 4 && "BranchReports".equalsIgnoreCase(viewName)) {
                 continue;
             }
             if (isCustomerOnlyView(viewName) && !isCustomer) {

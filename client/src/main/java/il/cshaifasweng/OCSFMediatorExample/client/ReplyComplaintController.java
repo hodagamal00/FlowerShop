@@ -8,6 +8,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complaint;
+import il.cshaifasweng.OCSFMediatorExample.entities.GetAllComplaints;
 import il.cshaifasweng.OCSFMediatorExample.entities.Message;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateMessage;
 import javafx.event.ActionEvent;
@@ -48,13 +50,25 @@ public class ReplyComplaintController {
     private ListView<String> complaintList; // Value injected by FXMLLoader
 
     @FXML // fx:id="complaintText"
-    private TextField complaintText; // Value injected by FXMLLoader
+    private TextArea complaintText; // Value injected by FXMLLoader
 
     @FXML // fx:id="loadButton"
     private Button loadButton; // Value injected by FXMLLoader
 
     @FXML // fx:id="orderID"
     private TextField orderID; // Value injected by FXMLLoader
+
+    @FXML
+    private ComboBox<String> branchFilterCombo;
+
+    @FXML
+    private ComboBox<String> statusFilterCombo;
+
+    @FXML
+    private DatePicker fromDatePicker;
+
+    @FXML
+    private DatePicker toDatePicker;
 
     @FXML
     private TextField createdAtField;
@@ -90,11 +104,23 @@ public class ReplyComplaintController {
     @FXML
     void SendReply(ActionEvent event)
     {
+        if (selectedComplaint == null || selectedComplaint.getComplaintID() == 0) {
+            showAlert("Please select a complaint to respond to.");
+            return;
+        }
+        if (currentUser == null) {
+            showAlert("You must be logged in to respond to complaints.");
+            return;
+        }
+        if (replyText.getText() == null || replyText.getText().trim().isEmpty()) {
+            showAlert("Please enter a response message.");
+            return;
+        }
         int compensationAmount = 0;
         boolean willReturnMoney=  false;
         selectedComplaint.setAccepted(true);
         selectedComplaint.setAnswerworkerID(currentUser.getAccountID());
-        selectedComplaint.setReplyText(replyText.getText());
+        selectedComplaint.setReplyText(replyText.getText().trim());
         selectedComplaint.setRespondedAt(new Date());
         if(refundCheck.isSelected())
         {
@@ -205,53 +231,7 @@ public class ReplyComplaintController {
     @FXML
     void loadComplaints(ActionEvent event)
     {
-        String aString = "";
-        if(loadButton.getText().equals("Load Complaints"))
-        {
-            for(int z = 0 ; z < retrievedComplaints.size() ; z++)
-            {
-                if(retrievedComplaints.get(z).isAccepted() == false)
-                {
-                    aString = "#" + retrievedComplaints.get(z).getComplaintID() + " - " + retrievedComplaints.get(z).getDay() + "/" + retrievedComplaints.get(z).getMonth() + "/" + retrievedComplaints.get(z).getYear();
-                    if (isLateStatus(retrievedComplaints.get(z).getSlaStatus())) {
-                        aString = aString + " (Late)";
-                    }
-                    complaintList.getItems().add(aString);
-                    aString = "";
-                }
-            }
-            loadButton.setText("Load Selected Complaint");
-        }
-        else
-        {
-            sendButton.setVisible(true);
-            String SelectedIDString = "";
-            int SelectedID;
-            String SelectedComplaint = complaintList.getSelectionModel().getSelectedItem();
-            for (int i = 1; SelectedComplaint.charAt(i) != ' '; i++) {
-                SelectedIDString = SelectedIDString + Character.toString(SelectedComplaint.charAt(i));
-            }
-            SelectedID = Integer.parseInt(SelectedIDString);
-            for (int i = 0; i < retrievedComplaints.size(); i++) {
-                if (retrievedComplaints.get(i).getComplaintID() == SelectedID) {
-                    selectedComplaint = retrievedComplaints.get(i);
-                    break;
-                }
-            }
-            complaintList.getItems().clear();
-            loadButton.setText("Load Complaints");
-
-            complaintID.setText(String.valueOf(selectedComplaint.getComplaintID()));
-            accountID.setText(String.valueOf(selectedComplaint.getCustomerID()));
-            orderID.setText(String.valueOf(selectedComplaint.getOrderID()));
-            complaintDate.setText(selectedComplaint.getDate());
-            complaintText.setText(selectedComplaint.getComplaintText());
-            createdAtField.setText(formatTimestamp(selectedComplaint.getCreatedAt()));
-            respondedAtField.setText(formatTimestamp(selectedComplaint.getRespondedAt()));
-            slaStatusField.setText(selectedComplaint.getSlaStatus());
-            compensationDecisionField.setText(selectedComplaint.getCompensationDecision());
-        }
-
+        requestComplaints();
     }
     Account currentUser;
     List<Complaint> retrievedComplaints = new ArrayList<>();
@@ -278,39 +258,27 @@ public class ReplyComplaintController {
         assert slaStatusField != null : "fx:id=\"slaStatusField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert compensationDecisionField != null : "fx:id=\"compensationDecisionField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
 
-
         refundPercent.getItems().add("25₪");
         refundPercent.getItems().add("50₪");
         refundPercent.getItems().add("75₪");
         refundPercent.getItems().add("100₪");
 
-        //Complaint a = new Complaint(0,23,22,false,false,"Fuck you",2,0,false,0,23,2,2004,"");
         refundPercent.setVisible(false);
-        loadButton.setDisable(true);
         other.setVisible(false);
-        wait.setVisible(true);
+        wait.setVisible(false);
         sendButton.setVisible(false);
-        //String aString = "Complaint #" + a.getComplaintID() + " " + "Received: " + a.getDay() + "/" + a.getMonth() + "/" + a.getYear();
-        //complaintList.getItems().add(aString);
-        //retrievedComplaints.add(a);
 
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-
-                        loadButton.setDisable(false);
-                        other.setVisible(true);
-                        wait.setVisible(false);
-                    }
-                },4500
-        );
-        try {
-            SimpleClient.getClient().sendToServer("get complaints");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        setupFilters();
+        complaintList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                Complaint selected = findComplaintByListEntry(newValue);
+                if (selected != null) {
+                    selectedComplaint = selected;
+                    showComplaintDetails(selected);
+                }
+            }
+        });
+        requestComplaints();
     }
 
     @Subscribe
@@ -318,10 +286,8 @@ public class ReplyComplaintController {
         System.out.println("we're in retrieveAllComplaints");
         List<Complaint> allComplaints = complaints.getComplaintsToPass();
         System.out.println("SIZE = " + allComplaints.size());
-        retrievedComplaints = allComplaints;
-        for(int i = 0 ; i < allComplaints.size(); i++) {
-            System.out.println(allComplaints.get(i).getComplaintText());
-        }
+        retrievedComplaints = allComplaints != null ? allComplaints : new ArrayList<>();
+        applyFilters();
     }
     @Subscribe
     public void PassAccountEventReplyComplaint(PassAccountEventReplyComplaint passAcc){ // added today
@@ -335,6 +301,7 @@ public class ReplyComplaintController {
         System.out.println(recvAccount.getCreditCardNumber());
         System.out.println(recvAccount.getCreditMonthExpire());
         currentUser = recvAccount;
+        setupBranchFilterVisibility();
     }
     private String formatTimestamp(Date date) {
         if (date == null) {
@@ -343,4 +310,182 @@ public class ReplyComplaintController {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date);
     }
 
+    private void setupFilters() {
+        if (statusFilterCombo != null) {
+            statusFilterCombo.getItems().setAll("All", "Pending", "Resolved");
+            statusFilterCombo.setValue("All");
+            statusFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> applyFilters());
+        }
+        if (fromDatePicker != null) {
+            fromDatePicker.setValue(LocalDate.now().minusDays(30));
+            fromDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> applyFilters());
+        }
+        if (toDatePicker != null) {
+            toDatePicker.setValue(LocalDate.now());
+            toDatePicker.valueProperty().addListener((obs, oldValue, newValue) -> applyFilters());
+        }
+        if (branchFilterCombo != null) {
+            branchFilterCombo.getItems().setAll(
+                    "All Branches",
+                    "Branch 1 - Tiberias, Big Danilof",
+                    "Branch 2 - Haifa, Merkaz Zeiv",
+                    "Branch 3 - Tel Aviv, Ramat Aviv",
+                    "Branch 4 - Eilat, Ice mall",
+                    "Branch 5 - Be'er Sheva, Big Beer Sheva"
+            );
+            branchFilterCombo.setValue("All Branches");
+            branchFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> applyFilters());
+        }
+        setupBranchFilterVisibility();
+    }
+
+    private void setupBranchFilterVisibility() {
+        if (branchFilterCombo == null) {
+            return;
+        }
+        boolean isChainManager = currentUser != null && currentUser.getPrivilegeLevel() >= 4;
+        branchFilterCombo.setVisible(isChainManager);
+        branchFilterCombo.setManaged(isChainManager);
+        if (!isChainManager) {
+            branchFilterCombo.setValue("All Branches");
+        }
+    }
+
+    private void requestComplaints() {
+        try {
+            SimpleClient.getClient().sendToServer(new GetAllComplaints());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void applyFilters() {
+        complaintList.getItems().clear();
+        if (retrievedComplaints == null) {
+            return;
+        }
+        LocalDate from = fromDatePicker != null ? fromDatePicker.getValue() : null;
+        LocalDate to = toDatePicker != null ? toDatePicker.getValue() : null;
+        String status = statusFilterCombo != null ? statusFilterCombo.getValue() : "All";
+        Integer branchFilter = resolveBranchFilter();
+
+        for (Complaint complaint : retrievedComplaints) {
+            if (branchFilter != null && complaint.getShopID() != branchFilter) {
+                continue;
+            }
+            if (!matchesStatus(complaint, status)) {
+                continue;
+            }
+            LocalDate complaintDateValue = resolveComplaintDate(complaint);
+            if (from != null && complaintDateValue != null && complaintDateValue.isBefore(from)) {
+                continue;
+            }
+            if (to != null && complaintDateValue != null && complaintDateValue.isAfter(to)) {
+                continue;
+            }
+            complaintList.getItems().add(formatListEntry(complaint));
+        }
+    }
+
+    private Integer resolveBranchFilter() {
+        if (branchFilterCombo == null || branchFilterCombo.getValue() == null) {
+            return null;
+        }
+        String selection = branchFilterCombo.getValue();
+        if ("All Branches".equalsIgnoreCase(selection)) {
+            return null;
+        }
+        if (selection.startsWith("Branch 1")) {
+            return 1;
+        }
+        if (selection.startsWith("Branch 2")) {
+            return 2;
+        }
+        if (selection.startsWith("Branch 3")) {
+            return 3;
+        }
+        if (selection.startsWith("Branch 4")) {
+            return 4;
+        }
+        if (selection.startsWith("Branch 5")) {
+            return 5;
+        }
+        return null;
+    }
+
+    private boolean matchesStatus(Complaint complaint, String status) {
+        if (status == null || "All".equalsIgnoreCase(status)) {
+            return true;
+        }
+        boolean resolved = complaint.isAccepted();
+        return resolved ? "Resolved".equalsIgnoreCase(status) : "Pending".equalsIgnoreCase(status);
+    }
+
+    private String formatListEntry(Complaint complaint) {
+        String date = complaint.getDay() + "/" + complaint.getMonth() + "/" + complaint.getYear();
+        String status = complaint.isAccepted() ? "Resolved" : "Pending";
+        String entry = "#" + complaint.getComplaintID() + " - " + date + " (" + status + ")";
+        if (isLateStatus(complaint.getSlaStatus())) {
+            entry += " (Late)";
+        }
+        return entry;
+    }
+
+    private Complaint findComplaintByListEntry(String listEntry) {
+        int id = parseComplaintId(listEntry);
+        if (id == -1) {
+            return null;
+        }
+        for (Complaint complaint : retrievedComplaints) {
+            if (complaint.getComplaintID() == id) {
+                return complaint;
+            }
+        }
+        return null;
+    }
+
+    private int parseComplaintId(String listEntry) {
+        if (listEntry == null || listEntry.length() < 2) {
+            return -1;
+        }
+        StringBuilder idBuilder = new StringBuilder();
+        for (int i = 1; i < listEntry.length(); i++) {
+            char c = listEntry.charAt(i);
+            if (Character.isDigit(c)) {
+                idBuilder.append(c);
+            } else {
+                break;
+            }
+        }
+        try {
+            return Integer.parseInt(idBuilder.toString());
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
+    }
+
+    private void showComplaintDetails(Complaint selected) {
+        complaintID.setText(String.valueOf(selected.getComplaintID()));
+        accountID.setText(String.valueOf(selected.getCustomerID()));
+        orderID.setText(String.valueOf(selected.getOrderID()));
+        complaintDate.setText(selected.getDay() + "/" + selected.getMonth() + "/" + selected.getYear());
+        complaintText.setText(selected.getComplaintText());
+        createdAtField.setText(formatTimestamp(selected.getCreatedAt()));
+        respondedAtField.setText(formatTimestamp(selected.getRespondedAt()));
+        slaStatusField.setText(selected.getSlaStatus() != null ? selected.getSlaStatus() : "-");
+        compensationDecisionField.setText(selected.getCompensationDecision() != null ? selected.getCompensationDecision() : "-");
+        replyText.setText(selected.getReplyText() != null ? selected.getReplyText() : "");
+        sendButton.setVisible(true);
+    }
+
+    private LocalDate resolveComplaintDate(Complaint complaint) {
+        if (complaint.getCreatedAt() != null) {
+            return complaint.getCreatedAt().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        }
+        try {
+            return LocalDate.of(complaint.getYear(), complaint.getMonth(), complaint.getDay());
+        } catch (Exception ex) {
+            return null;
+        }
+    }
 }

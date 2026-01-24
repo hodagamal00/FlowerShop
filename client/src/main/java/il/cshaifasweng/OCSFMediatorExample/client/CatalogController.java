@@ -523,7 +523,7 @@ public class CatalogController {
 	@FXML
 	void openControlPanel(ActionEvent event) throws IOException {
 
-		if (!ensurePrivilege(event, 3, "Admin Panel")) {
+		if (!ensurePrivilege(event, 3, "Manager Panel")) {
 			return;
 		}
 

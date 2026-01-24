@@ -13,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -112,9 +113,58 @@ public class AdminControlController {
     @FXML // fx:id="privilageField"
     private TextField privilageField; // Value injected by FXMLLoader
 
+    @FXML
+    private VBox createAccountSection;
+
+    @FXML
+    private TextField createName;
+
+    @FXML
+    private TextField createEmail;
+
+    @FXML
+    private TextField createPassword;
+
+    @FXML
+    private ComboBox<String> createPrivilegeCombo;
+
+    @FXML
+    private TextField createPersonId;
+
+    @FXML
+    private TextField createPhone;
+
+    @FXML
+    private TextArea createAddress;
+
+    @FXML
+    private CheckBox createSubscription;
+
+    @FXML
+    private TextField createShop;
+
+    @FXML
+    private TextField createCardNumber;
+
+    @FXML
+    private TextField createCardMonth;
+
+    @FXML
+    private TextField createCardYear;
+
+    @FXML
+    private TextField createCvv;
+
+    @FXML
+    private Button createAccountButton;
+
+    @FXML
+    private Label createStatusLabel;
+
     private final ObservableList<UserRow> allUsers = FXCollections.observableArrayList();
     private final ObservableList<UserRow> filteredUsers = FXCollections.observableArrayList();
     private UserRow selectedUser;
+    private boolean createPending;
 
     @FXML
     void SaveChanges(ActionEvent event) {
@@ -217,6 +267,22 @@ public class AdminControlController {
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert Save != null : "fx:id=\"Save\" was not injected: check your FXML file 'admincontrol.fxml'.";
         assert privilageField != null : "fx:id=\"privilageField\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createAccountSection != null : "fx:id=\"createAccountSection\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createName != null : "fx:id=\"createName\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createEmail != null : "fx:id=\"createEmail\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createPassword != null : "fx:id=\"createPassword\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createPrivilegeCombo != null : "fx:id=\"createPrivilegeCombo\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createPersonId != null : "fx:id=\"createPersonId\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createPhone != null : "fx:id=\"createPhone\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createAddress != null : "fx:id=\"createAddress\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createSubscription != null : "fx:id=\"createSubscription\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createShop != null : "fx:id=\"createShop\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createCardNumber != null : "fx:id=\"createCardNumber\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createCardMonth != null : "fx:id=\"createCardMonth\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createCardYear != null : "fx:id=\"createCardYear\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createCvv != null : "fx:id=\"createCvv\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createAccountButton != null : "fx:id=\"createAccountButton\" was not injected: check your FXML file 'admincontrol.fxml'.";
+        assert createStatusLabel != null : "fx:id=\"createStatusLabel\" was not injected: check your FXML file 'admincontrol.fxml'.";
 
         if (!isManager()) {
             navigateToAccessDenied();
@@ -261,6 +327,8 @@ public class AdminControlController {
         refreshButton.setDisable(true);
         statusMessage.setVisible(false);
 
+        setupCreateAccountSection();
+
 
         new java.util.Timer().schedule(
                 new java.util.TimerTask() {
@@ -300,6 +368,18 @@ public class AdminControlController {
 
     @Subscribe
     public void handleUserUpdateResponse(UserUpdateResponse response) {
+        if (createPending) {
+            createPending = false;
+            if (response.isSuccess()) {
+                showCreateStatus("Account created successfully.", false);
+                clearCreateForm();
+                requestUserRefresh();
+            } else {
+                showCreateStatus(response.getErrorMessage() != null ? response.getErrorMessage() : "Failed to create account.", true);
+            }
+            return;
+        }
+
         if (response.isSuccess()) {
             showStatus("User details updated successfully.", false);
             requestUserRefresh();
@@ -309,6 +389,69 @@ public class AdminControlController {
         } else {
             showStatus(response.getErrorMessage() != null ? response.getErrorMessage() : "Failed to update user.", true);
             pendingUpdatedAccount = null;
+        }
+    }
+
+    @FXML
+    private void handleCreateAccount(ActionEvent event) {
+        if (!isChainManager()) {
+            showCreateStatus("Only chain managers can create new accounts.", true);
+            return;
+        }
+        String privilegeSelection = createPrivilegeCombo.getValue();
+        Integer privilege = parsePrivilegeSelection(privilegeSelection);
+        if (privilege == null) {
+            showCreateStatus("Please select a privilege level.", true);
+            return;
+        }
+        if (createName.getText().isBlank() || createEmail.getText().isBlank() || createPassword.getText().isBlank()) {
+            showCreateStatus("Please fill in name, email, and password.", true);
+            return;
+        }
+        UpdateMessage message;
+        if (privilege == 1) {
+            Long personId = parseCreateLong(createPersonId.getText(), "Government ID", true);
+            Long phoneValue = parseCreateLong(createPhone.getText(), "Phone", false);
+            Long cardNumber = parseCreateLong(createCardNumber.getText(), "Card Number", false);
+            Integer cardMonth = parseCreateInt(createCardMonth.getText(), "Expiry Month", false);
+            Integer cardYear = parseCreateInt(createCardYear.getText(), "Expiry Year", false);
+            Integer cvvValue = parseCreateInt(createCvv.getText(), "CVV", false);
+            if (personId == null) {
+                return;
+            }
+            Account account = new Account(0, createName.getText(), personId,
+                    createAddress.getText(), createEmail.getText(), createPassword.getText(),
+                    phoneValue != null ? phoneValue : 0L,
+                    cardNumber != null ? cardNumber : 0L,
+                    cardMonth != null ? cardMonth : 0,
+                    cardYear != null ? cardYear : 0,
+                    cvvValue != null ? cvvValue : 0,
+                    false,
+                    parseShopId(createShop.getText(), 0),
+                    createSubscription.isSelected());
+            account.setPrivialge(privilege);
+            message = new UpdateMessage("account", "admin_add");
+            message.setAccount(account);
+        } else if (privilege == 2) {
+            Worker worker = new Worker(createName.getText(), createEmail.getText(), createPassword.getText(), 0);
+            worker.setPrivialge(privilege);
+            message = new UpdateMessage("worker", "add");
+            message.setWorker(worker);
+        } else {
+            Manager manager = new Manager(createName.getText(), createEmail.getText(), createPassword.getText(), 0);
+            manager.setPrivialge(privilege);
+            manager.setShopID(parseShopId(createShop.getText(), privilege >= 4 ? 0 : 0));
+            message = new UpdateMessage("manager", "add");
+            message.setManager(manager);
+        }
+
+        try {
+            createPending = true;
+            SimpleClient.getClient().sendToServer(message);
+            showCreateStatus("Submitting account creation...", false);
+        } catch (IOException e) {
+            createPending = false;
+            showCreateStatus("Failed to send create request.", true);
         }
     }
 
@@ -711,6 +854,88 @@ public class AdminControlController {
     private boolean isManager() {
         Account account = SimpleClient.getAccount();
         return account != null && account.getPrivilegeLevel() >= 3;
+    }
+
+    private boolean isChainManager() {
+        Account account = SimpleClient.getAccount();
+        return account != null && account.getPrivilegeLevel() >= 4;
+    }
+
+    private void setupCreateAccountSection() {
+        boolean showCreate = isChainManager();
+        createAccountSection.setVisible(showCreate);
+        createAccountSection.setManaged(showCreate);
+        createPrivilegeCombo.getItems().setAll(
+                "Customer (1)",
+                "Worker (2)",
+                "Manager (3)",
+                "Chain Manager (4)"
+        );
+        createPrivilegeCombo.setValue("Customer (1)");
+        createStatusLabel.setVisible(false);
+    }
+
+    private Integer parsePrivilegeSelection(String selection) {
+        if (selection == null) {
+            return null;
+        }
+        String digits = selection.replaceAll("\\D+", "");
+        if (digits.isBlank()) {
+            return null;
+        }
+        return Integer.parseInt(digits);
+    }
+
+    private Long parseCreateLong(String value, String label, boolean required) {
+        if (value == null || value.isBlank()) {
+            if (required) {
+                showCreateStatus("Please enter a valid " + label + ".", true);
+            }
+            return null;
+        }
+        try {
+            return Long.parseLong(value.trim());
+        } catch (NumberFormatException ex) {
+            showCreateStatus("Invalid " + label + " value.", true);
+            return null;
+        }
+    }
+
+    private Integer parseCreateInt(String value, String label, boolean required) {
+        if (value == null || value.isBlank()) {
+            if (required) {
+                showCreateStatus("Please enter a valid " + label + ".", true);
+            }
+            return null;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException ex) {
+            showCreateStatus("Invalid " + label + " value.", true);
+            return null;
+        }
+    }
+
+    private void showCreateStatus(String message, boolean isError) {
+        createStatusLabel.setText(message);
+        createStatusLabel.setStyle(isError ? "-fx-text-fill: #c62828;" : "-fx-text-fill: #2e7d32;");
+        createStatusLabel.setVisible(true);
+    }
+
+    private void clearCreateForm() {
+        createName.clear();
+        createEmail.clear();
+        createPassword.clear();
+        createPersonId.clear();
+        createPhone.clear();
+        createAddress.clear();
+        createShop.clear();
+        createCardNumber.clear();
+        createCardMonth.clear();
+        createCardYear.clear();
+        createCvv.clear();
+        createSubscription.setSelected(false);
+        createPrivilegeCombo.setValue("Customer (1)");
     }
 
     private void navigateToAccessDenied() {

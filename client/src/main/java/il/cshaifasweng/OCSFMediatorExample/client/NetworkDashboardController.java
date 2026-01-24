@@ -1,10 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -12,11 +10,24 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
+import il.cshaifasweng.OCSFMediatorExample.entities.BranchSettings;
+import il.cshaifasweng.OCSFMediatorExample.entities.Order;
+import il.cshaifasweng.OCSFMediatorExample.entities.ReportDataRequest;
+import il.cshaifasweng.OCSFMediatorExample.entities.ReportDataResponse;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Controller for Network Dashboard - Chain Manager view
@@ -58,7 +69,13 @@ public class NetworkDashboardController {
     @FXML private Button roleManagementButton;
     
     // Data
-    private ObservableList<BranchData> branchesList = FXCollections.observableArrayList();
+    private final ObservableList<BranchData> branchesList = FXCollections.observableArrayList();
+    private final Map<Integer, BranchMetrics> branchMetrics = new LinkedHashMap<>();
+    private List<BranchSettings> branchSettings = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
+    private String currentRequestId;
+    private LocalDate rangeStart;
+    private LocalDate rangeEnd;
     
     @FXML
     public void initialize() {
@@ -66,12 +83,14 @@ public class NetworkDashboardController {
         if (!AccessGuard.requireMinPrivilege(4)) {
             return;
         }
-        
+
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+
         setupChartPeriodCombo();
         setupBranchesTable();
-        loadNetworkData();
-        updateStatistics();
-        updateChart();
+        requestNetworkData();
     }
     
     /**
@@ -132,62 +151,30 @@ public class NetworkDashboardController {
     /**
      * Load network data from server
      */
-    private void loadNetworkData() {
-        // TODO: Send request to server to get all branches data
-        // Message: new GetNetworkData()
-        // SimpleClient.getClient().sendToServer(message);
-        
-        // For now, generate sample data
-        generateSampleBranches();
-    }
-    
-    /**
-     * Generate sample branch data
-     */
-    private void generateSampleBranches() {
-        branchesList.clear();
-        
-        String[] branchNames = {
-            "Main Street Branch",
-            "Downtown Branch",
-            "Shopping Mall Branch",
-            "Airport Branch",
-            "University Branch"
-        };
-        
-        String[] locations = {
-            "Tel Aviv",
-            "Jerusalem",
-            "Haifa",
-            "Be'er Sheva",
-            "Netanya"
-        };
-        
-        String[] managers = {
-            "Sarah Cohen",
-            "David Levi",
-            "Rachel Mizrahi",
-            "Michael Green",
-            "Tamar Ben-David"
-        };
-        
-        Random random = new Random();
-        
-        for (int i = 0; i < 5; i++) {
-            int orders = 80 + random.nextInt(120);
-            double revenue = 12000 + random.nextDouble() * 18000;
-            String status = i < 4 ? "Active" : "Active";
-            
-            branchesList.add(new BranchData(
-                i + 1,
-                branchNames[i],
-                locations[i],
-                managers[i],
-                orders,
-                String.format("₪%.2f", revenue),
-                status,
-                revenue
-            ));
+    private void requestNetworkData() {
+        LocalDate today = LocalDate.now();
+        String period = chartPeriodCombo != null ? chartPeriodCombo.getValue() : "Last 30 Days";
+        if ("Last 7 Days".equals(period)) {
+            rangeStart = today.minusDays(6);
+            rangeEnd = today;
+        } else if ("Last 90 Days".equals(period)) {
+            rangeStart = today.minusDays(89);
+            rangeEnd = today;
+        } else if ("This Year".equals(period)) {
+            rangeStart = LocalDate.of(today.getYear(), 1, 1);
+            rangeEnd = today;
+        } else {
+            rangeStart = today.minusDays(29);
+            rangeEnd = today;
+        }
+
+        currentRequestId = UUID.randomUUID().toString();
+        ReportDataRequest request = new ReportDataRequest(currentRequestId, rangeStart, rangeEnd, 0, "DASHBOARD");
+        request.setBranchIds(new ArrayList<>());
+        try {
+            SimpleClient.getClient().sendToServer(request);
+        } catch (IOException e) {
+            showError("Unable to load network data. Please try again.");
         }
     }
     
@@ -195,20 +182,26 @@ public class NetworkDashboardController {
      * Update network statistics
      */
     private void updateStatistics() {
-        totalBranchesLabel.setText(String.valueOf(branchesList.size()));
-        
-        double totalRevenue = branchesList.stream()
-            .mapToDouble(BranchData::getRevenueValue)
+        int branchCount = !branchSettings.isEmpty() ? branchSettings.size() : branchMetrics.size();
+        totalBranchesLabel.setText(String.valueOf(branchCount));
+
+        double totalRevenue = branchMetrics.values().stream()
+            .mapToDouble(metrics -> metrics.revenue)
             .sum();
         totalRevenueLabel.setText(String.format("₪%.2f", totalRevenue));
-        
-        int totalOrders = branchesList.stream()
-            .mapToInt(BranchData::getOrdersCount)
+
+        int totalOrders = branchMetrics.values().stream()
+            .mapToInt(metrics -> metrics.orders)
             .sum();
         totalOrdersLabel.setText(String.valueOf(totalOrders));
-        
-        // TODO: Get actual active users count from server
-        activeUsersLabel.setText(String.valueOf(totalOrders * 3)); // Sample calculation
+
+        Set<Integer> activeUsers = new HashSet<>();
+        for (Order order : orders) {
+            if (!order.isCancelled()) {
+                activeUsers.add(order.getAccountID());
+            }
+        }
+        activeUsersLabel.setText(String.valueOf(activeUsers.size()));
     }
     
     /**
@@ -220,11 +213,9 @@ public class NetworkDashboardController {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Revenue");
         
-        for (BranchData branch : branchesList) {
-            // BranchData does not define getBranchName(); use getName() to retrieve
-            // the branch's display name.
-            series.getData().add(new XYChart.Data<>(branch.getName(), branch.getRevenueValue()));
-        }
+        branchesList.stream()
+            .sorted(Comparator.comparingInt(BranchData::getId))
+            .forEach(branch -> series.getData().add(new XYChart.Data<>(branch.getName(), branch.getRevenueValue())));
         
         branchComparisonChart.getData().add(series);
     }
@@ -235,9 +226,7 @@ public class NetworkDashboardController {
     @FXML
     private void handlePeriodChange() {
         // TODO: Reload data based on selected period
-        String period = chartPeriodCombo.getValue();
-        // Reload data from server for the selected period
-        updateChart();
+        requestNetworkData();
     }
     
     /**
@@ -245,9 +234,7 @@ public class NetworkDashboardController {
      */
     @FXML
     private void handleRefresh() {
-        loadNetworkData();
-        updateStatistics();
-        updateChart();
+        requestNetworkData();
         showInfo("Network data refreshed successfully.");
     }
     
@@ -321,6 +308,75 @@ public class NetworkDashboardController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @Subscribe
+    public void onReportDataResponse(ReportDataResponse response) {
+        if (response == null || response.getRequestId() == null || !response.getRequestId().equals(currentRequestId)) {
+            return;
+        }
+        if (!response.isSuccess()) {
+            Platform.runLater(() -> showError(response.getErrorMessage() != null ? response.getErrorMessage()
+                : "Failed to load network data."));
+            return;
+        }
+        branchSettings = response.getBranches() != null ? response.getBranches() : new ArrayList<>();
+        orders = response.getOrders() != null ? response.getOrders() : new ArrayList<>();
+        buildBranchMetrics();
+        Platform.runLater(() -> {
+            updateBranchTable();
+            updateStatistics();
+            updateChart();
+        });
+    }
+
+    private void buildBranchMetrics() {
+        branchMetrics.clear();
+        for (Order order : orders) {
+            if (order.isCancelled()) {
+                continue;
+            }
+            int branchId = order.getShopID();
+            BranchMetrics metrics = branchMetrics.computeIfAbsent(branchId, id -> new BranchMetrics());
+            metrics.orders += 1;
+            metrics.revenue += order.getTotalPrice();
+        }
+    }
+
+    private void updateBranchTable() {
+        branchesList.clear();
+        Map<Integer, BranchSettings> settingsById = new HashMap<>();
+        for (BranchSettings settings : branchSettings) {
+            settingsById.put(settings.getBranchId(), settings);
+        }
+        List<Integer> branchIds = new ArrayList<>(settingsById.keySet());
+        if (branchIds.isEmpty()) {
+            branchIds.addAll(branchMetrics.keySet());
+        }
+        branchIds.sort(Integer::compareTo);
+        for (Integer branchId : branchIds) {
+            BranchSettings settings = settingsById.get(branchId);
+            BranchMetrics metrics = branchMetrics.getOrDefault(branchId, new BranchMetrics());
+            String name = settings != null ? settings.getBranchName() : ("Branch " + branchId);
+            String location = settings != null ? settings.getBranchAddress() : "—";
+            String manager = settings != null ? settings.getManagerName() : "—";
+            String status = settings != null && settings.isActive() ? "Active" : "Inactive";
+            branchesList.add(new BranchData(
+                branchId,
+                name,
+                location,
+                manager,
+                metrics.orders,
+                String.format("₪%.2f", metrics.revenue),
+                status,
+                metrics.revenue
+            ));
+        }
+    }
+
+    private static class BranchMetrics {
+        private int orders;
+        private double revenue;
     }
     
     /**

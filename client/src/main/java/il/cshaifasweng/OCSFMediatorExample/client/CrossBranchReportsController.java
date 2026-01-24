@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.BranchSettings;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
@@ -41,6 +42,11 @@ public class CrossBranchReportsController {
     @FXML private CheckBox selectAllBranchesCheckbox;
     @FXML private Button generateButton;
     @FXML private Button exportButton;
+    @FXML private VBox branchSelectionBox;
+    @FXML private Label currentPeriodLabel;
+    @FXML private Label previousPeriodLabel;
+    @FXML private Label errorMessageLabel;
+    @FXML private Label emptyStateLabel;
     
     // Revenue Comparison
     @FXML private BarChart<String, Number> revenueComparisonChart;
@@ -71,6 +77,7 @@ public class CrossBranchReportsController {
     private final Map<Integer, String> branchNames = new LinkedHashMap<>();
     private final Map<Integer, BranchMetrics> currentMetrics = new LinkedHashMap<>();
     private final Map<Integer, BranchMetrics> previousMetrics = new LinkedHashMap<>();
+    private final Map<Integer, CheckBox> branchCheckboxes = new LinkedHashMap<>();
     private List<Order> currentOrders = new ArrayList<>();
     private List<Order> previousOrders = new ArrayList<>();
     private LocalDate currentStart;
@@ -120,8 +127,8 @@ public class CrossBranchReportsController {
      */
     @FXML
     private void handleSelectAllBranches() {
-        // TODO: Implement branch selection logic
-        // For now, just visual feedback
+        boolean selectAll = selectAllBranchesCheckbox.isSelected();
+        branchCheckboxes.values().forEach(cb -> cb.setSelected(selectAll));
     }
     
     /**
@@ -142,7 +149,15 @@ public class CrossBranchReportsController {
             showError("Start date must be before end date.");
             return;
         }
-        
+
+        if (selectAllBranchesCheckbox != null && !selectAllBranchesCheckbox.isSelected()) {
+            List<Integer> selected = resolveSelectedBranchIds();
+            if (selected.isEmpty()) {
+                showError("Select at least one branch.");
+                return;
+            }
+        }
+
         requestReportData(startDate, endDate);
     }
 
@@ -155,14 +170,16 @@ public class CrossBranchReportsController {
 
         currentRequestId = UUID.randomUUID().toString();
         previousRequestId = UUID.randomUUID().toString();
+        List<Integer> selectedBranchIds = resolveSelectedBranchIds();
 
         try {
             SimpleClient.getClient().sendToServer(
-                new ReportDataRequest(currentRequestId, startDate, endDate, 0, "CURRENT")
+                new ReportDataRequest(currentRequestId, startDate, endDate, 0, "CURRENT", selectedBranchIds)
             );
             SimpleClient.getClient().sendToServer(
-                new ReportDataRequest(previousRequestId, previousStart, previousEnd, 0, "PREVIOUS")
+                new ReportDataRequest(previousRequestId, previousStart, previousEnd, 0, "PREVIOUS", selectedBranchIds)
             );
+            updatePeriodLabels(startDate, endDate, previousStart, previousEnd);
         } catch (IOException e) {
             showError("Failed to request report data.");
         }
@@ -178,10 +195,15 @@ public class CrossBranchReportsController {
                 showError(response.getErrorMessage() != null ? response.getErrorMessage() : "Failed to load report data.");
                 return;
             }
+            if (errorMessageLabel != null) {
+                errorMessageLabel.setVisible(false);
+                errorMessageLabel.setManaged(false);
+            }
 
             if (response.getRequestId().equals(currentRequestId)) {
                 currentOrders = response.getOrders() != null ? response.getOrders() : new ArrayList<>();
                 updateBranchNames(response.getBranches());
+                populateBranchSelections();
                 buildMetrics(currentOrders, currentMetrics);
             } else if (response.getRequestId().equals(previousRequestId)) {
                 previousOrders = response.getOrders() != null ? response.getOrders() : new ArrayList<>();
@@ -190,12 +212,12 @@ public class CrossBranchReportsController {
                 return;
             }
 
-            if (!currentMetrics.isEmpty() && currentStart != null) {
-                generateRevenueComparison();
-                generateOrderTrends();
-                generateMarketShare();
-                updateKPIs();
-            }
+            boolean hasData = !currentOrders.isEmpty();
+            toggleEmptyState(!hasData);
+            generateRevenueComparison();
+            generateOrderTrends();
+            generateMarketShare();
+            updateKPIs();
         });
     }
 
@@ -207,6 +229,38 @@ public class CrossBranchReportsController {
                         settings.getBranchName() != null ? settings.getBranchName() : ("Branch " + settings.getBranchId()));
             }
         }
+    }
+
+    private void populateBranchSelections() {
+        if (branchSelectionBox == null) {
+            return;
+        }
+        branchSelectionBox.getChildren().clear();
+        branchCheckboxes.clear();
+        for (Map.Entry<Integer, String> entry : branchNames.entrySet()) {
+            CheckBox checkBox = new CheckBox(entry.getValue());
+            checkBox.setSelected(selectAllBranchesCheckbox != null && selectAllBranchesCheckbox.isSelected());
+            checkBox.setOnAction(event -> {
+                if (selectAllBranchesCheckbox != null && !checkBox.isSelected()) {
+                    selectAllBranchesCheckbox.setSelected(false);
+                }
+            });
+            branchCheckboxes.put(entry.getKey(), checkBox);
+            branchSelectionBox.getChildren().add(checkBox);
+        }
+    }
+
+    private List<Integer> resolveSelectedBranchIds() {
+        if (selectAllBranchesCheckbox != null && selectAllBranchesCheckbox.isSelected()) {
+            return new ArrayList<>();
+        }
+        List<Integer> selected = new ArrayList<>();
+        for (Map.Entry<Integer, CheckBox> entry : branchCheckboxes.entrySet()) {
+            if (entry.getValue().isSelected()) {
+                selected.add(entry.getKey());
+            }
+        }
+        return selected;
     }
 
     private void buildMetrics(List<Order> orders, Map<Integer, BranchMetrics> metricsMap) {
@@ -391,6 +445,10 @@ public class CrossBranchReportsController {
             } else {
                 networkGrowthLabel.setText("N/A");
             }
+        } else {
+            bestPerformerLabel.setText("N/A");
+            avgRevenueLabel.setText("₪0.00");
+            networkGrowthLabel.setText("N/A");
         }
     }
     
@@ -418,11 +476,15 @@ public class CrossBranchReportsController {
      * Show error alert
      */
     private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        if (errorMessageLabel != null) {
+            errorMessageLabel.setText(message);
+            errorMessageLabel.setVisible(true);
+            errorMessageLabel.setManaged(true);
+        }
+        if (emptyStateLabel != null) {
+            emptyStateLabel.setVisible(false);
+            emptyStateLabel.setManaged(false);
+        }
     }
     
     /**
@@ -434,6 +496,33 @@ public class CrossBranchReportsController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void toggleEmptyState(boolean show) {
+        if (emptyStateLabel != null) {
+            emptyStateLabel.setVisible(show);
+            emptyStateLabel.setManaged(show);
+        }
+        if (errorMessageLabel != null) {
+            errorMessageLabel.setVisible(false);
+            errorMessageLabel.setManaged(false);
+        }
+        if (show) {
+            revenueComparisonChart.getData().clear();
+            orderTrendsChart.getData().clear();
+            revenueSharePieChart.getData().clear();
+            orderSharePieChart.getData().clear();
+            revenueTable.getItems().clear();
+        }
+    }
+
+    private void updatePeriodLabels(LocalDate start, LocalDate end, LocalDate previousStart, LocalDate previousEnd) {
+        if (currentPeriodLabel != null) {
+            currentPeriodLabel.setText("Period A: " + start + " to " + end);
+        }
+        if (previousPeriodLabel != null) {
+            previousPeriodLabel.setText("Period B: " + previousStart + " to " + previousEnd);
+        }
     }
     
     /**

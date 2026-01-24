@@ -16,7 +16,7 @@
       <HBox alignment="CENTER_LEFT" prefHeight="64.0" spacing="20.0"
             styleClass="app-navbar elevated">
          <children>
-            <Label text="Admin Control Panel" styleClass="page-title"/>
+            <Label text="Manager Control Panel" styleClass="page-title"/>
             <HBox spacing="8.0" HBox.hgrow="ALWAYS"/>
             <Button fx:id="changeDetailsButton" text="Change Details"
                     styleClass="pill" visible="false"/>
@@ -223,6 +223,76 @@
                      <padding><Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/></padding>
                   </VBox>
                </HBox>
+
+               <VBox fx:id="createAccountSection" spacing="16.0" maxWidth="1200.0" styleClass="card hover-lift">
+                  <padding><Insets top="18.0" right="18.0" bottom="18.0" left="18.0"/></padding>
+                  <children>
+                     <Label text="Create New Account" styleClass="section-title">
+                        <font><Font name="System Bold" size="20.0"/></font>
+                     </Label>
+
+                     <GridPane hgap="18.0" vgap="12.0">
+                        <columnConstraints>
+                           <ColumnConstraints percentWidth="33"/>
+                           <ColumnConstraints percentWidth="33"/>
+                           <ColumnConstraints percentWidth="33"/>
+                        </columnConstraints>
+
+                        <children>
+                           <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                              <children>
+                                 <Text text="Full Name:"/>
+                                 <TextField fx:id="createName" promptText="Full name"/>
+                                 <Text text="Email:"/>
+                                 <TextField fx:id="createEmail" promptText="name@example.com"/>
+                                 <Text text="Password:"/>
+                                 <TextField fx:id="createPassword" promptText="••••••••"/>
+                                 <Text text="Privilege Level:"/>
+                                 <ComboBox fx:id="createPrivilegeCombo" promptText="Select privilege"/>
+                              </children>
+                           </VBox>
+
+                           <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                              <children>
+                                 <Text text="Government ID:"/>
+                                 <TextField fx:id="createPersonId" promptText="User ID"/>
+                                 <Text text="Phone:"/>
+                                 <TextField fx:id="createPhone" promptText="+972 5X-XXXXXXX"/>
+                                 <Text text="Address:"/>
+                                 <TextArea fx:id="createAddress" prefRowCount="3" promptText="Street, City, Zip"/>
+                                 <CheckBox fx:id="createSubscription" text="Subscription"/>
+                              </children>
+                           </VBox>
+
+                           <VBox spacing="8.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                              <children>
+                                 <Text text="Shop ID:"/>
+                                 <TextField fx:id="createShop" promptText="Branch id"/>
+                                 <Text text="Card Number:"/>
+                                 <TextField fx:id="createCardNumber" promptText="#### #### #### ####"/>
+                                 <Text text="Expiry Month:"/>
+                                 <TextField fx:id="createCardMonth" promptText="MM"/>
+                                 <Text text="Expiry Year:"/>
+                                 <TextField fx:id="createCardYear" promptText="YYYY"/>
+                                 <Text text="CVV:"/>
+                                 <TextField fx:id="createCvv" promptText="3 digits"/>
+                              </children>
+                           </VBox>
+                        </children>
+                     </GridPane>
+
+                     <HBox alignment="CENTER" spacing="12.0">
+                        <children>
+                           <Button fx:id="createAccountButton" text="Create Account" onAction="#handleCreateAccount"
+                                   styleClass="pill"/>
+                        </children>
+                     </HBox>
+
+                     <Label fx:id="createStatusLabel" text="Status message" visible="false" styleClass="text-secondary">
+                        <font><Font size="14.0"/></font>
+                     </Label>
+                  </children>
+               </VBox>
 
                <Region prefHeight="20.0"/>
             </VBox>

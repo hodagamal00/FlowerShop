@@ -17,8 +17,10 @@ import org.greenrobot.eventbus.Subscribe;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -51,6 +53,8 @@ public class BranchOrdersController {
     private final ObservableList<OrderRow> allOrders = FXCollections.observableArrayList();
     private final ObservableList<OrderRow> filteredOrders = FXCollections.observableArrayList();
     private int currentBranchId = -1;
+    private final Map<Integer, String> branchLabels = new LinkedHashMap<>();
+    private final Map<String, Integer> branchIdsByLabel = new LinkedHashMap<>();
 
     @FXML
     void initialize() {
@@ -89,9 +93,12 @@ public class BranchOrdersController {
         if (branchFilterCombo == null) {
             return;
         }
-        branchFilterCombo.setItems(FXCollections.observableArrayList(
-            "My Branch", "All Branches", "Branch 1", "Branch 2"
-        ));
+        buildBranchOptions();
+        ObservableList<String> items = FXCollections.observableArrayList();
+        items.add("My Branch");
+        items.add("All Branches");
+        items.addAll(branchLabels.values());
+        branchFilterCombo.setItems(items);
         branchFilterCombo.setValue("My Branch");
         branchFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> requestOrders());
         Account account = SimpleClient.getAccount();
@@ -113,6 +120,7 @@ public class BranchOrdersController {
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
         addActionsColumn();
 
+        ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         ordersTable.setItems(filteredOrders);
     }
 
@@ -169,14 +177,34 @@ public class BranchOrdersController {
             if ("All Branches".equalsIgnoreCase(selection)) {
                 return 0;
             }
-            if ("Branch 1".equalsIgnoreCase(selection)) {
-                return 1;
-            }
-            if ("Branch 2".equalsIgnoreCase(selection)) {
-                return 2;
+            Integer mappedId = branchIdsByLabel.get(selection);
+            if (mappedId != null) {
+                return mappedId;
             }
         }
         return currentBranchId > 0 ? currentBranchId : null;
+    }
+
+    private void buildBranchOptions() {
+        if (!branchLabels.isEmpty()) {
+            return;
+        }
+        for (int branchId = 1; branchId <= 5; branchId++) {
+            String label = resolveBranchName(branchId);
+            branchLabels.put(branchId, label);
+            branchIdsByLabel.put(label, branchId);
+        }
+    }
+
+    private String resolveBranchName(int branchId) {
+        return switch (branchId) {
+            case 1 -> "Branch 1 - Tiberias, Big Danilof";
+            case 2 -> "Branch 2 - Haifa, Merkaz Zeiv";
+            case 3 -> "Branch 3 - Tel Aviv, Ramat Aviv";
+            case 4 -> "Branch 4 - Eilat, Ice mall";
+            case 5 -> "Branch 5 - Be'er Sheva, Big Beer Sheva";
+            default -> "Branch " + branchId;
+        };
     }
 
     @FXML
@@ -244,9 +272,13 @@ public class BranchOrdersController {
     @Subscribe
     public void passOrders(PassOrdersFromServer passOrders) {
         List<Order> receivedOrders = passOrders.getRecievedOrders();
-        allOrders.setAll(receivedOrders.stream()
-            .map(this::buildRow)
-            .collect(Collectors.toList()));
+        if (receivedOrders == null) {
+            allOrders.clear();
+        } else {
+            allOrders.setAll(receivedOrders.stream()
+                .map(this::buildRow)
+                .collect(Collectors.toList()));
+        }
         applyFilters();
     }
 

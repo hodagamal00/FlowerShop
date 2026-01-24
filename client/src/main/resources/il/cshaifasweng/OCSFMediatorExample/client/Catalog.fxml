@@ -444,7 +444,7 @@
                 <Button fx:id="deliveryButton" mnemonicParsing="false"
                         onAction="#openDelivery" prefWidth="180.0" text="Deliveries" />
                 <Button fx:id="adminControlButtton" mnemonicParsing="false"
-                        onAction="#openControlPanel" prefWidth="180.0" text="Admin Control" />
+                        onAction="#openControlPanel" prefWidth="180.0" text="Manager Panel" />
                 <Button fx:id="infoo" mnemonicParsing="false"
                         onAction="#openComplaintManager" prefWidth="180.0" text="Manager Reports" />
                 <Button fx:id="logout" mnemonicParsing="false"

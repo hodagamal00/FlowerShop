@@ -87,6 +87,12 @@ public class WorkerUpdateManager {
         int castedId = (int) numOfRowsWorker;
         int newWorkerId = castedId + 1;
         recievedWorker.setPersonID(newWorkerId);
+        if (recievedWorker.getAccountID() <= 0) {
+            recievedWorker.setAccountID(newWorkerId);
+        }
+        if (recievedWorker.getLoggedIn() == null) {
+            recievedWorker.setLoggedIn(false);
+        }
         System.out.println("inside additemTocatalog2");
         String recievedWorkerName = recievedWorker.getFullName();
         System.out.println("inside additemTocatalog3");

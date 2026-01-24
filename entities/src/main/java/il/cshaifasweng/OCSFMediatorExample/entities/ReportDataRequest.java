@@ -2,6 +2,8 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReportDataRequest implements Serializable {
     private String requestId;
@@ -9,6 +11,7 @@ public class ReportDataRequest implements Serializable {
     private LocalDate endDate;
     private int branchId;
     private String periodLabel;
+    private List<Integer> branchIds = new ArrayList<>();
 
     public ReportDataRequest() {
     }
@@ -19,6 +22,14 @@ public class ReportDataRequest implements Serializable {
         this.endDate = endDate;
         this.branchId = branchId;
         this.periodLabel = periodLabel;
+    }
+
+    public ReportDataRequest(String requestId, LocalDate startDate, LocalDate endDate, int branchId,
+                             String periodLabel, List<Integer> branchIds) {
+        this(requestId, startDate, endDate, branchId, periodLabel);
+        if (branchIds != null) {
+            this.branchIds = new ArrayList<>(branchIds);
+        }
     }
 
     public String getRequestId() {
@@ -59,5 +70,13 @@ public class ReportDataRequest implements Serializable {
 
     public void setPeriodLabel(String periodLabel) {
         this.periodLabel = periodLabel;
+    }
+
+    public List<Integer> getBranchIds() {
+        return branchIds;
+    }
+
+    public void setBranchIds(List<Integer> branchIds) {
+        this.branchIds = branchIds != null ? new ArrayList<>(branchIds) : new ArrayList<>();
     }
 }

@@ -1,178 +1,147 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<?import javafx.scene.control.ScrollPane?>
-<ScrollPane
-        xmlns="http://javafx.com/javafx/17"
-        xmlns:fx="http://javafx.com/fxml/1"
-        fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReplyComplaintController"
-        stylesheets="@styles.css"
-        fitToWidth="true"
-        pannable="true"
-        styleClass="app-scroll-container">
-   <content>
-      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="780.0" minWidth="1520.0" prefHeight="800.0" prefWidth="1520.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-         <children>
-            <!-- Header -->
-            <AnchorPane layoutX="0.0" layoutY="0.0" prefHeight="80.0" prefWidth="1520.0" style="-fx-background-color: #2c3e50;">
-               <children>
-                  <Label text="Worker Portal - Handle Complaints" textFill="WHITE" layoutX="20.0" layoutY="25.0">
-                     <font>
-                        <Font name="System Bold" size="28.0" />
-                     </font>
-                  </Label>
-               </children>
-            </AnchorPane>
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReplyComplaintController"
+      stylesheets="@styles.css"
+      spacing="24.0"
+      styleClass="content-container">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
 
-            <!-- Left Panel - Complaints List -->
-            <AnchorPane layoutX="20.0" layoutY="100.0" prefWidth="350.0" prefHeight="680.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
-               <children>
-                  <VBox spacing="15.0" layoutX="15.0" layoutY="15.0" prefWidth="320.0">
-                     <Text text="Active Complaints" strokeType="OUTSIDE" fill="#2c3e50">
-                        <font>
-                           <Font name="System Bold" size="20.0" />
-                        </font>
-                     </Text>
-                     <Button fx:id="loadButton" mnemonicParsing="false" onAction="#loadComplaints" prefHeight="40.0" prefWidth="320.0" text="Refresh Complaint List" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
-                     <ListView fx:id="complaintList" prefHeight="580.0" prefWidth="320.0" />
-                  </VBox>
-               </children>
-            </AnchorPane>
+    <VBox spacing="6.0">
+        <Label text="Complaints Management" styleClass="page-title">
+            <font>
+                <Font name="System Bold" size="30.0" />
+            </font>
+        </Label>
+        <Label text="Monitor and respond to complaints across the network." textFill="#666666" />
+    </VBox>
 
-            <!-- Right Panel - Complaint Details & Response -->
-            <AnchorPane layoutX="390.0" layoutY="100.0" prefWidth="1110.0" prefHeight="680.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
-               <children>
-                  <!-- Complaint Details Section -->
-                  <VBox layoutX="30.0" layoutY="20.0" spacing="20.0" prefWidth="520.0">
-                     <Text text="Complaint Details" fill="#2c3e50">
-                        <font>
-                           <Font name="System Bold" size="22.0" />
-                        </font>
-                     </Text>
+    <HBox spacing="18.0" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 18; -fx-background-color: white;">
+        <Label text="Branch:" />
+        <ComboBox fx:id="branchFilterCombo" prefWidth="240.0" promptText="All Branches" />
+        <Label text="Status:" />
+        <ComboBox fx:id="statusFilterCombo" prefWidth="160.0" promptText="All" />
+        <Label text="From" />
+        <DatePicker fx:id="fromDatePicker" prefWidth="150.0" />
+        <Label text="To" />
+        <DatePicker fx:id="toDatePicker" prefWidth="150.0" />
+        <Button fx:id="loadButton" mnemonicParsing="false" onAction="#loadComplaints"
+                prefHeight="36.0" prefWidth="180.0" text="Refresh Complaints"
+                styleClass="btn-primary" />
+    </HBox>
 
-                     <HBox spacing="15.0">
-                        <VBox spacing="8.0" prefWidth="250.0">
-                           <Text text="Complaint ID:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                           <TextField fx:id="complaintID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                        </VBox>
-                        <VBox spacing="8.0" prefWidth="250.0">
-                           <Text text="Account ID:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                           <TextField fx:id="accountID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                           <HBox spacing="15.0">
-                              <VBox spacing="8.0" prefWidth="250.0">
-                                 <Text text="Related Order ID:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                                 <TextField fx:id="orderID" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                              </VBox>
-                              <VBox spacing="8.0" prefWidth="250.0">
-                                 <Text text="Date Received:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                                 <TextField fx:id="complaintDate" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                              </VBox>
-                           </HBox>
+    <HBox spacing="20.0">
+        <VBox spacing="12.0" prefWidth="320.0" styleClass="card" style="-fx-padding: 16; -fx-background-color: white;">
+            <Text text="Complaints List" strokeType="OUTSIDE" fill="#2c3e50">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Text>
+            <ListView fx:id="complaintList" prefHeight="560.0" />
+        </VBox>
 
-                           <HBox spacing="15.0">
-                              <VBox spacing="8.0" prefWidth="250.0">
-                                 <Text text="Created At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                                 <TextField fx:id="createdAtField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                              </VBox>
-                              <VBox spacing="8.0" prefWidth="250.0">
-                                 <Text text="Responded At:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                                 <TextField fx:id="respondedAtField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                              </VBox>
-                           </HBox>
+        <VBox spacing="18.0" styleClass="card" style="-fx-padding: 18; -fx-background-color: white;" HBox.hgrow="ALWAYS">
+            <Text text="Complaint Details" fill="#2c3e50">
+                <font>
+                    <Font name="System Bold" size="20.0" />
+                </font>
+            </Text>
 
-                           <HBox spacing="15.0">
-                              <VBox spacing="8.0" prefWidth="250.0">
-                                 <Text text="SLA Status:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                                 <TextField fx:id="slaStatusField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0; -fx-text-fill: #c0392b;" />
-                              </VBox>
-                              <VBox spacing="8.0" prefWidth="250.0">
-                                 <Text text="Compensation Decision:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                                 <TextField fx:id="compensationDecisionField" editable="false" prefWidth="250.0" style="-fx-background-color: #f0f0f0;" />
-                              </VBox>
-                           </HBox>
-                        </VBox>
-                     </HBox>
+            <HBox spacing="16.0">
+                <VBox spacing="8.0" prefWidth="220.0">
+                    <Text text="Complaint ID:" />
+                    <TextField fx:id="complaintID" editable="false" styleClass="field-readonly" />
+                </VBox>
+                <VBox spacing="8.0" prefWidth="220.0">
+                    <Text text="Account ID:" />
+                    <TextField fx:id="accountID" editable="false" styleClass="field-readonly" />
+                </VBox>
+                <VBox spacing="8.0" prefWidth="220.0">
+                    <Text text="Order ID:" />
+                    <TextField fx:id="orderID" editable="false" styleClass="field-readonly" />
+                </VBox>
+            </HBox>
 
-                     <VBox spacing="8.0">
-                        <Text text="Complaint Description:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                        <TextField fx:id="complaintText" editable="false" prefHeight="120.0" prefWidth="520.0" style="-fx-background-color: #f0f0f0;" />
-                     </VBox>
-                  </VBox>
+            <HBox spacing="16.0">
+                <VBox spacing="8.0" prefWidth="220.0">
+                    <Text text="Created At:" />
+                    <TextField fx:id="createdAtField" editable="false" styleClass="field-readonly" />
+                </VBox>
+                <VBox spacing="8.0" prefWidth="220.0">
+                    <Text text="Responded At:" />
+                    <TextField fx:id="respondedAtField" editable="false" styleClass="field-readonly" />
+                </VBox>
+                <VBox spacing="8.0" prefWidth="220.0">
+                    <Text text="SLA Status:" />
+                    <TextField fx:id="slaStatusField" editable="false" styleClass="field-readonly" />
+                </VBox>
+            </HBox>
 
-                  <!-- Worker Response Section -->
-                  <VBox layoutX="580.0" layoutY="20.0" spacing="20.0" prefWidth="500.0">
-                     <Text text="Worker Response" fill="#2c3e50">
-                        <font>
-                           <Font name="System Bold" size="22.0" />
-                        </font>
-                     </Text>
+            <HBox spacing="16.0">
+                <VBox spacing="8.0" prefWidth="220.0">
+                    <Text text="Complaint Date:" />
+                    <TextField fx:id="complaintDate" editable="false" styleClass="field-readonly" />
+                </VBox>
+                <VBox spacing="8.0" prefWidth="220.0">
+                    <Text text="Compensation:" />
+                    <TextField fx:id="compensationDecisionField" editable="false" styleClass="field-readonly" />
+                </VBox>
+            </HBox>
 
-                     <VBox spacing="12.0" style="-fx-padding: 20; -fx-border-color: #3498db; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #ecf0f1;">
-                        <Text text="Resolution Details" fill="#2c3e50">
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                        </Text>
+            <VBox spacing="8.0">
+                <Text text="Complaint Description:" />
+                <TextArea fx:id="complaintText" editable="false" prefRowCount="4" styleClass="field-readonly" />
+            </VBox>
 
-                        <VBox spacing="8.0">
-                           <Text text="Response Message:" strokeType="OUTSIDE"><font><Font size="14.0" /></font></Text>
-                           <TextField fx:id="replyText" prefHeight="150.0" prefWidth="450.0" promptText="Enter your response to the customer..." />
-                        </VBox>
+            <Separator />
 
-                        <VBox spacing="10.0">
-                           <CheckBox fx:id="refundCheck" mnemonicParsing="false" onAction="#addRefund" text="Include Refund" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
-                           <HBox spacing="10.0" alignment="CENTER_LEFT">
-                              <Text text="Refund Percentage:" strokeType="OUTSIDE" prefWidth="140.0">
-                                 <font><Font size="14.0" /></font>
-                              </Text>
-                              <ComboBox fx:id="refundPercent" onAction="#addRefundPercent" prefHeight="35.0" prefWidth="130.0" promptText="Select %" />
-                           </HBox>
-                        </VBox>
+            <Text text="Response & Compensation" fill="#2c3e50">
+                <font>
+                    <Font name="System Bold" size="18.0" />
+                </font>
+            </Text>
 
-                        <HBox spacing="15.0" alignment="CENTER" style="-fx-padding: 20 0 0 0;">
-                           <Button fx:id="sendButton" mnemonicParsing="false" onAction="#SendReply" prefHeight="45.0" prefWidth="200.0" text="Send Response" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #27ae60; -fx-text-fill: white;" />
-                        </HBox>
-                     </VBox>
-                  </VBox>
+            <VBox spacing="12.0">
+                <Text text="Response Message:" />
+                <TextArea fx:id="replyText" prefRowCount="4" promptText="Enter your response to the customer..." />
+            </VBox>
 
-                  <!-- SLA Warning Section -->
-                  <VBox layoutX="30.0" layoutY="400.0" spacing="10.0" prefWidth="1050.0" style="-fx-padding: 15; -fx-border-color: #e74c3c; -fx-border-width: 2; -fx-border-radius: 5; -fx-background-color: #fadbd8;">
-                     <Text text="⚠ Service Level Agreement (SLA)" fill="#c0392b">
-                        <font>
-                           <Font name="System Bold" size="16.0" />
-                        </font>
-                     </Text>
-                     <Text text="Complaints must be resolved within 24 hours to maintain service quality standards." wrappingWidth="1020.0">
-                        <font><Font size="14.0" /></font>
-                     </Text>
-                     <Text text="Priority complaints (with refund requests) require immediate attention." wrappingWidth="1020.0">
-                        <font><Font size="14.0" /></font>
-                     </Text>
-                  </VBox>
+            <HBox spacing="12.0" alignment="CENTER_LEFT">
+                <CheckBox fx:id="refundCheck" mnemonicParsing="false" onAction="#addRefund" text="Include Refund" />
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Text text="Amount:" />
+                    <ComboBox fx:id="refundPercent" onAction="#addRefundPercent" prefHeight="32.0" prefWidth="140.0"
+                              promptText="Select amount" />
+                </HBox>
+                <Button fx:id="sendButton" mnemonicParsing="false" onAction="#SendReply"
+                        prefHeight="36.0" prefWidth="160.0" text="Send Response"
+                        styleClass="btn-primary" />
+            </HBox>
 
-                  <!-- Loading Indicator -->
-                  <Label fx:id="wait" layoutX="400.0" layoutY="280.0" text="Please Wait" visible="false" textFill="#3498db">
-                     <font>
-                        <Font size="72.0" />
-                     </font>
-                  </Label>
-                  <Text fx:id="other" visible="false" />
-               </children>
-            </AnchorPane>
-
-            <!-- Hidden Elements -->
-         </children>
-      </AnchorPane>
-   </content>
-</ScrollPane>
+            <Label fx:id="wait" text="Please Wait" visible="false" textFill="#3498db">
+                <font>
+                    <Font size="18.0" />
+                </font>
+            </Label>
+            <Text fx:id="other" visible="false" />
+        </VBox>
+    </HBox>
+</VBox>

@@ -302,6 +302,33 @@ private static SessionFactory cachedSessionFactory;
 					break;
 
 				case "account":
+					if ("admin_add".equals(updateClassFunction)) {
+						if (!requirePrivilegeAtLeast(client, 4)) {
+							client.sendToClient(new UserUpdateResponse(false, "Unauthorized: chain manager access required."));
+							break;
+						}
+						Account newAccount = recievedMessage.getAccount();
+						if (newAccount == null) {
+							client.sendToClient(new UserUpdateResponse(false, "Missing account details."));
+							break;
+						}
+						newAccount.setLoggedIn(false);
+						try {
+							if (isEmailAlreadyRegistered(newAccount.getEmail())) {
+								client.sendToClient(new UserUpdateResponse(false, "Email is already registered."));
+								break;
+							}
+							Account savedAccount = addAccount(newAccount);
+							if (savedAccount != null) {
+								client.sendToClient(new UserUpdateResponse(true, null));
+							} else {
+								client.sendToClient(new UserUpdateResponse(false, "Failed to create account."));
+							}
+						} catch (Exception ex) {
+							client.sendToClient(new UserUpdateResponse(false, "Failed to create account."));
+						}
+						break;
+					}
 					if (!"add".equals(updateClassFunction) && !requirePrivilegeAtLeast(client, 4)) {
 						break;
 					}
@@ -319,7 +346,6 @@ private static SessionFactory cachedSessionFactory;
 								return;
 							}
 
-							NewAcc.setLoggedIn(true);
 							Account savedAccount = addAccount(NewAcc);
 
 							if (savedAccount != null) {
@@ -363,7 +389,12 @@ private static SessionFactory cachedSessionFactory;
 					if (updateClassFunction.equals("add")) {
 						System.out.println("arrived to here inside worker add");
 						Worker recievedWorker = recievedMessage.getWorker();
-						WorkerUpdateManager.addWorker(recievedWorker);
+						try {
+							WorkerUpdateManager.addWorker(recievedWorker);
+							client.sendToClient(new UserUpdateResponse(true, null));
+						} catch (Exception ex) {
+							client.sendToClient(new UserUpdateResponse(false, "Failed to create worker."));
+						}
 					} else if (updateClassFunction.equals("remove")) {
 						String idToRemove = recievedMessage.getDelteId();
 						WorkerUpdateManager.removeWorker(idToRemove, client);
@@ -386,7 +417,12 @@ private static SessionFactory cachedSessionFactory;
 					if (updateClassFunction.equals("add")) {
 						System.out.println("arrived to here inside manager add");
 						Manager recievedManager = recievedMessage.getManager();
-						ManagerUpdateManager.addManager(recievedManager);
+						try {
+							ManagerUpdateManager.addManager(recievedManager);
+							client.sendToClient(new UserUpdateResponse(true, null));
+						} catch (Exception ex) {
+							client.sendToClient(new UserUpdateResponse(false, "Failed to create manager."));
+						}
 					} else if (updateClassFunction.equals("remove")) {
 						String idToRemove = recievedMessage.getDelteId();
 						ManagerUpdateManager.removeManager(idToRemove, client);
@@ -629,7 +665,7 @@ private static SessionFactory cachedSessionFactory;
 			try {
 				localSession = sessionFactory.openSession();
 				tx1 = localSession.beginTransaction();
-				if (requirePrivilegeAtLeast(client, 1)) {
+				if (requirePrivilegeAtLeast(client, 2)) {
 					Account account = getClientAccount(client);
 					if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
 						sendAuthError(client, "forbidden");
@@ -693,9 +729,9 @@ private static SessionFactory cachedSessionFactory;
 
 				System.out.println("arrived to getAllComplaints in server !");
 				Account account = getClientAccount(client);
-				if (account == null || account.getPrivilegeLevel() < 2) {
+				if (account == null || account.getPrivilegeLevel() < 1) {
 					sendAuthError(client, "Access denied");
-				} else if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
+				} else if (account.getPrivilegeLevel() >= 2 && requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
 					sendAuthError(client, "Access denied");
 				} else {
 					GetAllComplaints complaintsToClient = new GetAllComplaints();
@@ -1363,14 +1399,15 @@ private static SessionFactory cachedSessionFactory;
 		LocalDate startDate = request.getStartDate();
 		LocalDate endDate = request.getEndDate();
 		int branchId = request.getBranchId();
+		List<Integer> branchIds = normalizeBranchIds(request.getBranchIds());
 
-		List<Order> orders = getOrdersForReport(session, startDate, endDate, branchId);
-		List<Complaint> complaints = getComplaintsForReport(session, startDate, endDate, branchId);
-		List<BranchSettings> branches = getBranchesForReport(session, branchId);
+		List<Order> orders = getOrdersForReport(session, startDate, endDate, branchId, branchIds);
+		List<Complaint> complaints = getComplaintsForReport(session, startDate, endDate, branchId, branchIds);
+		List<BranchSettings> branches = getBranchesForReport(session, branchId, branchIds);
 
-		double totalRevenue = queryTotalRevenue(session, startDate, endDate, branchId);
-		Map<String, Integer> ordersByProductType = queryOrdersByProductType(session, startDate, endDate, branchId);
-		Map<LocalDate, Integer> complaintsHistogram = queryComplaintsHistogram(session, startDate, endDate, branchId);
+		double totalRevenue = queryTotalRevenue(session, startDate, endDate, branchId, branchIds);
+		Map<String, Integer> ordersByProductType = queryOrdersByProductType(session, startDate, endDate, branchId, branchIds);
+		Map<LocalDate, Integer> complaintsHistogram = queryComplaintsHistogram(session, startDate, endDate, branchId, branchIds);
 
 		return new ReportDataResponse(
 				true,
@@ -1389,24 +1426,28 @@ private static SessionFactory cachedSessionFactory;
 
 	private void handleReportDataRequest(ReportDataRequest request, ConnectionToClient client) throws IOException {
 		Account account = getClientAccount(client);
-		if (account == null || account.getPrivilegeLevel() < 3) {
+		if (account == null || account.getPrivilegeLevel() < 4) {
 			client.sendToClient(new ReportDataResponse(false, "Access denied", request.getRequestId(),
 					request.getPeriodLabel(), request.getBranchId(), 0.0, null, null,
 					Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
 			return;
 		}
-		if (request.getBranchId() == 0 && account.getPrivilegeLevel() < 4) {
-			client.sendToClient(new ReportDataResponse(false, "Access denied", request.getRequestId(),
-					request.getPeriodLabel(), request.getBranchId(), 0.0, null, null,
-					Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+		if (request.getStartDate() == null || request.getEndDate() == null) {
+			client.sendToClient(new ReportDataResponse(false, "Please select a start and end date.",
+					request.getRequestId(), request.getPeriodLabel(), request.getBranchId(), 0.0,
+					null, null, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
 			return;
 		}
-		if (requiresBranchAssignment(account) && request.getBranchId() > 0
-				&& resolveBranchId(account) != request.getBranchId()) {
-			client.sendToClient(new ReportDataResponse(false, "Access denied", request.getRequestId(),
-					request.getPeriodLabel(), request.getBranchId(), 0.0, null, null,
-					Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+		if (request.getStartDate().isAfter(request.getEndDate())) {
+			client.sendToClient(new ReportDataResponse(false, "Start date must be before end date.",
+					request.getRequestId(), request.getPeriodLabel(), request.getBranchId(), 0.0,
+					null, null, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
 			return;
+		}
+		List<Integer> branchIds = normalizeBranchIds(request.getBranchIds());
+		if (!branchIds.isEmpty() && branchIds.stream().anyMatch(id -> id <= 0)) {
+			branchIds = branchIds.stream().filter(id -> id > 0).distinct().toList();
+			request.setBranchIds(branchIds);
 		}
 
 		SessionFactory sessionFactory = getSessionFactory();
@@ -1425,12 +1466,17 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
-	private List<Order> getOrdersForReport(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+	private List<Order> getOrdersForReport(Session session, LocalDate startDate, LocalDate endDate, int branchId, List<Integer> branchIds) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Order> query = builder.createQuery(Order.class);
 		Root<Order> root = query.from(Order.class);
-		if (branchId > 0) {
-			query.where(builder.equal(root.get("shopID"), branchId));
+		List<Predicate> predicates = new ArrayList<>();
+		Predicate branchPredicate = buildBranchPredicate(builder, root, branchId, branchIds);
+		if (branchPredicate != null) {
+			predicates.add(branchPredicate);
+		}
+		if (!predicates.isEmpty()) {
+			query.where(predicates.toArray(new Predicate[0]));
 		}
 		List<Order> orders = session.createQuery(query).getResultList();
 		if (startDate == null || endDate == null) {
@@ -1446,12 +1492,17 @@ private static SessionFactory cachedSessionFactory;
 		return filtered;
 	}
 
-	private List<Complaint> getComplaintsForReport(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+	private List<Complaint> getComplaintsForReport(Session session, LocalDate startDate, LocalDate endDate, int branchId, List<Integer> branchIds) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Complaint> query = builder.createQuery(Complaint.class);
 		Root<Complaint> root = query.from(Complaint.class);
-		if (branchId > 0) {
-			query.where(builder.equal(root.get("shopID"), branchId));
+		List<Predicate> predicates = new ArrayList<>();
+		Predicate branchPredicate = buildBranchPredicate(builder, root, branchId, branchIds);
+		if (branchPredicate != null) {
+			predicates.add(branchPredicate);
+		}
+		if (!predicates.isEmpty()) {
+			query.where(predicates.toArray(new Predicate[0]));
 		}
 		List<Complaint> complaints = session.createQuery(query).getResultList();
 		if (startDate == null || endDate == null) {
@@ -1467,7 +1518,14 @@ private static SessionFactory cachedSessionFactory;
 		return filtered;
 	}
 
-	private List<BranchSettings> getBranchesForReport(Session session, int branchId) {
+	private List<BranchSettings> getBranchesForReport(Session session, int branchId, List<Integer> branchIds) {
+		if (branchIds != null && !branchIds.isEmpty()) {
+			CriteriaBuilder builder = session.getCriteriaBuilder();
+			CriteriaQuery<BranchSettings> query = builder.createQuery(BranchSettings.class);
+			Root<BranchSettings> root = query.from(BranchSettings.class);
+			query.where(root.get("branchId").in(branchIds));
+			return session.createQuery(query).getResultList();
+		}
 		if (branchId <= 0) {
 			CriteriaBuilder builder = session.getCriteriaBuilder();
 			CriteriaQuery<BranchSettings> query = builder.createQuery(BranchSettings.class);
@@ -1481,14 +1539,16 @@ private static SessionFactory cachedSessionFactory;
 		return Collections.singletonList(settings);
 	}
 
-	private double queryTotalRevenue(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+	private double queryTotalRevenue(Session session, LocalDate startDate, LocalDate endDate, int branchId,
+									 List<Integer> branchIds) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Double> query = builder.createQuery(Double.class);
 		Root<Order> root = query.from(Order.class);
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.equal(root.get("isCancelled"), false));
-		if (branchId > 0) {
-			predicates.add(builder.equal(root.get("shopID"), branchId));
+		Predicate branchPredicate = buildBranchPredicate(builder, root, branchId, branchIds);
+		if (branchPredicate != null) {
+			predicates.add(branchPredicate);
 		}
 		if (startDate != null && endDate != null) {
 			predicates.add(buildOrderDateRangePredicate(builder, root, startDate, endDate));
@@ -1499,8 +1559,9 @@ private static SessionFactory cachedSessionFactory;
 		return result != null ? result : 0.0;
 	}
 
-	private Map<String, Integer> queryOrdersByProductType(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
-		List<Order> orders = getOrdersForReport(session, startDate, endDate, branchId);
+	private Map<String, Integer> queryOrdersByProductType(Session session, LocalDate startDate, LocalDate endDate,
+														 int branchId, List<Integer> branchIds) {
+		List<Order> orders = getOrdersForReport(session, startDate, endDate, branchId, branchIds);
 		Map<String, Integer> counts = new LinkedHashMap<>();
 		for (Order order : orders) {
 			Map<Product, Integer> parsedItems = parseOrderProducts(session, order.getProducts());
@@ -1606,15 +1667,10 @@ private static SessionFactory cachedSessionFactory;
 		List<Predicate> predicates = new ArrayList<>();
 		int privilegeLevel = account.getPrivilegeLevel();
 		Integer requestBranchId = request != null ? request.getBranchId() : null;
-		if (privilegeLevel == 1) {
-			predicates.add(builder.equal(root.get("accountID"), account.getAccountID()));
-		} else if (privilegeLevel == 2 || privilegeLevel == 3) {
+		if (privilegeLevel == 2 || privilegeLevel == 3) {
 			int branchId = resolveBranchId(account);
 			if (branchId <= 0) {
 				return Collections.emptyList();
-			}
-			if (requestBranchId != null && requestBranchId > 0 && requestBranchId != branchId) {
-				return null;
 			}
 			predicates.add(builder.equal(root.get("shopID"), branchId));
 		} else {
@@ -1625,6 +1681,26 @@ private static SessionFactory cachedSessionFactory;
 		query.where(predicates.toArray(new Predicate[0]));
 		List<Order> orders = session.createQuery(query).getResultList();
 		return applyOrderFilters(orders, request);
+	}
+
+	private List<Integer> normalizeBranchIds(List<Integer> branchIds) {
+		if (branchIds == null || branchIds.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return branchIds.stream()
+				.filter(id -> id != null && id > 0)
+				.distinct()
+				.toList();
+	}
+
+	private <T> Predicate buildBranchPredicate(CriteriaBuilder builder, Root<T> root, int branchId, List<Integer> branchIds) {
+		if (branchIds != null && !branchIds.isEmpty()) {
+			return root.get("shopID").in(branchIds);
+		}
+		if (branchId > 0) {
+			return builder.equal(root.get("shopID"), branchId);
+		}
+		return null;
 	}
 
 	private List<Order> applyOrderFilters(List<Order> orders, getAllOrdersMessage request) {
@@ -1683,14 +1759,16 @@ private static SessionFactory cachedSessionFactory;
 		return normalized;
 	}
 
-	private Map<LocalDate, Integer> queryComplaintsHistogram(Session session, LocalDate startDate, LocalDate endDate, int branchId) {
+	private Map<LocalDate, Integer> queryComplaintsHistogram(Session session, LocalDate startDate, LocalDate endDate,
+															 int branchId, List<Integer> branchIds) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
 		Root<Complaint> root = query.from(Complaint.class);
 		Expression<java.sql.Date> dateExpr = builder.function("date", java.sql.Date.class, root.get("createdAt"));
 		List<Predicate> predicates = new ArrayList<>();
-		if (branchId > 0) {
-			predicates.add(builder.equal(root.get("shopID"), branchId));
+		Predicate branchPredicate = buildBranchPredicate(builder, root, branchId, branchIds);
+		if (branchPredicate != null) {
+			predicates.add(branchPredicate);
 		}
 		if (startDate != null && endDate != null) {
 			Date start = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -2123,7 +2201,9 @@ private static SessionFactory cachedSessionFactory;
 
 					int newId = getNextAccountId(session);
 					newAcc.setAccountID(newId);
-					newAcc.setLoggedIn(true);
+					if (newAcc.getLoggedIn() == null) {
+						newAcc.setLoggedIn(false);
+					}
 
 					System.out.println("Saving account with email: " + newAcc.getEmail());
 					session.save(newAcc);
