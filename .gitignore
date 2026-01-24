@@ -1,3 +1,5 @@
 # Project exclude paths
 /client/target/
 /server/target/
+if (!(Test-Path .gitignore)) { New-Item .gitignore -ItemType File | Out-Null }
+Add-Content .gitignore "`n.idea/workspace.xml`n.idea/`n"
