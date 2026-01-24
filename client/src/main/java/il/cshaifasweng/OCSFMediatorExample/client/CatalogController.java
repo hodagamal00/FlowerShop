@@ -87,6 +87,9 @@ public class CatalogController {
 	private VBox init_container;
 
 	@FXML
+	private VBox accountToolsPanel;
+
+	@FXML
 	private TextField customid;
 
 	@FXML
@@ -325,9 +328,6 @@ public class CatalogController {
 
 	@FXML
 	private Button btnClearCart;
-
-	@FXML
-	private TextField cartTextDiscount;
 
 	@FXML
 	private TextField cartTextPrice;
@@ -1540,6 +1540,7 @@ public class CatalogController {
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
 		if (inboxList != null) inboxList.setVisible(false);
 		if (openMessage != null) openMessage.setVisible(false);
+		setAccountToolsPanelVisible(false);
 
 		// Restore persisted login so customer-specific buttons become
 		// available even if the PassAccountEvent arrived before this
@@ -1551,7 +1552,6 @@ public class CatalogController {
 		}
 		checkout.setVisible(false);
 		if (cartTextPrice != null) cartTextPrice.setVisible(false);
-		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
 		if (CartItemsList != null) CartItemsList.setVisible(false);
 		if (cartTopText != null) cartTopText.setVisible(false);
 		flower1_addCart.setVisible(false);
@@ -1642,7 +1642,6 @@ public class CatalogController {
 		if (btnClearCart != null) btnClearCart.setVisible(false);
 		//cartTopText.setVisible(false);
 		//cartTextPrice.setVisible(false);
-		//cartTextDiscount.setVisible(false);
 
 		// Populate filter combo boxes after data initialisation.  We only have six
 		// products at present; categories and colours are pulled from the Product
@@ -1691,9 +1690,6 @@ public class CatalogController {
 		System.out.println(CatalogFlag.getFlagg());
 		if (cartTextPrice != null) {
 			cartTextPrice.setText("0");
-		}
-		if (cartTextDiscount != null) {
-			cartTextDiscount.setText("0");
 		}
 		CartService.getInstance().getObservableItems()
 				.addListener((ListChangeListener<Product>) change -> refreshCartDisplay());
@@ -2072,6 +2068,7 @@ public class CatalogController {
 		Account account = SimpleClient.getUser();
 		if (account == null) {
 			hideAllPrivilegedFeatures();
+			setAccountToolsPanelVisible(false);
 			configureProductCardActions();
 			System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
 			return;
@@ -2083,6 +2080,7 @@ public class CatalogController {
 		// GUEST (0): Can only browse catalog - all interactive features hidden
 		if (privilege == 0) {
 			hideAllPrivilegedFeatures();
+			setAccountToolsPanelVisible(false);
 			System.out.println("Guest mode: Browse-only access");
 			return;
 		}
@@ -2090,11 +2088,13 @@ public class CatalogController {
 		// CUSTOMER (1): Can browse + checkout + manage own orders/complaints
 		enableCustomerFeatures();
 		enableCustomerOnlyFeatures();
+		setAccountToolsPanelVisible(privilege >= 2);
 		System.out.println("Customer mode: Shopping and account management enabled");
 
 		if (privilege >= 2) {
 			// WORKER (2): Customer features + worker panel
 			enableWorkerFeatures();
+			setAccountToolsPanelVisible(true);
 			System.out.println("Worker mode: Customer + Worker panel enabled");
 		}
 		if (privilege >= 3) {
@@ -2132,6 +2132,13 @@ public class CatalogController {
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
 	}
 
+	private void setAccountToolsPanelVisible(boolean visible) {
+		if (accountToolsPanel != null) {
+			accountToolsPanel.setVisible(visible);
+			accountToolsPanel.setManaged(visible);
+		}
+	}
+
 	private void showCartPanelForGuest() {
 		if (cartTopText != null) {
 			cartTopText.setVisible(true);
@@ -2140,11 +2147,6 @@ public class CatalogController {
 		if (CartItemsList != null) {
 			CartItemsList.setVisible(true);
 			CartItemsList.setManaged(true);
-		}
-		if (cartTextDiscount != null) {
-			cartTextDiscount.setVisible(true);
-			cartTextDiscount.setManaged(true);
-			cartTextDiscount.setText("0");
 		}
 		if (cartTextPrice != null) {
 			cartTextPrice.setVisible(true);
@@ -2174,7 +2176,6 @@ public class CatalogController {
 			checkout.setDisable(false);
 		}
 		if (cartTextPrice != null) cartTextPrice.setVisible(true);
-		if (cartTextDiscount != null) cartTextDiscount.setVisible(true);
 		if (CartItemsList != null) CartItemsList.setVisible(true);
 		if (cartTopText != null) cartTopText.setVisible(true);
 		if (btnClearCart != null) btnClearCart.setVisible(true);
@@ -2308,17 +2309,12 @@ public class CatalogController {
 
 	private void recalculateCartTotals(List<Product> items) {
 		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
-		double subtotal = 0.0;
+		double total = 0.0;
 		for (CartLine line : buildCartLines(items)) {
 			PricingService.PricingResult pricing = PricingService.calculatePricing(line.product, account);
-			subtotal += pricing.getFinalPrice() * line.quantity;
+			total += pricing.getFinalPrice() * line.quantity;
 		}
-		subtotal = PricingService.roundCurrency(subtotal);
-		double total = subtotal;
-
-		if (cartTextDiscount != null) {
-			cartTextDiscount.setText(String.format(Locale.US, "%.2f", subtotal));
-		}
+		total = PricingService.roundCurrency(total);
 		if (cartTextPrice != null) {
 			cartTextPrice.setText(String.format(Locale.US, "%.2f", total));
 		}
