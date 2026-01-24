@@ -31,39 +31,48 @@
    </top>
    <center>
       <HBox spacing="14.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="12.0" left="16.0" right="16.0" top="18.0" />
+         </BorderPane.margin>
          <padding>
-            <Insets bottom="12.0" left="16.0" right="16.0" top="12.0" />
+            <Insets bottom="12.0" left="16.0" right="16.0" top="8.0" />
          </padding>
          <children>
             <!-- Left Panel - Complaints List -->
-            <AnchorPane prefHeight="600.0" prefWidth="320.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
+            <AnchorPane prefHeight="520.0" prefWidth="300.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;">
                <children>
-                  <VBox layoutX="12.0" layoutY="12.0" prefWidth="296.0" spacing="10.0">
+                  <VBox layoutX="12.0" layoutY="12.0" prefWidth="276.0" spacing="8.0">
                      <Text fill="#2c3e50" strokeType="OUTSIDE" text="Your Complaint History">
                         <font>
                            <Font name="System Bold" size="16.0" />
                         </font>
                      </Text>
-                     <Button fx:id="loadButton" mnemonicParsing="false" onAction="#loadComplaints" prefHeight="32.0" prefWidth="296.0" style="-fx-font-size: 12px; -fx-font-weight: bold;" text="Refresh Complaint List" />
-                     <ListView fx:id="complaintList" prefHeight="520.0" prefWidth="296.0" />
+                     <Button fx:id="loadButton" mnemonicParsing="false" onAction="#loadComplaints" prefHeight="28.0" prefWidth="276.0" style="-fx-font-size: 11px; -fx-font-weight: bold;" text="Refresh Complaint List" />
+                     <ListView fx:id="complaintList" prefHeight="430.0" prefWidth="276.0" />
                   </VBox>
                </children>
             </AnchorPane>
 
             <!-- Right Panel - Complaint Details -->
-            <AnchorPane prefHeight="600.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;" HBox.hgrow="ALWAYS" minWidth="0.0">
+            <AnchorPane prefHeight="520.0" style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 1; -fx-border-radius: 5;" HBox.hgrow="ALWAYS" minWidth="0.0">
                <children>
                   <!-- Complaint Details Section -->
-                  <VBox layoutX="20.0" layoutY="14.0" prefWidth="1040.0" spacing="10.0">
+                  <VBox layoutX="18.0" layoutY="12.0" prefWidth="720.0" spacing="8.0">
                      <Text fill="#2c3e50" text="Complaint Details">
                         <font>
                            <Font name="System Bold" size="18.0" />
                         </font>
                      </Text>
 
+                     <HBox alignment="CENTER_LEFT">
+                        <children>
+                           <Button fx:id="submitComplaint" mnemonicParsing="false" onAction="#submitComplaint" prefHeight="28.0" prefWidth="160.0" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold;" text="Submit Complaint" />
+                        </children>
+                     </HBox>
+
                      <VBox spacing="4.0">
                         <Text strokeType="OUTSIDE" text="Complaint Date &amp; Time:"><font><Font size="12.0" /></font></Text>
-                        <TextField fx:id="complaintDateTime" editable="false" prefHeight="28.0" prefWidth="520.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 12px;" />
+                        <TextField fx:id="complaintDateTime" editable="false" prefHeight="24.0" prefWidth="420.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 11px;" />
                      </VBox>
 
                      <VBox spacing="4.0">
@@ -72,27 +81,27 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Text>
-                        <TextArea fx:id="complaintText" prefHeight="120.0" prefWidth="520.0" promptText="Enter your complaint here..." wrapText="true" style="-fx-font-size: 12px;" />
+                        <TextArea fx:id="complaintText" prefHeight="70.0" prefWidth="420.0" promptText="Enter your complaint here..." wrapText="true" style="-fx-font-size: 11px;" />
                      </VBox>
 
                      <VBox spacing="4.0">
                         <Text strokeType="OUTSIDE" text="Response Status:"><font><Font size="12.0" /></font></Text>
-                        <TextField fx:id="answerBool" editable="false" prefHeight="28.0" prefWidth="520.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 12px;" />
+                        <TextField fx:id="answerBool" editable="false" prefHeight="24.0" prefWidth="420.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 11px;" />
                      </VBox>
 
                      <VBox spacing="4.0">
                         <Text text="Responded At:" strokeType="OUTSIDE"><font><Font size="12.0" /></font></Text>
-                        <TextField fx:id="respondedAt" editable="false" prefHeight="28.0" prefWidth="520.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 12px;" />
+                        <TextField fx:id="respondedAt" editable="false" prefHeight="24.0" prefWidth="420.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 11px;" />
                      </VBox>
 
                      <VBox spacing="4.0">
                         <Text text="Compensation Decision:" strokeType="OUTSIDE"><font><Font size="12.0" /></font></Text>
-                        <TextField fx:id="compensationDecision" editable="false" prefHeight="28.0" prefWidth="520.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 12px;" />
+                        <TextField fx:id="compensationDecision" editable="false" prefHeight="24.0" prefWidth="420.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 11px;" />
                      </VBox>
 
                      <VBox spacing="4.0">
                         <Text text="Compensation Amount:" strokeType="OUTSIDE"><font><Font size="12.0" /></font></Text>
-                        <TextField fx:id="refundMoney" editable="false" prefHeight="28.0" prefWidth="520.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 13px; -fx-font-weight: bold;" />
+                        <TextField fx:id="refundMoney" editable="false" prefHeight="24.0" prefWidth="420.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 11px; -fx-font-weight: bold;" />
                      </VBox>
 
                      <VBox spacing="4.0">
@@ -101,10 +110,8 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Text>
-                        <TextArea fx:id="responseText" editable="false" prefHeight="110.0" prefWidth="520.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 12px;" wrapText="true" />
+                        <TextArea fx:id="responseText" editable="false" prefHeight="70.0" prefWidth="420.0" style="-fx-background-color: #f0f0f0; -fx-font-size: 11px;" wrapText="true" />
                      </VBox>
-
-                     <Button fx:id="submitComplaint" mnemonicParsing="false" onAction="#submitComplaint" prefHeight="32.0" prefWidth="180.0" style="-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold;" text="Submit Complaint" />
                   </VBox>
                </children>
             </AnchorPane>
