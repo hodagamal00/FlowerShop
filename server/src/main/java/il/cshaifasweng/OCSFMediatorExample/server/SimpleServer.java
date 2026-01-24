@@ -200,7 +200,7 @@ private static SessionFactory cachedSessionFactory;
 
 				if (recievedStr.equals("get complaints")) {
 					Account account = getClientAccount(client);
-					if (account == null || account.getPrivilegeLevel() < 2) {
+					if (account == null || account.getPrivilegeLevel() < 1) {
 						sendAuthError(client, "Access denied");
 					} else if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
 						sendAuthError(client, "Access denied");
@@ -683,7 +683,7 @@ private static SessionFactory cachedSessionFactory;
 
 				System.out.println("arrived to getAllComplaints in server !");
 				Account account = getClientAccount(client);
-				if (account == null || account.getPrivilegeLevel() < 2) {
+				if (account == null || account.getPrivilegeLevel() < 1) {
 					sendAuthError(client, "Access denied");
 				} else if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
 					sendAuthError(client, "Access denied");
