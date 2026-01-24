@@ -82,6 +82,9 @@ public class ReplyComplaintController {
     @FXML // fx:id="sendButton"
     private Button sendButton; // Value injected by FXMLLoader
 
+    @FXML // fx:id="backButton"
+    private Button backButton; // Value injected by FXMLLoader
+
 
     @FXML // fx:id="other"
     private Text other; // Value injected by FXMLLoader
@@ -263,6 +266,7 @@ public class ReplyComplaintController {
         assert refundCheck != null : "fx:id=\"refundCheck\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert refundAmountField != null : "fx:id=\"refundAmountField\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert sendButton != null : "fx:id=\"sendButton\" was not injected: check your FXML file 'replycomplaint.fxml'.";
+        assert backButton != null : "fx:id=\"backButton\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert wait != null : "fx:id=\"wait\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert other != null : "fx:id=\"other\" was not injected: check your FXML file 'replycomplaint.fxml'.";
         assert createdAtField != null : "fx:id=\"createdAtField\" was not injected: check your FXML file 'replycomplaint.fxml'.";

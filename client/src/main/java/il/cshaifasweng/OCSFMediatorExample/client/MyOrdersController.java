@@ -55,8 +55,6 @@ public class MyOrdersController {
     @FXML // fx:id="accountID"
     private TextField accountID; // Value injected by FXMLLoader
 
-    @FXML // fx:id="backToCatalog"
-    private Button backToCatalog; // Value injected by FXMLLoader
 
     @FXML // fx:id="creditCVV"
     private TextField creditCVV; // Value injected by FXMLLoader
@@ -219,34 +217,6 @@ public class MyOrdersController {
     }
 
     int complaint_num = 0;
-    @FXML
-    void GoToCatalog(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Catalog.fxml"));
-        Parent roott = loader.load();
-        CatalogController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Catalog");
-        stage.show();
-        Stage stagee = (Stage)backToCatalog.getScene().getWindow();
-        stagee.close();
-
-        Account recAcc = currentUser;
-        System.out.println("the server sent me the account , NICE 2 !!");
-        PassAccountEvent recievedAcc = new PassAccountEvent(recAcc);
-        System.out.println("the server sent me the account , NICE 3 !!");
-        new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(recievedAcc);
-                        System.out.println("the server sent me the account , NICE 4 !!");
-                    }
-                },4000
-        );
-
-    }
-
 
     @FXML
     void goToMyComplaints(ActionEvent event) {
@@ -391,22 +361,11 @@ public class MyOrdersController {
                 }
             }
             SelectedOrder = retrievedOrder;
-            String currentProduct = "";
-            String MyProducts = retrievedOrder.getProducts();
             orderProducts.getItems().clear();
-            for(int i = 0 ; i < MyProducts.length() ; i++)
-            {
-                if(MyProducts.charAt(i) != 37)
-                {
-                    currentProduct = currentProduct + Character.toString(MyProducts.charAt(i));
-                }
-                else if(currentProduct != "")
-                {
-                    orderProducts.getItems().add(currentProduct);
-                    currentProduct = "";
-                }
-                else
-                    currentProduct = "";
+            List<OrderProductParser.OrderItem> items = OrderProductParser.parseItems(
+                    retrievedOrder.getProducts(), ProductCatalogCache.snapshot());
+            for (OrderProductParser.OrderItem item : items) {
+                orderProducts.getItems().add(item.formatLine());
             }
             submitComplaint.setVisible(true);
             orderID.setText(String.valueOf(retrievedOrder.getOrderID()));
@@ -465,7 +424,6 @@ public class MyOrdersController {
         assert RecepName != null : "fx:id=\"RecepName\" was not injected: check your FXML file 'myorders.fxml'.";
         assert RecepNumber != null : "fx:id=\"RecepNumber\" was not injected: check your FXML file 'myorders.fxml'.";
         assert accountID != null : "fx:id=\"accountID\" was not injected: check your FXML file 'myorders.fxml'.";
-        assert backToCatalog != null : "fx:id=\"backToCatalog\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditCVV != null : "fx:id=\"creditCVV\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditExpire != null : "fx:id=\"creditExpire\" was not injected: check your FXML file 'myorders.fxml'.";
         assert creditNumber != null : "fx:id=\"creditNumber\" was not injected: check your FXML file 'myorders.fxml'.";
@@ -530,8 +488,6 @@ public class MyOrdersController {
         refundDecisionLabel.setVisible(false);
 
         viewOrder.setDisable(true);
-        backToCatalog.setDisable(true);
-        requestOrders();
     }
 
     private Account resolveCurrentUser() {
@@ -544,19 +500,26 @@ public class MyOrdersController {
     private void requestOrders() {
         wait.setVisible(true);
         viewOrder.setDisable(true);
-        backToCatalog.setDisable(true);
         try {
             getAllOrdersMessage getOrdersMsg = new getAllOrdersMessage();
             SimpleClient.getClient().sendToServer(getOrdersMsg);
         } catch (IOException e) {
             wait.setVisible(false);
             viewOrder.setDisable(false);
-            backToCatalog.setDisable(false);
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
             alert.setContentText("Failed to load orders. Please try again.");
             alert.showAndWait();
         }
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        viewOrder.setDisable(false);
+                        wait.setVisible(false);
+                    }
+                },4500
+        );
     }
     @Subscribe
     public void PassAccountEvent(PassAccountEventOrders passAcc){ // added today
@@ -580,7 +543,6 @@ public class MyOrdersController {
         Platform.runLater(() -> {
             wait.setVisible(false);
             viewOrder.setDisable(false);
-            backToCatalog.setDisable(false);
         });
     }
 
