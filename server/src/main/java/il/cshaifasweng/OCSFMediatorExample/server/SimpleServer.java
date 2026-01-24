@@ -14,6 +14,7 @@ import java.util.Properties;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DateTimeException;
@@ -1445,10 +1446,13 @@ private static SessionFactory cachedSessionFactory;
 			return;
 		}
 		List<Integer> branchIds = normalizeBranchIds(request.getBranchIds());
-		if (!branchIds.isEmpty() && branchIds.stream().anyMatch(id -> id <= 0)) {
-			branchIds = branchIds.stream().filter(id -> id > 0).distinct().toList();
-			request.setBranchIds(branchIds);
-		}
+			if (!branchIds.isEmpty() && branchIds.stream().anyMatch(id -> id <= 0)) {
+				branchIds = branchIds.stream()
+						.filter(id -> id > 0)
+						.distinct()
+						.collect(Collectors.toList());
+				request.setBranchIds(branchIds);
+			}
 
 		SessionFactory sessionFactory = getSessionFactory();
 		try (Session session = sessionFactory.openSession()) {
@@ -1690,7 +1694,7 @@ private static SessionFactory cachedSessionFactory;
 		return branchIds.stream()
 				.filter(id -> id != null && id > 0)
 				.distinct()
-				.toList();
+				.collect(Collectors.toList());
 	}
 
 	private <T> Predicate buildBranchPredicate(CriteriaBuilder builder, Root<T> root, int branchId, List<Integer> branchIds) {
