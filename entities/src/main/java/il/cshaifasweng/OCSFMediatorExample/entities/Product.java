@@ -16,7 +16,7 @@ public class Product implements Serializable {
     private String name;
     @Column(name = "product_details")
     private String details;
-    @Column(name = "product_price")
+    @Column(name = "price")
     private double price;
     @Column(name = "product_image")
     private String image;
