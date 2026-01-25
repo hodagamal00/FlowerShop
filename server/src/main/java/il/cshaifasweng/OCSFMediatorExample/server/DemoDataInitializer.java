@@ -52,30 +52,57 @@ public final class DemoDataInitializer {
                 }
             }
 
-            if (hasExistingData(session)) {
-                initialized = true;
-                return;
-            }
-            Transaction tx = session.beginTransaction();
-            try {
-                seedProducts(session);
-                logProductCount(session, "after demo seed");
-                seedAccounts(session);
-                seedWorkers(session);
-                seedManagers(session);
-                seedOrders(session);
-                seedComplaints(session);
-                seedMessages(session);
-                seedPromotions(session);
-                seedBranchSettings(session);
-                seedGlobalSettings(session);
+            long productCount = count(session, Product.class);
+            long accountCount = count(session, Account.class);
+            long orderCount = count(session, Order.class);
+            long complaintCount = count(session, Complaint.class);
+            boolean hadAnyData = productCount > 0 || accountCount > 0 || orderCount > 0 || complaintCount > 0;
 
-                tx.commit();
-                initialized = true;
-            } catch (RuntimeException ex) {
-                tx.rollback();
-                throw ex;
+            if (!hadAnyData) {
+                Transaction tx = session.beginTransaction();
+                try {
+                    seedProducts(session);
+                    logProductCount(session, "after demo seed");
+                    seedAccounts(session);
+                    seedWorkers(session);
+                    seedManagers(session);
+                    seedOrders(session);
+                    seedComplaints(session);
+                    seedMessages(session);
+                    seedPromotions(session);
+                    seedBranchSettings(session);
+                    seedGlobalSettings(session);
+
+                    tx.commit();
+                    initialized = true;
+                    return;
+                } catch (RuntimeException ex) {
+                    tx.rollback();
+                    throw ex;
+                }
             }
+
+            if (productCount == 0) {
+                Transaction tx = session.beginTransaction();
+                try {
+                    seedProducts(session);
+                    logProductCount(session, "after catalog seed");
+                    seedPromotions(session);
+                    tx.commit();
+                } catch (RuntimeException ex) {
+                    tx.rollback();
+                    throw ex;
+                }
+            } else {
+                System.out.println("Found " + productCount
+                        + " products. Run with RESET_PRODUCTS=true to reseed the catalog.");
+            }
+
+            if (hadAnyData && productCount == 0) {
+                System.out.println("Existing data detected; seeded catalog only to avoid overwriting.");
+            }
+
+            initialized = true;
         }
     }
 
@@ -90,23 +117,6 @@ public final class DemoDataInitializer {
     private static void logProductCount(Session session, String context) {
         long productCount = count(session, Product.class);
         System.out.println("Product count " + context + ": " + productCount);
-    }
-
-    private static boolean hasExistingData(Session session) {
-        long productCount = count(session, Product.class);
-        long accountCount = count(session, Account.class);
-        long orderCount = count(session, Order.class);
-        long complaintCount = count(session, Complaint.class);
-        boolean hasData = productCount > 0 || accountCount > 0 || orderCount > 0 || complaintCount > 0;
-        if (hasData) {
-            if (productCount > 0) {
-                System.out.println("Found " + productCount
-                        + " products. Run with RESET_PRODUCTS=true to reseed the catalog.");
-            } else {
-                System.out.println("Existing data detected; demo seed skipped to avoid overwriting.");
-            }
-        }
-        return hasData;
     }
 
     private static void seedProducts(Session session) {
