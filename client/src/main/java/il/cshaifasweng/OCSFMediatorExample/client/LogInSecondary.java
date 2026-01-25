@@ -47,8 +47,6 @@ public class LogInSecondary {
     private Button LogIn;
 
     @FXML
-
-    @FXML
     private TextField Password;
 
     @FXML

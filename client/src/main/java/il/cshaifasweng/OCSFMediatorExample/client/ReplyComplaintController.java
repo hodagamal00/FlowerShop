@@ -82,10 +82,6 @@ public class ReplyComplaintController {
     @FXML // fx:id="sendButton"
     private Button sendButton; // Value injected by FXMLLoader
 
-    @FXML // fx:id="backButton"
-    private Button backButton; // Value injected by FXMLLoader
-
-
     @FXML // fx:id="other"
     private Text other; // Value injected by FXMLLoader
 

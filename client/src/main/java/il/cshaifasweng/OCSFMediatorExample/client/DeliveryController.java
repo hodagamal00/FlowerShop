@@ -42,10 +42,6 @@ public class DeliveryController {
     @FXML // fx:id="wait"
     private Label wait; // Value injected by FXMLLoader
 
-
-
-    @FXML
-
     @FXML
     void ApplyDelivery(ActionEvent event) {
         String aString = "";
