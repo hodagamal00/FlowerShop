@@ -63,6 +63,9 @@ public class CatalogController {
 	@FXML // fx:id="logout"
 	private Button logout; // Value injected by FXMLLoader
 
+	@FXML
+	private Button btnCustomItem;
+
 
 
 	@FXML
@@ -1757,6 +1760,7 @@ public class CatalogController {
 		allProducts.clear();
 		resetFilteredProducts();
 		availableProducts = false;
+		updateCustomItemAvailability();
 		Platform.runLater(() -> updateFields(2));
 	}
 
@@ -1766,6 +1770,7 @@ public class CatalogController {
 		resetFilteredProducts();
 		availableProducts = !allProducts.isEmpty();
 		updateFilterOptions();
+		updateCustomItemAvailability();
 		Platform.runLater(() -> {
 			updateFields(2);
 			if (init_container != null) {
@@ -1807,6 +1812,24 @@ public class CatalogController {
 			priceFilter.getItems().add("50-100");
 			priceFilter.getItems().add("100-200");
 			priceFilter.getSelectionModel().selectFirst();
+		}
+	}
+
+	private void updateCustomItemAvailability() {
+		boolean hasCustomItem = false;
+		for (Product product : allProducts) {
+			if (product != null && product.isCustomProduct()) {
+				hasCustomItem = true;
+				break;
+			}
+		}
+		if (btnCustomItem != null) {
+			btnCustomItem.setDisable(!hasCustomItem);
+			if (hasCustomItem) {
+				btnCustomItem.setTooltip(null);
+			} else {
+				btnCustomItem.setTooltip(new Tooltip("Custom products are not available at the moment."));
+			}
 		}
 	}
 
