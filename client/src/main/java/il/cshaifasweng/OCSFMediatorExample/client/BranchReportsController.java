@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 public class BranchReportsController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Header
     @FXML private Label branchLabel;
@@ -68,6 +67,13 @@ public class BranchReportsController {
     @FXML private Label completedOrdersLabel;
     @FXML private Label pendingOrdersLabel;
     @FXML private Label cancelledOrdersLabel;
+    @FXML private BarChart<String, Number> ordersByTypeChart;
+    @FXML private CategoryAxis ordersByTypeXAxis;
+    @FXML private NumberAxis ordersByTypeYAxis;
+    @FXML private TableView<OrderTypeData> ordersByTypeTable;
+    @FXML private TableColumn<OrderTypeData, String> orderTypeCol;
+    @FXML private TableColumn<OrderTypeData, Integer> orderTypeCountCol;
+    @FXML private Label ordersByTypeEmptyLabel;
     
     // Complaints Report Section
     @FXML private VBox complaintsReportCard;
@@ -76,6 +82,7 @@ public class BranchReportsController {
     @FXML private BarChart<String, Number> complaintsHistogramChart;
     @FXML private CategoryAxis complaintsHistogramXAxis;
     @FXML private NumberAxis complaintsHistogramYAxis;
+    @FXML private Label complaintsEmptyLabel;
     @FXML private TableView<ComplaintData> complaintsTable;
     @FXML private TableColumn<ComplaintData, String> complaintStatusCol;
     @FXML private TableColumn<ComplaintData, Integer> complaintCountCol;
@@ -86,6 +93,8 @@ public class BranchReportsController {
     private List<Order> branchOrders = new ArrayList<>();
     private List<Complaint> branchComplaints = new ArrayList<>();
     private Map<LocalDate, Integer> complaintsHistogram = new java.util.HashMap<>();
+    private Map<String, Integer> ordersByProductType = new java.util.HashMap<>();
+    private double reportTotalRevenue = 0.0;
     private int currentBranchId = 1;
     private String pendingRequestId;
     private String lastReportType;
@@ -133,6 +142,9 @@ public class BranchReportsController {
         incomeOrdersCol.setCellValueFactory(new PropertyValueFactory<>("ordersCount"));
         incomeAmountCol.setCellValueFactory(new PropertyValueFactory<>("totalIncome"));
         incomeAvgCol.setCellValueFactory(new PropertyValueFactory<>("avgOrderValue"));
+
+        orderTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        orderTypeCountCol.setCellValueFactory(new PropertyValueFactory<>("count"));
         
         // Complaints table
         complaintStatusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -233,6 +245,10 @@ public class BranchReportsController {
             complaintsHistogram = response.getComplaintsHistogram() != null
                     ? response.getComplaintsHistogram()
                     : new java.util.HashMap<>();
+            ordersByProductType = response.getOrdersByProductType() != null
+                    ? response.getOrdersByProductType()
+                    : new java.util.HashMap<>();
+            reportTotalRevenue = response.getTotalRevenue();
             updateBranchLabel(response.getBranches());
             refreshReports(lastReportType);
         });
@@ -294,7 +310,9 @@ public class BranchReportsController {
         Map<String, List<Order>> ordersByWeek = branchOrders.stream()
             .filter(o -> "Delivered".equals(o.getStatus()))
             .collect(Collectors.groupingBy(order -> {
-                LocalDate orderDate = order.getOrderDate().toLocalDate();
+                LocalDate orderDate = order.getDelivery_time() != null
+                        ? order.getDelivery_time().toLocalDate()
+                        : order.getOrderDate().toLocalDate();
                 int weekOfYear = orderDate.getDayOfYear() / 7;
                 return "Week " + weekOfYear;
             }));
@@ -324,7 +342,8 @@ public class BranchReportsController {
         
         incomeBarChart.getData().add(series);
         incomeTable.setItems(incomeDataList);
-        totalIncomeLabel.setText(String.format("Total: ₪%.2f", totalIncome));
+        double displayTotal = reportTotalRevenue > 0 ? reportTotalRevenue : totalIncome;
+        totalIncomeLabel.setText(String.format("Total: ₪%.2f", displayTotal));
     }
     
     /**
@@ -339,6 +358,8 @@ public class BranchReportsController {
         completedOrdersLabel.setText(String.valueOf(completed));
         pendingOrdersLabel.setText(String.valueOf(pending));
         cancelledOrdersLabel.setText(String.valueOf(cancelled));
+
+        updateOrdersByTypeChart(ordersByProductType);
     }
     
     /**
@@ -424,7 +445,15 @@ public class BranchReportsController {
             if (complaintsHistogramChart != null) {
                 complaintsHistogramChart.getData().clear();
             }
+            if (complaintsEmptyLabel != null) {
+                complaintsEmptyLabel.setVisible(true);
+                complaintsEmptyLabel.setManaged(true);
+            }
             return;
+        }
+        if (complaintsEmptyLabel != null) {
+            complaintsEmptyLabel.setVisible(false);
+            complaintsEmptyLabel.setManaged(false);
         }
         BarChart<String, Number> chart = ensureComplaintsHistogramChart();
         chart.getData().clear();
@@ -438,6 +467,38 @@ public class BranchReportsController {
                         new XYChart.Data<>(entry.getKey().toString(), entry.getValue())));
 
         chart.getData().add(series);
+    }
+
+    private void updateOrdersByTypeChart(Map<String, Integer> typeCounts) {
+        if (ordersByTypeChart != null) {
+            ordersByTypeChart.getData().clear();
+        }
+        ObservableList<OrderTypeData> tableItems = FXCollections.observableArrayList();
+        if (typeCounts == null || typeCounts.isEmpty()) {
+            if (ordersByTypeEmptyLabel != null) {
+                ordersByTypeEmptyLabel.setVisible(true);
+                ordersByTypeEmptyLabel.setManaged(true);
+            }
+            ordersByTypeTable.setItems(tableItems);
+            return;
+        }
+        if (ordersByTypeEmptyLabel != null) {
+            ordersByTypeEmptyLabel.setVisible(false);
+            ordersByTypeEmptyLabel.setManaged(false);
+        }
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Orders by Type");
+        for (Map.Entry<String, Integer> entry : typeCounts.entrySet()) {
+            String type = entry.getKey();
+            int count = entry.getValue() != null ? entry.getValue() : 0;
+            series.getData().add(new XYChart.Data<>(type, count));
+            tableItems.add(new OrderTypeData(type, count));
+        }
+        if (ordersByTypeChart != null) {
+            ordersByTypeChart.getData().add(series);
+        }
+        ordersByTypeTable.setItems(tableItems);
     }
 
     private BarChart<String, Number> ensureComplaintsHistogramChart() {
@@ -472,17 +533,6 @@ public class BranchReportsController {
         // TODO: Implement PDF export functionality
         // Could use libraries like iText or Apache PDFBox
         showInfo("Export feature will generate a PDF report with all charts and data.");
-    }
-    
-    /**
-     * Navigate back to catalog
-     */
-    @FXML
-    private void handleBackToCatalog() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**
@@ -545,5 +595,23 @@ public class BranchReportsController {
         public int getCount() { return count; }
         public String getPercentage() { return percentage; }
         public String getAvgResponseTime() { return avgResponseTime; }
+    }
+
+    public static class OrderTypeData {
+        private final String type;
+        private final int count;
+
+        public OrderTypeData(String type, int count) {
+            this.type = type;
+            this.count = count;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public int getCount() {
+            return count;
+        }
     }
 }

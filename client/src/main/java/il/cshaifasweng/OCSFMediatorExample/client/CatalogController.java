@@ -8,6 +8,7 @@ import javafx.collections.ListChangeListener;
 // controller uses JavaFX exclusively, so AWT imports are unnecessary and
 // problematic.
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.*;
 import javafx.scene.control.TextField;
@@ -19,7 +20,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -85,6 +89,9 @@ public class CatalogController {
 
 	@FXML
 	private VBox init_container;
+
+	@FXML
+	private VBox accountToolsPanel;
 
 	@FXML
 	private TextField customid;
@@ -325,9 +332,6 @@ public class CatalogController {
 
 	@FXML
 	private Button btnClearCart;
-
-	@FXML
-	private TextField cartTextDiscount;
 
 	@FXML
 	private TextField cartTextPrice;
@@ -919,6 +923,59 @@ public class CatalogController {
 		}
 	}
 
+	private void applyProductImage(Product product, ImageView imageView) {
+		if (product == null || imageView == null) {
+			return;
+		}
+		String imagePath = product.getImage();
+		Image image = loadProductImage(imagePath);
+		if (image != null) {
+			imageView.setImage(image);
+		}
+	}
+
+	private Image loadProductImage(String imagePath) {
+		if (imagePath == null || imagePath.isBlank()) {
+			return loadPlaceholderImage();
+		}
+		String normalizedPath = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+		try (InputStream inputStream = getClass().getResourceAsStream(normalizedPath)) {
+			if (inputStream != null) {
+				return new Image(inputStream);
+			}
+			System.out.println("Missing image resource: " + normalizedPath);
+		} catch (Exception ex) {
+			System.out.println("Unable to load product image: " + ex.getMessage());
+		}
+		return loadPlaceholderImage();
+	}
+
+	private Image loadPlaceholderImage() {
+		try (InputStream inputStream = getClass().getResourceAsStream("placeholder.png")) {
+			if (inputStream != null) {
+				return new Image(inputStream);
+			}
+		} catch (Exception ex) {
+			System.out.println("Unable to load placeholder image: " + ex.getMessage());
+		}
+		try (InputStream inputStream = getClass().getResourceAsStream("/placeholder.png")) {
+			if (inputStream != null) {
+				return new Image(inputStream);
+			}
+		} catch (Exception ex) {
+			System.out.println("Unable to load placeholder image: " + ex.getMessage());
+		}
+		int width = 220;
+		int height = 160;
+		WritableImage placeholder = new WritableImage(width, height);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				placeholder.getPixelWriter().setColor(x, y, Color.LIGHTGRAY);
+			}
+		}
+		return placeholder;
+	}
+
 	private String defaultSkuFor(Product product, int index) {
 		String[] defaultSkus = {
 				"SUN-001",
@@ -1174,6 +1231,7 @@ public class CatalogController {
 			if(CatalogENDIndex - CatalogSTARTIndex > 0)
 			{
 				flower_name1.setText(displayProducts.get(CatalogSTARTIndex).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex), flower_button1);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex), flower_price1, flower_price_before_container1, flower_price_before1,
 						flower_price_before_line1, flower_price_after1, flower_promo1);
 				flower_sku1.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex).getSku()));
@@ -1192,6 +1250,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 1)
 			{
 				flower_name2.setText(displayProducts.get(CatalogSTARTIndex + 1).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 1), flower_button2);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 1), flower_price2, flower_price_before_container2, flower_price_before2,
 						flower_price_before_line2, flower_price_after2, flower_promo2);
 				flower_sku2.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 1).getSku()));
@@ -1209,6 +1268,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 2)
 			{
 				flower_name3.setText(displayProducts.get(CatalogSTARTIndex + 2).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 2), flower_button3);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 2), flower_price3, flower_price_before_container3, flower_price_before3,
 						flower_price_before_line3, flower_price_after3, flower_promo3);
 				flower_sku3.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 2).getSku()));
@@ -1226,6 +1286,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 3)
 			{
 				flower_name4.setText(displayProducts.get(CatalogSTARTIndex + 3).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 3), flower_button4);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 3), flower_price4, flower_price_before_container4, flower_price_before4,
 						flower_price_before_line4, flower_price_after4, flower_promo4);
 				flower_sku4.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 3).getSku()));
@@ -1243,6 +1304,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 4)
 			{
 				flower_name5.setText(displayProducts.get(CatalogSTARTIndex + 4).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 4), flower_button5);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 4), flower_price5, flower_price_before_container5, flower_price_before5,
 						flower_price_before_line5, flower_price_after5, flower_promo5);
 				flower_sku5.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 4).getSku()));
@@ -1263,6 +1325,7 @@ public class CatalogController {
 				// select the sixth element in the current window and update the corresponding
 				// UI components (name, price, button, cart button and container) for slot 6.
 				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 5), flower_button6);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before_container6, flower_price_before6,
 						flower_price_before_line6, flower_price_after6, flower_promo6);
 				flower_sku6.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 5).getSku()));
@@ -1280,6 +1343,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex == 6)
 			{
 				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 5), flower_button6);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before_container6, flower_price_before6,
 						flower_price_before_line6, flower_price_after6, flower_promo6);
 				flower_sku6.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 5).getSku()));
@@ -1317,7 +1381,6 @@ public class CatalogController {
 		String containerId = ((VBox) event.getSource()).getId();
 		Product selected = getProductForContainer(containerId);
 		if (selected != null) {
-			syncProductImageFromCatalog(selected, getImageViewForContainer(containerId));
 			setCurrent_button(selected);
 			openProductDetailsModal(selected);
 		}
@@ -1540,6 +1603,7 @@ public class CatalogController {
 		if (viewInboxPlz != null) viewInboxPlz.setVisible(false);
 		if (inboxList != null) inboxList.setVisible(false);
 		if (openMessage != null) openMessage.setVisible(false);
+		setAccountToolsPanelVisible(false);
 
 		// Restore persisted login so customer-specific buttons become
 		// available even if the PassAccountEvent arrived before this
@@ -1551,7 +1615,6 @@ public class CatalogController {
 		}
 		checkout.setVisible(false);
 		if (cartTextPrice != null) cartTextPrice.setVisible(false);
-		if (cartTextDiscount != null) cartTextDiscount.setVisible(false);
 		if (CartItemsList != null) CartItemsList.setVisible(false);
 		if (cartTopText != null) cartTopText.setVisible(false);
 		flower1_addCart.setVisible(false);
@@ -1642,39 +1705,10 @@ public class CatalogController {
 		if (btnClearCart != null) btnClearCart.setVisible(false);
 		//cartTopText.setVisible(false);
 		//cartTextPrice.setVisible(false);
-		//cartTextDiscount.setVisible(false);
 
-		// Populate filter combo boxes after data initialisation.  We only have six
-		// products at present; categories and colours are pulled from the Product
-		// objects.  Price ranges are hard coded for illustrative purposes.
+		// Populate filter combo boxes after data initialisation.
 		ensureCatalogDataLoaded();
-		// Collect distinct categories and colours from available products
-		java.util.Set<String> categories = new java.util.HashSet<>();
-		java.util.Set<String> colours = new java.util.HashSet<>();
-		for (Product p : allProducts) {
-			if (p.getCategory() != null && !p.getCategory().isEmpty()) {
-				categories.add(p.getCategory());
-			}
-			if (p.getColor() != null && !p.getColor().isEmpty()) {
-				colours.add(p.getColor());
-			}
-		}
-		categoryFilter.getItems().clear();
-		categoryFilter.getItems().add("All");
-		categoryFilter.getItems().addAll(categories);
-		categoryFilter.getSelectionModel().selectFirst();
-
-		colorFilter.getItems().clear();
-		colorFilter.getItems().add("All");
-		colorFilter.getItems().addAll(colours);
-		colorFilter.getSelectionModel().selectFirst();
-
-		priceFilter.getItems().clear();
-		priceFilter.getItems().add("All");
-		priceFilter.getItems().add("0-50");
-		priceFilter.getItems().add("50-100");
-		priceFilter.getItems().add("100-200");
-		priceFilter.getSelectionModel().selectFirst();
+		updateFilterOptions();
 
 		// Attach listeners to apply filters when a selection changes
 		categoryFilter.setOnAction(e -> applyFilters());
@@ -1691,9 +1725,6 @@ public class CatalogController {
 		System.out.println(CatalogFlag.getFlagg());
 		if (cartTextPrice != null) {
 			cartTextPrice.setText("0");
-		}
-		if (cartTextDiscount != null) {
-			cartTextDiscount.setText("0");
 		}
 		CartService.getInstance().getObservableItems()
 				.addListener((ListChangeListener<Product>) change -> refreshCartDisplay());
@@ -1717,23 +1748,24 @@ public class CatalogController {
 	}
 
 	private void ensureCatalogDataLoaded() {
-		if (!allProducts.isEmpty()) {
-			ensureProductMetadata(allProducts);
-			resetFilteredProducts();
-			availableProducts = true;
-			Platform.runLater(() -> updateFields(2));
-			return;
-		}
-		initializeData();
+		clearCatalogData();
+		showStatusMessage("Catalog data is loading from the server.");
+		requestCatalogReload();
 	}
 
-	@Subscribe
-	public void updateGui(UpdateGuiEvent upEvent){
-		System.out.println("arrived to the update GUI  event");
-		allProducts = upEvent.getRecievedList();
+	private void clearCatalogData() {
+		allProducts.clear();
+		resetFilteredProducts();
+		availableProducts = false;
+		Platform.runLater(() -> updateFields(2));
+	}
+
+	private void rebuildCatalogFromProducts(List<Product> products) {
+		allProducts = products != null ? new ArrayList<>(products) : new ArrayList<>();
 		ensureProductMetadata(allProducts);
 		resetFilteredProducts();
-		availableProducts = true;
+		availableProducts = !allProducts.isEmpty();
+		updateFilterOptions();
 		Platform.runLater(() -> {
 			updateFields(2);
 			if (init_container != null) {
@@ -1743,6 +1775,45 @@ public class CatalogController {
 				justText.setVisible(false);
 			}
 		});
+	}
+
+	private void updateFilterOptions() {
+		java.util.Set<String> categories = new java.util.HashSet<>();
+		java.util.Set<String> colours = new java.util.HashSet<>();
+		for (Product p : allProducts) {
+			if (p.getCategory() != null && !p.getCategory().isEmpty()) {
+				categories.add(p.getCategory());
+			}
+			if (p.getColor() != null && !p.getColor().isEmpty()) {
+				colours.add(p.getColor());
+			}
+		}
+		if (categoryFilter != null) {
+			categoryFilter.getItems().clear();
+			categoryFilter.getItems().add("All");
+			categoryFilter.getItems().addAll(categories);
+			categoryFilter.getSelectionModel().selectFirst();
+		}
+		if (colorFilter != null) {
+			colorFilter.getItems().clear();
+			colorFilter.getItems().add("All");
+			colorFilter.getItems().addAll(colours);
+			colorFilter.getSelectionModel().selectFirst();
+		}
+		if (priceFilter != null) {
+			priceFilter.getItems().clear();
+			priceFilter.getItems().add("All");
+			priceFilter.getItems().add("0-50");
+			priceFilter.getItems().add("50-100");
+			priceFilter.getItems().add("100-200");
+			priceFilter.getSelectionModel().selectFirst();
+		}
+	}
+
+	@Subscribe
+	public void updateGui(UpdateGuiEvent upEvent){
+		System.out.println("arrived to the update GUI  event");
+		rebuildCatalogFromProducts(upEvent.getRecievedList());
 	}
 	@Subscribe
 	public void complaintEvent(PassAllComplaintsEvent allComps){ // added new 21/7
@@ -1807,18 +1878,7 @@ public class CatalogController {
 		for (int i = 0; i < rtEvent.getRecievedList().size(); i++) {
 			System.out.println(rtEvent.getRecievedList().get(i).getButton());
 		}
-		allProducts = rtEvent.getRecievedList();
-		ensureProductMetadata(allProducts);
-		resetFilteredProducts();
-		Platform.runLater(() -> {
-			updateFields(2);
-			if (init_container != null) {
-				init_container.setVisible(false);
-			}
-			if (justText != null) {
-				justText.setVisible(false);
-			}
-		});
+		rebuildCatalogFromProducts(rtEvent.getRecievedList());
 
 
 	}
@@ -1827,62 +1887,9 @@ public class CatalogController {
 	public void initDatabase(InitDatabaseEvent event) {
 
 		System.out.println("arrived to databaseInit");
-		// When constructing Product instances we must pass the price as a double.
-		// Label#getText() returns a String, so parse it to double before calling
-		// the Product constructor.  This avoids "String cannot be converted to
-		// double" compilation errors.
-		double price1 = 0.0;
-		double price2 = 0.0;
-		double price3 = 0.0;
-		double price4 = 0.0;
-		double price5 = 0.0;
-		double price6 = 0.0;
-		try {
-			// Strip any non-numeric characters (e.g. currency symbols) before parsing
-			price1 = Double.parseDouble(flower_price1.getText().replaceAll("[^\\d.]", ""));
-			price2 = Double.parseDouble(flower_price2.getText().replaceAll("[^\\d.]", ""));
-			price3 = Double.parseDouble(flower_price3.getText().replaceAll("[^\\d.]", ""));
-			price4 = Double.parseDouble(flower_price4.getText().replaceAll("[^\\d.]", ""));
-			price5 = Double.parseDouble(flower_price5.getText().replaceAll("[^\\d.]", ""));
-			price6 = Double.parseDouble(flower_price6.getText().replaceAll("[^\\d.]", ""));
-		} catch (NumberFormatException ex) {
-			// If parsing fails, leave default 0.0; you may want to handle this case
-			// by showing an error to the user or skipping product creation
-			ex.printStackTrace();
-		}
-		Product flower1 = new Product(1, flower_button1.getId(), flower_name1.getText(), "", price1);
-		applyDefaultMetadata(flower1, 0);
-		allProducts.add(flower1);
-		Product flower2 = new Product(2, flower_button2.getId(), flower_name2.getText(), "", price2);
-		applyDefaultMetadata(flower2, 1);
-		allProducts.add(flower2);
-		Product flower3 = new Product(3, flower_button3.getId(), flower_name3.getText(), "", price3);
-		applyDefaultMetadata(flower3, 2);
-		allProducts.add(flower3);
-		Product flower4 = new Product(4, flower_button4.getId(), flower_name4.getText(), "", price4);
-		applyDefaultMetadata(flower4, 3);
-		allProducts.add(flower4);
-		Product flower5 = new Product(5, flower_button5.getId(), flower_name5.getText(), "", price5);
-		applyDefaultMetadata(flower5, 4);
-		allProducts.add(flower5);
-		Product flower6 = new Product(6, flower_button6.getId(), flower_name6.getText(), "", price6);
-		applyDefaultMetadata(flower6, 5);
-		allProducts.add(flower6);
-
-		List<Product> productList = new ArrayList<Product>();
-		productList.add(flower1);
-		productList.add(flower2);
-		productList.add(flower3);
-		productList.add(flower4);
-		productList.add(flower5);
-		productList.add(flower6);
-		try {
-			SimpleClient.getClient().sendToServer(productList); // sends the updated product to the server class
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		resetFilteredProducts();
+		clearCatalogData();
+		showStatusMessage("Catalog data is loading from the server.");
+		requestCatalogReload();
 
 	}
 
@@ -2072,6 +2079,7 @@ public class CatalogController {
 		Account account = SimpleClient.getUser();
 		if (account == null) {
 			hideAllPrivilegedFeatures();
+			setAccountToolsPanelVisible(false);
 			configureProductCardActions();
 			System.out.println("=== Applying UI for privilege level: 0 (guest) ===");
 			return;
@@ -2083,6 +2091,7 @@ public class CatalogController {
 		// GUEST (0): Can only browse catalog - all interactive features hidden
 		if (privilege == 0) {
 			hideAllPrivilegedFeatures();
+			setAccountToolsPanelVisible(false);
 			System.out.println("Guest mode: Browse-only access");
 			return;
 		}
@@ -2090,11 +2099,13 @@ public class CatalogController {
 		// CUSTOMER (1): Can browse + checkout + manage own orders/complaints
 		enableCustomerFeatures();
 		enableCustomerOnlyFeatures();
+		setAccountToolsPanelVisible(privilege >= 2);
 		System.out.println("Customer mode: Shopping and account management enabled");
 
 		if (privilege >= 2) {
 			// WORKER (2): Customer features + worker panel
 			enableWorkerFeatures();
+			setAccountToolsPanelVisible(true);
 			System.out.println("Worker mode: Customer + Worker panel enabled");
 		}
 		if (privilege >= 3) {
@@ -2132,6 +2143,13 @@ public class CatalogController {
 		if (adminControlButtton != null) adminControlButtton.setVisible(false);
 	}
 
+	private void setAccountToolsPanelVisible(boolean visible) {
+		if (accountToolsPanel != null) {
+			accountToolsPanel.setVisible(visible);
+			accountToolsPanel.setManaged(visible);
+		}
+	}
+
 	private void showCartPanelForGuest() {
 		if (cartTopText != null) {
 			cartTopText.setVisible(true);
@@ -2140,11 +2158,6 @@ public class CatalogController {
 		if (CartItemsList != null) {
 			CartItemsList.setVisible(true);
 			CartItemsList.setManaged(true);
-		}
-		if (cartTextDiscount != null) {
-			cartTextDiscount.setVisible(true);
-			cartTextDiscount.setManaged(true);
-			cartTextDiscount.setText("0");
 		}
 		if (cartTextPrice != null) {
 			cartTextPrice.setVisible(true);
@@ -2174,7 +2187,6 @@ public class CatalogController {
 			checkout.setDisable(false);
 		}
 		if (cartTextPrice != null) cartTextPrice.setVisible(true);
-		if (cartTextDiscount != null) cartTextDiscount.setVisible(true);
 		if (CartItemsList != null) CartItemsList.setVisible(true);
 		if (cartTopText != null) cartTopText.setVisible(true);
 		if (btnClearCart != null) btnClearCart.setVisible(true);
@@ -2308,17 +2320,12 @@ public class CatalogController {
 
 	private void recalculateCartTotals(List<Product> items) {
 		Account account = currentLoggedAccount != null ? currentLoggedAccount : SimpleClient.getUser();
-		double subtotal = 0.0;
+		double total = 0.0;
 		for (CartLine line : buildCartLines(items)) {
 			PricingService.PricingResult pricing = PricingService.calculatePricing(line.product, account);
-			subtotal += pricing.getFinalPrice() * line.quantity;
+			total += pricing.getFinalPrice() * line.quantity;
 		}
-		subtotal = PricingService.roundCurrency(subtotal);
-		double total = subtotal;
-
-		if (cartTextDiscount != null) {
-			cartTextDiscount.setText(String.format(Locale.US, "%.2f", subtotal));
-		}
+		total = PricingService.roundCurrency(total);
 		if (cartTextPrice != null) {
 			cartTextPrice.setText(String.format(Locale.US, "%.2f", total));
 		}
@@ -2430,7 +2437,6 @@ public class CatalogController {
 			alert.showAndWait();
 			return;
 		}
-		syncProductImageFromCatalog(selected, getImageViewForProduct(selected));
 		openProductDetailsModal(selected);
 	}
 
@@ -2464,63 +2470,7 @@ public class CatalogController {
 			return;
 		}
 
-		syncProductImageFromCatalog(customProduct, getImageViewForProduct(customProduct));
 		openProductDetailsModal(customProduct);
-	}
-
-	private ImageView getImageViewForContainer(String containerId) {
-		switch (containerId) {
-			case "container1":
-				return flower_button1;
-			case "container2":
-				return flower_button2;
-			case "container3":
-				return flower_button3;
-			case "container4":
-				return flower_button4;
-			case "container5":
-				return flower_button5;
-			case "container6":
-				return flower_button6;
-			default:
-				return null;
-		}
-	}
-
-	private ImageView getImageViewForProduct(Product product) {
-		if (product == null || product.getButton() == null) {
-			return null;
-		}
-		String buttonId = product.getButton();
-		if (buttonId.equals(flower_button1.getId())) {
-			return flower_button1;
-		}
-		if (buttonId.equals(flower_button2.getId())) {
-			return flower_button2;
-		}
-		if (buttonId.equals(flower_button3.getId())) {
-			return flower_button3;
-		}
-		if (buttonId.equals(flower_button4.getId())) {
-			return flower_button4;
-		}
-		if (buttonId.equals(flower_button5.getId())) {
-			return flower_button5;
-		}
-		if (buttonId.equals(flower_button6.getId())) {
-			return flower_button6;
-		}
-		return null;
-	}
-
-	private void syncProductImageFromCatalog(Product product, ImageView imageView) {
-		if (product == null || imageView == null || imageView.getImage() == null) {
-			return;
-		}
-		String imageUrl = imageView.getImage().getUrl();
-		if (imageUrl != null && !imageUrl.isBlank()) {
-			product.setImage(imageUrl);
-		}
 	}
 
 	/**

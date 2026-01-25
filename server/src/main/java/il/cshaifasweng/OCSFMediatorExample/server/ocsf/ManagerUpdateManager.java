@@ -78,26 +78,19 @@ public class ManagerUpdateManager {
     public static void addManager(Manager recievedManager) {
         System.out.println("inside additemTocatalog1");
 
-        long numOfRowsManager = countRowsManager();
-        System.out.println(countRowsManager());
-        int castedId = (int) numOfRowsManager;
-        int newManagerId = castedId + 1;
-        recievedManager.setPersonID(newManagerId);
-        System.out.println("inside additemTocatalog2");
-        String recievedManagerName = recievedManager.getFullName();
-        System.out.println("inside additemTocatalog3");
-        String recievedManagerEmail = recievedManager.getEmail();
-        System.out.println("inside additemTocatalog4");
-        String recievedManagerPassword = recievedManager.getPassword();
-        System.out.println("inside additemTocatalog5");
-        Boolean recievedManagerloggedIn = recievedManager.getLoggedIn();
-
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             try {
+                int managerId = recievedManager.getAccountID();
+                if (managerId <= 0) {
+                    managerId = getNextManagerId(session);
+                    recievedManager.setAccountID(managerId);
+                }
+                recievedManager.setPersonID(managerId);
+
                 System.out.println("inside additemTocatalog8");
-                System.out.println("the new index is:" + newManagerId);
+                System.out.println("the new index is:" + managerId);
 
                 session.save(recievedManager);
                 System.out.println("inside additemTocatalog9");
@@ -114,57 +107,33 @@ public class ManagerUpdateManager {
         System.out.println("inside additemTocatalog12");
     }
 
+    private static int getNextManagerId(Session session) {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+        Root<Manager> root = query.from(Manager.class);
+        query.select(builder.max(root.get("accountID")));
+        Integer maxId = session.createQuery(query).getSingleResult();
+        return maxId == null ? 1 : maxId + 1;
+    }
+
     public static void removeManager(String managerIdToRemove, ConnectionToClient _client) {
-
-
         System.out.println("arrived to removeManager");
-
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-
-
-        managersnum--;
-
         int removedId = Integer.parseInt(managerIdToRemove);
-        managerGeneralList = getAllManagers();
-        managerGeneralList.remove(removedId-1); // remove the wanted item from the list
-        for(int i=0;i<managerGeneralList.size();i++){ // update all the items id's
-            if(managerGeneralList.get(i).getPersonID() > removedId){
-                // getPersonID returns a long, while setPersonID accepts an int.  Cast
-                // the result of the subtraction to int to avoid a lossy conversion
-                // compilation error.
-                managerGeneralList.get(i).setPersonID((int)(managerGeneralList.get(i).getPersonID() - 1));
-            }
-        }
-        System.out.println("arrived to removeManager 2");
-
-
-        long longID = countRowsManager();
-        //tx1.commit();
-        System.out.println("arrived to removeManager 3 and the longID is " + longID);
-        int castedID = (int) longID;
-        for(int l=0;l<castedID;l++){
-
-            System.out.println("arrived to removeItemFromCatalog 2.5");
-            deleteManager(l+1);
-        }
-
         try (Session session = sessionFactory.openSession()) {
-            Transaction tx2 = session.beginTransaction();
+            Transaction tx = session.beginTransaction();
             try {
-                for(int i=0;i<managerGeneralList.size();i++){
-                    session.save(managerGeneralList.get(i));
-                    session.flush();
+                Manager manager = session.get(Manager.class, removedId);
+                if (manager != null) {
+                    session.delete(manager);
                 }
-                tx2.commit();
+                tx.commit();
+                System.out.println("arrived to removeManager 2.8");
             } catch (Exception ex) {
-                tx2.rollback();
+                tx.rollback();
                 throw ex;
             }
         }
-
-        //session.close(); // here we finished deleting a Manager, everything else is for updating the id's
-        System.out.println("arrived to removeItemFromCatalog 2.8");
-
     }
 
     public static void deleteManager(int deleteIndex) {

@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -15,6 +17,7 @@ import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +45,6 @@ public class ProductDetailsController {
     @FXML private Button buyNowBtn;
     @FXML private Label successMessage;
     @FXML private Label errorMessage;
-    @FXML private Button backToCatalogBtn;
     @FXML private Button viewCartBtn;
     @FXML private Button closeBtn;
 
@@ -236,11 +238,6 @@ public class ProductDetailsController {
     }
 
     @FXML
-    void goBackToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
-    }
-
-    @FXML
     void closeModal() {
         Stage stage = getCurrentStage();
         if (stage != null) {
@@ -252,35 +249,42 @@ public class ProductDetailsController {
         Image image = null;
         String imagePath = product.getImage();
         if (imagePath != null && !imagePath.isEmpty()) {
-            try {
-                java.net.URL resourceUrl = getClass().getResource(imagePath);
-                if (resourceUrl == null && !imagePath.startsWith("/")) {
-                    resourceUrl = getClass().getResource("/" + imagePath);
-                }
-                if (resourceUrl != null) {
-                    image = new Image(resourceUrl.toExternalForm());
-                } else if (imagePath.startsWith("http://")
-                        || imagePath.startsWith("https://")
-                        || imagePath.startsWith("file:")
-                        || imagePath.startsWith("jar:")
-                        || imagePath.startsWith("jrt:")) {
-                    image = new Image(imagePath);
+            String normalizedPath = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+            try (InputStream inputStream = getClass().getResourceAsStream(normalizedPath)) {
+                if (inputStream != null) {
+                    image = new Image(inputStream);
                 }
             } catch (Exception e) {
                 System.out.println("Could not load product image: " + imagePath);
             }
         }
         if (image == null) {
-            try {
-                java.net.URL placeholderUrl = getClass().getResource("placeholder.png");
-                if (placeholderUrl == null) {
-                    placeholderUrl = getClass().getResource("/placeholder.png");
-                }
-                if (placeholderUrl != null) {
-                    image = new Image(placeholderUrl.toExternalForm());
+            try (InputStream inputStream = getClass().getResourceAsStream("placeholder.png")) {
+                if (inputStream != null) {
+                    image = new Image(inputStream);
                 }
             } catch (Exception e) {
                 System.out.println("Placeholder image not found.");
+            }
+            if (image == null) {
+                try (InputStream inputStream = getClass().getResourceAsStream("/placeholder.png")) {
+                    if (inputStream != null) {
+                        image = new Image(inputStream);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Placeholder image not found.");
+                }
+            }
+            if (image == null) {
+                int width = 260;
+                int height = 200;
+                WritableImage placeholder = new WritableImage(width, height);
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        placeholder.getPixelWriter().setColor(x, y, Color.LIGHTGRAY);
+                    }
+                }
+                image = placeholder;
             }
         }
         if (image != null && productImage != null) {

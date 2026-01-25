@@ -44,6 +44,10 @@ public class Account implements Serializable {
     @Column(name = "Credit_Balance")
     private double creditBalance;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Shop", referencedColumnName = "branch_id", insertable = false, updatable = false)
+    private BranchSettings branchSettings;
+
     /*
     public Account(String fullName, String address,String email, String password,long phoneNumber, long creditCardNumber,int creditYearExpire,int creditMonthExpire,int ccv,int belongShop)
     {
@@ -243,6 +247,10 @@ public class Account implements Serializable {
 
     public int getBelongShop() {
         return belongShop;
+    }
+
+    public BranchSettings getBranchSettings() {
+        return branchSettings;
     }
 
     public long getID() {

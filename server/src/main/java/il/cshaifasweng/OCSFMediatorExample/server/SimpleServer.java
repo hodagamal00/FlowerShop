@@ -106,7 +106,6 @@ private static SessionFactory cachedSessionFactory;
 					.build();
 
 			cachedSessionFactory = configuration.buildSessionFactory(serviceRegistry);
-			DemoDataInitializer.initialize(cachedSessionFactory);
 			return cachedSessionFactory;
 		}
 	}
@@ -141,33 +140,24 @@ private static SessionFactory cachedSessionFactory;
 			Session localSession = null;
 			Transaction tx1 = null;
 			try {
+				String recievedStr = (String) msg;
+				if (recievedStr.equals("first entry")) {
+					DemoDataInitializer.initialize(sessionFactory);
+				}
+
 				localSession = sessionFactory.openSession();
 				tx1 = localSession.beginTransaction();
-
-				String recievedStr = (String) msg;
 				if (recievedStr.equals("first entry")) {
 					System.out.println("entered first entry");
 
-					List<String> list = localSession.createSQLQuery("SHOW TABLES;").list();
-
-					int tableFoundIndex = -1;
-					for (int i = 0; i < list.size(); i++) {
-						if (list.get(i).equals("products_table")) {
-							tableFoundIndex = i;
-						}
+					List<Product> resultList = getAllProducts(localSession);
+					if (resultList.isEmpty()) {
+						System.out.println("Product list empty, initializing demo data...");
+						DemoDataInitializer.initialize(sessionFactory);
+						resultList = getAllProducts(localSession);
 					}
-					if (tableFoundIndex != -1) {
-						if (countRows(localSession) == 0) {
-							System.out.println("didnt find a table (this message is from the server");
-							client.sendToClient("not found");
-						} else {
-							List<Product> resultList = getAllProducts(localSession);
-							FoundTable foundTbl = new FoundTable("found", resultList);
-							client.sendToClient(foundTbl);
-						}
-					} else {
-						client.sendToClient("not found");
-					}
+					FoundTable foundTbl = new FoundTable("found", resultList);
+					client.sendToClient(foundTbl);
 				}
 
 				if (recievedStr.equals("get Managers")) {
@@ -594,10 +584,24 @@ private static SessionFactory cachedSessionFactory;
 				System.out.println("the mail is: " + recievedMailStr);
 				System.out.println("arrived to Logout in server 3");
 
-				Account matchedAccount = findAccountByEmail(localSession, Account.class, recievedMailStr);
+				Account matchedAccount = null;
+				Manager matchedManager = findAccountByEmail(localSession, Manager.class, recievedMailStr);
+				if (matchedManager != null) {
+					matchedAccount = matchedManager;
+				} else {
+					Worker matchedWorker = findAccountByEmail(localSession, Worker.class, recievedMailStr);
+					if (matchedWorker != null) {
+						matchedAccount = matchedWorker;
+					} else {
+						matchedAccount = findAccountByEmail(localSession, Account.class, recievedMailStr);
+					}
+				}
 				if (matchedAccount != null) {
 					System.out.println("arrived to Logout in server 5");
-					Account updateAcc = localSession.load(Account.class, matchedAccount.getAccountID());
+					Account updateAcc = localSession.get(matchedAccount.getClass(), matchedAccount.getAccountID());
+					if (updateAcc == null) {
+						updateAcc = matchedAccount;
+					}
 					updateAcc.setLoggedIn(false);
 					System.out.println("arrived to Logout in server 6");
 					localSession.update(updateAcc);
@@ -625,6 +629,7 @@ private static SessionFactory cachedSessionFactory;
 			try {
 				localSession = sessionFactory.openSession();
 				tx1 = localSession.beginTransaction();
+				getAllOrdersMessage request = (getAllOrdersMessage) msg;
 				if (requirePrivilegeAtLeast(client, 1)) {
 					Account account = getClientAccount(client);
 					if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
@@ -632,7 +637,7 @@ private static SessionFactory cachedSessionFactory;
 					} else {
 						getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
 						System.out.println("arrived to get all orders in simple server ! \n");
-						List<Order> orderList = getScopedOrders(localSession, account);
+						List<Order> orderList = getScopedOrders(localSession, account, request);
 						ordersToBeSent.setOrderList(orderList);
 						client.sendToClient(ordersToBeSent);
 					}
@@ -741,44 +746,7 @@ private static SessionFactory cachedSessionFactory;
 		}
 
 		if (msg instanceof ArrayList) {
-			System.out.println("Arrived here: msg instance of arrayList ");
-
-			System.out.println("list size 11111 = " + flowersnum);
-
-			SessionFactory sessionFactory = getSessionFactory();
-			Session localSession = null;
-			Transaction tx1 = null;
-			try {
-				localSession = sessionFactory.openSession();
-				tx1 = localSession.beginTransaction();
-				System.out.println("msg instance of arrayList ");
-
-				List<Product> resultList = (List<Product>) msg;
-				flowersnum = resultList.size();
-				System.out.println("list size 2222 = " + flowersnum);
-				for (int i = 0; i < resultList.size(); i++) {
-					localSession.save(resultList.get(i));
-					localSession.flush();
-					System.out.println(resultList.get(i).getName());
-				}
-				tx1.commit();
-
-				for (int i = 0; i < resultList.size(); i++) {
-					productGeneralList.add(resultList.get(i));
-					System.out.println(resultList.get(i).getName());
-				}
-			} catch (Exception ex) {
-				if (tx1 != null) {
-					tx1.rollback();
-				}
-				throw ex;
-			} finally {
-				if (localSession != null) {
-					localSession.close();
-				}
-			}
-		} else {
-			// nothing
+			System.out.println("Ignoring client-sent list payload; catalog data must come from DB.");
 		}
 	}
 
@@ -902,9 +870,16 @@ private static SessionFactory cachedSessionFactory;
 		try (Session session = sessionFactory.openSession()) {
 			Transaction tx = session.beginTransaction();
 			try {
+				String email = account.getEmail();
 				int accountId = account.getAccountID();
 				Account managedAccount = null;
-				if (accountId > 0) {
+				if (!isBlank(email)) {
+					managedAccount = findAccountByEmail(session, account.getClass(), email);
+					if (managedAccount == null && account.getClass() != Account.class) {
+						managedAccount = findAccountByEmail(session, Account.class, email);
+					}
+				}
+				if (managedAccount == null && accountId > 0) {
 					managedAccount = session.get(account.getClass(), accountId);
 					if (managedAccount == null && account.getClass() != Account.class) {
 						managedAccount = session.get(Account.class, accountId);
@@ -1631,7 +1606,7 @@ private static SessionFactory cachedSessionFactory;
 		return builder.and(startPredicate, endPredicate);
 	}
 
-	private LocalDate resolveOrderDate(Order order) {
+	private static LocalDate resolveOrderDate(Order order) {
 		try {
 			return LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
 		} catch (Exception ex) {
@@ -1656,9 +1631,14 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
-	private boolean isWithinRange(LocalDate date, LocalDate startDate, LocalDate endDate) {
+	private static boolean isWithinRange(LocalDate date, LocalDate startDate, LocalDate endDate) {
 		return (date.isEqual(startDate) || date.isAfter(startDate))
 				&& (date.isEqual(endDate) || date.isBefore(endDate));
+	}
+
+	private static List<Order> getScopedOrders(Session session, Account account, getAllOrdersMessage request) {
+		List<Order> scoped = getScopedOrders(session, account);
+		return filterOrders(scoped, account, request);
 	}
 
 	private static List<Order> getScopedOrders(Session session, Account account) {
@@ -1682,6 +1662,55 @@ private static SessionFactory cachedSessionFactory;
 		List<Order> result = session.createQuery(query).getResultList();
 		System.out.println("Arrived to getScopedOrders 2");
 		return result;
+	}
+
+	private static List<Order> filterOrders(List<Order> orders, Account account, getAllOrdersMessage request) {
+		if (orders == null) {
+			return Collections.emptyList();
+		}
+		Integer branchId = request != null ? request.getBranchId() : null;
+		LocalDate fromDate = request != null ? request.getFromDate() : null;
+		LocalDate toDate = request != null ? request.getToDate() : null;
+		String status = request != null ? request.getStatus() : null;
+		boolean filterBranch = branchId != null && branchId > 0;
+		boolean filterStatus = status != null && !status.isBlank() && !"all".equalsIgnoreCase(status);
+		boolean filterDates = fromDate != null && toDate != null;
+
+		int privilege = account != null ? account.getPrivilegeLevel() : 0;
+		int accountBranch = account != null ? resolveBranchId(account) : 0;
+
+		List<Order> filtered = new ArrayList<>();
+		for (Order order : orders) {
+			if (filterBranch) {
+				if (privilege >= 4) {
+					if (order.getShopID() != branchId) {
+						continue;
+					}
+				} else if (accountBranch > 0 && order.getShopID() != accountBranch) {
+					continue;
+				}
+			}
+			if (filterStatus) {
+				String normalized = status.trim().toLowerCase(Locale.ROOT);
+				boolean matches = switch (normalized) {
+					case "pending" -> !order.isDelivered() && !order.isCancelled();
+					case "delivered" -> order.isDelivered();
+					case "cancelled" -> order.isCancelled();
+					default -> true;
+				};
+				if (!matches) {
+					continue;
+				}
+			}
+			if (filterDates) {
+				LocalDate orderDate = resolveOrderDate(order);
+				if (orderDate == null || !isWithinRange(orderDate, fromDate, toDate)) {
+					continue;
+				}
+			}
+			filtered.add(order);
+		}
+		return filtered;
 	}
 
 	private List<Account> getScopedAccounts(Session session, Account account) {
@@ -1713,6 +1742,7 @@ private static SessionFactory cachedSessionFactory;
 		query.from(Product.class);
 		System.out.println("Arrived to getAllProducts 4");
 		List<Product> result = session.createQuery(query).getResultList();
+		System.out.println("DB products count = " + result.size());
 		System.out.println("Arrived to getAllProducts 5");
 		return result;
 	}

@@ -55,12 +55,6 @@
 
             <HBox HBox.hgrow="ALWAYS" />
 
-            <Button fx:id="backButton" onAction="#handleBackToCatalog"
-                    styleClass="btn-secondary" text="← Back to Catalog">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Button>
          </HBox>
 
          <!-- Main Content Area with ScrollPane -->
@@ -271,6 +265,32 @@
                            </Label>
                         </VBox>
                      </HBox>
+
+                     <Label text="Orders by Product Type" styleClass="section-title">
+                        <font>
+                           <Font name="System Bold" size="16.0" />
+                        </font>
+                     </Label>
+
+                     <Label fx:id="ordersByTypeEmptyLabel" text="No orders in selected range."
+                            textFill="#666666" visible="false" managed="false" />
+
+                     <BarChart fx:id="ordersByTypeChart" prefHeight="300.0"
+                               legendVisible="false" title="Orders by Product Type">
+                        <xAxis>
+                           <CategoryAxis fx:id="ordersByTypeXAxis" label="Product Type" />
+                        </xAxis>
+                        <yAxis>
+                           <NumberAxis fx:id="ordersByTypeYAxis" label="Orders" />
+                        </yAxis>
+                     </BarChart>
+
+                     <TableView fx:id="ordersByTypeTable" prefHeight="200.0">
+                        <columns>
+                           <TableColumn fx:id="orderTypeCol" prefWidth="250.0" text="Product Type" />
+                           <TableColumn fx:id="orderTypeCountCol" prefWidth="150.0" text="Orders" />
+                        </columns>
+                     </TableView>
                   </VBox>
 
                   <!-- Complaints Report Section -->
@@ -301,6 +321,8 @@
                      </PieChart>
 
                      <!-- Complaints Histogram -->
+                     <Label fx:id="complaintsEmptyLabel" text="No complaints in selected range."
+                            textFill="#666666" visible="false" managed="false" />
                      <BarChart fx:id="complaintsHistogramChart" prefHeight="300.0"
                                legendVisible="false" title="Complaints by Day">
                         <xAxis>

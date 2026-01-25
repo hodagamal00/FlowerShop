@@ -57,12 +57,6 @@
 
             <HBox HBox.hgrow="ALWAYS" />
 
-            <Button fx:id="backButton" onAction="#handleBackToDashboard"
-                    styleClass="btn-secondary" text="← Back to Dashboard">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Button>
          </HBox>
 
          <!-- Main Content Area -->
@@ -151,6 +145,11 @@
                               </Button>
                            </HBox>
                         </VBox>
+                     </HBox>
+
+                     <HBox spacing="20.0" alignment="CENTER_LEFT">
+                        <Label fx:id="currentPeriodLabel" text="Period A: -" textFill="#666666" />
+                        <Label fx:id="previousPeriodLabel" text="Period B: -" textFill="#666666" />
                      </HBox>
                   </VBox>
 

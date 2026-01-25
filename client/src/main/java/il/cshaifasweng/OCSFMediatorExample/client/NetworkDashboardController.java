@@ -27,7 +27,6 @@ import java.util.Random;
 public class NetworkDashboardController {
 
     // Navigation
-    @FXML private Button backButton;
     
     // Network Statistics
     @FXML private Label totalBranchesLabel;
@@ -321,14 +320,6 @@ public class NetworkDashboardController {
             e.printStackTrace();
             showError("Failed to load Role Management page.");
         }
-    }
-    
-    /**
-     * Navigate back to catalog
-     */
-    @FXML
-    private void handleBackToCatalog() {
-        NavigationService.getInstance().navigate("Catalog");
     }
     
     /**

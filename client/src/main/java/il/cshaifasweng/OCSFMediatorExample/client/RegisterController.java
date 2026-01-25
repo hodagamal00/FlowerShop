@@ -53,9 +53,6 @@ public class RegisterController {
     @FXML
     private Button RegisterButton;
 
-    @FXML
-    private Button backk;
-
 
     @FXML
     private TextField Street_Address;
@@ -375,19 +372,6 @@ public class RegisterController {
             ErrorMsg.setText(event.getMessage());
             ErrorMsg.setVisible(true);
         });
-    }
-    @FXML
-    void backkk(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
-        Parent roott = loader.load();
-        LoginController cc = loader.getController();
-        Stage stage = new Stage();
-        stage.setScene(new Scene(roott));
-        stage.setTitle("Login");
-        stage.show();
-        Stage stagee = (Stage) backk.getScene().getWindow();
-        // do what you have to do
-        stagee.close();
     }
     public LinkedList<String> getRegisteredAccounts(){
         return RegisteredAccounts;

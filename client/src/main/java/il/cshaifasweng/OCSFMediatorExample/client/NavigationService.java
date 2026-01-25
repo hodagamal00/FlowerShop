@@ -1,8 +1,9 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Account;
+import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import java.io.IOException;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Region;
@@ -62,20 +63,23 @@ public class NavigationService {
      * @param fxml the simple name of the FXML file (without extension)
      */
     public void navigate(String fxml) {
+        String resolvedView = resolveViewName(fxml);
+        if (isWorkerBlocked(resolvedView)) {
+            resolvedView = resolveViewName("WorkerDashboard");
+        }
         if (appShellController == null || !appShellController.isActive()) {
             // Controller not yet registered; fall back to the legacy scene
             // replacement to keep navigation working in standalone stages.
             try {
-                App.setRoot(resolveViewName(fxml));
+                App.setRoot(resolvedView);
             } catch (IOException e) {
                 // If we cannot swap roots yet, remember the request so it can be
                 // executed once the shell is ready.
-                pendingView = fxml;
+                pendingView = resolvedView;
             }
             return;
         }
         try {
-            String resolvedView = resolveViewName(fxml);
             FXMLLoader loader = new FXMLLoader(App.class.getResource(resolvedView + ".fxml"));
             Parent view = loader.load();
             Node content = ensureScrollable(view);
@@ -95,6 +99,15 @@ public class NavigationService {
             return "Catalog";
         }
         return normalized;
+    }
+
+    private boolean isWorkerBlocked(String resolvedView) {
+        if (resolvedView == null) {
+            return false;
+        }
+        Account account = SimpleClient.getAccount();
+        boolean isWorker = account != null && account.getPrivilegeLevel() == 2;
+        return isWorker && "myorders".equalsIgnoreCase(resolvedView);
     }
     /**
      * Ensures that the supplied view is scrollable by wrapping it in a

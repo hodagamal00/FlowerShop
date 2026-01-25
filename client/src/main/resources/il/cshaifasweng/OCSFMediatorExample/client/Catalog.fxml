@@ -44,13 +44,6 @@
                 <children>
                     <HBox spacing="10.0" alignment="CENTER_LEFT">
                         <children>
-                            <Text text="Subtotal:" strokeType="OUTSIDE" />
-                            <TextField fx:id="cartTextDiscount" editable="false" prefWidth="120.0" />
-                        </children>
-                    </HBox>
-
-                    <HBox spacing="10.0" alignment="CENTER_LEFT">
-                        <children>
                             <Text text="Total:" strokeType="OUTSIDE" styleClass="strong" />
                             <TextField fx:id="cartTextPrice" editable="false" prefWidth="120.0" styleClass="strong" />
                         </children>
@@ -430,7 +423,7 @@
         </StackPane>
     </center>
     <right>
-        <VBox spacing="24.0" styleClass="catalog-rightbar">
+        <VBox fx:id="accountToolsPanel" spacing="24.0" styleClass="catalog-rightbar">
             <VBox spacing="8.0" styleClass="catalog-panel">
                 <Text text="Account &amp; Tools" styleClass="panel-title" />
                 <Button fx:id="viewMyOrders" mnemonicParsing="false"

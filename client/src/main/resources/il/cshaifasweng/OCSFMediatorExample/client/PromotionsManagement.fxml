@@ -53,12 +53,6 @@
 
             <HBox HBox.hgrow="ALWAYS" />
 
-            <Button fx:id="backButton" onAction="#handleBackToCatalog"
-                    styleClass="btn-secondary" text="← Back to Catalog">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Button>
          </HBox>
 
          <!-- Main Content Area -->

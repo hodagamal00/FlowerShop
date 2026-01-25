@@ -67,10 +67,12 @@ public class OrderUpdateManager {
 
         validateOrder(recievedOrder);
 
-        long numOfRowsOrder = countRowsOrder();
-        int castedId = (int) numOfRowsOrder;
-        int newOrderId = castedId + 1;
-        recievedOrder.setOrderID(newOrderId);
+        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
+        int orderId = recievedOrder.getOrderID();
+        if (orderId <= 0) {
+            orderId = getNextOrderId(sessionFactory);
+            recievedOrder.setOrderID(orderId);
+        }
    /*     boolean recievedOrderPickUp = recievedOrder.isPickUp();
         int recievedOrderShopID = recievedOrder.getShopID();
         System.out.println("inside additemTocatalog4");
@@ -89,12 +91,11 @@ public class OrderUpdateManager {
 
 */
 
-        SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             try {
                 System.out.println("inside additemTocatalog8");
-                System.out.println("the new index is:" + newOrderId);
+                System.out.println("the new index is:" + orderId);
 
                 session.save(recievedOrder);
                 System.out.println("inside additemTocatalog9");
@@ -109,6 +110,17 @@ public class OrderUpdateManager {
         }
 
         System.out.println("inside additemTocatalog12");
+    }
+
+    private static int getNextOrderId(SessionFactory sessionFactory) {
+        try (Session session = sessionFactory.openSession()) {
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+            Root<Order> root = query.from(Order.class);
+            query.select(builder.max(root.get("orderID")));
+            Integer maxId = session.createQuery(query).getSingleResult();
+            return maxId == null ? 1 : maxId + 1;
+        }
     }
 
     private static void validateOrder(Order order) {
@@ -161,53 +173,23 @@ public class OrderUpdateManager {
     }
 
     public static void removeOrder(String orderIdToRemove, ConnectionToClient _client) {
-
-
         System.out.println("arrived to removeOrder");
-
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-
-
-        ordersnum--;
-
         int removedId = Integer.parseInt(orderIdToRemove);
-        orderGeneralList = getAllOrders();
-        orderGeneralList.remove(removedId-1); // remove the wanted item from the list
-        for(int i=0;i<orderGeneralList.size();i++){ // update all the items id's
-            if(orderGeneralList.get(i).getOrderID() > removedId){
-                orderGeneralList.get(i).setOrderID((orderGeneralList.get(i).getOrderID()-1));
-            }
-        }
-        System.out.println("arrived to removeOrder 2");
-
-
-        long longID = countRowsOrder();
-        //tx1.commit();
-        System.out.println("arrived to removeOrder 3 and the longID is " + longID);
-        int castedID = (int) longID;
-        for(int l=0;l<castedID;l++){
-
-            System.out.println("arrived to removeItemFromCatalog 2.5");
-            deleteOrder(l+1);
-        }
-
         try (Session session = sessionFactory.openSession()) {
-            Transaction tx2 = session.beginTransaction();
+            Transaction tx = session.beginTransaction();
             try {
-                for(int i=0;i<orderGeneralList.size();i++){
-                    session.save(orderGeneralList.get(i));
-                    session.flush();
+                Order order = session.get(Order.class, removedId);
+                if (order != null) {
+                    session.delete(order);
                 }
-                tx2.commit();
+                tx.commit();
+                System.out.println("arrived to removeOrder 2.8");
             } catch (Exception ex) {
-                tx2.rollback();
+                tx.rollback();
                 throw ex;
             }
         }
-
-        //session.close(); // here we finished deleting a Order, everything else is for updating the id's
-        System.out.println("arrived to removeItemFromCatalog 2.8");
-
     }
 
     public static void deleteOrder(int deleteIndex) {

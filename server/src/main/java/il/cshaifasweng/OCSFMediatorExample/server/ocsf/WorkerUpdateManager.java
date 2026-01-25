@@ -83,25 +83,18 @@ public class WorkerUpdateManager {
     public static void addWorker(Worker recievedWorker) {
         System.out.println("inside additemTocatalog1");
 
-        long numOfRowsWorker = countRowsWorker();
-        int castedId = (int) numOfRowsWorker;
-        int newWorkerId = castedId + 1;
-        recievedWorker.setPersonID(newWorkerId);
-        System.out.println("inside additemTocatalog2");
-        String recievedWorkerName = recievedWorker.getFullName();
-        System.out.println("inside additemTocatalog3");
-        String recievedWorkerEmail = recievedWorker.getEmail();
-        System.out.println("inside additemTocatalog4");
-        String recievedWorkerPassword = recievedWorker.getPassword();
-        System.out.println("inside additemTocatalog5");
-        Boolean recievedWorkerloggedIn = recievedWorker.getLoggedIn();
-
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
             try {
+                int workerId = recievedWorker.getAccountID();
+                if (workerId <= 0) {
+                    workerId = getNextWorkerId(session);
+                    recievedWorker.setAccountID(workerId);
+                }
+                recievedWorker.setPersonID(workerId);
                 System.out.println("inside additemTocatalog8");
-                System.out.println("the new index is:" + newWorkerId);
+                System.out.println("the new index is:" + workerId);
 
                 session.save(recievedWorker);
                 System.out.println("inside additemTocatalog9");
@@ -118,56 +111,33 @@ public class WorkerUpdateManager {
         System.out.println("inside additemTocatalog12");
     }
 
+    private static int getNextWorkerId(Session session) {
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Integer> query = builder.createQuery(Integer.class);
+        Root<Worker> root = query.from(Worker.class);
+        query.select(builder.max(root.get("accountID")));
+        Integer maxId = session.createQuery(query).getSingleResult();
+        return maxId == null ? 1 : maxId + 1;
+    }
+
     public static void removeWorker(String workerIdToRemove, ConnectionToClient _client) {
-
-
         System.out.println("arrived to removeWorker");
-
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
-
-
-        workersnum--;
-
         int removedId = Integer.parseInt(workerIdToRemove);
-        workerGeneralList = getAllWorkers();
-        workerGeneralList.remove(removedId-1); // remove the wanted item from the list
-        for(int i=0;i<workerGeneralList.size();i++){ // update all the items id's
-            if(workerGeneralList.get(i).getPersonID() > removedId){
-                // Cast the result of the subtraction to int to satisfy the setter
-                // signature.  getPersonID returns long and setPersonID expects int.
-                workerGeneralList.get(i).setPersonID((int)(workerGeneralList.get(i).getPersonID() - 1));
-            }
-        }
-        System.out.println("arrived to removeWorker 2");
-
-
-        long longID = countRowsWorker();
-        //tx1.commit();
-        System.out.println("arrived to removeWorker 3 and the longID is " + longID);
-        int castedID = (int) longID;
-        for(int l=0;l<castedID;l++){
-
-            System.out.println("arrived to removeItemFromCatalog 2.5");
-            deleteWorker(l+1);
-        }
-
         try (Session session = sessionFactory.openSession()) {
-            Transaction tx2 = session.beginTransaction();
+            Transaction tx = session.beginTransaction();
             try {
-                for(int i=0;i<workerGeneralList.size();i++){
-                    session.save(workerGeneralList.get(i));
-                    session.flush();
+                Worker worker = session.get(Worker.class, removedId);
+                if (worker != null) {
+                    session.delete(worker);
                 }
-                tx2.commit();
+                tx.commit();
+                System.out.println("arrived to removeWorker 2.8");
             } catch (Exception ex) {
-                tx2.rollback();
+                tx.rollback();
                 throw ex;
             }
         }
-
-        //session.close(); // here we finished deleting a worker, everything else is for updating the id's
-        System.out.println("arrived to removeItemFromCatalog 2.8");
-
     }
 
     public static void deleteWorker(int deleteIndex) {
