@@ -68,6 +68,14 @@ public class Order implements Serializable {
     private String RecepAddress;
     @Column(name = "Products")
     private String Products;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Account_ID", referencedColumnName = "accountID", insertable = false, updatable = false)
+    private Account account;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Shop_ID", referencedColumnName = "branch_id", insertable = false, updatable = false)
+    private BranchSettings branchSettings;
     
     // New fields for cancellation and refund tracking
     @Column(name = "is_cancelled")
@@ -257,6 +265,14 @@ public class Order implements Serializable {
 
     public int getOrderID() {
         return orderID;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public BranchSettings getBranchSettings() {
+        return branchSettings;
     }
 
     public boolean isPickUp() {

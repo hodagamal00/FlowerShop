@@ -20,8 +20,8 @@ import java.util.Random;
 
 /**
  * Seeds the database with demo data so the application can be used immediately
- * after launching the server.  The initializer is idempotent – if records are
- * already present in a table it skips seeding that table.
+ * after launching the server. The initializer runs only when no products exist
+ * to avoid resetting real data on subsequent launches.
  */
 public final class DemoDataInitializer {
 
@@ -36,6 +36,10 @@ public final class DemoDataInitializer {
         }
 
         try (Session session = sessionFactory.openSession()) {
+            if (hasExistingData(session)) {
+                initialized = true;
+                return;
+            }
             Transaction tx = session.beginTransaction();
             try {
                 seedProducts(session);
@@ -45,7 +49,6 @@ public final class DemoDataInitializer {
                 seedOrders(session);
                 seedComplaints(session);
                 seedMessages(session);
-                seedReports(session);
                 seedPromotions(session);
                 seedBranchSettings(session);
                 seedGlobalSettings(session);
@@ -67,6 +70,13 @@ public final class DemoDataInitializer {
         return session.createQuery(criteria).getSingleResult();
     }
 
+    private static boolean hasExistingData(Session session) {
+        return count(session, Product.class) > 0
+                || count(session, Account.class) > 0
+                || count(session, Order.class) > 0
+                || count(session, Complaint.class) > 0;
+    }
+
     private static void seedProducts(Session session) {
         if (count(session, Product.class) > 0) {
             return;
@@ -75,22 +85,22 @@ public final class DemoDataInitializer {
         List<Product> products = Arrays.asList(
                 createProduct(1, "btnRose", "Red Rose Bouquet", "A dozen fresh red roses", 120.0,
                         "ROSE-001", "Bouquet", "Red", false, 0, false, null, 0.0, 0.0,
-                        "Classic bouquet for any celebration"),
+                        "Classic bouquet for any celebration", "/images/flower1.jpg"),
                 createProduct(2, "btnSun", "Sunny Sunflowers", "Bright sunflowers in a rustic vase", 95.0,
                         "SUN-002", "Arrangement", "Yellow", true, 15, false, null, 0.0, 0.0,
-                        "Bring sunshine indoors"),
+                        "Bring sunshine indoors", "/images/flower2.jpg"),
                 createProduct(3, "btnOrchid", "Orchid Elegance", "White orchids in a ceramic pot", 180.0,
                         "ORC-003", "Flowering Pot", "White", false, 0, false, null, 0.0, 0.0,
-                        "Elegant orchids that last weeks"),
+                        "Elegant orchids that last weeks", "/images/flower3.jpg"),
                 createProduct(4, "btnMix", "Color Splash", "Mixed seasonal flowers", 140.0,
                         "MIX-004", "Bouquet", "Mixed", true, 10, false, null, 0.0, 0.0,
-                        "Perfect for birthdays and anniversaries"),
+                        "Perfect for birthdays and anniversaries", "/images/flower4.jpg"),
                 createProduct(5, "btnTulip", "Tulip Charm", "Soft tulips arranged for spring", 110.0,
                         "TUL-005", "Seasonal", "Pink", false, 0, false, null, 0.0, 0.0,
-                        "Fresh tulips to brighten any room"),
+                        "Fresh tulips to brighten any room", "/images/flower5.jpg"),
                 createProduct(6, "btnCustom", "Custom Bridal Bouquet", "Tailored bridal bouquet design", 350.0,
                         "CUS-006", "Custom", "Varies", false, 0, true, "Bridal Bouquet", 250.0, 600.0,
-                        "Work with our designers to craft your dream bouquet")
+                        "Work with our designers to craft your dream bouquet", "/images/flower6.jpg")
         );
 
         for (Product product : products) {
@@ -101,9 +111,12 @@ public final class DemoDataInitializer {
     private static Product createProduct(int id, String button, String name, String details, double price,
                                          String sku, String category, String color, boolean promotion,
                                          double discountPercent, boolean custom, String customType,
-                                         double priceRangeMin, double priceRangeMax, String greetingCard) {
+                                         double priceRangeMin, double priceRangeMax, String greetingCard,
+                                         String imagePath) {
         Product product = new Product(id, button, name, details, price);
-        product.setImage(button + ".jpg");
+        if (imagePath != null && !imagePath.isBlank()) {
+            product.setImage(imagePath);
+        }
         product.setSku(sku);
         product.setCategory(category);
         product.setColor(color);

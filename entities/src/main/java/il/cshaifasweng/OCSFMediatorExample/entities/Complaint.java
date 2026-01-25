@@ -54,6 +54,18 @@ public class Complaint implements Serializable {
     @Column(name = "compensation_decision")
     private String compensationDecision;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Customer_Id", referencedColumnName = "accountID", insertable = false, updatable = false)
+    private Account customer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Order_Id", referencedColumnName = "orderID", insertable = false, updatable = false)
+    private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_Id", referencedColumnName = "branch_id", insertable = false, updatable = false)
+    private BranchSettings branchSettings;
+
 
     public Complaint(int complaintID, int customerID, int orderID, boolean accepted, boolean in24Hours, String complaintText, int shopID, int answerworkerID, boolean returnedMoney, int returnedmoneyvalue, int day, int month, int year, String replyText) {
         this.complaintID = complaintID;
@@ -170,6 +182,18 @@ public class Complaint implements Serializable {
 
     public int getComplaintID() {
         return complaintID;
+    }
+
+    public Account getCustomer() {
+        return customer;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public BranchSettings getBranchSettings() {
+        return branchSettings;
     }
 
     public int getCustomerID() {

@@ -9,6 +9,7 @@ import javafx.collections.ListChangeListener;
 // problematic.
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -19,6 +20,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Parent;
@@ -919,6 +921,44 @@ public class CatalogController {
 		}
 	}
 
+	private void applyProductImage(Product product, ImageView imageView) {
+		if (product == null || imageView == null) {
+			return;
+		}
+		String imagePath = product.getImage();
+		if (imagePath == null || imagePath.isBlank()) {
+			return;
+		}
+		Image image = loadProductImage(imagePath);
+		if (image != null) {
+			imageView.setImage(image);
+		}
+	}
+
+	private Image loadProductImage(String imagePath) {
+		if (imagePath == null || imagePath.isBlank()) {
+			return null;
+		}
+		try {
+			if (imagePath.startsWith("http://")
+					|| imagePath.startsWith("https://")
+					|| imagePath.startsWith("file:")
+					|| imagePath.startsWith("jar:")) {
+				return new Image(imagePath);
+			}
+			URL resource = getClass().getResource(imagePath);
+			if (resource == null && !imagePath.startsWith("/")) {
+				resource = getClass().getResource("/" + imagePath);
+			}
+			if (resource != null) {
+				return new Image(resource.toExternalForm());
+			}
+		} catch (Exception ex) {
+			System.out.println("Unable to load product image: " + ex.getMessage());
+		}
+		return null;
+	}
+
 	private String defaultSkuFor(Product product, int index) {
 		String[] defaultSkus = {
 				"SUN-001",
@@ -1174,6 +1214,7 @@ public class CatalogController {
 			if(CatalogENDIndex - CatalogSTARTIndex > 0)
 			{
 				flower_name1.setText(displayProducts.get(CatalogSTARTIndex).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex), flower_button1);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex), flower_price1, flower_price_before_container1, flower_price_before1,
 						flower_price_before_line1, flower_price_after1, flower_promo1);
 				flower_sku1.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex).getSku()));
@@ -1192,6 +1233,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 1)
 			{
 				flower_name2.setText(displayProducts.get(CatalogSTARTIndex + 1).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 1), flower_button2);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 1), flower_price2, flower_price_before_container2, flower_price_before2,
 						flower_price_before_line2, flower_price_after2, flower_promo2);
 				flower_sku2.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 1).getSku()));
@@ -1209,6 +1251,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 2)
 			{
 				flower_name3.setText(displayProducts.get(CatalogSTARTIndex + 2).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 2), flower_button3);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 2), flower_price3, flower_price_before_container3, flower_price_before3,
 						flower_price_before_line3, flower_price_after3, flower_promo3);
 				flower_sku3.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 2).getSku()));
@@ -1226,6 +1269,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 3)
 			{
 				flower_name4.setText(displayProducts.get(CatalogSTARTIndex + 3).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 3), flower_button4);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 3), flower_price4, flower_price_before_container4, flower_price_before4,
 						flower_price_before_line4, flower_price_after4, flower_promo4);
 				flower_sku4.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 3).getSku()));
@@ -1243,6 +1287,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex > 4)
 			{
 				flower_name5.setText(displayProducts.get(CatalogSTARTIndex + 4).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 4), flower_button5);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 4), flower_price5, flower_price_before_container5, flower_price_before5,
 						flower_price_before_line5, flower_price_after5, flower_promo5);
 				flower_sku5.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 4).getSku()));
@@ -1263,6 +1308,7 @@ public class CatalogController {
 				// select the sixth element in the current window and update the corresponding
 				// UI components (name, price, button, cart button and container) for slot 6.
 				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 5), flower_button6);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before_container6, flower_price_before6,
 						flower_price_before_line6, flower_price_after6, flower_promo6);
 				flower_sku6.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 5).getSku()));
@@ -1280,6 +1326,7 @@ public class CatalogController {
 			if (CatalogENDIndex - CatalogSTARTIndex == 6)
 			{
 				flower_name6.setText(displayProducts.get(CatalogSTARTIndex + 5).getName());
+				applyProductImage(displayProducts.get(CatalogSTARTIndex + 5), flower_button6);
 				updatePricingLabels(displayProducts.get(CatalogSTARTIndex + 5), flower_price6, flower_price_before_container6, flower_price_before6,
 						flower_price_before_line6, flower_price_after6, flower_promo6);
 				flower_sku6.setText(formatCatalogField("SKU", displayProducts.get(CatalogSTARTIndex + 5).getSku()));
@@ -1823,62 +1870,10 @@ public class CatalogController {
 	public void initDatabase(InitDatabaseEvent event) {
 
 		System.out.println("arrived to databaseInit");
-		// When constructing Product instances we must pass the price as a double.
-		// Label#getText() returns a String, so parse it to double before calling
-		// the Product constructor.  This avoids "String cannot be converted to
-		// double" compilation errors.
-		double price1 = 0.0;
-		double price2 = 0.0;
-		double price3 = 0.0;
-		double price4 = 0.0;
-		double price5 = 0.0;
-		double price6 = 0.0;
-		try {
-			// Strip any non-numeric characters (e.g. currency symbols) before parsing
-			price1 = Double.parseDouble(flower_price1.getText().replaceAll("[^\\d.]", ""));
-			price2 = Double.parseDouble(flower_price2.getText().replaceAll("[^\\d.]", ""));
-			price3 = Double.parseDouble(flower_price3.getText().replaceAll("[^\\d.]", ""));
-			price4 = Double.parseDouble(flower_price4.getText().replaceAll("[^\\d.]", ""));
-			price5 = Double.parseDouble(flower_price5.getText().replaceAll("[^\\d.]", ""));
-			price6 = Double.parseDouble(flower_price6.getText().replaceAll("[^\\d.]", ""));
-		} catch (NumberFormatException ex) {
-			// If parsing fails, leave default 0.0; you may want to handle this case
-			// by showing an error to the user or skipping product creation
-			ex.printStackTrace();
-		}
-		Product flower1 = new Product(1, flower_button1.getId(), flower_name1.getText(), "", price1);
-		applyDefaultMetadata(flower1, 0);
-		allProducts.add(flower1);
-		Product flower2 = new Product(2, flower_button2.getId(), flower_name2.getText(), "", price2);
-		applyDefaultMetadata(flower2, 1);
-		allProducts.add(flower2);
-		Product flower3 = new Product(3, flower_button3.getId(), flower_name3.getText(), "", price3);
-		applyDefaultMetadata(flower3, 2);
-		allProducts.add(flower3);
-		Product flower4 = new Product(4, flower_button4.getId(), flower_name4.getText(), "", price4);
-		applyDefaultMetadata(flower4, 3);
-		allProducts.add(flower4);
-		Product flower5 = new Product(5, flower_button5.getId(), flower_name5.getText(), "", price5);
-		applyDefaultMetadata(flower5, 4);
-		allProducts.add(flower5);
-		Product flower6 = new Product(6, flower_button6.getId(), flower_name6.getText(), "", price6);
-		applyDefaultMetadata(flower6, 5);
-		allProducts.add(flower6);
-
-		List<Product> productList = new ArrayList<Product>();
-		productList.add(flower1);
-		productList.add(flower2);
-		productList.add(flower3);
-		productList.add(flower4);
-		productList.add(flower5);
-		productList.add(flower6);
-		try {
-			SimpleClient.getClient().sendToServer(productList); // sends the updated product to the server class
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		allProducts.clear();
 		resetFilteredProducts();
+		showStatusMessage("Catalog data is loading from the server.");
+		requestCatalogReload();
 
 	}
 
@@ -2511,6 +2506,9 @@ public class CatalogController {
 
 	private void syncProductImageFromCatalog(Product product, ImageView imageView) {
 		if (product == null || imageView == null || imageView.getImage() == null) {
+			return;
+		}
+		if (product.getImage() != null && !product.getImage().isBlank()) {
 			return;
 		}
 		String imageUrl = imageView.getImage().getUrl();

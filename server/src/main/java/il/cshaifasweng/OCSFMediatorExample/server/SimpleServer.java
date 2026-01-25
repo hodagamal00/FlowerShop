@@ -741,44 +741,7 @@ private static SessionFactory cachedSessionFactory;
 		}
 
 		if (msg instanceof ArrayList) {
-			System.out.println("Arrived here: msg instance of arrayList ");
-
-			System.out.println("list size 11111 = " + flowersnum);
-
-			SessionFactory sessionFactory = getSessionFactory();
-			Session localSession = null;
-			Transaction tx1 = null;
-			try {
-				localSession = sessionFactory.openSession();
-				tx1 = localSession.beginTransaction();
-				System.out.println("msg instance of arrayList ");
-
-				List<Product> resultList = (List<Product>) msg;
-				flowersnum = resultList.size();
-				System.out.println("list size 2222 = " + flowersnum);
-				for (int i = 0; i < resultList.size(); i++) {
-					localSession.save(resultList.get(i));
-					localSession.flush();
-					System.out.println(resultList.get(i).getName());
-				}
-				tx1.commit();
-
-				for (int i = 0; i < resultList.size(); i++) {
-					productGeneralList.add(resultList.get(i));
-					System.out.println(resultList.get(i).getName());
-				}
-			} catch (Exception ex) {
-				if (tx1 != null) {
-					tx1.rollback();
-				}
-				throw ex;
-			} finally {
-				if (localSession != null) {
-					localSession.close();
-				}
-			}
-		} else {
-			// nothing
+			System.out.println("Ignoring client-sent list payload; catalog data must come from DB.");
 		}
 	}
 
