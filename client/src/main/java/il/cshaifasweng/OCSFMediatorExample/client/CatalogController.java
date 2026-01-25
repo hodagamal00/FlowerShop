@@ -1695,37 +1695,9 @@ public class CatalogController {
 		//cartTopText.setVisible(false);
 		//cartTextPrice.setVisible(false);
 
-		// Populate filter combo boxes after data initialisation.  We only have six
-		// products at present; categories and colours are pulled from the Product
-		// objects.  Price ranges are hard coded for illustrative purposes.
+		// Populate filter combo boxes after data initialisation.
 		ensureCatalogDataLoaded();
-		// Collect distinct categories and colours from available products
-		java.util.Set<String> categories = new java.util.HashSet<>();
-		java.util.Set<String> colours = new java.util.HashSet<>();
-		for (Product p : allProducts) {
-			if (p.getCategory() != null && !p.getCategory().isEmpty()) {
-				categories.add(p.getCategory());
-			}
-			if (p.getColor() != null && !p.getColor().isEmpty()) {
-				colours.add(p.getColor());
-			}
-		}
-		categoryFilter.getItems().clear();
-		categoryFilter.getItems().add("All");
-		categoryFilter.getItems().addAll(categories);
-		categoryFilter.getSelectionModel().selectFirst();
-
-		colorFilter.getItems().clear();
-		colorFilter.getItems().add("All");
-		colorFilter.getItems().addAll(colours);
-		colorFilter.getSelectionModel().selectFirst();
-
-		priceFilter.getItems().clear();
-		priceFilter.getItems().add("All");
-		priceFilter.getItems().add("0-50");
-		priceFilter.getItems().add("50-100");
-		priceFilter.getItems().add("100-200");
-		priceFilter.getSelectionModel().selectFirst();
+		updateFilterOptions();
 
 		// Attach listeners to apply filters when a selection changes
 		categoryFilter.setOnAction(e -> applyFilters());
@@ -1765,23 +1737,24 @@ public class CatalogController {
 	}
 
 	private void ensureCatalogDataLoaded() {
-		if (!allProducts.isEmpty()) {
-			ensureProductMetadata(allProducts);
-			resetFilteredProducts();
-			availableProducts = true;
-			Platform.runLater(() -> updateFields(2));
-			return;
-		}
-		initializeData();
+		clearCatalogData();
+		showStatusMessage("Catalog data is loading from the server.");
+		requestCatalogReload();
 	}
 
-	@Subscribe
-	public void updateGui(UpdateGuiEvent upEvent){
-		System.out.println("arrived to the update GUI  event");
-		allProducts = upEvent.getRecievedList();
+	private void clearCatalogData() {
+		allProducts.clear();
+		resetFilteredProducts();
+		availableProducts = false;
+		Platform.runLater(() -> updateFields(2));
+	}
+
+	private void rebuildCatalogFromProducts(List<Product> products) {
+		allProducts = products != null ? new ArrayList<>(products) : new ArrayList<>();
 		ensureProductMetadata(allProducts);
 		resetFilteredProducts();
-		availableProducts = true;
+		availableProducts = !allProducts.isEmpty();
+		updateFilterOptions();
 		Platform.runLater(() -> {
 			updateFields(2);
 			if (init_container != null) {
@@ -1791,6 +1764,45 @@ public class CatalogController {
 				justText.setVisible(false);
 			}
 		});
+	}
+
+	private void updateFilterOptions() {
+		java.util.Set<String> categories = new java.util.HashSet<>();
+		java.util.Set<String> colours = new java.util.HashSet<>();
+		for (Product p : allProducts) {
+			if (p.getCategory() != null && !p.getCategory().isEmpty()) {
+				categories.add(p.getCategory());
+			}
+			if (p.getColor() != null && !p.getColor().isEmpty()) {
+				colours.add(p.getColor());
+			}
+		}
+		if (categoryFilter != null) {
+			categoryFilter.getItems().clear();
+			categoryFilter.getItems().add("All");
+			categoryFilter.getItems().addAll(categories);
+			categoryFilter.getSelectionModel().selectFirst();
+		}
+		if (colorFilter != null) {
+			colorFilter.getItems().clear();
+			colorFilter.getItems().add("All");
+			colorFilter.getItems().addAll(colours);
+			colorFilter.getSelectionModel().selectFirst();
+		}
+		if (priceFilter != null) {
+			priceFilter.getItems().clear();
+			priceFilter.getItems().add("All");
+			priceFilter.getItems().add("0-50");
+			priceFilter.getItems().add("50-100");
+			priceFilter.getItems().add("100-200");
+			priceFilter.getSelectionModel().selectFirst();
+		}
+	}
+
+	@Subscribe
+	public void updateGui(UpdateGuiEvent upEvent){
+		System.out.println("arrived to the update GUI  event");
+		rebuildCatalogFromProducts(upEvent.getRecievedList());
 	}
 	@Subscribe
 	public void complaintEvent(PassAllComplaintsEvent allComps){ // added new 21/7
@@ -1855,18 +1867,7 @@ public class CatalogController {
 		for (int i = 0; i < rtEvent.getRecievedList().size(); i++) {
 			System.out.println(rtEvent.getRecievedList().get(i).getButton());
 		}
-		allProducts = rtEvent.getRecievedList();
-		ensureProductMetadata(allProducts);
-		resetFilteredProducts();
-		Platform.runLater(() -> {
-			updateFields(2);
-			if (init_container != null) {
-				init_container.setVisible(false);
-			}
-			if (justText != null) {
-				justText.setVisible(false);
-			}
-		});
+		rebuildCatalogFromProducts(rtEvent.getRecievedList());
 
 
 	}
@@ -1875,8 +1876,7 @@ public class CatalogController {
 	public void initDatabase(InitDatabaseEvent event) {
 
 		System.out.println("arrived to databaseInit");
-		allProducts.clear();
-		resetFilteredProducts();
+		clearCatalogData();
 		showStatusMessage("Catalog data is loading from the server.");
 		requestCatalogReload();
 

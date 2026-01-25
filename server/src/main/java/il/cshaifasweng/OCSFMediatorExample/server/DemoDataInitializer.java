@@ -41,6 +41,7 @@ public final class DemoDataInitializer {
                 try {
                     resetProducts(session);
                     seedProducts(session);
+                    logProductCount(session, "after RESET_PRODUCTS");
                     tx.commit();
                     System.out.println("RESET_PRODUCTS done.");
                     initialized = true;
@@ -58,6 +59,7 @@ public final class DemoDataInitializer {
             Transaction tx = session.beginTransaction();
             try {
                 seedProducts(session);
+                logProductCount(session, "after demo seed");
                 seedAccounts(session);
                 seedWorkers(session);
                 seedManagers(session);
@@ -83,6 +85,11 @@ public final class DemoDataInitializer {
         Root<?> root = criteria.from(entityClass);
         criteria.select(builder.count(root));
         return session.createQuery(criteria).getSingleResult();
+    }
+
+    private static void logProductCount(Session session, String context) {
+        long productCount = count(session, Product.class);
+        System.out.println("Product count " + context + ": " + productCount);
     }
 
     private static boolean hasExistingData(Session session) {

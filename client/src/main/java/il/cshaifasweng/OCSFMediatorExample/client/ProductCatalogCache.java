@@ -18,6 +18,7 @@ public final class ProductCatalogCache {
         if (products == null) {
             return;
         }
+        PRODUCTS.clear();
         for (Product product : products) {
             if (product != null) {
                 PRODUCTS.put(product.getID(), product);
