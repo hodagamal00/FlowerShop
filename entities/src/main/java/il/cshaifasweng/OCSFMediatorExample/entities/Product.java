@@ -1,5 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -16,7 +18,8 @@ public class Product implements Serializable {
     private String name;
     @Column(name = "product_details")
     private String details;
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
+    @ColumnDefault("0")
     private double price;
     @Column(name = "product_image")
     private String image;
