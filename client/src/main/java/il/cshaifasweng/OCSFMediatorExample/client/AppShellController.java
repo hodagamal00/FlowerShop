@@ -14,10 +14,13 @@ import javafx.scene.layout.VBox;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -46,9 +49,9 @@ public class AppShellController {
     private static final List<NavDestination> NAV_LINKS = List.of(
             NavDestination.forAllUsers("Home", "HomePage"),
             NavDestination.forAllUsers("Catalog", "Catalog"),
-            NavDestination.forLoggedIn("Cart", "cart", 0),
-            NavDestination.forLoggedIn("Checkout", "checkout", 1),
-            NavDestination.forLoggedIn("Orders", "myorders", 1),
+            NavDestination.forRoles("Cart", "cart", false, 1),
+            NavDestination.forRoles("Checkout", "checkout", true, 1),
+            NavDestination.forRoles("Orders", "myorders", false, 1),
             NavDestination.forLoggedIn("Branch Orders", "BranchOrders", 2),
             NavDestination.forLoggedIn("Complaints", "mycomplaints", 1),
             NavDestination.forLoggedIn("My Account", "Profile", 1),
@@ -85,7 +88,7 @@ public class AppShellController {
         if (profileButton != null) {
             profileButton.setOnAction(e -> NavigationService.getInstance().navigate("Profile"));
         }
-        buildNavigationBar(SimpleClient.getUser());
+        configureNavbarForRole(SimpleClient.getUser());
         updateLoginState(SimpleClient.getUser());
 
     }
@@ -215,7 +218,7 @@ public class AppShellController {
             boolean showProfile = finalAccount != null && finalAccount.getPrivilegeLevel() == 1;
             profileContainer.setVisible(showProfile);
             profileContainer.setManaged(showProfile);
-            buildNavigationBar(finalAccount);
+            configureNavbarForRole(finalAccount);
 
         });
     }
@@ -276,10 +279,10 @@ public class AppShellController {
         NavigationService.getInstance().navigate("HomePage");
     }
     private void buildNavigationBar() {
-        buildNavigationBar(SimpleClient.getUser());
+        configureNavbarForRole(SimpleClient.getUser());
     }
 
-    private void buildNavigationBar(Account account) {
+    private void configureNavbarForRole(Account account) {
         if (navBar == null) {
             return;
         }
@@ -351,25 +354,37 @@ public class AppShellController {
         private final int minPrivilege;
         private final boolean requiresLogin;
         private final boolean guestOnly;
+        private final Set<Integer> allowedPrivileges;
+        private final boolean allowGuests;
 
-        private NavDestination(String label, String viewName, int minPrivilege, boolean requiresLogin, boolean guestOnly) {
+        private NavDestination(String label, String viewName, int minPrivilege, boolean requiresLogin, boolean guestOnly,
+                               Set<Integer> allowedPrivileges, boolean allowGuests) {
             this.label = label;
             this.viewName = viewName;
             this.minPrivilege = minPrivilege;
             this.requiresLogin = requiresLogin;
             this.guestOnly = guestOnly;
+            this.allowedPrivileges = allowedPrivileges;
+            this.allowGuests = allowGuests;
         }
 
         static NavDestination forAllUsers(String label, String viewName) {
-            return new NavDestination(label, viewName, 0, false, false);
+            return new NavDestination(label, viewName, 0, false, false, null, true);
         }
 
         static NavDestination forLoggedIn(String label, String viewName, int minPrivilege) {
-            return new NavDestination(label, viewName, minPrivilege, true, false);
+            return new NavDestination(label, viewName, minPrivilege, true, false, null, false);
         }
 
         static NavDestination forGuestsOnly(String label, String viewName) {
-            return new NavDestination(label, viewName, 0, false, true);
+            return new NavDestination(label, viewName, 0, false, true, null, true);
+        }
+
+        static NavDestination forRoles(String label, String viewName, boolean allowGuests, int... privileges) {
+            Set<Integer> allowed = Arrays.stream(privileges)
+                    .boxed()
+                    .collect(Collectors.toSet());
+            return new NavDestination(label, viewName, 0, !allowGuests, false, allowed, allowGuests);
         }
 
         String getLabel() {
@@ -383,6 +398,12 @@ public class AppShellController {
         boolean isVisibleFor(int privilege, boolean loggedIn) {
             if (guestOnly) {
                 return !loggedIn;
+            }
+            if (allowedPrivileges != null) {
+                if (!loggedIn) {
+                    return allowGuests;
+                }
+                return allowedPrivileges.contains(privilege);
             }
             if (requiresLogin && !loggedIn) {
                 return false;
