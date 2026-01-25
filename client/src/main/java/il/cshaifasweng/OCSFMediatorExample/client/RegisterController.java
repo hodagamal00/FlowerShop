@@ -53,8 +53,6 @@ public class RegisterController {
     @FXML
     private Button RegisterButton;
 
-    @FXML
-
 
     @FXML
     private TextField Street_Address;
