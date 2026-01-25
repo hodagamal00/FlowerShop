@@ -417,6 +417,11 @@ public class MyOrdersController {
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() throws IOException {
+        Account account = SimpleClient.getAccount();
+        if (account != null && account.getPrivilegeLevel() == 2) {
+            NavigationService.getInstance().navigate("WorkerDashboard");
+            return;
+        }
         EventBus.getDefault().register(this);
         resolveCurrentUser();
 

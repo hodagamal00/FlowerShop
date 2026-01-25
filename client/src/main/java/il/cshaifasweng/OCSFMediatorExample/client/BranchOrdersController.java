@@ -141,18 +141,24 @@ public class BranchOrdersController {
         Account account = SimpleClient.getAccount();
         if (account != null) {
             currentBranchId = account.getBelongShop();
+            if (currentBranchId <= 0) {
+                currentBranchId = account.getBelongShop();
+            }
         }
     }
 
     private void requestOrders() {
+        resolveCurrentBranch();
         try {
             getAllOrdersMessage request = new getAllOrdersMessage();
-            request.setBranchId(resolveRequestedBranchId());
+            Integer branchId = resolveRequestedBranchId();
+            request.setBranchId(branchId);
             request.setFromDate(fromDatePicker != null ? fromDatePicker.getValue() : null);
             request.setToDate(toDatePicker != null ? toDatePicker.getValue() : null);
             String status = statusFilterCombo != null ? statusFilterCombo.getValue() : null;
             request.setStatus(status);
             SimpleClient.getClient().sendToServer(request);
+            System.out.println("BranchOrders request branchId=" + branchId);
         } catch (IOException e) {
             showError("Unable to load orders. Please try again.");
         }
@@ -253,10 +259,15 @@ public class BranchOrdersController {
     @Subscribe
     public void passOrders(PassOrdersFromServer passOrders) {
         List<Order> receivedOrders = passOrders.getRecievedOrders();
-        allOrders.setAll(receivedOrders.stream()
-            .map(this::buildRow)
-            .collect(Collectors.toList()));
+        if (receivedOrders == null) {
+            allOrders.clear();
+        } else {
+            allOrders.setAll(receivedOrders.stream()
+                .map(this::buildRow)
+                .collect(Collectors.toList()));
+        }
         applyFilters();
+        System.out.println("BranchOrders received orders count=" + allOrders.size());
     }
 
     private OrderRow buildRow(Order order) {

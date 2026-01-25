@@ -288,22 +288,37 @@ public class AppShellController {
 
         int privilege = account != null ? account.getPrivilegeLevel() : 0;
         boolean loggedIn = account != null;
+        boolean isCustomer = privilege == 1;
+        boolean isWorker = privilege == 2;
 
         for (NavDestination destination : NAV_LINKS) {
-            if (!destination.isVisibleFor(privilege, loggedIn)) {
+            String viewName = destination.getViewName();
+            String normalizedView = normalizeViewName(viewName);
+            boolean showDestination = destination.isVisibleFor(privilege, loggedIn);
+
+            if ("checkout".equalsIgnoreCase(normalizedView)) {
+                showDestination = !loggedIn || isCustomer;
+            }
+            if ("cart".equalsIgnoreCase(normalizedView)) {
+                showDestination = loggedIn && isCustomer;
+            }
+            if ("myorders".equalsIgnoreCase(normalizedView)) {
+                showDestination = loggedIn && isCustomer;
+            }
+
+            if (!showDestination || (isWorker && isWorkerRestrictedDestination(normalizedView))) {
                 continue;
             }
-            if ("Profile".equalsIgnoreCase(destination.getViewName()) && privilege != 1) {
+            if ("Profile".equalsIgnoreCase(viewName) && privilege != 1) {
                 continue;
             }
             ToggleButton button = new ToggleButton(destination.getLabel());
             button.setToggleGroup(navToggleGroup);
             button.setFocusTraversable(false);
             button.getStyleClass().addAll("nav-link", "pill");
-            button.setOnAction(event -> NavigationService.getInstance().navigate(destination.getViewName()));
+            button.setOnAction(event -> NavigationService.getInstance().navigate(viewName));
 
-            String normalized = normalizeViewName(destination.getViewName());
-            navButtons.put(normalized, button);
+            navButtons.put(normalizedView, button);
             navBar.getChildren().add(button);
         }
         selectCurrentNavButton();
@@ -312,6 +327,12 @@ public class AppShellController {
 
     private String normalizeViewName(String viewName) {
         return viewName == null ? "" : viewName.toLowerCase(Locale.ROOT);
+    }
+
+    private boolean isWorkerRestrictedDestination(String normalizedViewName) {
+        return "cart".equalsIgnoreCase(normalizedViewName)
+                || "checkout".equalsIgnoreCase(normalizedViewName)
+                || "myorders".equalsIgnoreCase(normalizedViewName);
     }
     private void selectCurrentNavButton() {
         if (currentViewName == null) {
