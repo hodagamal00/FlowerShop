@@ -22,6 +22,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -962,7 +964,15 @@ public class CatalogController {
 		} catch (Exception ex) {
 			System.out.println("Unable to load placeholder image: " + ex.getMessage());
 		}
-		return null;
+		int width = 220;
+		int height = 160;
+		WritableImage placeholder = new WritableImage(width, height);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				placeholder.getPixelWriter().setColor(x, y, Color.LIGHTGRAY);
+			}
+		}
+		return placeholder;
 	}
 
 	private String defaultSkuFor(Product product, int index) {

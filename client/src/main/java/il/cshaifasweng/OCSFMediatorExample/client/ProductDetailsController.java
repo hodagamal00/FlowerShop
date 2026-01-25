@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -272,6 +274,17 @@ public class ProductDetailsController {
                 } catch (Exception e) {
                     System.out.println("Placeholder image not found.");
                 }
+            }
+            if (image == null) {
+                int width = 260;
+                int height = 200;
+                WritableImage placeholder = new WritableImage(width, height);
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        placeholder.getPixelWriter().setColor(x, y, Color.LIGHTGRAY);
+                    }
+                }
+                image = placeholder;
             }
         }
         if (image != null && productImage != null) {

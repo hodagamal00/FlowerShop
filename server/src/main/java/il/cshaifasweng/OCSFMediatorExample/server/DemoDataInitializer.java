@@ -238,6 +238,8 @@ public final class DemoDataInitializer {
     }
 
     private static void resetProducts(Session session) {
+        session.createQuery("delete from Complaint").executeUpdate();
+        session.createQuery("delete from Order").executeUpdate();
         session.createQuery("delete from Product").executeUpdate();
     }
 
