@@ -140,13 +140,15 @@ private static SessionFactory cachedSessionFactory;
 			Session localSession = null;
 			Transaction tx1 = null;
 			try {
-				localSession = sessionFactory.openSession();
-				tx1 = localSession.beginTransaction();
-
 				String recievedStr = (String) msg;
 				if (recievedStr.equals("first entry")) {
-					System.out.println("entered first entry");
 					DemoDataInitializer.initialize(sessionFactory);
+				}
+
+				localSession = sessionFactory.openSession();
+				tx1 = localSession.beginTransaction();
+				if (recievedStr.equals("first entry")) {
+					System.out.println("entered first entry");
 
 					List<String> list = localSession.createSQLQuery("SHOW TABLES;").list();
 
