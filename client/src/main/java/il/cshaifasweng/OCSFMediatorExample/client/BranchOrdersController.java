@@ -3,6 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.Account;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.getAllOrdersMessage;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -258,17 +259,17 @@ public class BranchOrdersController {
     @Subscribe
     public void passOrders(PassOrdersFromServer passOrders) {
         List<Order> receivedOrders = passOrders.getRecievedOrders();
-        Integer requestedBranchId = resolveRequestedBranchId();
-        List<Order> scopedOrders = receivedOrders;
-        if (requestedBranchId != null && requestedBranchId > 0) {
-            scopedOrders = receivedOrders.stream()
-                .filter(order -> order.getShopID() == requestedBranchId)
-                .collect(Collectors.toList());
+        Platform.runLater(() -> updateOrders(receivedOrders));
+    }
+
+    private void updateOrders(List<Order> receivedOrders) {
+        if (receivedOrders == null) {
+            allOrders.clear();
+        } else {
+            allOrders.setAll(receivedOrders.stream()
+                .map(this::buildRow)
+                .collect(Collectors.toList()));
         }
-        System.out.printf("BranchOrders response: branchId=%s orders=%d%n", requestedBranchId, scopedOrders.size());
-        allOrders.setAll(scopedOrders.stream()
-            .map(this::buildRow)
-            .collect(Collectors.toList()));
         applyFilters();
     }
 
