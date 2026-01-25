@@ -58,6 +58,16 @@ public class Product implements Serializable {
 
     }
 
+    public Product(String name, String details, double price, String image, String sku, String category, boolean promotion) {
+        this.name = name;
+        this.details = details;
+        this.price = price;
+        this.image = image;
+        this.sku = sku;
+        this.category = category;
+        this.isPromotion = promotion;
+    }
+
     public Product(){
 
     }
@@ -93,13 +103,20 @@ public class Product implements Serializable {
     public String getImage(){
         return this.image;
     }
-    public int setID(int newid){
+    public void setID(int newid){
         this.id = newid;
-        return  this.id;
     }
     public  int getID(){
 
         return this.id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void updateid() {
