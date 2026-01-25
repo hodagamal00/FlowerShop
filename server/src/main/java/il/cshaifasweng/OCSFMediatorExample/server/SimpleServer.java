@@ -106,7 +106,6 @@ private static SessionFactory cachedSessionFactory;
 					.build();
 
 			cachedSessionFactory = configuration.buildSessionFactory(serviceRegistry);
-			DemoDataInitializer.initialize(cachedSessionFactory);
 			return cachedSessionFactory;
 		}
 	}
@@ -1676,6 +1675,7 @@ private static SessionFactory cachedSessionFactory;
 		query.from(Product.class);
 		System.out.println("Arrived to getAllProducts 4");
 		List<Product> result = session.createQuery(query).getResultList();
+		System.out.println("DB products count = " + result.size());
 		System.out.println("Arrived to getAllProducts 5");
 		return result;
 	}

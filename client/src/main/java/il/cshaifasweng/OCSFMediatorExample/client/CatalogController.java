@@ -943,6 +943,7 @@ public class CatalogController {
 			if (inputStream != null) {
 				return new Image(inputStream);
 			}
+			System.out.println("Missing image resource: " + normalizedPath);
 		} catch (Exception ex) {
 			System.out.println("Unable to load product image: " + ex.getMessage());
 		}
