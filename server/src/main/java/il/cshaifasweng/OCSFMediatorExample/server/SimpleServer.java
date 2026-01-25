@@ -110,6 +110,21 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
+	public static void clearAllLoginState(SessionFactory sessionFactory) {
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				session.createQuery("update Account set loggedIn = false").executeUpdate();
+				session.createQuery("update Worker set loggedIn = false").executeUpdate();
+				session.createQuery("update Manager set loggedIn = false").executeUpdate();
+				tx.commit();
+			} catch (RuntimeException ex) {
+				tx.rollback();
+				throw ex;
+			}
+		}
+	}
+
 	public static void generateProducts() {
 		System.out.println("arrived to generate products function");
 		Product product = new Product(5, "btn", "flower1", "someDetails", 5000.0);
