@@ -15,6 +15,7 @@ import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -246,35 +247,31 @@ public class ProductDetailsController {
         Image image = null;
         String imagePath = product.getImage();
         if (imagePath != null && !imagePath.isEmpty()) {
-            try {
-                java.net.URL resourceUrl = getClass().getResource(imagePath);
-                if (resourceUrl == null && !imagePath.startsWith("/")) {
-                    resourceUrl = getClass().getResource("/" + imagePath);
-                }
-                if (resourceUrl != null) {
-                    image = new Image(resourceUrl.toExternalForm());
-                } else if (imagePath.startsWith("http://")
-                        || imagePath.startsWith("https://")
-                        || imagePath.startsWith("file:")
-                        || imagePath.startsWith("jar:")
-                        || imagePath.startsWith("jrt:")) {
-                    image = new Image(imagePath);
+            String normalizedPath = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+            try (InputStream inputStream = getClass().getResourceAsStream(normalizedPath)) {
+                if (inputStream != null) {
+                    image = new Image(inputStream);
                 }
             } catch (Exception e) {
                 System.out.println("Could not load product image: " + imagePath);
             }
         }
         if (image == null) {
-            try {
-                java.net.URL placeholderUrl = getClass().getResource("placeholder.png");
-                if (placeholderUrl == null) {
-                    placeholderUrl = getClass().getResource("/placeholder.png");
-                }
-                if (placeholderUrl != null) {
-                    image = new Image(placeholderUrl.toExternalForm());
+            try (InputStream inputStream = getClass().getResourceAsStream("placeholder.png")) {
+                if (inputStream != null) {
+                    image = new Image(inputStream);
                 }
             } catch (Exception e) {
                 System.out.println("Placeholder image not found.");
+            }
+            if (image == null) {
+                try (InputStream inputStream = getClass().getResourceAsStream("/placeholder.png")) {
+                    if (inputStream != null) {
+                        image = new Image(inputStream);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Placeholder image not found.");
+                }
             }
         }
         if (image != null && productImage != null) {

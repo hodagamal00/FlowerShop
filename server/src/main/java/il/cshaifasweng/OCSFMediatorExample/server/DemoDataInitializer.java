@@ -36,6 +36,21 @@ public final class DemoDataInitializer {
         }
 
         try (Session session = sessionFactory.openSession()) {
+            if (shouldResetProducts()) {
+                Transaction tx = session.beginTransaction();
+                try {
+                    resetProducts(session);
+                    seedProducts(session);
+                    tx.commit();
+                    System.out.println("RESET_PRODUCTS done.");
+                    initialized = true;
+                    return;
+                } catch (RuntimeException ex) {
+                    tx.rollback();
+                    throw ex;
+                }
+            }
+
             if (hasExistingData(session)) {
                 initialized = true;
                 return;
@@ -83,24 +98,99 @@ public final class DemoDataInitializer {
         }
 
         List<Product> products = Arrays.asList(
-                createProduct(1, "btnRose", "Red Rose Bouquet", "A dozen fresh red roses", 120.0,
-                        "ROSE-001", "Bouquet", "Red", false, 0, false, null, 0.0, 0.0,
-                        "Classic bouquet for any celebration", "/images/flower1.jpg"),
-                createProduct(2, "btnSun", "Sunny Sunflowers", "Bright sunflowers in a rustic vase", 95.0,
-                        "SUN-002", "Arrangement", "Yellow", true, 15, false, null, 0.0, 0.0,
-                        "Bring sunshine indoors", "/images/flower2.jpg"),
-                createProduct(3, "btnOrchid", "Orchid Elegance", "White orchids in a ceramic pot", 180.0,
+                createProduct(1, "btn1", "Crimson Rose Bouquet", "A dozen velvety red roses tied with ribbon", 120.0,
+                        "ROS-001", "Bouquet", "Red", true, 10, false, null, 0.0, 0.0,
+                        "Classic roses for any celebration", "/images/1.jpeg"),
+                createProduct(2, "btn2", "Sunflower Radiance", "Bright sunflowers in a rustic vase", 95.0,
+                        "SUN-002", "Arrangement", "Yellow", false, 0, false, null, 0.0, 0.0,
+                        "Bring sunshine indoors", "/images/2.jpeg"),
+                createProduct(3, "btn3", "Orchid Elegance", "White orchids in a ceramic pot", 180.0,
                         "ORC-003", "Flowering Pot", "White", false, 0, false, null, 0.0, 0.0,
-                        "Elegant orchids that last weeks", "/images/flower3.jpg"),
-                createProduct(4, "btnMix", "Color Splash", "Mixed seasonal flowers", 140.0,
-                        "MIX-004", "Bouquet", "Mixed", true, 10, false, null, 0.0, 0.0,
-                        "Perfect for birthdays and anniversaries", "/images/flower4.jpg"),
-                createProduct(5, "btnTulip", "Tulip Charm", "Soft tulips arranged for spring", 110.0,
-                        "TUL-005", "Seasonal", "Pink", false, 0, false, null, 0.0, 0.0,
-                        "Fresh tulips to brighten any room", "/images/flower5.jpg"),
-                createProduct(6, "btnCustom", "Custom Bridal Bouquet", "Tailored bridal bouquet design", 350.0,
-                        "CUS-006", "Custom", "Varies", false, 0, true, "Bridal Bouquet", 250.0, 600.0,
-                        "Work with our designers to craft your dream bouquet", "/images/flower6.jpg")
+                        "Elegant orchids that last weeks", "/images/3.jpeg"),
+                createProduct(4, "btn4", "Spring Meadow Mix", "Mixed seasonal flowers with fresh greenery", 140.0,
+                        "MIX-004", "Bouquet", "Mixed", true, 15, false, null, 0.0, 0.0,
+                        "Perfect for birthdays and anniversaries", "/images/4.jpeg"),
+                createProduct(5, "btn5", "Tulip Charm", "Soft tulips arranged for spring", 110.0,
+                        "TUL-005", "Bouquet", "Pink", false, 0, false, null, 0.0, 0.0,
+                        "Fresh tulips to brighten any room", "/images/5.jpeg"),
+                createProduct(6, "btn6", "Lavender Dreams", "Lavender and lilac blooms in a glass vase", 130.0,
+                        "LAV-006", "Arrangement", "Purple", false, 0, false, null, 0.0, 0.0,
+                        "Calming hues with a gentle fragrance", "/images/6.jpeg"),
+                createProduct(7, "btn7", "Garden Peony Bliss", "Fluffy peonies with soft accents", 165.0,
+                        "PEO-007", "Bouquet", "Pink", false, 0, false, null, 0.0, 0.0,
+                        "A lush bouquet for elegant occasions", "/images/7.png"),
+                createProduct(8, "btn8", "Blue Hydrangea Halo", "Blue hydrangeas with eucalyptus", 150.0,
+                        "HYD-008", "Arrangement", "Blue", true, 12, false, null, 0.0, 0.0,
+                        "Cool tones for a modern feel", "/images/8.jpeg"),
+                createProduct(9, "btn9", "White Lily Grace", "White lilies with baby’s breath", 135.0,
+                        "LIL-009", "Bouquet", "White", false, 0, false, null, 0.0, 0.0,
+                        "Graceful lilies for serene moments", "/images/9.jpeg"),
+                createProduct(10, "btn10", "Citrus Bloom Basket", "Orange and yellow blooms in a woven basket", 145.0,
+                        "CIT-010", "Arrangement", "Orange", false, 0, false, null, 0.0, 0.0,
+                        "A bright pick-me-up for any room", "/images/10.jpeg"),
+                createProduct(11, "btn11", "Blush Garden Roses", "Blush roses with soft greenery", 125.0,
+                        "ROS-011", "Bouquet", "Blush", false, 0, false, null, 0.0, 0.0,
+                        "Romantic roses with a delicate touch", "/images/11.jpeg"),
+                createProduct(12, "btn12", "Tropical Hibiscus", "Tropical blooms with bold foliage", 160.0,
+                        "TRO-012", "Arrangement", "Mixed", false, 0, false, null, 0.0, 0.0,
+                        "Island-inspired energy in a vase", "/images/12.jpeg"),
+                createProduct(13, "btn13", "Pastel Garden", "Pastel blooms wrapped with satin", 118.0,
+                        "PAS-013", "Bouquet", "Mixed", true, 8, false, null, 0.0, 0.0,
+                        "Soft colors for a gentle statement", "/images/13.jpeg"),
+                createProduct(14, "btn14", "Ruby Romance", "Deep red blooms with velvet accents", 155.0,
+                        "RUB-014", "Bouquet", "Red", false, 0, false, null, 0.0, 0.0,
+                        "Bold romance in every stem", "/images/14.jpeg"),
+                createProduct(15, "btn15", "Greenhouse Fresh", "Green-white mix with crisp leaves", 128.0,
+                        "GRN-015", "Arrangement", "Green", false, 0, false, null, 0.0, 0.0,
+                        "Clean, modern, and refreshing", "/images/15.jpeg"),
+                createProduct(16, "btn16", "Golden Hour Bouquet", "Warm yellow roses and carnations", 132.0,
+                        "GLD-016", "Bouquet", "Yellow", false, 0, false, null, 0.0, 0.0,
+                        "Capture the glow of golden hour", "/images/16.jpeg"),
+                createProduct(17, "btn17", "Coral Bloom Box", "Coral roses in a premium box", 170.0,
+                        "COR-017", "Arrangement", "Coral", true, 10, false, null, 0.0, 0.0,
+                        "Luxury blooms in a sleek box", "/images/17.jpeg"),
+                createProduct(18, "btn18", "Winter White Pines", "White blooms with pine accents", 148.0,
+                        "WIN-018", "Bouquet", "White", false, 0, false, null, 0.0, 0.0,
+                        "Seasonal whites with evergreen flair", "/images/18.jpeg"),
+                createProduct(19, "btn19", "Berry Bloom Basket", "Berry-toned blooms in a basket", 142.0,
+                        "BER-019", "Arrangement", "Berry", false, 0, false, null, 0.0, 0.0,
+                        "Rich berry tones for cozy vibes", "/images/19.jpeg"),
+                createProduct(20, "btn20", "Sunrise Tulip Mix", "Yellow and pink tulips", 115.0,
+                        "TUL-020", "Bouquet", "Mixed", false, 0, false, null, 0.0, 0.0,
+                        "Bright tulips that feel like sunrise", "/images/20.jpeg"),
+                createProduct(21, "btn21", "Serenity Orchid Pot", "Orchids in a matte ceramic pot", 190.0,
+                        "ORC-021", "Flowering Pot", "White", false, 0, false, null, 0.0, 0.0,
+                        "Minimalist orchids with long-lasting blooms", "/images/21.jpeg"),
+                createProduct(22, "btn22", "Wildflower Wrap", "Wildflowers wrapped in kraft paper", 105.0,
+                        "WLD-022", "Bouquet", "Mixed", false, 0, false, null, 0.0, 0.0,
+                        "A casual bouquet full of charm", "/images/22.jpeg"),
+                createProduct(23, "btn23", "Midnight Violet", "Deep violet blooms with silver leaves", 158.0,
+                        "MID-023", "Arrangement", "Purple", false, 0, false, null, 0.0, 0.0,
+                        "Moody tones for a dramatic statement", "/images/23.jpeg"),
+                createProduct(24, "btn24", "Peach Blossom", "Peach roses with white accents", 122.0,
+                        "PEA-024", "Bouquet", "Peach", false, 0, false, null, 0.0, 0.0,
+                        "Warm peach tones with delicate texture", "/images/24.jpeg"),
+                createProduct(25, "btn25", "Fresh Citrus Vase", "Citrus blooms with green foliage", 138.0,
+                        "CIT-025", "Arrangement", "Yellow", true, 10, false, null, 0.0, 0.0,
+                        "Zesty colors for bright interiors", "/images/25.jpeg"),
+                createProduct(26, "btn26", "Cherry Blossom Breeze", "Cherry blossom-inspired mix", 150.0,
+                        "CHE-026", "Bouquet", "Pink", false, 0, false, null, 0.0, 0.0,
+                        "Soft petals with airy greens", "/images/26.jpeg"),
+                createProduct(27, "btn27", "Ocean Mist Bouquet", "Blue and white blooms with eucalyptus", 145.0,
+                        "OCN-027", "Bouquet", "Blue", false, 0, false, null, 0.0, 0.0,
+                        "A coastal palette of calm", "/images/27.jpeg"),
+                createProduct(28, "btn28", "Rustic Amber Jar", "Amber-toned florals in a mason jar", 112.0,
+                        "AMB-028", "Arrangement", "Amber", false, 0, false, null, 0.0, 0.0,
+                        "Rustic charm with warm hues", "/images/28.jpeg"),
+                createProduct(29, "btn29", "Snowberry Glow", "White blooms with silver accents", 155.0,
+                        "SNW-029", "Bouquet", "White", false, 0, false, null, 0.0, 0.0,
+                        "Elegant whites with a soft shimmer", "/images/29.jpeg"),
+                createProduct(30, "btn30", "Citrus Sunrise Basket", "Orange blooms with seasonal greens", 148.0,
+                        "SUN-030", "Arrangement", "Orange", false, 0, false, null, 0.0, 0.0,
+                        "Sunny hues for a cheerful gift", "/images/30.png"),
+                createProduct(31, "btn31", "Custom Celebration Bouquet", "Work with our designers to craft your bouquet", 250.0,
+                        "CUS-031", "Custom", "Varies", false, 0, true, "Custom Bouquet", 150.0, 500.0,
+                        "Tailored designs for milestone moments", "/images/31.jpeg")
         );
 
         for (Product product : products) {
@@ -128,6 +218,29 @@ public final class DemoDataInitializer {
         product.setPriceRangeMax(priceRangeMax);
         product.setGreetingCard(greetingCard);
         return product;
+    }
+
+    private static void resetProducts(Session session) {
+        session.createQuery("delete from Product").executeUpdate();
+    }
+
+    private static boolean shouldResetProducts() {
+        String flag = System.getProperty("RESET_PRODUCTS");
+        if (flag == null || flag.isBlank()) {
+            flag = System.getenv("RESET_PRODUCTS");
+        }
+        return parseBooleanFlag(flag);
+    }
+
+    private static boolean parseBooleanFlag(String flag) {
+        if (flag == null) {
+            return false;
+        }
+        String normalized = flag.trim().toLowerCase();
+        return normalized.equals("true")
+                || normalized.equals("1")
+                || normalized.equals("yes")
+                || normalized.equals("y");
     }
 
     private static void seedAccounts(Session session) {

@@ -8,8 +8,8 @@ import javafx.collections.ListChangeListener;
 // controller uses JavaFX exclusively, so AWT imports are unnecessary and
 // problematic.
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -926,9 +926,6 @@ public class CatalogController {
 			return;
 		}
 		String imagePath = product.getImage();
-		if (imagePath == null || imagePath.isBlank()) {
-			return;
-		}
 		Image image = loadProductImage(imagePath);
 		if (image != null) {
 			imageView.setImage(image);
@@ -937,24 +934,33 @@ public class CatalogController {
 
 	private Image loadProductImage(String imagePath) {
 		if (imagePath == null || imagePath.isBlank()) {
-			return null;
+			return loadPlaceholderImage();
 		}
-		try {
-			if (imagePath.startsWith("http://")
-					|| imagePath.startsWith("https://")
-					|| imagePath.startsWith("file:")
-					|| imagePath.startsWith("jar:")) {
-				return new Image(imagePath);
-			}
-			URL resource = getClass().getResource(imagePath);
-			if (resource == null && !imagePath.startsWith("/")) {
-				resource = getClass().getResource("/" + imagePath);
-			}
-			if (resource != null) {
-				return new Image(resource.toExternalForm());
+		String normalizedPath = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+		try (InputStream inputStream = getClass().getResourceAsStream(normalizedPath)) {
+			if (inputStream != null) {
+				return new Image(inputStream);
 			}
 		} catch (Exception ex) {
 			System.out.println("Unable to load product image: " + ex.getMessage());
+		}
+		return loadPlaceholderImage();
+	}
+
+	private Image loadPlaceholderImage() {
+		try (InputStream inputStream = getClass().getResourceAsStream("placeholder.png")) {
+			if (inputStream != null) {
+				return new Image(inputStream);
+			}
+		} catch (Exception ex) {
+			System.out.println("Unable to load placeholder image: " + ex.getMessage());
+		}
+		try (InputStream inputStream = getClass().getResourceAsStream("/placeholder.png")) {
+			if (inputStream != null) {
+				return new Image(inputStream);
+			}
+		} catch (Exception ex) {
+			System.out.println("Unable to load placeholder image: " + ex.getMessage());
 		}
 		return null;
 	}
@@ -1364,7 +1370,6 @@ public class CatalogController {
 		String containerId = ((VBox) event.getSource()).getId();
 		Product selected = getProductForContainer(containerId);
 		if (selected != null) {
-			syncProductImageFromCatalog(selected, getImageViewForContainer(containerId));
 			setCurrent_button(selected);
 			openProductDetailsModal(selected);
 		}
@@ -2421,7 +2426,6 @@ public class CatalogController {
 			alert.showAndWait();
 			return;
 		}
-		syncProductImageFromCatalog(selected, getImageViewForProduct(selected));
 		openProductDetailsModal(selected);
 	}
 
@@ -2455,66 +2459,7 @@ public class CatalogController {
 			return;
 		}
 
-		syncProductImageFromCatalog(customProduct, getImageViewForProduct(customProduct));
 		openProductDetailsModal(customProduct);
-	}
-
-	private ImageView getImageViewForContainer(String containerId) {
-		switch (containerId) {
-			case "container1":
-				return flower_button1;
-			case "container2":
-				return flower_button2;
-			case "container3":
-				return flower_button3;
-			case "container4":
-				return flower_button4;
-			case "container5":
-				return flower_button5;
-			case "container6":
-				return flower_button6;
-			default:
-				return null;
-		}
-	}
-
-	private ImageView getImageViewForProduct(Product product) {
-		if (product == null || product.getButton() == null) {
-			return null;
-		}
-		String buttonId = product.getButton();
-		if (buttonId.equals(flower_button1.getId())) {
-			return flower_button1;
-		}
-		if (buttonId.equals(flower_button2.getId())) {
-			return flower_button2;
-		}
-		if (buttonId.equals(flower_button3.getId())) {
-			return flower_button3;
-		}
-		if (buttonId.equals(flower_button4.getId())) {
-			return flower_button4;
-		}
-		if (buttonId.equals(flower_button5.getId())) {
-			return flower_button5;
-		}
-		if (buttonId.equals(flower_button6.getId())) {
-			return flower_button6;
-		}
-		return null;
-	}
-
-	private void syncProductImageFromCatalog(Product product, ImageView imageView) {
-		if (product == null || imageView == null || imageView.getImage() == null) {
-			return;
-		}
-		if (product.getImage() != null && !product.getImage().isBlank()) {
-			return;
-		}
-		String imageUrl = imageView.getImage().getUrl();
-		if (imageUrl != null && !imageUrl.isBlank()) {
-			product.setImage(imageUrl);
-		}
 	}
 
 	/**
