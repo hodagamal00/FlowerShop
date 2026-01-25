@@ -150,30 +150,14 @@ private static SessionFactory cachedSessionFactory;
 				if (recievedStr.equals("first entry")) {
 					System.out.println("entered first entry");
 
-					List<String> list = localSession.createSQLQuery("SHOW TABLES;").list();
-
-					int tableFoundIndex = -1;
-					for (int i = 0; i < list.size(); i++) {
-						if (list.get(i).equals("products_table")) {
-							tableFoundIndex = i;
-						}
+					List<Product> resultList = getAllProducts(localSession);
+					if (resultList.isEmpty()) {
+						System.out.println("Product list empty, initializing demo data...");
+						DemoDataInitializer.initialize(sessionFactory);
+						resultList = getAllProducts(localSession);
 					}
-					if (tableFoundIndex != -1) {
-						if (countRows(localSession) == 0) {
-							System.out.println("didnt find a table (this message is from the server");
-							client.sendToClient("not found");
-						} else {
-							List<Product> resultList = getAllProducts(localSession);
-							if (resultList.isEmpty()) {
-								DemoDataInitializer.initialize(sessionFactory);
-								resultList = getAllProducts(localSession);
-							}
-							FoundTable foundTbl = new FoundTable("found", resultList);
-							client.sendToClient(foundTbl);
-						}
-					} else {
-						client.sendToClient("not found");
-					}
+					FoundTable foundTbl = new FoundTable("found", resultList);
+					client.sendToClient(foundTbl);
 				}
 
 				if (recievedStr.equals("get Managers")) {
