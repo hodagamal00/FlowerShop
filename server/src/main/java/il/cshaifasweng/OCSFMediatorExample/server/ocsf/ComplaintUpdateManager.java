@@ -190,7 +190,10 @@ public class ComplaintUpdateManager {
                 updateComplaint.setAccepted(recievedIsAccpeted);
                 updateComplaint.setCompensationDecision(recievedComplaint.getCompensationDecision() != null ? recievedComplaint.getCompensationDecision() : compensationDecision);
                 if (updateComplaint.getCreatedAt() == null) {
-                    updateComplaint.setCreatedAt(buildCreatedAtFromLegacy(updateComplaint));
+                    Date legacyCreatedAt = buildCreatedAtFromLegacy(updateComplaint);
+                    if (legacyCreatedAt != null) {
+                        updateComplaint.setCreatedAt(legacyCreatedAt);
+                    }
                 }
                 Date respondedAt = new Date();
                 updateComplaint.setRespondedAt(respondedAt);
@@ -237,7 +240,10 @@ public class ComplaintUpdateManager {
         int responseWindow = resolveResponseWindowHours(session);
         for (Complaint complaint : complaints) {
             if (complaint.getCreatedAt() == null) {
-                complaint.setCreatedAt(buildCreatedAtFromLegacy(complaint));
+                Date legacyCreatedAt = buildCreatedAtFromLegacy(complaint);
+                if (legacyCreatedAt != null) {
+                    complaint.setCreatedAt(legacyCreatedAt);
+                }
             }
             applySlaStatus(complaint, responseWindow);
             session.update(complaint);
@@ -262,10 +268,18 @@ public class ComplaintUpdateManager {
     }
 
     private static void applySlaStatus(Complaint complaint, int responseWindow) {
-        if (complaint.getCreatedAt() == null) {
-            complaint.setCreatedAt(new Date());
+        Date createdAt = complaint.getCreatedAt();
+        if (createdAt == null) {
+            Date legacyCreatedAt = buildCreatedAtFromLegacy(complaint);
+            if (legacyCreatedAt != null) {
+                complaint.setCreatedAt(legacyCreatedAt);
+                createdAt = legacyCreatedAt;
+            }
         }
-        LocalDateTime created = LocalDateTime.ofInstant(complaint.getCreatedAt().toInstant(), ZoneId.systemDefault());
+        if (createdAt == null) {
+            createdAt = new Date();
+        }
+        LocalDateTime created = LocalDateTime.ofInstant(createdAt.toInstant(), ZoneId.systemDefault());
         LocalDateTime deadline = created.plusHours(responseWindow);
         String status;
         if (complaint.isAccepted()) {
@@ -284,7 +298,7 @@ public class ComplaintUpdateManager {
 
     private static Date buildCreatedAtFromLegacy(Complaint complaint) {
         if (complaint.getDay() == 0 || complaint.getMonth() == 0 || complaint.getYear() == 0) {
-            return new Date();
+            return null;
         }
         LocalDateTime timestamp = LocalDateTime.of(complaint.getYear(), complaint.getMonth(), complaint.getDay(), 12, 0);
         return Date.from(timestamp.atZone(ZoneId.systemDefault()).toInstant());
