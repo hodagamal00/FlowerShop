@@ -146,6 +146,7 @@ private static SessionFactory cachedSessionFactory;
 				String recievedStr = (String) msg;
 				if (recievedStr.equals("first entry")) {
 					System.out.println("entered first entry");
+					DemoDataInitializer.initialize(sessionFactory);
 
 					List<String> list = localSession.createSQLQuery("SHOW TABLES;").list();
 
@@ -161,6 +162,10 @@ private static SessionFactory cachedSessionFactory;
 							client.sendToClient("not found");
 						} else {
 							List<Product> resultList = getAllProducts(localSession);
+							if (resultList.isEmpty()) {
+								DemoDataInitializer.initialize(sessionFactory);
+								resultList = getAllProducts(localSession);
+							}
 							FoundTable foundTbl = new FoundTable("found", resultList);
 							client.sendToClient(foundTbl);
 						}
