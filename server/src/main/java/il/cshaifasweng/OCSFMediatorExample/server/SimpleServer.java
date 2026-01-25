@@ -584,10 +584,24 @@ private static SessionFactory cachedSessionFactory;
 				System.out.println("the mail is: " + recievedMailStr);
 				System.out.println("arrived to Logout in server 3");
 
-				Account matchedAccount = findAccountByEmail(localSession, Account.class, recievedMailStr);
+				Account matchedAccount = null;
+				Manager matchedManager = findAccountByEmail(localSession, Manager.class, recievedMailStr);
+				if (matchedManager != null) {
+					matchedAccount = matchedManager;
+				} else {
+					Worker matchedWorker = findAccountByEmail(localSession, Worker.class, recievedMailStr);
+					if (matchedWorker != null) {
+						matchedAccount = matchedWorker;
+					} else {
+						matchedAccount = findAccountByEmail(localSession, Account.class, recievedMailStr);
+					}
+				}
 				if (matchedAccount != null) {
 					System.out.println("arrived to Logout in server 5");
-					Account updateAcc = localSession.load(Account.class, matchedAccount.getAccountID());
+					Account updateAcc = localSession.get(matchedAccount.getClass(), matchedAccount.getAccountID());
+					if (updateAcc == null) {
+						updateAcc = matchedAccount;
+					}
 					updateAcc.setLoggedIn(false);
 					System.out.println("arrived to Logout in server 6");
 					localSession.update(updateAcc);
@@ -855,9 +869,16 @@ private static SessionFactory cachedSessionFactory;
 		try (Session session = sessionFactory.openSession()) {
 			Transaction tx = session.beginTransaction();
 			try {
+				String email = account.getEmail();
 				int accountId = account.getAccountID();
 				Account managedAccount = null;
-				if (accountId > 0) {
+				if (!isBlank(email)) {
+					managedAccount = findAccountByEmail(session, account.getClass(), email);
+					if (managedAccount == null && account.getClass() != Account.class) {
+						managedAccount = findAccountByEmail(session, Account.class, email);
+					}
+				}
+				if (managedAccount == null && accountId > 0) {
 					managedAccount = session.get(account.getClass(), accountId);
 					if (managedAccount == null && account.getClass() != Account.class) {
 						managedAccount = session.get(Account.class, accountId);
