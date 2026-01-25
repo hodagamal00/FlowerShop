@@ -161,7 +161,7 @@
                                                         <Font size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <Label fx:id="subtotalLabel" text="$0.00">
+                                                <Label fx:id="subtotalLabel" text="\$0.00">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
@@ -174,7 +174,7 @@
                                                         <Font size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <Label fx:id="deliveryFeeSummaryLabel" text="$0.00">
+                                                <Label fx:id="deliveryFeeSummaryLabel" text="\$0.00">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
@@ -187,7 +187,7 @@
                                                         <Font size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <Label fx:id="discountLabel" text="-$0.00">
+                                                <Label fx:id="discountLabel" text="-\$0.00">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
@@ -200,7 +200,7 @@
                                                         <Font size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <Text fx:id="orderTotalSummaryText" text="$0.00" fill="#4a148c">
+                                                <Text fx:id="orderTotalSummaryText" text="\$0.00" fill="#4a148c">
                                                     <font>
                                                         <Font name="System Bold" size="18.0" />
                                                     </font>
