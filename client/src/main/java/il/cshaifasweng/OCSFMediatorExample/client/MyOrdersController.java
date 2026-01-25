@@ -417,6 +417,14 @@ public class MyOrdersController {
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() throws IOException {
+        Account account = SimpleClient.getAccount();
+        if (account == null || account.getPrivilegeLevel() != 1) {
+            int currentPrivilege = account != null ? account.getPrivilegeLevel() : 0;
+            AccessDeniedController.setAccessInfo(currentPrivilege, 1, "Orders");
+            AccessDeniedController.setReturnPage(currentPrivilege >= 2 ? "WorkerDashboard" : "Catalog");
+            NavigationService.getInstance().navigate("AccessDenied");
+            return;
+        }
         EventBus.getDefault().register(this);
         resolveCurrentUser();
 

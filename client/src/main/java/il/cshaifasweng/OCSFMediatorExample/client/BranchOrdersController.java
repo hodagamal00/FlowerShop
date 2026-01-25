@@ -147,11 +147,16 @@ public class BranchOrdersController {
     private void requestOrders() {
         try {
             getAllOrdersMessage request = new getAllOrdersMessage();
-            request.setBranchId(resolveRequestedBranchId());
+            Integer branchId = resolveRequestedBranchId();
+            request.setBranchId(branchId);
             request.setFromDate(fromDatePicker != null ? fromDatePicker.getValue() : null);
             request.setToDate(toDatePicker != null ? toDatePicker.getValue() : null);
             String status = statusFilterCombo != null ? statusFilterCombo.getValue() : null;
+            if (status != null && "All".equalsIgnoreCase(status.trim())) {
+                status = null;
+            }
             request.setStatus(status);
+            System.out.printf("BranchOrders request: branchId=%s status=%s%n", branchId, status);
             SimpleClient.getClient().sendToServer(request);
         } catch (IOException e) {
             showError("Unable to load orders. Please try again.");
@@ -253,7 +258,15 @@ public class BranchOrdersController {
     @Subscribe
     public void passOrders(PassOrdersFromServer passOrders) {
         List<Order> receivedOrders = passOrders.getRecievedOrders();
-        allOrders.setAll(receivedOrders.stream()
+        Integer requestedBranchId = resolveRequestedBranchId();
+        List<Order> scopedOrders = receivedOrders;
+        if (requestedBranchId != null && requestedBranchId > 0) {
+            scopedOrders = receivedOrders.stream()
+                .filter(order -> order.getShopID() == requestedBranchId)
+                .collect(Collectors.toList());
+        }
+        System.out.printf("BranchOrders response: branchId=%s orders=%d%n", requestedBranchId, scopedOrders.size());
+        allOrders.setAll(scopedOrders.stream()
             .map(this::buildRow)
             .collect(Collectors.toList()));
         applyFilters();
@@ -294,9 +307,14 @@ public class BranchOrdersController {
 
     private void applyFilters() {
         String searchTerm = Optional.ofNullable(searchField.getText()).orElse("").trim().toLowerCase(Locale.US);
+        String status = statusFilterCombo != null ? statusFilterCombo.getValue() : null;
+        java.time.LocalDate fromDate = fromDatePicker != null ? fromDatePicker.getValue() : null;
+        java.time.LocalDate toDate = toDatePicker != null ? toDatePicker.getValue() : null;
 
         List<OrderRow> filtered = allOrders.stream()
             .filter(order -> matchesSearch(order, searchTerm))
+            .filter(order -> matchesStatus(order, status))
+            .filter(order -> matchesDateRange(order, fromDate, toDate))
             .collect(Collectors.toList());
 
         filteredOrders.setAll(filtered);
@@ -315,6 +333,28 @@ public class BranchOrdersController {
 
         return order.getCustomer().toLowerCase(Locale.US).contains(searchTerm)
             || String.valueOf(order.getOrderId()).contains(searchTerm);
+    }
+
+    private boolean matchesStatus(OrderRow order, String status) {
+        if (status == null || status.isBlank() || "All".equalsIgnoreCase(status.trim())) {
+            return true;
+        }
+        return order.getStatus().equalsIgnoreCase(status.trim());
+    }
+
+    private boolean matchesDateRange(OrderRow order, java.time.LocalDate fromDate, java.time.LocalDate toDate) {
+        if (fromDate == null || toDate == null) {
+            return true;
+        }
+        Order rawOrder = order.getOrder();
+        java.time.LocalDate orderDate;
+        try {
+            orderDate = java.time.LocalDate.of(rawOrder.getOrderYear(), rawOrder.getOrderMonth(), rawOrder.getOrderDay());
+        } catch (Exception ex) {
+            return false;
+        }
+        return (orderDate.isEqual(fromDate) || orderDate.isAfter(fromDate))
+            && (orderDate.isEqual(toDate) || orderDate.isBefore(toDate));
     }
 
     private void updateOrderStatus(OrderRow row, String status) {

@@ -629,6 +629,7 @@ private static SessionFactory cachedSessionFactory;
 			try {
 				localSession = sessionFactory.openSession();
 				tx1 = localSession.beginTransaction();
+				getAllOrdersMessage request = (getAllOrdersMessage) msg;
 				if (requirePrivilegeAtLeast(client, 1)) {
 					Account account = getClientAccount(client);
 					if (requiresBranchAssignment(account) && resolveBranchId(account) <= 0) {
@@ -636,7 +637,7 @@ private static SessionFactory cachedSessionFactory;
 					} else {
 						getAllOrdersMessage ordersToBeSent = new getAllOrdersMessage();
 						System.out.println("arrived to get all orders in simple server ! \n");
-						List<Order> orderList = getScopedOrders(localSession, account);
+						List<Order> orderList = getScopedOrders(localSession, account, request);
 						ordersToBeSent.setOrderList(orderList);
 						client.sendToClient(ordersToBeSent);
 					}
@@ -1605,7 +1606,7 @@ private static SessionFactory cachedSessionFactory;
 		return builder.and(startPredicate, endPredicate);
 	}
 
-	private LocalDate resolveOrderDate(Order order) {
+	private static LocalDate resolveOrderDate(Order order) {
 		try {
 			return LocalDate.of(order.getOrderYear(), order.getOrderMonth(), order.getOrderDay());
 		} catch (Exception ex) {
@@ -1630,9 +1631,14 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
-	private boolean isWithinRange(LocalDate date, LocalDate startDate, LocalDate endDate) {
+	private static boolean isWithinRange(LocalDate date, LocalDate startDate, LocalDate endDate) {
 		return (date.isEqual(startDate) || date.isAfter(startDate))
 				&& (date.isEqual(endDate) || date.isBefore(endDate));
+	}
+
+	private static List<Order> getScopedOrders(Session session, Account account, getAllOrdersMessage request) {
+		List<Order> scoped = getScopedOrders(session, account);
+		return filterOrders(scoped, account, request);
 	}
 
 	private static List<Order> getScopedOrders(Session session, Account account) {
@@ -1656,6 +1662,55 @@ private static SessionFactory cachedSessionFactory;
 		List<Order> result = session.createQuery(query).getResultList();
 		System.out.println("Arrived to getScopedOrders 2");
 		return result;
+	}
+
+	private static List<Order> filterOrders(List<Order> orders, Account account, getAllOrdersMessage request) {
+		if (orders == null) {
+			return Collections.emptyList();
+		}
+		Integer branchId = request != null ? request.getBranchId() : null;
+		LocalDate fromDate = request != null ? request.getFromDate() : null;
+		LocalDate toDate = request != null ? request.getToDate() : null;
+		String status = request != null ? request.getStatus() : null;
+		boolean filterBranch = branchId != null && branchId > 0;
+		boolean filterStatus = status != null && !status.isBlank() && !"all".equalsIgnoreCase(status);
+		boolean filterDates = fromDate != null && toDate != null;
+
+		int privilege = account != null ? account.getPrivilegeLevel() : 0;
+		int accountBranch = account != null ? resolveBranchId(account) : 0;
+
+		List<Order> filtered = new ArrayList<>();
+		for (Order order : orders) {
+			if (filterBranch) {
+				if (privilege >= 4) {
+					if (order.getShopID() != branchId) {
+						continue;
+					}
+				} else if (accountBranch > 0 && order.getShopID() != accountBranch) {
+					continue;
+				}
+			}
+			if (filterStatus) {
+				String normalized = status.trim().toLowerCase(Locale.ROOT);
+				boolean matches = switch (normalized) {
+					case "pending" -> !order.isDelivered() && !order.isCancelled();
+					case "delivered" -> order.isDelivered();
+					case "cancelled" -> order.isCancelled();
+					default -> true;
+				};
+				if (!matches) {
+					continue;
+				}
+			}
+			if (filterDates) {
+				LocalDate orderDate = resolveOrderDate(order);
+				if (orderDate == null || !isWithinRange(orderDate, fromDate, toDate)) {
+					continue;
+				}
+			}
+			filtered.add(order);
+		}
+		return filtered;
 	}
 
 	private List<Account> getScopedAccounts(Session session, Account account) {
