@@ -47,14 +47,10 @@ public class Product implements Serializable {
    /* @ManyToMany (mappedBy = "products")
     private List<Order> orders;
 */
-    public Product(int id, String button, String name,String details, double price) {
-        super();
+    public Product(int id, String button, String name, String details, double price) {
+        this(name, details, price, null, null, null, true);
         this.button = button;
-        this.name = name;
-        this.details = details;
-        this.price = price;
         this.id = id;
-
     }
 
     public Product(String name, String details, double price, String image, String category, String color,
