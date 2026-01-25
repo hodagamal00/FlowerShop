@@ -128,6 +128,21 @@ private static SessionFactory cachedSessionFactory;
 		}
 	}
 
+	public static void resetAllLoginStates(SessionFactory sessionFactory) {
+		try (Session session = sessionFactory.openSession()) {
+			Transaction tx = session.beginTransaction();
+			try {
+				session.createQuery("update Account set loggedIn = false").executeUpdate();
+				session.createQuery("update Worker set loggedIn = false").executeUpdate();
+				session.createQuery("update Manager set loggedIn = false").executeUpdate();
+				tx.commit();
+			} catch (Exception ex) {
+				tx.rollback();
+				throw ex;
+			}
+		}
+	}
+
 	@Override
 	protected void handleMessageFromClient(Object msg, ConnectionToClient client)
 			throws SQLException, IOException {

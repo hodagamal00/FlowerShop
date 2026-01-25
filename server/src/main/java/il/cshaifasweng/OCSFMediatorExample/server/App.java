@@ -17,6 +17,7 @@ public class App
         server = new SimpleServer(3000);
         SessionFactory sessionFactory = SimpleServer.getSessionFactory();
         DemoDataInitializer.initialize(sessionFactory);
+        SimpleServer.resetAllLoginStates(sessionFactory);
         server.listen();
         System.out.println("Server is now listening on port 3000");
     }
