@@ -1,49 +1,48 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
-import org.hibernate.annotations.ColumnDefault;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
-
-
 @Entity
 @Table(name = "products_table")
 public class Product implements Serializable {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Transient
     private String button;
     @Column(name = "product_name")
     private String name;
-    @Column(name = "product_details")
+    @Column(name = "description")
     private String details;
     @Column(name = "price", nullable = false)
-    @ColumnDefault("0")
     private double price;
     @Column(name = "product_image")
     private String image;
-    
-    // New fields for enhanced catalog functionality
-    @Column(name = "sku")
-    private String sku;  // Stock Keeping Unit
-    @Column(name = "category")
-    private String category;  // e.g., "Bouquet", "Arrangement", "Flowering Pot", "Bridal Bouquet"
+
+    @Column(name = "category", nullable = false)
+    private String category;
     @Column(name = "color")
-    private String color;  // e.g., "Red", "White", "Mixed"
-    @Column(name = "is_promotion")
+    private String color;
+    @Column(name = "is_available", nullable = false)
+    private boolean isAvailable = true;
+
+    // Extra fields for enhanced catalog functionality (not in current table)
+    @Transient
+    private String sku;  // Stock Keeping Unit
+    @Transient
     private boolean isPromotion;  // Is this product on sale?
-    @Column(name = "discount_percent")
+    @Transient
     private double discountPercent;  // Discount percentage (0-100)
-    @Column(name = "is_custom_product")
+    @Transient
     private boolean isCustomProduct;  // Is this a custom order?
-    @Column(name = "custom_type")
+    @Transient
     private String customType;  // Type if custom: "Bridal Bouquet", "Flowering Pot", etc.
-    @Column(name = "price_range_min")
+    @Transient
     private double priceRangeMin;  // Minimum price for custom products
-    @Column(name = "price_range_max")
+    @Transient
     private double priceRangeMax;  // Maximum price for custom products
-    @Column(name = "greeting_card")
+    @Transient
     private String greetingCard;  // Optional greeting card text
    /* @ManyToMany (mappedBy = "products")
     private List<Order> orders;
@@ -58,14 +57,15 @@ public class Product implements Serializable {
 
     }
 
-    public Product(String name, String details, double price, String image, String sku, String category, boolean promotion) {
+    public Product(String name, String details, double price, String image, String category, String color,
+                   boolean isAvailable) {
         this.name = name;
         this.details = details;
         this.price = price;
         this.image = image;
-        this.sku = sku;
         this.category = category;
-        this.isPromotion = promotion;
+        this.color = color;
+        this.isAvailable = isAvailable;
     }
 
     public Product(){
@@ -104,11 +104,11 @@ public class Product implements Serializable {
         return this.image;
     }
     public void setID(int newid){
-        this.id = newid;
+        setId(newid);
     }
     public  int getID(){
 
-        return this.id;
+        return getId();
     }
 
     public int getId() {
@@ -146,6 +146,14 @@ public class Product implements Serializable {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
     }
 
     public boolean isPromotion() {
