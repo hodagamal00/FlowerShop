@@ -86,10 +86,20 @@ public final class DemoDataInitializer {
     }
 
     private static boolean hasExistingData(Session session) {
-        return count(session, Product.class) > 0
-                || count(session, Account.class) > 0
-                || count(session, Order.class) > 0
-                || count(session, Complaint.class) > 0;
+        long productCount = count(session, Product.class);
+        long accountCount = count(session, Account.class);
+        long orderCount = count(session, Order.class);
+        long complaintCount = count(session, Complaint.class);
+        boolean hasData = productCount > 0 || accountCount > 0 || orderCount > 0 || complaintCount > 0;
+        if (hasData) {
+            if (productCount > 0) {
+                System.out.println("Found " + productCount
+                        + " products. Run with RESET_PRODUCTS=true to reseed the catalog.");
+            } else {
+                System.out.println("Existing data detected; demo seed skipped to avoid overwriting.");
+            }
+        }
+        return hasData;
     }
 
     private static void seedProducts(Session session) {
