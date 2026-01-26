@@ -132,9 +132,9 @@ private static SessionFactory cachedSessionFactory;
 		try (Session session = sessionFactory.openSession()) {
 			Transaction tx = session.beginTransaction();
 			try {
-				session.createQuery("update Account set loggedIn = false").executeUpdate();
-				session.createQuery("update Worker set loggedIn = false").executeUpdate();
-				session.createQuery("update Manager set loggedIn = false").executeUpdate();
+				session.createNativeQuery("update accounts_table set Logged_In = false").executeUpdate();
+				session.createNativeQuery("update workers_table set Logged_In = false").executeUpdate();
+				session.createNativeQuery("update managers_table set Logged_In = false").executeUpdate();
 				tx.commit();
 			} catch (Exception ex) {
 				tx.rollback();
